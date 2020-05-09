@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://scenes/demo.gd" type="Script" id=1]
+[ext_resource path="res://addons/godot_xterm/terminal.gd" type="Script" id=2]
+
+[node name="Demo" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 120.0
+margin_top = 80.0
+margin_right = 120.0
+margin_bottom = 80.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Terminal" type="Control" parent="."]
+margin_right = 631.0
+margin_bottom = 401.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
