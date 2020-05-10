@@ -16,10 +16,10 @@ __meta__ = {
 }
 
 [node name="Terminal" type="Control" parent="."]
-margin_left = 95.937
-margin_top = 44.6138
-margin_right = 695.937
-margin_bottom = 444.614
+margin_left = 163.651
+margin_top = 68.7974
+margin_right = 763.651
+margin_bottom = 468.797
 rect_min_size = Vector2( 600, 400 )
 script = ExtResource( 2 )
 __meta__ = {
@@ -31,7 +31,6 @@ font_family = {
 "italic": ExtResource( 4 ),
 "regular": ExtResource( 3 )
 }
-font_size = 16
 colors = {
 "black": Color( 0.121569, 0.00784314, 0.00784314, 1 )
 }

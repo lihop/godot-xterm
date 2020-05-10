@@ -1,3 +1,5 @@
+# Copyright (c) 2020 The GodotXterm authors. All rights reserved.
+# License MIT
 tool
 extends EditorPlugin
 

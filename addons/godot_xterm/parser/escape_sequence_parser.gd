@@ -244,7 +244,7 @@ func parse(data: Array, length: int):
 				handlers.invert()
 				for handler in handlers:
 					# undefined or true means success and to stop bubbling
-					if handler['target'].call(handler['method'], params.to_array()):
+					if handler['target'].call(handler['method'], params):
 						continue
 				handlers.invert()
 				if handlers.empty():

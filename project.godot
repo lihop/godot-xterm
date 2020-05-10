@@ -8,10 +8,27 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "Node2D",
+"class": "CanvasRenderingContext2D",
+"language": "GDScript",
+"path": "res://addons/godot_xterm/renderer/canvas_rendering_context_2d.gd"
+} ]
 _global_script_class_icons={
-
+"CanvasRenderingContext2D": ""
 }
+
+[WAT]
+
+Test_Directory="res://tests"
+Results_Directory="res://tests/results/WAT"
+Minimize_Window_When_Running_Tests=false
+TestStrategy={
+"repeat": 1,
+"strategy": "RunAll"
+}
+Tags=PoolStringArray(  )
+Display=8
 
 [application]
 

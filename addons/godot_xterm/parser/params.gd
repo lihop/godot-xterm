@@ -53,6 +53,17 @@ func _init(max_length: int = 32, max_sub_params_length: int = 32):
 	sub_params.resize(max_sub_params_length)
 	sub_params_idx.resize(max_length)
 
+
+# Gets param at `index` from param if it exists and is non-zero.
+# Otherwise returns `default` (which is zero anyway due to zero default
+# mode (ZDM), but allows the caller to specify a non-zero default value).
+func get_param(index: int, default = 0) -> int:
+	if index < params.size() and params[index]:
+		return params[index]
+	else:
+		return default
+
+
 func add_param(value: int):
 	digit_is_sub = false
 	if length >= _max_length:
@@ -78,13 +89,17 @@ func add_sub_param(value: int):
 	sub_params_idx[length - 1] += 1
 
 func add_digit(value: int):
-	print("adding digit: ", value, " is sub: ", digit_is_sub)
 	var _length = sub_params_length if digit_is_sub else length
 	if _reject_digits or (not _length) or (digit_is_sub and _reject_sub_digits):
 		return
 	var store = sub_params if digit_is_sub else params
 	var cur = store[_length - 1]
 	store[_length - 1] = min(cur * 10 + value, MAX_VALUE) if ~cur else value
+
+
+func size():
+	return params.size()
+
 
 func to_array():
 	var res = []

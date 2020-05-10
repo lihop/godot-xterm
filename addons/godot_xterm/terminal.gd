@@ -1,16 +1,42 @@
 # Copyright (c) 2020 The GodotXterm authors. All rights reserved.
-# License MIT
+# Copyright (c) 2014-2020 The xterm.js authors. All rights reserved.
+# Copyright (c) 2012-2013, Christopher Jeffrey (MIT License)
+# Ported to GDScript by the GodotXterm authors.
+# Licese MIT
+#
+# Originally forked from (with the author's permission):
+#   Fabrice Bellard's javascript vt100 for jslinux:
+#   http://bellard.org/jslinux/
+#   Copyright (c) 2011 Fabrice Bellard
+#   The original design remains. The terminal itself
+#   has been extended to include xterm CSI codes, among
+#   other features.
+#
+# Terminal Emulation References:
+#   http://vt100.net/
+#   http://invisible-island.net/xterm/ctlseqs/ctlseqs.txt
+#   http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+#   http://invisible-island.net/vttest/
+#   http://www.inwap.com/pdp10/ansicode.txt
+#   http://linux.die.net/man/4/console_codes
+#   http://linux.die.net/man/7/urxvt
 tool
 extends Control
 
 
-signal data_sent(data)
-
+const BufferService = preload("res://addons/godot_xterm/services/buffer_service.gd")
+const CoreService = preload("res://addons/godot_xterm/services/core_service.gd")
+const OptionsService = preload("res://addons/godot_xterm/services/options_service.gd")
+const CharsetService = preload("res://addons/godot_xterm/services/charset_service.gd")
+const InputHandler = preload("res://addons/godot_xterm/input_handler.gd")
 const Const = preload("res://addons/godot_xterm/Constants.gd")
 const Constants = preload("res://addons/godot_xterm/parser/constants.gd")
 const Parser = preload("res://addons/godot_xterm/parser/escape_sequence_parser.gd")
-const Buffer = preload("res://addons/godot_xterm/buffer.gd")
 const Decoder = preload("res://addons/godot_xterm/input/text_decoder.gd")
+const Renderer = preload("res://addons/godot_xterm/renderer/renderer.gd")
+const ColorManager = preload("res://addons/godot_xterm/color_manager.gd")
+const CellData = preload("res://addons/godot_xterm/buffer/cell_data.gd")
+
 const SourceCodeProRegular = preload("res://addons/godot_xterm/fonts/source_code_pro/source_code_pro_regular.tres")
 const SourceCodeProBold = preload("res://addons/godot_xterm/fonts/source_code_pro/source_code_pro_bold.tres")
 const SourceCodeProItalic = preload("res://addons/godot_xterm/fonts/source_code_pro/source_code_pro_italic.tres")
@@ -26,342 +52,200 @@ const LEFT_BRACKET = 91
 const ENTER = 10
 const BACKSPACE_ALT = 127
 
-export (Font) var normal_font = SourceCodeProRegular setget _set_normal_font
-export (Font) var bold_font = SourceCodeProBold setget _set_bold_font
-export (Font) var italic_font = SourceCodeProItalic setget _set_italics_font
-export (Font) var bold_italic_font = SourceCodeProBoldItalic setget _set_bold_italics_font
-var buffer
-var alternate_buffer
-var parser
+# TODO: Move me somewhere else.
+enum BellStyle {
+	NONE
+}
+
+signal output(data)
+
+export var cols = 80
+export var rows = 24
+export var cursor_blink = false
+export var cursor_style = 'block'
+export var cursor_width = 1
+export var bell_sound: AudioStream = null # TODO Bell sound
+export(BellStyle) var bell_style = BellStyle.NONE
+export var draw_bold_text_in_bright_colors = true
+export var fast_scroll_modifier = 'alt' # TODO Use scancode?
+export var fast_scroll_sensitivity = 5
+export var font_family: Dictionary = {
+	"regular": SourceCodeProRegular,
+	"bold": SourceCodeProBold,
+	"italic": SourceCodeProItalic,
+	"bold_italic": SourceCodeProBoldItalic,
+}
+export var font_size: int = 15
+export var font_weight = 'normal' # Enum?
+export var font_weight_bold = 'bold' # Enum?
+export var line_height = 1.0
+export var link_tooltip_hover_duration = 500 # Not relevant?
+export var letter_spacing = 0
+export var log_level = 'info' # Not relevant?
+export var scrollback = 1000
+export var scroll_sensitivity = 1
+export var screen_reader_mode: bool = false
+export var mac_option_is_meta = false
+export var mac_option_click_forces_selection = false
+export var minimum_contrast_ratio = 1
+export var disable_stdin = false
+export var allow_proposed_api = true
+export var allow_transparency = false
+export var tab_stop_width = 8
+export var colors: Dictionary = {
+	'black': Color(0, 0, 0)
+}
+export var right_click_selects_word = 'isMac' # TODO
+export var renderer_type = 'canvas' # Relevant?
+export var window_options = {
+	'set_win_lines': false
+}
+export var windows_mode = false
+export var word_separator = " ()[]{}',\"`"
+export var convert_eol = true
+export var term_name = 'xterm'
+export var cancel_events = false
+
+var options_service
 var decoder
-var cols = 80
-var rows = 24
-var cell: Vector2
-
-# font flags
-export(int, FLAGS,
-	"Bold",
-	"Italic", # Not xterm-256color
-	"Underlined",
-	"Blink",
-	"Inverse",
-	"Invisible",
-	"Strikethrough" # Not xterm-256color
-	) var font_flags = Const.FONT_NORMAL
-
-
-func _init():
-	pass
-
-
-func _set_normal_font(font: Font) -> void:
-	normal_font = font
-	_calculate_cell_size()
-
-
-func _set_bold_font(font: Font) -> void:
-	bold_font = font
-	_calculate_cell_size()
-
-
-func _set_italics_font(font: Font) -> void:
-	italic_font = font
-	_calculate_cell_size()
-
-
-func _set_bold_italics_font(font: Font) -> void:
-	bold_italic_font = font
-	_calculate_cell_size()
-
-
-func _calculate_cell_size() -> void:
-	var x = 0.0
-	var y = 0.0
-	var fonts = [normal_font, bold_font, italic_font, bold_italic_font]
-	for font in fonts:
-		if not font:
-			continue
-		var size = font.get_string_size("W")
-		x = max(x, size.x)
-		y = max(y, size.y)
-	cell.x = x
-	cell.y = y
-
+var parser
+var _buffer_service
+var _core_service
+var _charset_service
+var _input_handler
+var _render_service
+var _color_manager
+var _scaled_char_width
+var _scaled_char_height
+var _scaled_cell_width
+var _scaled_cell_height
+var _scaled_char_top
+var _scaled_char_left
+var _work_cell = CellData.new()
 
 func _ready():
-	_calculate_cell_size()
-	var rect = get_rect()
-	var rs = rect_size
-	cols = (rect_size.x / cell.x) as int
-	rows = (rect_size.y / cell.y) as int
+	var options = OptionsService.TerminalOptions.new()
+	options.cols = cols
+	options.rows = rows
+	options.font_family = font_family
+	options.line_height = line_height
+	options.screen_reader_mode = screen_reader_mode
+	options.window_options = window_options
+	options.convert_eol = convert_eol
 	
-	decoder = Decoder.Utf8ToUtf32.new()
+	options_service = OptionsService.new(options)
+	options_service.connect("option_changed", self, "_update_options")
 	
-	buffer = Buffer.new(rows, cols)
-	alternate_buffer = Buffer.new(rows, cols, true)
+	_buffer_service = BufferService.new(options_service)
+	_core_service = CoreService.new()
+	_charset_service = CharsetService.new()
 	
-	parser = Parser.new()
 	
-	# Print handler
-	parser.set_print_handler(buffer, "insert_at_cursor")
+	# Register input handler and connect signals.
+	_input_handler = InputHandler.new(_buffer_service, _core_service, _charset_service, options_service)
+	_input_handler.connect("bell_requested", self, "bell")
+	_input_handler.connect("refresh_rows_requested", self, "_refresh_rows")
+	_input_handler.connect("reset_requested", self, "reset")
+	_input_handler.connect("scroll_requested", self, "scroll")
+	_input_handler.connect("windows_options_report_requested", self, "report_windows_options")
 	
-	# Execute handlers
-	parser.set_execute_handler(C0.BEL, self, 'bell')
-	parser.set_execute_handler(C0.LF, buffer, 'line_feed')
-	parser.set_execute_handler(C0.VT, buffer, 'line_feed')
-	parser.set_execute_handler(C0.FF, buffer, 'line_feed')
-	parser.set_execute_handler(C0.CR, buffer, 'carriage_return')
-	parser.set_execute_handler(C0.BS, buffer, 'backspace')
-	parser.set_execute_handler(C0.HT, buffer, 'insert_tab');
-	parser.set_execute_handler(C0.SO, self, 'shift_out')
-	parser.set_execute_handler(C0.SI, self, 'shift_in')
-	parser.set_execute_handler(C1.IND, self, 'index')
-	parser.set_execute_handler(C1.NEL, self, 'next_line')
-	parser.set_execute_handler(C1.HTS, self, 'tab_set')
+	_color_manager = ColorManager.new()
+	_color_manager.set_theme(colors)
+	_render_service = Renderer.new(_color_manager.colors, self, _buffer_service, options_service)
 	
-	# CSI handlers
-	parser.set_csi_handler({'final': '@'}, self, 'insert_chars')
-	parser.set_csi_handler({'intermediates': ' ', 'final': '@'}, self, 'scroll_left')
-	parser.set_csi_handler({'final': 'A'}, self, 'cursor_up')
-	parser.set_csi_handler({'intermediates': ' ', 'final': 'A'}, self, 'scroll_right')
-	parser.set_csi_handler({'final': 'B'}, self, 'cursor_down')
-	parser.set_csi_handler({'final': 'C'}, self, 'cursor_forward')
-	parser.set_csi_handler({'final': 'D'}, self, 'cursor_backward')
-	parser.set_csi_handler({'final': 'E'}, self, 'cursor_nextLine')
-	parser.set_csi_handler({'final': 'F'}, self, 'cursor_precedingLine')
-	parser.set_csi_handler({'final': 'G'}, self, 'cursor_charAbsolute')
-	parser.set_csi_handler({'final': 'H'}, buffer, 'cursor_position')
-	parser.set_csi_handler({'final': 'I'}, self, 'cursor_forward_tab')
-	parser.set_csi_handler({'final': 'J'}, self, 'erase_in_display')
-	parser.set_csi_handler({'prefix': '?', 'final': 'J'}, self, 'erase_in_display')
-	parser.set_csi_handler({'final': 'K'}, self, 'erase_in_line')
-	parser.set_csi_handler({'prefix': '?', 'final': 'K'}, self, 'erase_in_line')
-	parser.set_csi_handler({'final': 'L'}, self, 'insert_lines')
-	parser.set_csi_handler({'final': 'M'}, self, 'delete_lines')
-	parser.set_csi_handler({'final': 'P'}, self, 'delete_chars')
-	parser.set_csi_handler({'final': 'S'}, self, 'scroll_up')
-	parser.set_csi_handler({'final': 'T'}, self, 'scroll_down')
-	parser.set_csi_handler({'final': 'X'}, self, 'erase_chars')
-	parser.set_csi_handler({'final': 'Z'}, self, 'cursor_backward_tab')
-	parser.set_csi_handler({'final': '`'}, self, 'char_pos_absolute')
-	parser.set_csi_handler({'final': 'a'}, self, 'h_position_relative')
-	parser.set_csi_handler({'final': 'b'}, self, 'repeat_preceding_character')
-	parser.set_csi_handler({'final': 'c'}, self, 'send_device_attributes_primary')
-	parser.set_csi_handler({'prefix': '>', 'final': 'c'}, self, 'send_device_attributes_secondary')
-	parser.set_csi_handler({'final': 'd'}, self, 'line_pos_absolute')
-	parser.set_csi_handler({'final': 'e'}, self, 'v_position_relative')
-	parser.set_csi_handler({'final': 'f'}, self, 'h_v_position')
-	parser.set_csi_handler({'final': 'g'}, self, 'tab_clear')
-	parser.set_csi_handler({'final': 'h'}, self, 'set_mode')
-	parser.set_csi_handler({'prefix': '?', 'final': 'h'}, self, 'set_mode_private')
-	parser.set_csi_handler({'final': 'l'}, self, 'reset_mode')
-	parser.set_csi_handler({'prefix': '?', 'final': 'l'}, self, 'reset_mode_private')
-	parser.set_csi_handler({'final': 'm'}, self, 'char_attributes')
-	parser.set_csi_handler({'final': 'n'}, self, 'device_status')
-	parser.set_csi_handler({'prefix': '?', 'final': 'n'}, self, 'device_status_private')
-	parser.set_csi_handler({'intermediates': '!', 'final': 'p'}, self, 'soft_reset')
-	parser.set_csi_handler({'intermediates': ' ', 'final': 'q'}, self, 'set_cursor_style')
-	parser.set_csi_handler({'final': 'r'}, self, 'set_scroll_region')
-	parser.set_csi_handler({'final': 's'}, self, 'save_cursor')
-	parser.set_csi_handler({'final': 't'}, self, 'window_options')
-	parser.set_csi_handler({'final': 'u'}, self, 'restore_cursor')
-	parser.set_csi_handler({'intermediates': '\'', 'final': '}'}, self, 'insert_columns')
-	parser.set_csi_handler({'intermediates': '\'', 'final': '~'}, self, 'delete_columns')
+	connect("resized", self, "_update_dimensions")
+	_update_dimensions()
+	
 
-func print(data, start, end):
-	print(data.substr(start, end))
 
-func bell():
-	print("The bell signal was emited!")
+func _refresh_rows(start_row = 0, end_row = 0):
+	# Not optimized, just draw
+	update()
 
-func line_feed():
-	pass
-
-func carriage_return():
-	print("carriage return!")
-
-func backspace():
-	print("backspace!")
-	pass
-
-func tab():
-	pass
-
-func shift_out():
-	pass
-
-func shift_in():
-	pass
-
-func index():
-	pass
-
-func next_line():
-	pass
-
-func tab_set():
-	pass
-
-func insert_chars(params):
-	pass
-
-func scroll_left(params):
-	pass
-func cursor_up(params):
-	pass
-func scroll_right(params):
-	pass
-func cursor_down(params):
-	pass
-func cursor_forward(params):
-	pass
-func cursor_backward(params):
-	pass
-func cursor_next_line(params):
-	pass
-func cursor_preceding_line(params):
-	pass
-func cursor_char_absolute(params):
-	pass
-func cursor_position(params):
-	pass
-func cursor_forward_tab(params):
-	pass
-func erase_in_display(params):
-	pass
-func erase_in_line(params):
-	pass
-func insert_lines(params):
-	pass
-func delete_lines(params):
-	pass
-func delete_chars(params):
-	pass
-func scroll_up(params):
-	pass
-func scroll_down(params):
-	pass
-func erase_chars(params):
-	pass
-func cursor_backward_tab(params):
-	pass
-func char_pos_absolute(params):
-	pass
-func h_position_relative(params):
-	pass
-func repeat_preceding_character(params):
-	pass
-func send_device_attributes_primary(params):
-	pass
-func send_device_attributes_secondary(params):
-	pass
-func line_pos_absolute(params):
-	pass
-func v_position_relative(params):
-	pass
-func h_v_position(params):
-	pass
-func tab_clear(params):
-	pass
-func set_mode(params):
-	pass
-func set_mode_private(params):
-	pass
-func reset_mode(params):
-	pass
-func char_attributes(params):
-	pass
-func device_status(params):
-	pass
-func device_status_private(params):
-	pass
-func soft_reset(params):
-	pass
-func set_cursor_style(params):
-	pass
-func set_scroll_region(params):
-	pass
-func save_cursor(params):
-	pass
-func window_options(params):
-	pass
-func restore_cursor(params):
-	pass
-func insert_columns(params):
-	pass
-func delete_columns(params):
-	pass
 
 func _input(event):
 	if event is InputEventKey and event.pressed:
+		var data = PoolByteArray([])
 		accept_event()
 		
 		# TODO: Handle more of these.
 		if (event.control and event.scancode == KEY_C):
-			send_data(PoolByteArray([3]))
+			data.append(3)
 		elif event.unicode:
-			send_data(PoolByteArray([event.unicode]))
+			data.append(event.unicode)
 		elif event.scancode == KEY_ENTER:
-			send_data(PoolByteArray([ENTER]))
+			data.append(ENTER)
 		elif event.scancode == KEY_BACKSPACE:
-			send_data(PoolByteArray([BACKSPACE_ALT]))
+			data.append(BACKSPACE_ALT)
 		elif event.scancode == KEY_ESCAPE:
-			send_data(PoolByteArray([27]))
+			data.append(27)
 		elif event.scancode == KEY_TAB:
-			send_data(PoolByteArray([9]))
+			data.append(9)
 		elif OS.get_scancode_string(event.scancode) == "Shift":
 			pass
 		elif OS.get_scancode_string(event.scancode) == "Control":
 			pass
 		else:
-			push_warning('Unhandled input. scancode: ' + str(OS.get_scancode_string(event.scancode)))
+			pass
+			#push_warning('Unhandled input. scancode: ' + str(OS.get_scancode_string(event.scancode)))
+		emit_signal("output", data)
 
 
-func send_data(data: PoolByteArray):
-	emit_signal("data_sent", data)
+func write(data, callback_target = null, callback_method: String = ''):
+	_input_handler.parse(data)
+	if callback_target and callback_method:
+		callback_target.call(callback_method)
+
+
+func refresh(start = null, end = null) -> void:
+	pass
+
+
+# Recalculates the character and canvas dimensions.
+func _update_dimensions():
+	var char_width = 0
+	var char_height = 0
+	
+	for font in options_service.options.font_family.values():
+		var size = font.get_string_size("W")
+		char_width = max(char_width, size.x)
+		char_height = max(char_height, size.y)
+	
+	_scaled_char_width = char_width
+	_scaled_char_height = char_height
+	
+	# Calculate the scaled cell height, if line_height is not 1 then the value
+	# will be floored because since line_height can never be lower then 1, there
+	# is a guarantee that the scaled line height will always be larger than
+	# scaled char height.
+	_scaled_cell_height = floor(_scaled_char_height * options_service.options.line_height)
+	
+	# Calculate the y coordinate within a cell that text should draw from in
+	# order to draw in the center of a cell.
+	_scaled_char_top = 0 if options_service.options.line_height == 1 else \
+			round((_scaled_cell_height - _scaled_char_height) / 2)
+	
+	# Calculate the scaled cell width, taking the letter_spacing into account.
+	_scaled_cell_width = _scaled_char_width + round(options_service.options.letter_spacing)
+	
+	# Calculate the x coordinate with a cell that text should draw from in
+	# order to draw in the center of a cell.
+	_scaled_char_left = floor(options_service.options.letter_spacing / 2)
 
 
 func _draw():
-	# Draw the terminal background
-	draw_rect(get_rect(), Color(0.0, 0.5, 0.0))
-	
-	# Naive method. Draw the entire buffer starting with row 0.
-	for row in range(buffer.rows.size()):
-		#print("Doing the thing for row: ", row)
-		# Draw each CharacterData.
-		for col in range(buffer.rows[row].size()):
-			var data = buffer.rows[row][col]
-			#print("row: ", ((row + 1) * charHeight), " col: ", (col * charWidth))
-			_draw_character(col, row, data)
-	
-	# Draw the cursor.
-	_draw_cursor()
-
-
-func _draw_character(col, row, data):
-	# Draw the background.
-	draw_rect(Rect2(Vector2(col * cell.x, row * cell.y), Vector2(cell.x, cell.y)), data.bg)
-	
-	var font
-	if data.ff & (1 << Const.FONT_BOLD) and data.ff & (1 << Const.FONT_ITALIC):
-		font = bold_italic_font
-	elif data.ff & (1 << Const.FONT_BOLD):
-		font = bold_font
-	elif data.ff & (1 << Const.FONT_ITALIC):
-		font = italic_font
-	else:
-		font = normal_font
-	
-	# Draw the character using foreground color.
-	draw_char(font, Vector2(col * cell.x, (row + 1) * cell.y), data.ch, '', data.fg)
-
-
-func _draw_cursor():
-		draw_rect(Rect2(Vector2(buffer.ccol * cell.x, buffer.crow * cell.y), Vector2(cell.x, cell.y)), Color(1.0, 0.0, 1.0))
-
-
-func receive_data(data: PoolByteArray):
-	var utf32 = []
-	var length = decoder.decode(data, utf32)
-	parser.parse(utf32, length)
-	update()
+	# Draw the background and foreground
+	var buffer = _buffer_service.buffer
+	for y in range(buffer.ybase, rows):
+		var line = buffer.lines.get_el(y)
+		for x in line.length:
+			line.load_cell(x, _work_cell)
+			draw_rect(Rect2(x * _scaled_cell_width, y * _scaled_cell_height,
+					(cols - x) * _scaled_cell_width, 1 * _scaled_cell_height), Color())
+			var color = _color_manager.colors.ansi[_work_cell.get_fg_color()]  if _work_cell.get_fg_color() >= 0 else Color(1, 1, 1)
+			draw_char(options_service.options.font_family.regular,
+					Vector2(x * _scaled_cell_width + _scaled_char_left,
+					y * _scaled_cell_height + _scaled_char_top + _scaled_char_height / 2),
+					_work_cell.get_chars() if _work_cell.get_chars() else ' ', "", color)
+	# Draw the cursor
+	# Draw selection

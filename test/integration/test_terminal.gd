@@ -25,7 +25,7 @@ class TestBuffer:
 	
 	
 	func handle_csi(params):
-		calls.append(['csi', params])
+		calls.append(['csi', params.to_array()])
 	
 	
 	func clear():
@@ -68,7 +68,7 @@ func test_prints_printables():
 func skip_test_c0():
 	for code in C0.values():
 		parser.set_execute_handler(code, buffer, 'handle_exec')
-		parse(parser, Decoder.string_from_codepoint(code))
+		parse(parser, char(code))
 		if code == 0x0 or code == 0x1b or code == 0x20 or code == 0x7f:
 			assert_eq(buffer.calls, [])
 		else:
@@ -81,7 +81,7 @@ func skip_test_c0():
 func skip_test_c1():
 	for code in C1.values():
 		parser.set_execute_handler(code, buffer, 'handle_exec')
-		parse(parser, Decoder.string_from_codepoint(code))
+		parse(parser, char(code))
 		assert_eq(buffer.calls, [['exec']], 'code: 0x%x' % code)
 		assert_eq(buffer.printed, '')
 		parser.reset()

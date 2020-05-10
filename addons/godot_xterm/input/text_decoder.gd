@@ -28,21 +28,18 @@ static func utf32_to_utf8(codepoint: int):
 	
 	return utf8
 
-# Convert UTF32 codepoint into a String.
-static func string_from_codepoint(codepoint: int):
-	var utf8 = utf32_to_utf8(codepoint)
-	return utf8.get_string_from_utf8()
 
 # Covert UTF32 char codes into a String.
-# Basically the same as `string_from_codepoint` but for multiple codepoints
+# Basically the same as `char` but for multiple codepoints
 # in a loop (which is a lot faster).
 static func utf32_to_string(data: Array, start: int = 0, end: int = -1):
 	if end == -1:
 		end = data.size()
 	var result = ''
 	for i in range(start, end):
-		result += string_from_codepoint(data[i])
+		result += char(data[i])
 	return result
+
 
 # Utf8Decoder - decodes UTF8 byte sequences into UTF32 codepoints.
 class Utf8ToUtf32:

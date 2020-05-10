@@ -36,7 +36,7 @@ class TestTerminal:
 	
 	
 	func handle_execute(code: int):
-		var flag = Decoder.string_from_codepoint(code)
+		var flag = char(code)
 		calls.append(['exe', flag])
 	
 	
@@ -137,14 +137,14 @@ func test_state_GROUND_execute_action():
 	var exes = range(0x00, 0x18) + [0x19] + range(0x1c, 0x20)
 	for exe in exes:
 		parser.current_state = ParserState.GROUND
-		parse(parser, Decoder.string_from_codepoint(exe))
+		parse(parser, char(exe))
 		assert_eq(parser.current_state, ParserState.GROUND)
 		parser.reset()
 
 func test_state_GROUND_print_action():
 	var printables = range(0x20, 0x7f) # NOTE: DEL excluded
 	for printable in printables:
-		var string = Decoder.string_from_codepoint(printable)
+		var string = char(printable)
 		parser.current_state = ParserState.GROUND
 		parse(parser, string)
 		assert_eq(parser.current_state, ParserState.GROUND)
@@ -204,7 +204,7 @@ func test_state_ESCAPE_execute_rules():
 	var exes = range(0x00, 0x18) + [0x19] + range(0x1c, 0x20)
 	for exe in exes:
 		parser.current_state = ParserState.ESCAPE
-		var data = Decoder.string_from_codepoint(exe)
+		var data = char(exe)
 		parse(parser, data)
 		assert_eq(parser.current_state, ParserState.ESCAPE, 'exe: %x' % exe)
 		assert_eq(test_terminal.calls, [['exe', data]], 'exe: %x' % exe)
@@ -222,7 +222,7 @@ func test_trans_ESCAPE_to_GROUND_with_esc_dispatch_action():
 	var dispatches = range(0x30, 0x50) + range(0x51, 0x58) + [0x59, 0x5a] + range(0x60, 0x7f)
 	for dispatch in dispatches:
 		parser.current_state = ParserState.ESCAPE
-		var data = Decoder.string_from_codepoint(dispatch)
+		var data = char(dispatch)
 		parse(parser, data)
 		assert_eq(parser.current_state, ParserState.GROUND,
 				'wrong state: %s, dispatch: %x' % [ParserState.keys()[parser.current_state], dispatch])
@@ -236,7 +236,7 @@ func test_trans_ESCAPE_to_ESCAPE_INTERMEDIATE_with_collect_action():
 	var collect = range(0x20, 0x30)
 	for c in collect:
 		parser.current_state = ParserState.ESCAPE
-		var data = Decoder.string_from_codepoint(c)
+		var data = char(c)
 		parse(parser, data)
 		assert_eq(parser.current_state, ParserState.ESCAPE_INTERMEDIATE)
 		assert_eq(parser.collect, data)
@@ -246,7 +246,7 @@ func test_trans_ESCAPE_to_ESCAPE_INTERMEDIATE_with_collect_action():
 func test_state_ESCAPE_INTERMEDIATE_execute_rules():
 	var exes = range(0x00, 0x18) + [0x19] + range(0x1c, 0x20)
 	for exe in exes:
-		var data = Decoder.string_from_codepoint(exe)
+		var data = char(exe)
 		parser.current_state = ParserState.ESCAPE_INTERMEDIATE
 		parse(parser, data)
 		assert_eq(parser.current_state, ParserState.ESCAPE_INTERMEDIATE)
@@ -265,7 +265,7 @@ func test_state_ESCAPE_INTERMEDIATE_ignore():
 func test_state_ESCAPE_INTERMEDIATE_collect_action():
 	var collect = range(0x20, 0x30)
 	for c in collect:
-		var data = Decoder.string_from_codepoint(c)
+		var data = char(c)
 		parser.current_state = ParserState.ESCAPE_INTERMEDIATE
 		parse(parser, data)
 		assert_eq(parser.current_state, ParserState.ESCAPE_INTERMEDIATE)
@@ -276,7 +276,7 @@ func test_state_ESCAPE_INTERMEDIATE_collect_action():
 func test_trans_ESCAPE_INTERMEDIATE_to_GROUND_with_esc_dispatch_action():
 	var collect = range(0x30, 0x7f)
 	for c in collect:
-		var data = Decoder.string_from_codepoint(c)
+		var data = char(c)
 		parser.current_state = ParserState.ESCAPE_INTERMEDIATE
 		parse(parser, data)
 		assert_eq(parser.current_state, ParserState.GROUND)
@@ -309,7 +309,7 @@ func test_ANYWHERE_or_ESCAPE_to_CSI_ENTRY_with_clear():
 func test_CSI_ENTRY_execute_rules():
 	var exes = range(0x00, 0x18) + [0x19] + range(0x1c, 0x20)
 	for exe in exes:
-		var data = Decoder.string_from_codepoint(exe)
+		var data = char(exe)
 		parser.current_state = ParserState.CSI_ENTRY
 		parse(parser, data)
 		assert_eq(parser.current_state, ParserState.CSI_ENTRY)
@@ -328,7 +328,7 @@ func test_state_CSI_ENTRY_ignore():
 func test_trans_CSI_ENTRY_to_GROUND_with_csi_dispatch_action():
 	var dispatches = range(0x40, 0x7f)
 	for dispatch in dispatches:
-		var data = Decoder.string_from_codepoint(dispatch)
+		var data = char(dispatch)
 		parser.current_state = ParserState.CSI_ENTRY
 		parse(parser, data)
 		assert_eq(parser.current_state, ParserState.GROUND)
@@ -342,7 +342,7 @@ func test_trans_CSI_ENTRY_to_CSI_PARAMS_with_param_or_collect_action():
 	var collect = ['\u003c', '\u003d', '\u003e', '\u003f']
 	for param in params:
 		parser.current_state = ParserState.CSI_ENTRY
-		parse(parser, Decoder.string_from_codepoint(param))
+		parse(parser, char(param))
 		assert_eq(parser.current_state, ParserState.CSI_PARAM)
 		assert_eq(parser.params, [param - 48], 'param: 0x%x' % param)
 		parser.reset()
@@ -362,7 +362,7 @@ func test_trans_CSI_ENTRY_to_CSI_PARAMS_with_param_or_collect_action():
 func test_state_CSI_PARAM_execute_rules():
 	var exes = range(0x00, 0x018) + [0x19] + range(0x1c, 0x20)
 	for exe in exes:
-		var data = Decoder.string_from_codepoint(exe)
+		var data = char(exe)
 		parser.current_state = ParserState.CSI_PARAM
 		parse(parser, data)
 		assert_eq(parser.current_state, ParserState.CSI_PARAM)
@@ -375,7 +375,7 @@ func test_state_CSI_PARAM_param_action():
 	var params = range(0x30, 0x3a)
 	for param in params:
 		parser.current_state = ParserState.CSI_PARAM
-		parse(parser, Decoder.string_from_codepoint(param))
+		parse(parser, char(param))
 		assert_eq(parser.current_state, ParserState.CSI_PARAM)
 		assert_eq(parser.params, [param - 48], 'param: 0x%x' % param)
 		parser.reset()
@@ -391,7 +391,7 @@ func test_state_CSI_PARAM_ignore():
 func test_trans_CSI_PARAM_to_GROUND_with_csi_dispatch_action():
 	var dispatches = range(0x40, 0x7f)
 	for dispatch in dispatches:
-		var data = Decoder.string_from_codepoint(dispatch)
+		var data = char(dispatch)
 		parser.current_state = ParserState.CSI_PARAM
 		parser.params = [0, 1]
 		parse(parser, data)
@@ -403,7 +403,7 @@ func test_trans_CSI_PARAM_to_GROUND_with_csi_dispatch_action():
 
 func test_trans_CSI_ENTRY_to_CSI_INTERMEDIATE_with_collect_action():
 	for collect in range(0x20, 0x30):
-		var data = Decoder.string_from_codepoint(collect)
+		var data = char(collect)
 		parser.current_state = ParserState.CSI_ENTRY
 		parse(parser, data)
 		assert_eq(parser.current_state, ParserState.CSI_INTERMEDIATE)
