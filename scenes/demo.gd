@@ -51,7 +51,10 @@ func _process(delta):
 		var res = stream_peer.get_data(stream_peer.get_available_bytes())
 		var error = res[0]
 		var data = res[1]
-		if error == OK and not data.empty():
+		if error != OK:
+			OS.alert("Something went wrong with the TCP connection to socat.",
+					"Connection Error!")
+		elif not data.empty():
 			emit_signal("data_received", data)
 
 
