@@ -1,4 +1,4 @@
-# Copyright (c) 2020 The GodotTerm authors.
+# Copyright (c) 2020 The GodotXterm authors.
 # Copyright (c) 2019 The xterm.js authors. All rights reserved.
 # License MIT
 extends Reference

@@ -1,5 +1,5 @@
-# Copyright (c) 2020 The GodotXterm authors. All rights reserved.
 # Copyright (c) 2018 The xterm.js authers. All rights reserved.
+# Ported to GDScript by the GodotXterm authors.
 # License MIT
 extends Reference
 

@@ -1,3 +1,6 @@
+# Copyright (c) 2019 The xterm.js authors. All rights reserved.
+# Ported to GDScript by the GodotXterm authors.
+# License MIT
 extends 'res://addons/gut/test.gd'
 
 const Params = preload("res://addons/godot_xterm/parser/params.gd")
