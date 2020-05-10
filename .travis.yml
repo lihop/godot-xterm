@@ -1,0 +1,8 @@
+services:
+- docker
+
+install:
+- docker pull barichello/godot-ci
+
+script:
+- docker run -v $(pwd):/src barichello/godot-ci godot --path /src -s addons/gut/gut_cmdln.gd
