@@ -35,12 +35,12 @@ static func _generate_default_ansi_colors() -> PoolColorArray:
 		var r = v[(i / 36) % 6 | 0]
 		var g = v[(i / 6) % 6 | 0]
 		var b = v[i % 6]
-		colors.append(Color(r, g, b))
+		colors.append(Color("%02x%02x%02x" % [r, g, b]))
 	
 	# Generate greys (232-255)
 	for i in range(0, 24):
 		var c = 8 + i * 10
-		colors.append(Color(c, c, c))
+		colors.append(Color("%02x%02x%02x" % [c, c, c]))
 	
 	return colors
 

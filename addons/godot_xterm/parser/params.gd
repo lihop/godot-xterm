@@ -75,6 +75,12 @@ func add_param(value: int):
 	params[length] = MAX_VALUE if value > MAX_VALUE else value
 	length += 1
 
+
+# Add a sub parameter value.
+# The sub parameter is automatically associated with the last parameter value.
+# Thus it is not possible to add a subparameter without any parameter added yet.
+# `Params` only stores up to `subParamsLength` sub parameters, any later
+# sub parameter will be ignored.
 func add_sub_param(value: int):
 	digit_is_sub = true
 	if !length:
@@ -88,6 +94,21 @@ func add_sub_param(value: int):
 	sub_params_length += 1
 	sub_params_idx[length - 1] += 1
 
+
+# Whether parameter at index `idx` has sub parameters.
+func has_sub_params(idx: int) -> bool:
+	return (sub_params_idx[idx] & 0xFF) - (sub_params_idx[idx] >> 8) > 0
+
+
+func get_sub_params(idx: int):
+	var start = sub_params_idx[idx] >> 8
+	var end = sub_params_idx[idx] & 0xFF
+	if end - start > 0:
+		return sub_params.slice(start, end - 1)
+	else:
+		return null
+
+
 func add_digit(value: int):
 	var _length = sub_params_length if digit_is_sub else length
 	if _reject_digits or (not _length) or (digit_is_sub and _reject_sub_digits):
@@ -95,10 +116,6 @@ func add_digit(value: int):
 	var store = sub_params if digit_is_sub else params
 	var cur = store[_length - 1]
 	store[_length - 1] = min(cur * 10 + value, MAX_VALUE) if ~cur else value
-
-
-func size():
-	return params.size()
 
 
 func to_array():

@@ -100,9 +100,3 @@ func test_csi_position_cursor():
 	parse(parser, '\u001b[1;5H')
 	assert_eq(buffer.calls, [['csi', [1, 5]]])
 	assert_eq(buffer.printed, '')
-		
-		
-		
-		
-		
-		

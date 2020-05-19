@@ -21,8 +21,7 @@ func _init(options_service, buffer_service):
 	alt = Buffer.new(false, options_service, buffer_service)
 	active = normal
 	
-	# TODO
-	#setup_tab_stops()
+	setup_tab_stops()
 
 
 # Sets the normal Bufer of the BufferSet as its currently active Buffer.
@@ -53,3 +52,18 @@ func activate_alt_buffer(fill_attr = null) -> void:
 	alt.y = normal.y
 	active = alt
 	emit_signal("buffer_activated", alt, normal)
+
+
+# Resizes both normal and alt buffers, adjusting their data accordingly.
+# @param new_cols The new number of columns.
+# @param new_rows The new number of rows.
+func resize(new_cols: int, new_rows: int) -> void:
+	normal.resize(new_cols, new_rows)
+	alt.resize(new_cols, new_rows)
+
+
+# Setup the tab stops.
+# @param i The index to start setting up tab stops from.
+func setup_tab_stops(i = null) -> void:
+	normal.setup_tab_stops(i)
+	alt.setup_tab_stops(i)

@@ -41,7 +41,10 @@ func get_cell(index: int):
 
 
 func get_width(index: int) -> int:
-	return _data[index * CELL_SIZE + Cell.CONTENT] >> Content.WIDTH_SHIFT
+	if (index * CELL_SIZE + Cell.CONTENT) < _data.size():
+		return _data[index * CELL_SIZE + Cell.CONTENT] >> Content.WIDTH_SHIFT
+	else:
+		return 0
 
 
 func has_content(index: int) -> int:
@@ -221,11 +224,41 @@ func fill(fill_cell_data) -> void:
 		set_cell(i, fill_cell_data)
 
 
+# alter to a full copy of line
+func copy_from(line) -> void:
+	_data = line._data.duplicate()
+	length = line.length
+	_combined = {}
+	for k in line._combined.keys():
+		_combined[k] = line._combined[k]
+	is_wrapped = line.is_wrapped
+
+
 func get_trimmed_length() -> int:
-	for i in range(length - 1, 0, -1):
+	for i in range(length - 1, -1, -1):
 		if _data[i * CELL_SIZE + Cell.CONTENT] & Content.HAS_CONTENT_MASK:
 			return i + (_data[i * CELL_SIZE + Cell.CONTENT] >> Content.WIDTH_SHIFT)
 	return 0
+
+
+func copy_cells_from(src, src_col: int, dest_col: int, length: int, apply_in_reverse: bool) -> void:
+	var src_data = src._data
+	
+	if apply_in_reverse:
+		for cell in range(length - 1, -1, -1):
+			for i in range(CELL_SIZE):
+				_data[(dest_col + cell) * CELL_SIZE + i] = src_data[(src_col + cell) * CELL_SIZE + i]
+	else:
+		for cell in range(length):
+			for i in range(CELL_SIZE):
+				_data[(dest_col + cell) * CELL_SIZE + i] = src_data[(src_col + cell) * CELL_SIZE + i]
+	
+	# Move any combined data over as needed, FIXME: repeat for extended attrs
+	var src_combined_keys = src._combined.keys()
+	for i in range(src_combined_keys.size()):
+		var key = int(src_combined_keys[i])
+		if key >= src_col:
+			_combined[key + src_col + dest_col] = src._combined[key]
 
 
 func translate_to_string(trim_right: bool = false, start_col: int = 0, end_col: int = -1) -> String:
@@ -245,3 +278,14 @@ func translate_to_string(trim_right: bool = false, start_col: int = 0, end_col: 
 			result += Constants.WHITESPACE_CELL_CHAR
 		start_col += max(content >> Content.WIDTH_SHIFT, 1) # always advance by 1
 	return result
+
+
+func duplicate():
+	# Workaround as per: https://github.com/godotengine/godot/issues/19345#issuecomment-471218401
+	var duplicant = load("res://addons/godot_xterm/buffer/buffer_line.gd").new(length)
+	duplicant._data = _data.duplicate(true)
+	duplicant._combined = _combined.duplicate(true)
+	duplicant._extended_attrs = _extended_attrs.duplicate(true)
+	duplicant.length = length
+	duplicant.is_wrapped = is_wrapped
+	return duplicant

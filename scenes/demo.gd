@@ -38,7 +38,6 @@ func _ready():
 	if err != OK:
 		OS.alert("Couldn't connect to socat on %s:%d" % [host, port], "Connection Failed!")
 	
-	
 	var status = stream_peer.get_status()
 	var connected = stream_peer.is_connected_to_host()
 	
@@ -51,6 +50,13 @@ func _ready():
 	# Connect the Terminal and StreamPeer.
 	$Terminal.connect('output', self, 'send_data')
 	connect("data_received", $Terminal, "write")
+	
+	connect("resized", self, "_resize_terminal")
+	_resize_terminal()
+
+
+func _resize_terminal():
+	$Terminal.rect_size = OS.window_size
 
 
 func send_data(data: PoolByteArray):

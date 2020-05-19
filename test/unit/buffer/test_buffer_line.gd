@@ -144,7 +144,6 @@ class TestCellData:
 	
 	func before_each():
 		cell = CellData.new()
-		
 	
 	
 	func test_char_data_cell_data_equality():
@@ -242,8 +241,97 @@ class TestBufferLine:
 			[6, 'f', 0, 'f'.ord_at(0)],
 			[5, 'e', 0, 'e'.ord_at(0)],
 		])
+	
+	
+	func test_copy_from():
+		var line = BufferLineTest.new(5)
+		line.set_cell(0, CellData.from_char_data([1, 'a', 0, 'a'.ord_at(0)]))
+		line.set_cell(0, CellData.from_char_data([2, 'b', 0, 'b'.ord_at(0)]))
+		line.set_cell(0, CellData.from_char_data([3, 'c', 0, 'c'.ord_at(0)]))
+		line.set_cell(0, CellData.from_char_data([4, 'd', 0, 'd'.ord_at(0)]))
+		line.set_cell(0, CellData.from_char_data([5, 'e', 0, 'e'.ord_at(0)]))
+		var line2 = BufferLineTest.new(5, CellData.from_char_data([1, 'a', 0, 'a'.ord_at(0)]), true)
+		line2.copy_from(line)
+		assert_eq(line2.to_array(), line.to_array())
+		assert_eq(line2.length, line.length)
+		assert_eq(line2.is_wrapped, line.is_wrapped)
 
-# Skipped a bunch of tests here...
+
+class TestResize:
+	extends "res://addons/gut/test.gd"
+	
+	
+	var CHAR_DATA = [1, 'a', 0, 'a'.ord_at(0)]
+	var line
+	
+	func repeat(el, times: int) -> Array:
+		var result = []
+		result.resize(times)
+		for i in range(times):
+			result[i] = el
+		return result
+	
+	
+	func test_enlarge():
+		line = BufferLineTest.new(5, CellData.from_char_data(CHAR_DATA), false)
+		line.resize(10, CellData.from_char_data(CHAR_DATA))
+		assert_eq(line.to_array(), repeat(CHAR_DATA, 10))
+	
+	
+	func test_shrink():
+		line = BufferLineTest.new(10, CellData.from_char_data(CHAR_DATA), false)
+		line.resize(5, CellData.from_char_data(CHAR_DATA))
+		assert_eq(line.to_array(), repeat(CHAR_DATA, 5))
+	
+	
+	func test_shrink_to_0_length():
+		line = BufferLineTest.new(10, CellData.from_char_data(CHAR_DATA), false)
+		line.resize(0, CellData.from_char_data(CHAR_DATA))
+		assert_eq(line.to_array(), repeat(CHAR_DATA, 0))
+	
+	func shrink_then_enlarge():
+		line = BufferLineTest.new(10, CellData.from_char_data(CHAR_DATA), false);
+		line.set_cell(2, CellData.from_char_data([0, '😁', 1, '😁'.ord_at(0)]))
+		line.set_cell(9, CellData.from_char_data([0, '😁', 1, '😁'.ord_at(0)]))
+		assert_eq(line.translate_to_string(), 'aa😁aaaaaa😁')
+		line.resize(5, CellData.from_char_data(CHAR_DATA))
+		assert_eq(line.translate_to_string(), 'aa😁aa')
+		line.resize(10, CellData.from_char_data(CHAR_DATA))
+		assert_eq(line.translate_to_string(), 'aa😁aaaaaaa')
+
+
+class TestTrimLength:
+	extends "res://addons/gut/test.gd"
+	
+	
+	var line
+	
+	
+	func before_each():
+		line = BufferLineTest.new(3, CellData.from_char_data([Constants.DEFAULT_ATTR,
+				Constants.NULL_CELL_CHAR, Constants.NULL_CELL_WIDTH, Constants.NULL_CELL_CODE]))
+	
+	
+	func test_empty_line():
+		assert_eq(line.get_trimmed_length(), 0)
+	
+	
+	func test_ascii():
+		line.set_cell(0, CellData.from_char_data([1, "a", 1, "a".ord_at(0)]))
+		line.set_cell(2, CellData.from_char_data([1, "a", 1, "a".ord_at(0)]))
+		assert_eq(line.get_trimmed_length(), 3)
+	
+	
+	func test_unicode():
+		line.set_cell(0, CellData.from_char_data([1, "\u1f914", 1, "\u1f914".ord_at(0)]))
+		line.set_cell(2, CellData.from_char_data([1, "\u1f914", 1, "\u1f914".ord_at(0)]))
+		assert_eq(line.get_trimmed_length(), 3)
+	
+	
+	func test_one_cell():
+		line.set_cell(0, CellData.from_char_data([1, "a", 1, "a".ord_at(0)]))
+		assert_eq(line.get_trimmed_length(), 1)
+
 
 class TestAddCharToCell:
 	extends "res://addons/gut/test.gd"
@@ -293,7 +381,7 @@ class TestAddCharToCell:
 		assert_eq(cell.is_combined(), Content.IS_COMBINED_MASK)
 
 
-class Testtranslate_to_string:
+class TestTranslateToString:
 	extends "res://addons/gut/test.gd"
 	
 	

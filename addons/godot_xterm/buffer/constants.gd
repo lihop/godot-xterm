@@ -91,3 +91,16 @@ enum UnderlineStyle {
 	DOTTED
 	DASHED
 }
+
+enum CursorStyle {
+	BLOCK
+	UNDERLINE
+	BAR
+}
+
+enum BellStyle {
+	NONE
+	VISUAL
+	SOUND
+	BOTH
+}

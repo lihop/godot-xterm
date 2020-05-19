@@ -15,6 +15,12 @@ var bg = 0
 var extended = ExtendedAttrs.new()
 
 
+static func to_color_rgb(value: int) -> Color:
+	# Create color from RGB format.
+	return Color("%02x%02x%02x" % [value >> Attributes.RED_SHIFT & 255,
+			value >> Attributes.GREEN_SHIFT & 255, value & 255])
+
+
 # flags
 func is_inverse() -> int:
 	return fg & FgFlags.INVERSE
@@ -27,7 +33,7 @@ func is_blink() -> int:
 func is_invisible() -> int:
 	return fg & FgFlags.INVISIBLE
 func is_italic() -> int:
-	return fg & BgFlags.ITALIC
+	return bg & BgFlags.ITALIC
 func is_dim() -> int:
 	return fg & BgFlags.DIM
 
@@ -60,11 +66,28 @@ func get_fg_color() -> int:
 		Attributes.CM_RGB:
 			return fg & Attributes.RGB_MASK
 		_:
-			return -1
+			return -1 # CM_DEFAULT defaults to -1
+
+
+func get_bg_color() -> int:
+	match bg & Attributes.CM_MASK:
+		Attributes.CM_P16, Attributes.CM_P256:
+			return bg & Attributes.PCOLOR_MASK
+		Attributes.CM_RGB:
+			return bg & Attributes.RGB_MASK
+		_:
+			return -1 # CM_DEFAULT defaults to -1
 
 
 func has_extended_attrs() -> int:
 	return bg & BgFlags.HAS_EXTENDED
+
+
+func update_extended() -> void:
+	if extended.is_empty():
+		bg &= ~BgFlags.HAS_EXTENDED
+	else:
+		bg |= BgFlags.HAS_EXTENDED
 
 
 func get_underline_color() -> int:
@@ -117,6 +140,9 @@ func get_underline_style():
 
 
 class ExtendedAttrs:
+	extends Reference
+	# Extended attributes for a cell.
+	# Holds information about different underline styles and color.
 	
 	
 	var underline_style = UnderlineStyle.NONE
@@ -125,3 +151,18 @@ class ExtendedAttrs:
 	
 	func _init():
 		underline_style
+	
+	
+	func duplicate():
+		# Workaround as per: https://github.com/godotengine/godot/issues/19345#issuecomment-471218401
+		var AttributeData = load("res://addons/godot_xterm/buffer/attribute_data.gd")
+		var clone = AttributeData.ExtendedAttrs.new()
+		clone.underline_style = underline_style
+		clone.underline_color = underline_color
+		return clone
+	
+	
+	# Convenient method to indicate whether the object holds no additional information,
+	# that needs to be persistant in the buffer.
+	func is_empty():
+		return underline_style == UnderlineStyle.NONE
