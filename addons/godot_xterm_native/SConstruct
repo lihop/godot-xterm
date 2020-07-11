@@ -98,7 +98,7 @@ cpp_library += '.' + str(bits)
 # make sure our binding library is properly includes
 env.Append(CPPPATH=['.', godot_headers_path, cpp_bindings_path + 'include/', cpp_bindings_path + 'include/core/', cpp_bindings_path + 'include/gen/'])
 env.Append(LIBPATH=[cpp_bindings_path + 'bin/'] + os.environ['LD_LIBRARY_PATH'].split(':'))
-env.Append(LIBS=[cpp_library, 'tsm'])
+env.Append(LIBS=[cpp_library, 'tsm', 'util']) # Note util used by pseudoterminal, tsm used by terminal.
 
 # tweak this if you want to use different folders, or more folders, to store your source code in.
 env.Append(CPPPATH=['src/'])
