@@ -8,19 +8,22 @@
 #include <map>
 #include <vector>
 
-namespace godot {
+namespace godot
+{
 
-class Terminal : public Control {
+class Terminal : public Control
+{
 	GODOT_CLASS(Terminal, Control)
 
 public:
-	struct cell {
+	struct cell
+	{
 		char ch[5];
 		struct tsm_screen_attr attr;
-	} empty_cell = { ch : { 0, 0, 0, 0, 0 }, attr : {} };
+	} empty_cell = {ch : {0, 0, 0, 0, 0}, attr : {}};
 
 public:
-	typedef std::vector<std::vector<struct cell> > Cells;
+	typedef std::vector<std::vector<struct cell>> Cells;
 	typedef std::vector<struct cell> Row;
 
 	Cells cells;
@@ -35,6 +38,8 @@ private:
 	Vector2 cell_size;
 	std::map<int, Color> palette = {};
 
+	void update_size();
+
 	void update_color_palette();
 	std::pair<Color, Color> get_cell_colors(int row, int col);
 	void draw_background(int row, int col, Color bgcol);
@@ -48,6 +53,7 @@ public:
 
 	void _init();
 	void _ready();
+	void _notification(int what);
 	void _input(Variant event);
 	void _draw();
 
