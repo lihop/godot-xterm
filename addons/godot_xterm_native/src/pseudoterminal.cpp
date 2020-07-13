@@ -1,6 +1,7 @@
 #include "pseudoterminal.h"
 #include <pty.h>
 #include <unistd.h>
+#include <termios.h>
 
 using namespace godot;
 
@@ -35,6 +36,14 @@ void Pseudoterminal::process_pty()
     char *name;
 
     should_process_pty = true;
+
+    struct termios termios = {};
+    termios.c_iflag = IGNPAR | ICRNL;
+    termios.c_oflag = 0;
+    termios.c_cflag = B38400 | CRTSCTS | CS8 | CLOCAL | CREAD;
+    termios.c_lflag = ICANON;
+    termios.c_cc[VMIN] = 1;
+    termios.c_cc[VTIME] = 0;
 
     pid_t pty_pid = forkpty(&fd, NULL, NULL, NULL);
 
@@ -71,13 +80,27 @@ void Pseudoterminal::process_pty()
             FD_SET(fd, &write_fds);
 
             struct timeval timeout;
-            timeout.tv_sec = 5;
+            timeout.tv_sec = 10;
             timeout.tv_usec = 0;
 
             ready = select(fd + 1, &read_fds, &write_fds, NULL, &timeout);
 
             if (ready > 0)
             {
+                if (FD_ISSET(fd, &write_fds))
+                {
+                    std::lock_guard<std::mutex> guard(write_buffer_mutex);
+
+                    if (bytes_to_write > 0)
+                    {
+                        write(fd, write_buffer, bytes_to_write);
+
+                        Godot::print(String("wrote {0} bytes").format(Array::make(bytes_to_write)));
+
+                        bytes_to_write = 0;
+                    }
+                }
+
                 if (FD_ISSET(fd, &read_fds))
                 {
                     std::lock_guard<std::mutex> guard(read_buffer_mutex);
@@ -85,8 +108,9 @@ void Pseudoterminal::process_pty()
                     int ret;
                     int bytes_read = 0;
 
-                    bytes_read = read(fd, read_buffer, 1);
+                    bytes_read = read(fd, read_buffer, MAX_READ_BUFFER_LENGTH);
 
+                    // TODO: handle error (-1)
                     if (bytes_read <= 0)
                         continue;
 
@@ -112,19 +136,7 @@ void Pseudoterminal::process_pty()
 
                     if (bytes_read > 0)
                     {
-                        Godot::print(String("read {0} bytes").format(Array::make(bytes_read)));
-                    }
-                }
-
-                if (FD_ISSET(fd, &write_fds))
-                {
-                    std::lock_guard<std::mutex> guard(write_buffer_mutex);
-
-                    if (bytes_to_write > 0)
-                    {
-                        write(fd, write_buffer, bytes_to_write);
-
-                        bytes_to_write = 0;
+                        //Godot::print(String("read {0} bytes").format(Array::make(bytes_read)));
                     }
                 }
             }
