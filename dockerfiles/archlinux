@@ -1,0 +1,3 @@
+FROM archlinux:20200908
+RUN pacman -Sy --needed --noconfirm base-devel cmake scons
+COPY . /src

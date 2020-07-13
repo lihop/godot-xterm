@@ -1,0 +1,2 @@
+FROM lnl7/nix:2.3.6
+COPY . /src

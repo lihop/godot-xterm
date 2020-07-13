@@ -6,6 +6,9 @@ opts = Variables([], ARGUMENTS)
 # Gets the standard flags CC, CCX, etc.
 env = DefaultEnvironment()
 
+# Add PATH to environment so scons can find commands such as g++, etc.
+env.AppendENVPath('PATH', os.getenv('PATH'))
+
 # Define our options
 opts.Add(EnumVariable('target', "Compilation target", 'debug', ['d', 'debug', 'r', 'release']))
 opts.Add(EnumVariable('platform', "Compilation platform", '', ['', 'windows', 'x11', 'linux', 'osx']))
@@ -18,6 +21,7 @@ opts.Add(PathVariable('target_name', 'The library name.', 'libgodotxtermnative',
 godot_headers_path = "godot-cpp/godot_headers/"
 cpp_bindings_path = "godot-cpp/"
 cpp_library = "libgodot-cpp"
+libtsm_path = "libtsm/"
 
 # only support 64 at this time..
 bits = 64
@@ -30,8 +34,8 @@ if env['use_llvm']:
     env['CC'] = 'clang'
     env['CXX'] = 'clang++'
 else:
-    env['CC'] = '/home/leroy/.nix-profile/bin/gcc'
-    env['CXX'] = '/home/leroy/.nix-profile/bin/g++'
+    env['CC'] = 'gcc'
+    env['CXX'] = 'g++'
 
 if env['p'] != '':
     env['platform'] = env['p']
@@ -64,7 +68,6 @@ elif env['platform'] in ('x11', 'linux'):
     env['target_path'] += 'x11/'
     cpp_library += '.linux'
     env.Append(CCFLAGS=['-fPIC', '-shared'])
-    env.Append(CCFLAGS=os.environ['NIX_CFLAGS_COMPILE'])
     env.Append(CXXFLAGS=['-std=c++17', '-shared', '-pthread'])
     if env['target'] in ('debug', 'd'):
         env.Append(CCFLAGS=['-g3', '-Og'])
@@ -96,8 +99,8 @@ else:
 cpp_library += '.' + str(bits)
 
 # make sure our binding library is properly includes
-env.Append(CPPPATH=['.', godot_headers_path, cpp_bindings_path + 'include/', cpp_bindings_path + 'include/core/', cpp_bindings_path + 'include/gen/'])
-env.Append(LIBPATH=[cpp_bindings_path + 'bin/'] + os.environ['LD_LIBRARY_PATH'].split(':'))
+env.Append(CPPPATH=['.', godot_headers_path, cpp_bindings_path + 'include/', cpp_bindings_path + 'include/core/', cpp_bindings_path + 'include/gen/', libtsm_path + 'src/tsm'])
+env.Append(LIBPATH=[cpp_bindings_path + 'bin/', libtsm_path + 'build/src/tsm'])
 env.Append(LIBS=[cpp_library, 'tsm', 'util']) # Note util used by pseudoterminal, tsm used by terminal.
 
 # tweak this if you want to use different folders, or more folders, to store your source code in.

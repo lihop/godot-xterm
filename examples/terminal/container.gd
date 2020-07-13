@@ -15,7 +15,6 @@ onready var viewport = get_viewport()
 
 func _ready():
 	$Pseudoterminal.connect("data_received", $Terminal, "write")
-	$Pseudoterminal.connect("data_received", self, "_on_data_received")
 	
 	viewport.connect("size_changed", self, "_resize")
 	_resize()
@@ -49,10 +48,6 @@ func _input(event):
 			#push_warning('Unhandled input. scancode: ' + str(OS.get_scancode_string(event.scancode)))
 		#emit_signal("output", data)
 		$Pseudoterminal.put_data(data)
-
-
-func _on_data_received(data: PoolByteArray):
-	print("Got data: %s" % data.get_string_from_utf8())
 
 
 func _resize():
