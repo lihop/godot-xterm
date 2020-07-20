@@ -8,8 +8,9 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 
-Xterm for Godot.
-This is still very much a work in progress.
+**NOTE: The GDScript version of this project turned out to be very buggy and performed poorly. I have had much more success with a gdnative implementation using [libtsm](https://github.com/Aetf/libtsm) which can be viewed in the [native branch](https://github.com/lihop/godot-xterm/tree/native) of this repo.**
+
+Xterm for Godot. This is still very much a work in progress.
 Most of the credit goes to the authors of [xterm.js](https://github.com/xtermjs/xterm.js) as most of this code was taken from that project and translated to GDScript.
 
 ## Demo
