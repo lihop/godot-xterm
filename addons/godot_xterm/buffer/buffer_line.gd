@@ -132,8 +132,8 @@ func insert_cells(pos: int, n: int, fill_cell_data, erase_attr = null) -> void:
 		while i >= 0:
 			set_cell(pos + n + i, load_cell(pos + i, cell))
 			i -= 1
-		for i in range(n):
-			set_cell(pos + i, fill_cell_data)
+		for j in range(n):
+			set_cell(pos + j, fill_cell_data)
 	else:
 		for i in range(pos, length):
 			set_cell(i, fill_cell_data)

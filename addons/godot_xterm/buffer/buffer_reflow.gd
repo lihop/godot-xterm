@@ -75,8 +75,8 @@ static func reflow_larger_get_lines_to_remove(lines, old_cols: int, new_cols: in
 		
 		# Work backwards and remove any rows at the end that only contain null cells
 		var count_to_remove = 0
-		for i in range(wrapped_lines.size() - 1, 0, -1):
-			if i > dest_line_index or wrapped_lines[i].get_trimmed_length() == 0:
+		for j in range(wrapped_lines.size() - 1, 0, -1):
+			if j > dest_line_index or wrapped_lines[j].get_trimmed_length() == 0:
 				count_to_remove += 1
 			else:
 				break
