@@ -128,8 +128,8 @@ func splice(start: int, delete_count: int, items: Array = []) -> void:
 	while i >= start:
 		_array[_get_cyclic_index(i + items.size())] = _array[_get_cyclic_index(i)]
 		i -= 1
-	for i in range(items.size()):
-		_array[_get_cyclic_index(start + i)] = items[i]
+	for j in range(items.size()):
+		_array[_get_cyclic_index(start + j)] = items[j]
 	
 	# Adjust length as needed
 	if length + items.size() > max_length:

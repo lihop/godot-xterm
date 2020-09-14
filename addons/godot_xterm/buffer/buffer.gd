@@ -291,8 +291,8 @@ func _reflow_smaller(new_cols: int, new_rows: int) -> void:
 		
 		# Record original lines so they don't get overridden when we rearrange the list
 		var original_lines = []
-		for i in range(lines.length):
-			original_lines.append(lines.get_line(i))
+		for j in range(lines.length):
+			original_lines.append(lines.get_line(j))
 		var original_lines_length = lines.length
 		
 		var original_line_index = original_lines_length - 1
@@ -322,10 +322,10 @@ func _reflow_smaller(new_cols: int, new_rows: int) -> void:
 		
 		# Update markers
 		var insert_count_emitted = 0
-		for i in range(insert_events.size() - 1, -1, -1):
-			insert_events[i].index += insert_count_emitted
-			lines.emit_signal("inserted", insert_events[i])
-			insert_count_emitted += insert_events[i].amount
+		for k in range(insert_events.size() - 1, -1, -1):
+			insert_events[k].index += insert_count_emitted
+			lines.emit_signal("inserted", insert_events[k])
+			insert_count_emitted += insert_events[k].amount
 		var amount_to_trim = max(0, original_lines_length + count_to_insert - lines.max_length)
 		if amount_to_trim > 0:
 			lines.emit_signal("trimmed", amount_to_trim)
