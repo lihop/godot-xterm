@@ -1,16 +1,17 @@
-# Copyright (c) 2020 The GodotXterm authors. All rights reserved.
-# License MIT
 tool
 extends EditorPlugin
 
 
 func _enter_tree():
-	var script = preload("res://addons/godot_xterm/terminal.gd")
-	var texture = preload("res://addons/godot_xterm/icon.svg")
-	add_custom_type("Terminal", "Control", script, texture)
-	pass
+	var terminal_script = preload("res://addons/godot_xterm/terminal.gdns")
+	var terminal_icon = preload("res://addons/godot_xterm/terminal_icon.svg")
+	add_custom_type("Terminal", "Control", terminal_script, terminal_icon)
+	
+	var pseudoterminal_script = preload("res://addons/godot_xterm/pseudoterminal.gdns")
+	var pseudoterminal_icon = preload("res://addons/godot_xterm/pseudoterminal_icon.svg")
+	add_custom_type("Pseudoterminal", "Node", pseudoterminal_script, pseudoterminal_icon)
 
 
 func _exit_tree():
 	remove_custom_type("Terminal")
-	pass
+	remove_custom_type("Psuedoterminal")

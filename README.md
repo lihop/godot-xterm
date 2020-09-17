@@ -8,6 +8,10 @@
 
 Native implementation of Godot Xterm using GDNative with [libtsm](https://github.com/Aetf/libtsm).
 
+Terminal emulator for Godot using GDNative and [libtsm](https://github.com/Aetf/libtsm).
+
+**Note**: If you are looking for the purely gdscript version of this plugin it was too buggy and slow so is no longer being developed or maintained but can found [here](https://github.com/lihop/godot-xterm/tree/gdscript-unmaintained).
+
 ## Demo
 
 Click the thumbnail to watch a demo video on youtube:
@@ -22,4 +26,4 @@ You are also implicitly verifying that all code is your original work, or unorig
 Copyright (c) 2020 Leroy Hopson (MIT License)
 
 The fonts used in this project are published under a seperate license.
-See: [addons/godot_xterm_native/fonts/LICENSE.txt](addons/godot_xterm_native/fonts/LICENSE.txt).
+See: [addons/godot_xterm/fonts/LICENSE.txt](addons/godot_xterm/fonts/LICENSE.txt).

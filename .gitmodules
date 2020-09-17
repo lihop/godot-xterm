@@ -1,6 +1,6 @@
-[submodule "addons/godot_xterm_native/godot-cpp"]
-	path = addons/godot_xterm_native/godot-cpp
+[submodule "addons/godot_xterm/godot-cpp"]
+	path = addons/godot_xterm/godot-cpp
 	url = https://github.com/lihop/godot-cpp
-[submodule "addons/godot_xterm_native/libtsm"]
-	path = addons/godot_xterm_native/libtsm
+[submodule "addons/godot_xterm/libtsm"]
+	path = addons/godot_xterm/libtsm
 	url = https://github.com/Aetf/libtsm
