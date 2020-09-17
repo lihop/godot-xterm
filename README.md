@@ -1,6 +1,6 @@
 <img align="left" width="64" height="64" src="icon.png">
 
-# GodotXterm 
+# GodotXterm (Unmaintained GDScript version!)
 
 [![Build Status](https://travis-ci.org/lihop/godot-xterm.svg?branch=master)](https://travis-ci.org/lihop/godot-xterm)
 ![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)
@@ -8,7 +8,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 
-**NOTE: The GDScript version of this project turned out to be very buggy and performed poorly. I have had much more success with a gdnative implementation using [libtsm](https://github.com/Aetf/libtsm) which can be viewed in the [native branch](https://github.com/lihop/godot-xterm/tree/native) of this repo.**
+**WARNING: The GDScript version of this project turned out to be very buggy and performed poorly. Therefore, it is no longer being developed or mantained. I have had much more success with a gdnative implementation using [libtsm](https://github.com/Aetf/libtsm) which can be viewed in the [master branch](https://github.com/lihop/godot-xterm/tree/) of this repo. You should use that instead.**
 
 Xterm for Godot. This is still very much a work in progress.
 Most of the credit goes to the authors of [xterm.js](https://github.com/xtermjs/xterm.js) as most of this code was taken from that project and translated to GDScript.
