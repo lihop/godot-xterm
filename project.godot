@@ -15,13 +15,12 @@ _global_script_class_icons={
 
 [application]
 
-config/name="Godot Xterm Native"
-run/main_scene="res://examples/terminal/Terminal.tscn"
+config/name="Godot Xterm"
 config/icon="res://icon.png"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "godot_xterm_native" )
+enabled=PoolStringArray( "godot_xterm" )
 
 [rendering]
 

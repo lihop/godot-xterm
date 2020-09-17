@@ -5,13 +5,11 @@ services:
 
 jobs:
   include:
-    - name: "Run tests"
-      env: SERVICE=tests
-    - name: "Build native on Arch Linux"
+    - name: "Build on Arch Linux"
       env: SERVICE=build-archlinux
-    - name: "Build native on NixOS"
+    - name: "Build on NixOS"
       env: SERVICE=build-nixos
-    - name: "Build native on Ubuntu"
+    - name: "Build on Ubuntu"
       env: SERVICE=build-ubuntu
 
 script: docker-compose run $SERVICE
