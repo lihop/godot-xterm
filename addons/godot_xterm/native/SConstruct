@@ -18,10 +18,10 @@ opts.Add(PathVariable('target_path', 'The path where the lib is installed.', 'bi
 opts.Add(PathVariable('target_name', 'The library name.', 'libgodotxtermnative', PathVariable.PathAccept))
 
 # Local dependency paths, adapt them to your setup
-godot_headers_path = "godot-cpp/godot_headers/"
-cpp_bindings_path = "godot-cpp/"
+godot_headers_path = "modules/godot-cpp/godot_headers/"
+cpp_bindings_path = "modules/godot-cpp/"
 cpp_library = "libgodot-cpp"
-libtsm_path = "libtsm/"
+libtsm_path = "modules/libtsm/"
 
 # only support 64 at this time..
 bits = 64

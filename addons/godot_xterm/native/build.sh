@@ -1,26 +1,27 @@
 #! /usr/bin/env nix-shell
 #! nix-shell -i bash --pure -p binutils.bintools cmake scons
+set -e
 
 # Make sure we are in the addons/godot_xterm directory
 cd ${BASH_SOURCE%/*}
 
 # Initialize godot-cpp
-if [ ! -d "godot-cpp/bin" ]
+if [ ! -d "modules/godot-cpp/bin" ]
 then
-	cd godot-cpp
+	cd modules/godot-cpp
 	scons platform=linux generate_bindings=yes -j12
-	cd ..
+	cd ../..
 fi
 
 # Build libtsm
-if [ ! -f "libtsm/build/src/tsm/libtsm.a" ]
+if [ ! -f "modules/libtsm/build/src/tsm/libtsm.a" ]
 then
-	cd libtsm
+	cd modules/libtsm
 	mkdir -p build
 	cd build
 	cmake -DBUILD_SHARED_LIBS=n ..
 	make
-	cd ../..
+	cd ../../..
 fi
 
 # Build godotxtermnative

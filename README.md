@@ -26,4 +26,4 @@ You are also implicitly verifying that all code is your original work, or unorig
 Copyright (c) 2020 Leroy Hopson (MIT License)
 
 The fonts used in this project are published under a seperate license.
-See: [addons/godot_xterm/fonts/LICENSE.txt](addons/godot_xterm/fonts/LICENSE.txt).
+See the various license files in the [subdirectories](addons/godot_xterm/themes/fonts/) for each font.

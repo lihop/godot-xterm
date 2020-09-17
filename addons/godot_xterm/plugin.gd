@@ -3,12 +3,12 @@ extends EditorPlugin
 
 
 func _enter_tree():
-	var terminal_script = preload("res://addons/godot_xterm/terminal.gdns")
-	var terminal_icon = preload("res://addons/godot_xterm/terminal_icon.svg")
+	var terminal_script = preload("res://addons/godot_xterm/nodes/terminal/terminal.gdns")
+	var terminal_icon = preload("res://addons/godot_xterm/nodes/terminal/terminal_icon.svg")
 	add_custom_type("Terminal", "Control", terminal_script, terminal_icon)
 	
-	var pseudoterminal_script = preload("res://addons/godot_xterm/pseudoterminal.gdns")
-	var pseudoterminal_icon = preload("res://addons/godot_xterm/pseudoterminal_icon.svg")
+	var pseudoterminal_script = preload("res://addons/godot_xterm/nodes/pseudoterminal/pseudoterminal.gdns")
+	var pseudoterminal_icon = preload("res://addons/godot_xterm/nodes/pseudoterminal/pseudoterminal_icon.svg")
 	add_custom_type("Pseudoterminal", "Node", pseudoterminal_script, pseudoterminal_icon)
 
 
