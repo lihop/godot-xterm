@@ -18,6 +18,13 @@ Click the thumbnail to watch a demo video on youtube:
 
 [![Demo video thumbnail](https://img.youtube.com/vi/_Tt4eQEBybo/0.jpg)](https://www.youtube.com/watch?v=_Tt4eQEBybo)
 
+## Usage
+
+### Asciicast (.cast) file importer
+[Asciinema](https://asciinema.org) recordings saved with the `.cast` extension will be automatically imported as animations. They can then be added to AnimationPlayer which is a child of the Terminal node. Playing the animation will play the terminal session recording in the parent Terminal.
+
+For an example, see the scene in [/examples/asciicast](/examples/asciicast).
+
 ## License
 
 If you contribute code to this project, you are implicitly allowing your code to be distributed under the MIT license.
