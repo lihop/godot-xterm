@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://examples/asciicast/asciicast.gd" type="Script" id=1]
+[ext_resource path="res://addons/godot_xterm/themes/default.theme" type="Theme" id=2]
+[ext_resource path="res://addons/godot_xterm/nodes/terminal/terminal.gdns" type="Script" id=4]
+[ext_resource path="res://examples/asciicast/example.cast" type="Animation" id=6]
+
+[node name="Container" type="Container"]
+margin_right = 40.0
+margin_bottom = 40.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Terminal" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+theme = ExtResource( 2 )
+script = ExtResource( 4 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Terminal"]
+method_call_mode = 1
+anims/a = ExtResource( 6 )
