@@ -6,17 +6,17 @@ set -e
 cd ${BASH_SOURCE%/*}
 
 # Initialize godot-cpp
-if [ ! -d "modules/godot-cpp/bin" ]
+if [ ! -d "external/godot-cpp/bin" ]
 then
-	cd modules/godot-cpp
+	cd external/godot-cpp
 	scons platform=linux generate_bindings=yes -j12
 	cd ../..
 fi
 
 # Build libtsm
-if [ ! -f "modules/libtsm/build/src/tsm/libtsm.a" ]
+if [ ! -f "external/libtsm/build/src/tsm/libtsm.a" ]
 then
-	cd modules/libtsm
+	cd external/libtsm
 	mkdir -p build
 	cd build
 	cmake -DBUILD_SHARED_LIBS=n ..
