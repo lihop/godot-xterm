@@ -99,7 +99,7 @@ else:
 cpp_library += '.' + str(bits)
 
 # make sure our binding library is properly includes
-env.Append(CPPPATH=['.', godot_headers_path, cpp_bindings_path + 'include/', cpp_bindings_path + 'include/core/', cpp_bindings_path + 'include/gen/', libtsm_path + 'src/tsm'])
+env.Append(CPPPATH=['.', godot_headers_path, cpp_bindings_path + 'include/', cpp_bindings_path + 'include/core/', cpp_bindings_path + 'include/gen/', libtsm_path + 'src/tsm', libtsm_path + 'external'])
 env.Append(LIBPATH=[cpp_bindings_path + 'bin/', libtsm_path + 'build/src/tsm'])
 env.Append(LIBS=[cpp_library, 'tsm', 'util']) # Note util used by pseudoterminal, tsm used by terminal.
 

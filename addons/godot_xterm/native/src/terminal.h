@@ -34,6 +34,7 @@ namespace godot
 
 	private:
 		static const uint8_t default_color_palette[TSM_COLOR_NUM][3];
+		static const std::map<std::pair<int64_t, int64_t>, uint32_t> keymap;
 
 		Vector2 cell_size;
 		std::map<int, Color> palette = {};
@@ -54,7 +55,7 @@ namespace godot
 		void _init();
 		void _ready();
 		void _notification(int what);
-		void _input(Variant event);
+		void _gui_input(Variant event);
 		void _draw();
 
 		void write(PoolByteArray bytes);
