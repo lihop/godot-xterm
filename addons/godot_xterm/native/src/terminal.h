@@ -11,63 +11,63 @@
 namespace godot
 {
 
-class Terminal : public Control
-{
-	GODOT_CLASS(Terminal, Control)
-
-public:
-	struct cell
+	class Terminal : public Control
 	{
-		char ch[5];
-		struct tsm_screen_attr attr;
-	} empty_cell = {ch : {0, 0, 0, 0, 0}, attr : {}};
+		GODOT_CLASS(Terminal, Control)
 
-public:
-	typedef std::vector<std::vector<struct cell>> Cells;
-	typedef std::vector<struct cell> Row;
+	public:
+		struct cell
+		{
+			char ch[5];
+			struct tsm_screen_attr attr;
+		} empty_cell = {ch : {0, 0, 0, 0, 0}, attr : {}};
 
-	Cells cells;
+	public:
+		typedef std::vector<std::vector<struct cell>> Cells;
+		typedef std::vector<struct cell> Row;
 
-protected:
-	tsm_screen *screen;
-	tsm_vte *vte;
+		Cells cells;
 
-private:
-	static const uint8_t default_color_palette[TSM_COLOR_NUM][3];
+	protected:
+		tsm_screen *screen;
+		tsm_vte *vte;
 
-	Vector2 cell_size;
-	std::map<int, Color> palette = {};
+	private:
+		static const uint8_t default_color_palette[TSM_COLOR_NUM][3];
 
-	void update_size();
+		Vector2 cell_size;
+		std::map<int, Color> palette = {};
 
-	void update_color_palette();
-	std::pair<Color, Color> get_cell_colors(int row, int col);
-	void draw_background(int row, int col, Color bgcol);
-	void draw_foreground(int row, int col, Color fgcol);
+		void update_size();
 
-public:
-	static void _register_methods();
+		void update_color_palette();
+		std::pair<Color, Color> get_cell_colors(int row, int col);
+		void draw_background(int row, int col, Color bgcol);
+		void draw_foreground(int row, int col, Color fgcol);
 
-	Terminal();
-	~Terminal();
+	public:
+		static void _register_methods();
 
-	void _init();
-	void _ready();
-	void _notification(int what);
-	void _input(Variant event);
-	void _draw();
+		Terminal();
+		~Terminal();
 
-	void write(PoolByteArray bytes);
+		void _init();
+		void _ready();
+		void _notification(int what);
+		void _input(Variant event);
+		void _draw();
 
-	int rows;
-	int cols;
+		void write(PoolByteArray bytes);
 
-	bool sleep;
+		int rows;
+		int cols;
 
-	uint8_t color_palette[TSM_COLOR_NUM][3];
+		bool sleep;
 
-	tsm_age_t framebuffer_age;
-};
+		uint8_t color_palette[TSM_COLOR_NUM][3];
+
+		tsm_age_t framebuffer_age;
+	};
 } // namespace godot
 
 #endif // TERMINAL_H
