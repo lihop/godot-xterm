@@ -305,12 +305,11 @@ void Terminal::_init()
 	{
 		ERR_PRINT("Error setting palette");
 	}
-
-	update_size();
 }
 
 void Terminal::_ready()
 {
+	update_size();
 	connect("resized", this, "update_size");
 }
 
@@ -319,7 +318,6 @@ void Terminal::_notification(int what)
 	switch (what)
 	{
 	case NOTIFICATION_RESIZED:
-		Godot::print("resized!");
 		update_size();
 		break;
 	}
@@ -555,6 +553,7 @@ void Terminal::update_size()
 	tsm_screen_resize(screen, cols, rows);
 
 	sleep = false;
+	framebuffer_age = tsm_screen_draw(screen, text_draw_cb, this);
 	update();
 }
 
