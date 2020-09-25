@@ -536,7 +536,7 @@ void Terminal::update_size()
 
 	Godot::print(String("resized_rows: {0}, resized_cols: {1}").format(Array::make(rows, cols)));
 
-	cells = {};
+	Cells new_cells = {};
 
 	for (int x = 0; x < rows; x++)
 	{
@@ -544,11 +544,20 @@ void Terminal::update_size()
 
 		for (int y = 0; y < cols; y++)
 		{
-			row[y] = empty_cell;
+			if (x < cells.size() && y < cells[x].size())
+			{
+				row[y] = cells[x][y];
+			}
+			else
+			{
+				row[y] = empty_cell;
+			}
 		}
 
-		cells.push_back(row);
+		new_cells.push_back(row);
 	}
+
+	cells = new_cells;
 
 	tsm_screen_resize(screen, cols, rows);
 
