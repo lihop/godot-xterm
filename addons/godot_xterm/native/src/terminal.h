@@ -58,7 +58,7 @@ namespace godot
 		void _gui_input(Variant event);
 		void _draw();
 
-		void write(PoolByteArray bytes);
+		void write(Variant data);
 
 		int rows;
 		int cols;

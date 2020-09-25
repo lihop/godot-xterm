@@ -566,8 +566,34 @@ void Terminal::update_size()
 	update();
 }
 
-void Terminal::write(PoolByteArray data)
+void Terminal::write(Variant data)
 {
-	tsm_vte_input(vte, (char *)data.read().ptr(), data.size());
+
+	const char *u8;
+	size_t len;
+
+	switch (data.get_type())
+	{
+	case Variant::Type::POOL_BYTE_ARRAY:
+	{
+		PoolByteArray bytes = data;
+		u8 = (char *)bytes.read().ptr();
+		len = bytes.size();
+		break;
+	}
+	case Variant::Type::STRING:
+	{
+		String string = data;
+		CharString utf8 = string.utf8();
+		u8 = utf8.get_data();
+		len = utf8.length();
+		break;
+	}
+	default:
+		WARN_PRINT("Method expected a String or PoolByteArray");
+		return;
+	}
+
+	tsm_vte_input(vte, u8, len);
 	framebuffer_age = tsm_screen_draw(screen, text_draw_cb, this);
 }
