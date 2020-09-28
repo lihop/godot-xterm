@@ -8,9 +8,14 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "Reference",
+"class": "ArrayUtils",
+"language": "GDScript",
+"path": "res://addons/SIsilicon.3d.text/array_utils.gd"
+} ]
 _global_script_class_icons={
-
+"ArrayUtils": ""
 }
 
 [application]
@@ -20,7 +25,7 @@ config/icon="res://icon.png"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "godot_xterm" )
+enabled=PoolStringArray( "SIsilicon.3d.text", "godot_xterm" )
 
 [rendering]
 
