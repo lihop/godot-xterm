@@ -493,7 +493,7 @@ std::pair<Color, Color> Terminal::get_cell_colors(int row, int col)
 		fb = (float)cell.attr.fb / 255.0;
 		fgcol = Color(fr, fg, fb);
 
-		if (cell.attr.fccode)
+		if (cell.attr.fccode != -1)
 		{
 			palette.insert(std::pair<int, Color>(cell.attr.fccode, Color(fr, fg, fb)));
 		}
@@ -512,7 +512,7 @@ std::pair<Color, Color> Terminal::get_cell_colors(int row, int col)
 		bb = (float)cell.attr.bb / 255.0;
 		bgcol = Color(br, bg, bb);
 
-		if (cell.attr.bccode)
+		if (cell.attr.bccode != -1)
 		{
 			palette.insert(std::pair<int, Color>(cell.attr.bccode, Color(br, bg, bb)));
 		}
