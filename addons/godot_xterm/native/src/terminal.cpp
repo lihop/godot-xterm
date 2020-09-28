@@ -358,28 +358,17 @@ void Terminal::_draw()
 	if (sleep)
 		return;
 
-	/* Draw the background */
+	/* Draw the full terminal rect background */
 	draw_rect(get_rect(), get_color("Background", "Terminal"));
 
-	/* Draw the cell backgrounds */
-
-	// Draw the background first so subsequent rows don't overlap
-	// foreground characters such as y that may extend below the baseline.
 	for (int row = 0; row < rows; row++)
 	{
 		for (int col = 0; col < cols; col++)
 		{
-			draw_background(row, col, get_cell_colors(row, col).first);
-		}
-	}
-
-	/* Draw the cell foregrounds */
-
-	for (int row = 0; row < rows; row++)
-	{
-		for (int col = 0; col < cols; col++)
-		{
-			draw_foreground(row, col, get_cell_colors(row, col).second);
+			/* Draw cell background and foreground */
+			std::pair<Color, Color> color_pair = get_cell_colors(row, col);
+			draw_background(row, col, color_pair.first);
+			draw_foreground(row, col, color_pair.second);
 		}
 	}
 }
@@ -466,7 +455,7 @@ void Terminal::draw_foreground(int row, int col, Color fgcolor)
 		; // TODO: Handle blink
 
 	int font_height = fontref.ptr()->get_height();
-	Vector2 foreground_pos = Vector2(col * cell_size.x, row * cell_size.y + font_height);
+	Vector2 foreground_pos = Vector2(col * cell_size.x, row * cell_size.y + font_height / 1.25);
 	draw_string(fontref, foreground_pos, cell.ch, fgcolor);
 
 	if (cell.attr.underline)
