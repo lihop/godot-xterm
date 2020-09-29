@@ -28,6 +28,8 @@ namespace godot
 
 		Cells cells;
 
+		Ref<InputEventKey> input_event_key;
+
 	protected:
 		tsm_screen *screen;
 		tsm_vte *vte;

@@ -29,6 +29,9 @@ namespace godot
         int bytes_to_read;
         std::mutex read_buffer_mutex;
 
+        Vector2 size;
+        std::mutex size_mutex;
+
         void process_pty();
 
     public:
@@ -40,7 +43,8 @@ namespace godot
         void _init();
         void _ready();
 
-        void put_data(PoolByteArray data);
+        void write(PoolByteArray data);
+        void resize(Vector2 size);
     };
 } // namespace godot
 

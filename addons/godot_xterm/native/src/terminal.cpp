@@ -215,7 +215,17 @@ static void write_cb(struct tsm_vte *vte, const char *u8, size_t len, void *data
 	for (int i = 0; i < len; i++)
 		bytes.append(u8[i]);
 
-	term->emit_signal("data_read", bytes);
+	if (len > 0)
+	{
+		if (term->input_event_key.is_valid())
+		{
+			// The callback was fired from a key press event so emit the "key_pressed" signal.
+			term->emit_signal("key_pressed", String(u8), term->input_event_key);
+			term->input_event_key.unref();
+		}
+
+		term->emit_signal("data_sent", bytes);
+	}
 }
 
 static int text_draw_cb(struct tsm_screen *con,
@@ -258,7 +268,6 @@ static int text_draw_cb(struct tsm_screen *con,
 
 void Terminal::_register_methods()
 {
-
 	register_method("_init", &Terminal::_init);
 	register_method("_ready", &Terminal::_ready);
 	register_method("_gui_input", &Terminal::_gui_input);
@@ -267,10 +276,12 @@ void Terminal::_register_methods()
 	register_method("write", &Terminal::write);
 	register_method("update_size", &Terminal::update_size);
 
-	//register_property<Terminal, int>("rows", &Terminal::rows, 24);
-	//register_property<Terminal, int>("cols", &Terminal::cols, 80);
+	register_property<Terminal, int>("rows", &Terminal::rows, 24);
+	register_property<Terminal, int>("cols", &Terminal::cols, 80);
 
-	register_signal<Terminal>("data_read", "data", GODOT_VARIANT_TYPE_POOL_BYTE_ARRAY);
+	register_signal<Terminal>("data_sent", "data", GODOT_VARIANT_TYPE_POOL_BYTE_ARRAY);
+	register_signal<Terminal>("key_pressed", "data", GODOT_VARIANT_TYPE_STRING, "event", GODOT_VARIANT_TYPE_OBJECT);
+	register_signal<Terminal>("size_changed", "new_size", GODOT_VARIANT_TYPE_VECTOR2);
 }
 
 Terminal::Terminal()
@@ -349,6 +360,7 @@ void Terminal::_gui_input(Variant event)
 		auto iter = keymap.find({unicode, scancode});
 		uint32_t keysym = (iter != keymap.end() ? iter->second : XKB_KEY_NoSymbol);
 
+		input_event_key = k;
 		tsm_vte_handle_keyboard(vte, keysym, ascii, mods, unicode ? unicode : TSM_VTE_INVALID);
 	}
 }
@@ -425,6 +437,9 @@ void Terminal::draw_foreground(int row, int col, Color fgcolor)
 
 	struct cell cell = cells[row][col];
 
+	if (cell.ch == nullptr)
+		return; // No foreground to draw
+
 	/* Set the font */
 
 	Ref<Font> fontref = get_font("");
@@ -447,9 +462,6 @@ void Terminal::draw_foreground(int row, int col, Color fgcolor)
 	}
 
 	/* Draw the foreground */
-
-	if (cell.ch == nullptr)
-		return; // No foreground to draw
 
 	if (cell.attr.blink)
 		; // TODO: Handle blink
@@ -523,7 +535,7 @@ void Terminal::update_size()
 	rows = std::max(2, (int)floor(get_rect().size.y / cell_size.y));
 	cols = std::max(1, (int)floor(get_rect().size.x / cell_size.x));
 
-	Godot::print(String("resized_rows: {0}, resized_cols: {1}").format(Array::make(rows, cols)));
+	emit_signal("size_changed", Vector2(cols, rows));
 
 	Cells new_cells = {};
 

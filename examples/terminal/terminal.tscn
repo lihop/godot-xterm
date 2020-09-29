@@ -8,15 +8,16 @@
 anchor_right = 1.0
 anchor_bottom = 1.0
 focus_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
 theme = ExtResource( 4 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+rows = 31
+cols = 102
 
 [node name="Pseudoterminal" type="Node" parent="."]
 script = ExtResource( 2 )
-[connection signal="data_read" from="." to="Pseudoterminal" method="put_data"]
-[connection signal="data_received" from="Pseudoterminal" to="." method="write"]
+[connection signal="data_sent" from="." to="Pseudoterminal" method="write"]
+[connection signal="size_changed" from="." to="Pseudoterminal" method="resize"]
+[connection signal="data_sent" from="Pseudoterminal" to="." method="write"]
