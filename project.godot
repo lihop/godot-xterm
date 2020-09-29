@@ -10,23 +10,30 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Reference",
-"class": "ArrayUtils",
+"class": "TPut",
 "language": "GDScript",
-"path": "res://addons/SIsilicon.3d.text/array_utils.gd"
+"path": "res://addons/godot_xterm/util/tput.gd"
 } ]
 _global_script_class_icons={
-"ArrayUtils": ""
+"TPut": ""
 }
 
 [application]
 
 config/name="Godot Xterm"
+run/main_scene="res://examples/menu/menu.tscn"
 config/icon="res://icon.png"
+
+[display]
+
+window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PoolStringArray( "SIsilicon.3d.text", "godot_xterm" )
+enabled=PoolStringArray( "godot_xterm" )
 
 [rendering]
 
+quality/filters/anisotropic_filter_level=16
+quality/filters/msaa=4
 environment/default_environment="res://default_env.tres"

@@ -45,7 +45,13 @@ func import(source_file, save_path, options, r_platform_variant, r_gen_files):
 	asciicast.add_track(Animation.TYPE_METHOD, 0)
 	asciicast.track_set_path(0, ".")
 	
-	var time: float
+	var frame = {
+		"time": 0.0,
+		"data": {
+			"method": "write",
+			"args": [PoolByteArray()]
+		}
+	}
 	
 	while not file.eof_reached():
 		var line = file.get_line()
@@ -56,14 +62,25 @@ func import(source_file, save_path, options, r_platform_variant, r_gen_files):
 		if typeof(p.result) != TYPE_ARRAY:
 			continue
 		
-		time = p.result[0]
 		var event_type: String = p.result[1]
 		var event_data: PoolByteArray = p.result[2].to_utf8()
 		
+		# Asciicast recordings have a resolution of 0.000001, however animation
+		# track keys only have a resolution of 0.01, therefore we must combine
+		# events that would occur in the same keyframe, otherwise only the last
+		# event is inserted and the previous events are overwritten.
+		var time = stepify(p.result[0], 0.01)
+		
 		if event_type == "o":
-			asciicast.track_insert_key(0, time, {"method": "write",
-					"args": [event_data]})
+			if time == frame.time:
+				asciicast.track_remove_key_at_position(0, time)
+				frame.data.args[0] = frame.data.args[0] + event_data
+			else:
+				frame.time = time
+				frame.data.args = [event_data]
+			
+			asciicast.track_insert_key(0, frame.time, frame.data)
 	
-	asciicast.length = time
+	asciicast.length = frame.time
 	
 	return ResourceSaver.save("%s.%s" % [save_path, get_save_extension()], asciicast)

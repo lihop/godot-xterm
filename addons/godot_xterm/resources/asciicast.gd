@@ -17,3 +17,7 @@ func get_class() -> String:
 
 func is_class(name) -> bool:
 	return name == get_class() or .is_class(name)
+
+
+func _init():
+	step = 0.01 # Parent override.
