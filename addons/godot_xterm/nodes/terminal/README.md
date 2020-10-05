@@ -9,7 +9,7 @@ Terminal emulator.
 
 <img align="right" src="./docs/important_properties.png"/>
 
-- If you are not seeing anything in the terminal check that a theme has been set. If there is no theme, everything will be drawn in black by default.
+- If you are not seeing anything in the terminal check that a theme has been set. If there is no theme, everything will be drawn in black by default. A default theme can be found in the [themes directory](../../themes). 
 - If the terminal isn't responding to keyboard or mouse input check that `focus_mode` is set to `All`, otherwise `_gui_input()` won't be called so no input will be processed.
 
 
@@ -19,15 +19,15 @@ Terminal emulator.
 
 ### (1) User Input
 
-The users enters some data into the terminal, typically by typing something on the keyboard or clicking (and possibly dragging) somewhere on the screen.
-This corresponds to the `_gui_input()` method which is implemented in [terminal.cpp](../native/src/terminal.cpp).
+The user enters some data into the terminal, typically by typing something on the keyboard or clicking (and possibly dragging) somewhere on the screen.
+This corresponds to the `_gui_input()` method which is implemented in [terminal.cpp](./terminal.cpp).
 
 ### (2) Terminal Output
 
 The user input from (1) is processed by the terminal and converted.
-For example, if the user were to press the down key, the terminal would
-and the `data_sent` signal would be emitted with the value `"\u001b[A"`.
-For a full list of escape sequences ["XTerm Control Sequences"](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html).
+For example, if the user were to press the downwards arrow key (↓), the terminal would interpret this
+and the `data_sent()` signal would be emitted with the value `"\u001b[A"`.
+For a full list of escape sequences see ["XTerm Control Sequences"](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html).
 
 ### (3) Terminal Input
 
@@ -36,7 +36,7 @@ In the other direction, characters can be sent to the terminal. This corresponds
 ### (4) Draw
 
 The input from (3) is then intepreted by the terminal and drawn to the screen.
-For example if the string "\u001b[39;m" was written to the terminal, then it would draw some colorful output to the screen.
+For example if the string "\u001b[38;2;0;255;0;mA" was written to the terminal, then it would draw a green colored capital letter 'A' on the screen.
 
 ## Properties
 
@@ -46,6 +46,11 @@ For example if the string "\u001b[39;m" was written to the terminal, then it wou
 | [int] | cols | 80      |
 
 ## Methods
+
+| Returns | Signature                                       |
+|---------|-------------------------------------------------|
+| void    | write **(** [String]\|[PoolByteArray] data **)** |
+
 
 ## Theme Properties
 
@@ -76,44 +81,63 @@ For example if the string "\u001b[39;m" was written to the terminal, then it wou
 
 ## Signals
 
-- **data_sent** **(** PoolByteArray data **)**
+- **data_sent** **(** [PoolByteArray] data **)**
 
   Emitted when some data comes out of the terminal.
   This typically occurs when the user interacts with the terminal by typing on the keyboard or clicking somewhere.
-  It might also occur.
-  Depending on several terminal settings can be interpreted differently, depending on modifier keys and the terminals settings/state.
-  In a typical setup, this data would be forwarded to the linux operating system.
+  Input can be interpreted differently depending on modifier keys and the terminal's settings/state.
+
+  In a typical setup, this data would be forwarded to the pseudoterminal.
 
 ---
 
-- **key_pressed** **(** int row **)**
+- **key_pressed** **(** [String] data, [InputEventKey] event **)**
 
-  Emitted when a key is pressed.
+  Emitted when a key is pressed. `data` is the data that would be emitted by the terminal via the `data_sent()` signal and may vary based on the terminal's state. `event` is the event captured by Godot in the `_gui_input(event)` method.
+
+---
+
+- **size_changed** **(** [Vector2] new_size **)**
+
+  Emitted when the terminal's size changes, typically in response to its `rect_size` changing. 
+  `new_size.x` will be the number of columns and `new_size.y` will be the number of rows.
+  This information should be forwarded to a pseudoterminal if it is connected so that it can update its size accordingly.
 
 ## Property Descriptions
 
 - [int] **rows**
 
-  |           |                 |
-  |-----------|-----------------|
-  | *Default* | 24              |
-  | *Setter*  | set_rows(value) |
-  | *Getter*  | get_rows(value) |
+  |           |      |
+  |-----------|------|
+  | *Default* | 24   |
+  | *Setter*  | None |
+  | *Getter*  | None | 
   
   The number of rows in the terminal's rect.
-  When using a monospace font, this is typically the number of characters that can fit from one side to another.
-  Therefore it is affected by the things thing.
+  When using a monospace font, this is typically the number of characters that can fit from the top to the bottom.
+  It will automatically update as the Control's rect_size changes, and therefore shouldn't be used to set the size of the terminal directly.
 
 ---
 
 - [int] **cols**
-The number of columns in the terminal's rect.
+
+  |           |      |
+  |-----------|------|
+  | *Default* | 80   |
+  | *Setter*  | None |
+  | *Getter*  | None | 
+  
+  The number of columns in the terminal's rect.
+  When using a monospace font, this is typically the number of characters that can fit from one side to another.
+  It will automatically update as the Control's rect_size changes, and therefore shouldn't be used to set the size of the terminal directly.
+
 
 ## Method Descriptions
 
-- void **write** **(** String|PoolByteArray data **)**
+- void **write** **(** [String]|[PoolByteArray] data **)**
 
-  Writes data to the terminal emulator. Accepts either a String or PoolByteArray.
+  Writes data to the terminal emulator. Accepts either a [String] or [PoolByteArray].
+  Typically it would be connected to the output of a pseudoterminal.
 
   Example:
   ```gdscript
@@ -122,10 +146,14 @@ The number of columns in the terminal's rect.
   $Terminal.write(PoolByteArray([0x1b, 0x9e])
   ```
 
-[Control]: https://docs.godotengine.org/en/stable/classes/class_control.html#class-control
-[CanvasItem]: https://docs.godotengine.org/en/stable/classes/class_canvasitem.html#class-canvasitem
-[Node]: https://docs.godotengine.org/en/stable/classes/class_node.html#class-node
-[Object]: https://docs.godotengine.org/en/stable/classes/class_object.html#class-object
-[Color]: https://docs.godotengine.org/en/stable/classes/class_color.html#class-color
-[Font]: https://docs.godotengine.org/en/stable/classes/class_font.html#class-font
-[int]: https://docs.godotengine.org/en/stable/classes/class_int.html#class-int
+[CanvasItem]: https://docs.godotengine.org/en/stable/classes/class_canvasitem.html
+[Color]: https://docs.godotengine.org/en/stable/classes/class_color.html
+[Control]: https://docs.godotengine.org/en/stable/classes/class_control.html
+[Node]: https://docs.godotengine.org/en/stable/classes/class_node.html
+[Font]: https://docs.godotengine.org/en/stable/classes/class_font.html
+[InputEventKey]: https://docs.godotengine.org/en/stable/classes/class_inputeventkey.html
+[int]: https://docs.godotengine.org/en/stable/classes/class_int.html
+[Object]: https://docs.godotengine.org/en/stable/classes/class_object.html
+[PoolByteArray]: https://docs.godotengine.org/en/stable/classes/class_poolbytearray.html
+[String]: https://docs.godotengine.org/en/stable/classes/class_string.html
+[Vector2]: https://docs.godotengine.org/en/stable/classes/class_vector2.html
