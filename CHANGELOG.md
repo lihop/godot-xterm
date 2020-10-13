@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Updated build script (`addons/godot_xterm/native/build.sh`). Git submodules will now be initialized if they haven't already. Moved nix-shell related stuff to a seperate shell.nix file so the same build command can be used on all Linux based OSes.
 
 ## [1.0.0] - 2020-10-05
 ### Added
