@@ -17,38 +17,34 @@ Terminal emulator for Godot using GDNative and [libtsm](https://github.com/Aetf/
 
 ### All Operating Systems
 
-**Important**: The main dependencies of this project are included as git submodules.
-You can install them in this repo after cloning with:
-```
-git submodule update --init --recursive
-```
-In addition to these, you will need some other dependencies including:
+You will need at least these dependencies in order to build this plugin:
+- Git (for git submodules)
 - a C++ compiler (e.g. gcc)
 - ar (part of GNU Binutils)
 - CMake
 - Python
 - SCons
 
-### Operating System Specific
+### Linux
 
 #### NixOS
-On NixOS you can simply run the [build.sh] script in the `addons/godot_xterm/native` directory:
+You can simply run the [build.sh] script in the `addons/godot_xterm/native` directory:
 ```
-cd addons/godot_xterm/native
-./build.sh
+addons/godot_xterm/native/build.sh
 ```
 All dependencies will be pulled in by nix-shell and the build steps will run.
 
 #### Arch Linux and Ubuntu
-See the [Arch Linux Dockerfile](dockerfiles/archlinux) and [Ubuntu Dockerfile](dockerfiles/ubuntu) for a list of packages that need to be installed. Once installed, run the [build.sh] script from the `addons/godot_xterm/native` directory:
+See the [Arch Linux Dockerfile](dockerfiles/archlinux) and [Ubuntu Dockerfile](dockerfiles/ubuntu) for a list of packages that need to be installed. Once installed, run the [build.sh] script in the `addons/godot_xterm/native` directory:
 ```
-cd addons/godot_xterm/native
-bash ./build.sh
+addons/godot_xterm/native/build.sh
 ```
-Make sure you use `bash` to run the script as the default interpreter is set to nix-shell. 
 
-#### Other
-Other operating systems will probably be similar to the above. When in doubt check the documentation in the submodule repos, the [build.sh] script, and the [SConstruct] file.
+#### Other Linux Distributions
+Will probably be similar to the above. When in doubt check the documentation in the submodule repos, the [build.sh] script, and the [SConstruct] file.
+
+### Other Operating Systems
+This plugin is not currently supported for other operating systems (e.g. MacOS, Windows). If you manage to build it on one of these platforms, please submit a PR for this readme.
 
 ## Usage
 
