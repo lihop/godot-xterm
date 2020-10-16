@@ -371,7 +371,7 @@ void Terminal::_draw()
 		return;
 
 	/* Draw the full terminal rect background */
-	draw_rect(get_rect(), get_color("Background", "Terminal"));
+	draw_rect(Rect2(Vector2(0, 0), get_rect().size), get_color("Background", "Terminal"));
 
 	for (int row = 0; row < rows; row++)
 	{
