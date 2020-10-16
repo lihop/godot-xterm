@@ -15,6 +15,15 @@ Terminal emulator for Godot using GDNative and [libtsm](https://github.com/Aetf/
 
 ## Building
 
+**Important**: It is recommended that you build the native binaries before opening this demo project, otherwise the Godot editor will automatically modify the example scenes when it can't find the native libs, such that they won't work when the files _are_ in place.
+
+If you prefer not to build your own binaries from source, there are some pre-compiled release binaries in the [dist] directory.
+They can be copied to the correct location by:
+```
+cd addons/godot_xterm/native
+cp -rf dist/* bin/
+```
+
 ### All Operating Systems
 
 You will need at least these dependencies in order to build this plugin:
@@ -93,4 +102,5 @@ See the various license files in the [subdirectories](addons/godot_xterm/themes/
 
 
 [build.sh]: /addons/godot_xterm/native/build.sh
+[dist]: /addons/godot_xterm/native/dist
 [SConstruct]: /addons/godot_xterm/native/SConstruct
