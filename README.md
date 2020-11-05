@@ -13,6 +13,17 @@ Terminal emulator for Godot using GDNative and [libtsm](https://github.com/Aetf/
 
 ![Screenshot of Main Menu Scene](./docs/screenshot.png)
 
+## Supported Platforms
+
+### Confirmed:
+- Linux 64-bit (primarily developed/tested on this platform)
+- Windows 64-bit
+
+### Planned/untested:
+- Linux 32-bit
+- Windows 32-bit
+- MacOS 64-bit
+
 ## Building
 
 **Important**: It is recommended that you build the native binaries before opening this demo project, otherwise the Godot editor will automatically modify the example scenes when it can't find the native libs, such that they won't work when the files _are_ in place.

@@ -5,8 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Support for Windows 64-bit.
+
 ### Changed
-- Updated build script (`addons/godot_xterm/native/build.sh`). Git submodules will now be initialized if they haven't already. Moved nix-shell related stuff to a seperate shell.nix file so the same build command can be used on all Linux based OSes.
+- Updated build script. `./build.sh` will create a debug build of the gdnative library for the current platform. `./build.sh release-all` will create release build of the gdnative library for every supported platform.
 - Positioned background rect at 0,0 so it is no longer offset if a margin is added when Terminal is a child of a Container node.
 - Removed all pre-compiled binaries using BFG [Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/), thus re-writing git history.
 
