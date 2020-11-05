@@ -1,118 +1,294 @@
-#!python
-import os, subprocess
+#!/usr/bin/env python
+"""
+This file is modified version of the godot-cpp SConstruct file: https://github.com/godotengine/godot-cpp/blob/master/SConstruct
+which is published under the following license:
+
+MIT License
+Copyright (c) 2017-2020 GodotNativeTools
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+
+import os
+import sys
+import subprocess
+
+if sys.version_info < (3,):
+    def decode_utf8(x):
+        return x
+else:
+    import codecs
+    def decode_utf8(x):
+        return codecs.utf_8_decode(x)[0]
+
+# Workaround for MinGW. See:
+# http://www.scons.org/wiki/LongCmdLinesOnWin32
+if (os.name=="nt"):
+    import subprocess
+
+    def mySubProcess(cmdline,env):
+        #print "SPAWNED : " + cmdline
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, startupinfo=startupinfo, shell = False, env = env)
+        data, err = proc.communicate()
+        rv = proc.wait()
+        if rv:
+            print("=====")
+            print(err.decode("utf-8"))
+            print("=====")
+        return rv
+
+    def mySpawn(sh, escape, cmd, args, env):
+
+        newargs = ' '.join(args[1:])
+        cmdline = cmd + " " + newargs
+
+        rv=0
+        if len(cmdline) > 32000 and cmd.endswith("ar") :
+            cmdline = cmd + " " + args[1] + " " + args[2] + " "
+            for i in range(3,len(args)) :
+                rv = mySubProcess( cmdline + args[i], env )
+                if rv :
+                    break
+        else:
+            rv = mySubProcess( cmdline, env )
+
+        return rv
+
+def add_sources(sources, dir, extension):
+    for f in os.listdir(dir):
+        if f.endswith('.' + extension):
+            sources.append(dir + '/' + f)
+
+
+# Try to detect the host platform automatically. 
+# This is used if no `platform` argument is passed.
+if sys.platform.startswith('linux'):
+    host_platform = 'linux'
+elif sys.platform == 'darwin':
+    host_platform = 'osx'
+elif sys.platform == 'win32' or sys.platform == 'msys':
+    host_platform = 'windows'
+else:
+    raise ValueError(
+        'Could not detect platform automatically, please specify with '
+        'platform=<platform>'
+    )
+
+VariantDir('./external/libtsm/build', './external/libtsm/src', duplicate=0)
+env = Environment(ENV = os.environ)
+
+is64 = sys.maxsize > 2**32
+if (
+    env['TARGET_ARCH'] == 'amd64' or
+    env['TARGET_ARCH'] == 'emt64' or
+    env['TARGET_ARCH'] == 'x86_64' or
+    env['TARGET_ARCH'] == 'arm64-v8a'
+):
+    is64 = True
 
 opts = Variables([], ARGUMENTS)
 
-# Gets the standard flags CC, CCX, etc.
-env = DefaultEnvironment()
+opts.Add(EnumVariable(
+    'platform',
+    'Target platform',
+    host_platform,
+    allowed_values=('linux', 'osx', 'windows'),
+    ignorecase=2
+))
+opts.Add(EnumVariable(
+    'bits',
+    'Target platform bits',
+    '64' if is64 else '32',
+    ('32', '64')
+))
+opts.Add(EnumVariable(
+    'target',
+    'Compilation target',
+    'debug',
+    allowed_values=('debug', 'release'),
+    ignorecase=2
+))
+
+opts.Update(env)
+Help(opts.GenerateHelpText(env))
 
 # Add PATH to environment so scons can find commands such as g++, etc.
 env.AppendENVPath('PATH', os.getenv('PATH'))
 
-# Define our options
-opts.Add(EnumVariable('target', "Compilation target", 'debug', ['d', 'debug', 'r', 'release']))
-opts.Add(EnumVariable('platform', "Compilation platform", '', ['', 'windows', 'x11', 'linux', 'osx']))
-opts.Add(EnumVariable('p', "Compilation target, alias for 'platform'", '', ['', 'windows', 'x11', 'linux', 'osx']))
-opts.Add(BoolVariable('use_llvm', "Use the LLVM / Clang compiler", 'no'))
-opts.Add(PathVariable('target_path', 'The path where the lib is installed.', 'bin/'))
-opts.Add(PathVariable('target_name', 'The library name.', 'libgodotxtermnative', PathVariable.PathAccept))
+# Generate godot-cpp bindings.
+# Options such as platform, target, etc. will be forwarded to the godot-cpp SConscript.
+ARGUMENTS['generate_bindings'] = True
+SConscript('external/godot-cpp/SConstruct')
 
-# Local dependency paths, adapt them to your setup
-godot_headers_path = "external/godot-cpp/godot_headers/"
-cpp_bindings_path = "external/godot-cpp/"
-cpp_library = "libgodot-cpp"
-libtsm_path = "external/libtsm/"
 
-# only support 64 at this time..
-bits = 64
+# Compile for Linux.
+if env['platform'] == 'linux':
+    env.Append(CPPDEFINES=['PLATFORM_LINUX'])
 
-# Updates the environment with the option variables.
-opts.Update(env)
-
-# Process some arguments
-if env['use_llvm']:
-    env['CC'] = 'clang'
-    env['CXX'] = 'clang++'
-else:
     env['CC'] = 'gcc'
     env['CXX'] = 'g++'
 
-if env['p'] != '':
-    env['platform'] = env['p']
+    env.Append(CCFLAGS=['-fPIC', '-Wwrite-strings'])
+    env.Append(LINKFLAGS=["-Wl,-R'$$ORIGIN'"])
 
-if env['platform'] == '':
-    print("No valid target platform selected.")
-    quit();
+    if env['target'] == 'debug':
+        env.Append(CCFLAGS=['-Og', '-g'])
+    elif env['target'] == 'release':
+        env.Append(CCFLAGS=['-O3'])
 
-# For the reference:
-# - CCFLAGS are compilation flags shared between C and C++
-# - CFLAGS are for C-specific compilation flags
-# - CXXFLAGS are for C++-specific compilation flags
-# - CPPFLAGS are for pre-processor flags
-# - CPPDEFINES are for pre-processor defines
-# - LINKFLAGS are for linking flags
+    if env['bits'] == '64':
+        env.Append(CCFLAGS=['-m64'])
+        env.Append(LINKFLAGS=['-m64'])
+    elif env['bits'] == '32':
+        env.Append(CCFLAGS=['-m32'])
+        env.Append(LINKFLAGS=['-m32'])
 
-# Check our platform specifics
-if env['platform'] == "osx":
-    env['target_path'] += 'osx/'
-    cpp_library += '.osx'
+
+# Compile for OSX.
+elif env['platform'] == 'osx':
+    env.Append(CPPDEFINES=['PLATFORM_OSX'])
+
+    env['CC'] = 'clang'
+    env['CXX'] = 'clang++'
+
+    if env['bits'] == '32':
+        raise ValueError(
+            'Only 64-bit builds are supported for the macOS target.'
+        )
+
     env.Append(CCFLAGS=['-arch', 'x86_64'])
-    env.Append(CXXFLAGS=['-std=c++17'])
-    env.Append(LINKFLAGS=['-arch', 'x86_64'])
-    if env['target'] in ('debug', 'd'):
-        env.Append(CCFLAGS=['-g', '-O2'])
-    else:
-        env.Append(CCFLAGS=['-g', '-O3'])
+    env.Append(LINKFLAGS=[
+        '-arch',
+        'x86_64',
+        '-Wl,-undefined,dynamic_lookup',
+    ])
 
-elif env['platform'] in ('x11', 'linux'):
-    env['target_path'] += 'x11/'
-    cpp_library += '.linux'
-    env.Append(CCFLAGS=['-fPIC', '-shared'])
-    env.Append(CXXFLAGS=['-std=c++17', '-shared', '-pthread'])
-    if env['target'] in ('debug', 'd'):
-        env.Append(CCFLAGS=['-g3', '-Og'])
-    else:
-        env.Append(CCFLAGS=['-g', '-O3'])
+    if env['target'] == 'debug':
+        env.Append(CCFLAGS=['-Og', '-g'])
+    elif env['target'] == 'release':
+        env.Append(CCFLAGS=['-O3'])
 
-elif env['platform'] == "windows":
-    env['target_path'] += 'win64/'
-    cpp_library += '.windows'
-    # This makes sure to keep the session environment variables on windows,
-    # that way you can run scons in a vs 2017 prompt and it will find all the required tools
-    env.Append(ENV=os.environ)
 
-    env.Append(CPPDEFINES=['WIN32', '_WIN32', '_WINDOWS', '_CRT_SECURE_NO_WARNINGS'])
-    env.Append(CCFLAGS=['-W3', '-GR'])
-    if env['target'] in ('debug', 'd'):
-        env.Append(CPPDEFINES=['_DEBUG'])
-        env.Append(CCFLAGS=['-EHsc', '-MDd', '-ZI'])
-        env.Append(LINKFLAGS=['-DEBUG'])
-    else:
-        env.Append(CPPDEFINES=['NDEBUG'])
-        env.Append(CCFLAGS=['-O2', '-EHsc', '-MD'])
+# Compile for Windows.
+elif env['platform'] == 'windows':
+    env.Append(CPPDEFINES=['PLATFORM_WINDOWS'])
 
-if env['target'] in ('debug', 'd'):
-    cpp_library += '.debug'
-else:
-    cpp_library += '.release'
+    env.Append(CCFLAGS=['-Wwrite-strings'])
+    env.Append(LINKFLAGS=[
+        '--static',
+        '-Wl,--no-undefined',
+        '-static-libgcc',
+        '-static-libstdc++',
+    ])
 
-cpp_library += '.' + str(bits)
+    if env['target'] == 'debug':
+        env.Append(CCFLAGS=['-Og', '-g'])
+    elif env['target'] == 'release':
+        env.Append(CCFLAGS=['-O3'])
 
-# make sure our binding library is properly includes
-env.Append(CPPPATH=['.', godot_headers_path, cpp_bindings_path + 'include/', cpp_bindings_path + 'include/core/', cpp_bindings_path + 'include/gen/', libtsm_path + 'src/tsm', libtsm_path + 'external'])
-env.Append(LIBPATH=[cpp_bindings_path + 'bin/', libtsm_path + 'build/src/tsm'])
-env.Append(LIBS=[cpp_library, 'tsm', 'util']) # Note util used by pseudoterminal, tsm used by terminal.
+    # On Windows.
+    if host_platform == 'windows':
+        env = env.Clone(tools=['mingw'])
+        env["SPAWN"] = mySpawn
 
-# tweak this if you want to use different folders, or more folders, to store your source code in.
-env.Append(CPPPATH=['src/'])
+    # On Linux or MacOS.
+    elif host_platform == 'linux' or host_platform == 'osx':
+        if env['bits'] == '64':
+            env['CC'] = 'x86_64-w64-mingw32-gcc'
+            env['CXX'] = 'x86_64-w64-mingw32-g++'
+            env['AR'] = "x86_64-w64-mingw32-ar"
+            env['RANLIB'] = "x86_64-w64-mingw32-ranlib"
+            env['LINK'] = "x86_64-w64-mingw32-g++"
+        elif env['bits'] == '32':
+            env['CC'] = 'i686-w64-mingw32-gcc'
+            env['CXX'] = 'i686-w64-mingw32-g++'
+            env['AR'] = "i686-w64-mingw32-ar"
+            env['RANLIB'] = "i686-w64-mingw32-ranlib"
+            env['LINK'] = "i686-w64-mingw32-g++"
+
+
+# Build libtsm as a static library.
+Execute([
+    Delete('external/libtsm/build/src'),
+    Delete('external/libtsm/build/external'),
+    Copy('external/libtsm/build/src', 'external/libtsm/src'),
+    Copy('external/libtsm/build/external', 'external/libtsm/external'),
+])
+
+env.Append(CPPPATH=[
+    'external/libtsm/src/shared',
+    'external/libtsm/external',
+])
+
 sources = []
-sources.append(Glob('src/*.c'))
-sources.append(Glob('src/*.cpp'))
+sources.append('external/libtsm/build/src/shared/shl-htable.c')
+sources.append(Glob('external/libtsm/build/src/tsm/*.c'))
+sources.append(Glob('external/libtsm/build/external/wcwidth/*.c'))
+
+libtsm = env.StaticLibrary(
+    target='external/libtsm/build/bin/libtsm.{}.{}.{}{}'.format(
+        env['platform'],
+        env['target'],
+        env['bits'],
+        env['LIBSUFFIX']
+    ), source=sources
+)
+Default(libtsm)
 
 
-library = env.SharedLibrary(target=env['target_path'] + env['target_name'] , source=sources)
+# Build libgodot-xterm.
+#env.Append(CCFLAGS=['-std=c++14'])
 
+env.Append(CPPPATH=[
+    'src/',
+    'external/libtsm/build/src/tsm',
+    'external/godot-cpp/include/',
+    'external/godot-cpp/include/core/',
+    'external/godot-cpp/include/gen/',
+    'external/godot-cpp/godot_headers/'
+])
+env.Append(LIBPATH=[
+    'external/godot-cpp/bin/',
+    'external/libtsm/build/bin/',
+])
+env.Append(LIBS=[
+    'libgodot-cpp.{}.{}.{}'.format(
+        env['platform'],
+        env['target'],
+        env['bits']
+    ),
+    'libtsm.{}.{}.{}'.format(
+        env['platform'],
+        env['target'],
+        env['bits']
+    ),
+])
+
+sources = []
+sources.append('src/libgodotxtermnative.cpp')
+sources.append('src/terminal.cpp')
+
+# Psuedoterminal not supported on windows yet.
+if env['platform'] != 'windows': 
+    sources.append('src/pseudoterminal.cpp')
+    env.Append(LIBS=['util'])
+
+if env['platform'] == 'linux':
+    suffix = "so"
+elif env['platform'] == 'windows':
+    suffix = "dll"
+elif env['platform'] == 'osx':
+    suffix = "dylib"
+
+library = env.SharedLibrary(
+    target='bin/libgodot-xterm.{}.{}.{}'.format(
+        env['platform'],
+        env['bits'],
+        suffix,
+    ), source=sources
+)
 Default(library)
-
-# Generates help for the -h scons option.
-Help(opts.GenerateHelpText(env))

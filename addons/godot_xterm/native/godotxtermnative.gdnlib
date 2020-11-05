@@ -7,10 +7,16 @@ reloadable=true
 
 [entry]
 
-X11.64="res://addons/godot_xterm/native/bin/x11/libgodotxtermnative.so"
-Server.64="res://addons/godot_xterm/native/bin/x11/libgodotxtermnative.so"
+Server.64="res://addons/godot_xterm/native/bin/libgodot-xterm.linux.64.so"
+X11.64="res://addons/godot_xterm/native/bin/libgodot-xterm.linux.64.so"
+X11.32="res://addons/godot_xterm/native/bin/libgodot-xterm.linux.32.so"
+Windows.64="res://addons/godot_xterm/native/bin/libgodot-xterm.windows.64.dll"
+OSX.64="res://addons/godot_xterm/native/bin/libgodot-xterm.osx.64.dylib"
 
 [dependencies]
 
-X11.64=[  ]
 Server.64=[  ]
+X11.64=[  ]
+X11.32=[  ]
+Windows.64=[  ]
+OSX.64=[  ]

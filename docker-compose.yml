@@ -9,7 +9,7 @@ services:
     build:
       context: .
       dockerfile: ./dockerfiles/nixos
-    command: /src/addons/godot_xterm/native/build.sh
+    command: /src/addons/godot_xterm/native/build.sh release-all
   build-ubuntu:
     build:
       context: .
