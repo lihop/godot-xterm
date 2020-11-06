@@ -1,8 +1,16 @@
 FROM ubuntu:18.04
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
+    # The following are required to compile for any platform:
     git \
     python3 \
-    scons
+    scons \
+    # The following are required to compile for 64-bit Linux:
+    build-essential \
+    # The following are required to compile for 32-bit Linux:
+    gcc-multilib \
+    g++-multilib \
+    # The following is required to cross-compile for 32/64-bit Windows:
+    g++-mingw-w64-x86-64 \
+    # The following is required to cross-compile for MacOS:
+    clang
 COPY . /src
