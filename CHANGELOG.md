@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated build script (`addons/godot_xterm/native/build.sh`). Git submodules will now be initialized if they haven't already. Moved nix-shell related stuff to a seperate shell.nix file so the same build command can be used on all Linux based OSes.
 - Positioned background rect at 0,0 so it is no longer offset if a margin is added when Terminal is a child of a Container node.
-- Moved pre-compiled binary to `addons/godot_xterm/native/dist` directory, and reduced size by ~70M by making it a release build rather than debug.
+- Removed all pre-compiled binaries using BFG [Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/), thus re-writing git history.
 
 ## [1.0.0] - 2020-10-05
 ### Added
