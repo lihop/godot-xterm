@@ -6,6 +6,7 @@ with (import <nixpkgs> {
 mkShell {
   buildInputs = with pkgs; [
     binutils.bintools
+    cacert
     cmake
     git
     libxkbcommon

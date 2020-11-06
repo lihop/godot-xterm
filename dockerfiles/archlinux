@@ -1,7 +1,14 @@
 FROM archlinux:20200908
 RUN pacman -Sy --needed --noconfirm \
-    base-devel \
-    cmake \
+    # The following are required to compile for any platform:
     git \
-    scons
+    scons \
+    # The following are required to compile for 64-bit Linux:
+    base-devel \
+    # The following are required to compile for 32-bit Linux:
+    multilib-devel \
+    # The following is required to cross-compile for 32/64-bit Windows:
+    mingw-w64-gcc \
+    # The following is required to cross-compile for MacOS:
+    clang
 COPY . /src

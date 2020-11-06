@@ -5,7 +5,7 @@
 ![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)
 ![Godot Version](https://img.shields.io/badge/godot-3.2+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-[![Build Status](https://travis-ci.com/lihop/godot-xterm.svg?branch=master)](https://travis-ci.com/lihop/godot-xterm)
+[![Build Status](https://github.com/lihop/godot-xterm/workflows/build/badge.svg?branch=master)](https://github.com/lihop/godot-xterm/actions?query=branch%3Amaster)
 
 Terminal emulator for Godot using GDNative and [libtsm](https://github.com/Aetf/libtsm).
 
