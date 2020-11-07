@@ -585,9 +585,8 @@ void Terminal::write(Variant data)
 	case Variant::Type::STRING:
 	{
 		String string = data;
-		CharString utf8 = string.utf8();
-		u8 = utf8.get_data();
-		len = utf8.length();
+		u8 = string.alloc_c_string();
+		len = strlen(u8);
 		break;
 	}
 	default:
