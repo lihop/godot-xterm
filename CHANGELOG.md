@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Positioned background rect at 0,0 so it is no longer offset if a margin is added when Terminal is a child of a Container node.
 - Removed all pre-compiled binaries using BFG [Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/), thus re-writing git history.
 
+### Fixed
+- Fixed #12 where incorrect data would sometimes be written to the terminal when passing a string to the Terminal's `write()` method.
+
 ## [1.0.0] - 2020-10-05
 ### Added
 - Changelog.
