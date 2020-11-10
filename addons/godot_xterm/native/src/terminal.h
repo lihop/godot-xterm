@@ -20,7 +20,8 @@ namespace godot
 		{
 			char ch[5];
 			struct tsm_screen_attr attr;
-		} empty_cell = {ch : {0, 0, 0, 0, 0}, attr : {}};
+		};
+		static const struct cell empty_cell;
 
 	public:
 		typedef std::vector<std::vector<struct cell>> Cells;

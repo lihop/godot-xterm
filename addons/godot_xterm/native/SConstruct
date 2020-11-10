@@ -14,56 +14,6 @@ import os
 import sys
 import subprocess
 
-if sys.version_info < (3,):
-    def decode_utf8(x):
-        return x
-else:
-    import codecs
-    def decode_utf8(x):
-        return codecs.utf_8_decode(x)[0]
-
-# Workaround for MinGW. See:
-# http://www.scons.org/wiki/LongCmdLinesOnWin32
-if (os.name=="nt"):
-    import subprocess
-
-    def mySubProcess(cmdline,env):
-        #print "SPAWNED : " + cmdline
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, startupinfo=startupinfo, shell = False, env = env)
-        data, err = proc.communicate()
-        rv = proc.wait()
-        if rv:
-            print("=====")
-            print(err.decode("utf-8"))
-            print("=====")
-        return rv
-
-    def mySpawn(sh, escape, cmd, args, env):
-
-        newargs = ' '.join(args[1:])
-        cmdline = cmd + " " + newargs
-
-        rv=0
-        if len(cmdline) > 32000 and cmd.endswith("ar") :
-            cmdline = cmd + " " + args[1] + " " + args[2] + " "
-            for i in range(3,len(args)) :
-                rv = mySubProcess( cmdline + args[i], env )
-                if rv :
-                    break
-        else:
-            rv = mySubProcess( cmdline, env )
-
-        return rv
-
-def add_sources(sources, dir, extension):
-    for f in os.listdir(dir):
-        if f.endswith('.' + extension):
-            sources.append(dir + '/' + f)
-
-
 # Try to detect the host platform automatically. 
 # This is used if no `platform` argument is passed.
 if sys.platform.startswith('linux'):
@@ -177,26 +127,29 @@ elif env['platform'] == 'osx':
 elif env['platform'] == 'windows':
     env.Append(CPPDEFINES=['PLATFORM_WINDOWS'])
 
-    env.Append(CCFLAGS=['-Wwrite-strings'])
-    env.Append(LINKFLAGS=[
-        '--static',
-        '-Wl,--no-undefined',
-        '-static-libgcc',
-        '-static-libstdc++',
-    ])
-
-    if env['target'] == 'debug':
-        env.Append(CCFLAGS=['-Og', '-g'])
-    elif env['target'] == 'release':
-        env.Append(CCFLAGS=['-O3'])
-
-    # On Windows.
+    # On Windows using MSVC.
     if host_platform == 'windows':
-        env = env.Clone(tools=['mingw'])
-        env["SPAWN"] = mySpawn
+        env.Append(LINKFLAGS=['/W3', '/GR'])
+        if env['target'] == 'debug':
+            env.Append(CCFLAGS=['/Z7', '/Od', '/EHsc', '/D_DEBUG', '/MDd'])
+        elif env['target'] == 'release':
+            env.Append(CCFLAGS=['/O2', '/EHsc', '/DNDEBUG', '/MD'])
 
-    # On Linux or MacOS.
+    # On Windows, Linux, or MacOS using MinGW.
     elif host_platform == 'linux' or host_platform == 'osx':
+        env.Append(CCFLAGS=['-std=c++14', '-Wwrite-strings'])
+        env.Append(LINKFLAGS=[
+            '--static',
+            '-Wl,--no-undefined',
+            '-static-libgcc',
+            '-static-libstdc++',
+        ])
+
+        if env['target'] == 'debug':
+            env.Append(CCFLAGS=['-Og', '-g'])
+        elif env['target'] == 'release':
+            env.Append(CCFLAGS=['-O3'])
+
         if env['bits'] == '64':
             env['CC'] = 'x86_64-w64-mingw32-gcc'
             env['CXX'] = 'x86_64-w64-mingw32-g++'

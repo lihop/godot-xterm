@@ -3,4 +3,4 @@
 	url = https://github.com/godotengine/godot-cpp
 [submodule "addons/godot_xterm/libtsm"]
 	path = addons/godot_xterm/native/external/libtsm
-	url = https://github.com/Aetf/libtsm
+	url = https://github.com/lihop/libtsm
