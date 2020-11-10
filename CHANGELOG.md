@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Support for Windows 64-bit.
+- Support for Windows 64-bit and compiling on Windows using MSVC.
 
 ### Changed
 - Updated build script. `./build.sh` will create a debug build of the gdnative library for the current platform. `./build.sh release-all` will create release build of the gdnative library for every supported platform.

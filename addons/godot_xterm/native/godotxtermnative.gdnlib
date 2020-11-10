@@ -11,6 +11,7 @@ Server.64="res://addons/godot_xterm/native/bin/libgodot-xterm.linux.64.so"
 X11.64="res://addons/godot_xterm/native/bin/libgodot-xterm.linux.64.so"
 X11.32="res://addons/godot_xterm/native/bin/libgodot-xterm.linux.32.so"
 Windows.64="res://addons/godot_xterm/native/bin/libgodot-xterm.windows.64.dll"
+Windows.32="res://addons/godot_xterm/native/bin/libgodot-xterm.windows.32.dll"
 OSX.64="res://addons/godot_xterm/native/bin/libgodot-xterm.osx.64.dylib"
 
 [dependencies]
@@ -19,4 +20,5 @@ Server.64=[  ]
 X11.64=[  ]
 X11.32=[  ]
 Windows.64=[  ]
+Windows.32=[  ]
 OSX.64=[  ]

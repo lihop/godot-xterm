@@ -63,8 +63,12 @@ addons/godot_xterm/native/build.sh
 #### Other Linux Distributions
 Will probably be similar to the above. When in doubt check the documentation in the submodule repos, the [build.sh] script, and the [SConstruct] file.
 
+### Windows
+Compiling on Windows for 64-bit is supported using [Visual Studio Community](https://visualstudio.microsoft.com/vs/community/) version 2019, although other versions might work. See the [Godot documentation](https://docs.godotengine.org/en/stable/development/compiling/compiling_for_windows.html) for more information on setting up the development environment.
+See the [github workflow file](.github/workflows/main.yml) for the commands that can be used to build the native libraries.
+
 ### Other Operating Systems
-This plugin is not currently supported for other operating systems (e.g. MacOS, Windows). If you manage to build it on one of these platforms, please submit a PR for this readme.
+This plugin is not currently supported for other operating systems (i.e. MacOS). If you manage to build it on a different platform, please submit a PR for this readme.
 
 ## Usage
 
