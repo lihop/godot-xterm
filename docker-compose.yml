@@ -4,14 +4,14 @@ services:
     build:
       context: .
       dockerfile: ./dockerfiles/archlinux
-    command: /src/addons/godot_xterm/native/build.sh release-all
+    command: /src/addons/godot_xterm/native/build.sh
   build-nixos:
     build:
       context: .
       dockerfile: ./dockerfiles/nixos
-    command: /src/addons/godot_xterm/native/build.sh release-all
+    command: /src/addons/godot_xterm/native/build.sh
   build-ubuntu:
     build:
       context: .
       dockerfile: ./dockerfiles/ubuntu
-    command: /src/addons/godot_xterm/native/build.sh release-all
+    command: /src/addons/godot_xterm/native/build.sh

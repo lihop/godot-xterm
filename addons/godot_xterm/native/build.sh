@@ -26,24 +26,10 @@ if [ ! -d "${GODOT_CPP_DIR}" ]; then
 	git submodule update --init --recursive -- $GODOT_CPP_DIR
 fi
 
+# Build godot-cpp bindings.
+cd ${GODOT_CPP_DIR}
+scons generate_bindings=yes -j$(nproc)
 
 # Build libgodot-xterm.
 cd ${NATIVE_DIR}
-case $1 in
-	"release-all")
-		# Cross-compile release build for all platforms.
-		scons platform=linux bits=64 target=release -j$(nproc)
-		if [ $IN_NIX_SHELL ]; then
-			nix-shell --pure --argstr system i686-linux --run "NIX_PATH=${NIX_PATH} scons platform=linux bits=32 target=release -j$(nproc)"
-		else
-			scons platform=linux bits=32 target=release -j$(nproc)
-		fi
-		scons platform=windows bits=64 target=release -j$(nproc)
-		#scons platform=windows bits=32 target=release -j$(nproc)
-		#scons platform=osx bits=64 target=release -j$(nproc)
-		;;
-	*)
-		# Default: Compile debug build for the current platform.
-		scons -j$(nproc)
-		;;
-esac
+scons -j$(nproc)
