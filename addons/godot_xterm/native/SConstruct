@@ -69,11 +69,6 @@ Help(opts.GenerateHelpText(env))
 # Add PATH to environment so scons can find commands such as g++, etc.
 env.AppendENVPath('PATH', os.getenv('PATH'))
 
-# Generate godot-cpp bindings.
-# Options such as platform, target, etc. will be forwarded to the godot-cpp SConscript.
-ARGUMENTS['generate_bindings'] = True
-SConscript('external/godot-cpp/SConstruct')
-
 
 # Compile for Linux.
 if env['platform'] == 'linux':
