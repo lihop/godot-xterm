@@ -194,8 +194,7 @@ Default(libtsm)
 
 
 # Build libgodot-xterm.
-#env.Append(CCFLAGS=['-std=c++14'])
-
+env.Append(CXXFLAGS=['-std=c++14'])
 env.Append(CPPPATH=[
     'src/',
     'external/libtsm/build/src/tsm',

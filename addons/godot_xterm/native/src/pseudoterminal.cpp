@@ -1,8 +1,16 @@
 #include "pseudoterminal.h"
-#include <pty.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <termios.h>
+
+// Platform specific includes.
+#if defined(PLATFORM_LINUX)
+#include <pty.h>
+#endif
+#if defined(PLATFORM_OSX)
+#include <util.h>
+#include <sys/ioctl.h>
+#endif
 
 using namespace godot;
 
