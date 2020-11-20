@@ -44,3 +44,19 @@ jobs:
         with:
           name: bin
           path: addons/godot_xterm/native/bin/*.dll
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install SCons software construction tool
+        run: brew install scons
+      - name: Buid for macOS 64-bit using llvm
+        run: |
+          cd addons/godot_xterm/native
+          scons platform=osx target=release bits=64
+      - uses: actions/upload-artifact@v2
+        with:
+          name: bin
+          path: addons/godot_xterm/native/bin/*.dylib
