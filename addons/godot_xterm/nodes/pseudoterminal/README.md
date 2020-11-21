@@ -3,7 +3,7 @@
 **Inherits:** [Node] < [Object]
 
 
-Can be used with the [Terminal] node to get an actual shell. Currently only tested/working on Linux.
+Can be used with the [Terminal] node to get an actual shell. Currently only tested/working on Linux and MacOS.
 
 ## Methods
 
