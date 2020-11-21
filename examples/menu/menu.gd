@@ -8,6 +8,7 @@ extends Control
 # - https://tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
 # - https://www.youtube.com/watch?v=jTSQlIK_92w
 
+# Title generated using command: toilet -f pagga GODOT XTERM
 const TITLE = """
 ░█▀▀░█▀█░█▀▄░█▀█░▀█▀░░░█░█░▀█▀░█▀▀░█▀▄░█▄█\r
 ░█░█░█░█░█░█░█░█░░█░░░░▄▀▄░░█░░█▀▀░█▀▄░█░█\r
