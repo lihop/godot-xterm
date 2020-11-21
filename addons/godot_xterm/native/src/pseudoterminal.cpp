@@ -1,7 +1,8 @@
 #include "pseudoterminal.h"
-#include <unistd.h>
+#include <libgen.h>
 #include <sys/wait.h>
 #include <termios.h>
+#include <unistd.h>
 
 // Platform specific includes.
 #if defined(PLATFORM_LINUX)
@@ -77,7 +78,8 @@ void Pseudoterminal::process_pty()
         putenv(colortermenv);
 
         char *shell = getenv("SHELL");
-        execvp(shell, NULL);
+        char *argv[] = { basename(shell), NULL };
+        execvp(shell, argv);
     }
     else
     {
