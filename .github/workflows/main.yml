@@ -7,16 +7,6 @@ on:
     branches: [ master ]
 
 jobs:
-  docker:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [ build-nixos, build-archlinux, build-ubuntu ]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build inside docker container
-        run: docker-compose run ${{ matrix.service }}
-
   release-build:
     runs-on: ${{ matrix.os }}
     strategy:
