@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Fixed
+- For windows release builds, use the /MT flag rather than /MD. When built with /MD the plugin does not work with exported projects.
 
 
 ## [v1.2.0] - 2020-11-21
