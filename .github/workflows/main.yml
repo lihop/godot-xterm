@@ -59,7 +59,7 @@ jobs:
       # Windows-specific steps.
       - name: Install additional windows build dependencies
         if: ${{ matrix.os == 'windows-latest' }}
-        run: choco install python3 && python -m pip install scons
+        run: python -m pip install scons
       - uses: ilammy/msvc-dev-cmd@v1
         if: ${{ matrix.os == 'windows-latest' }}
 
