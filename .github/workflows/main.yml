@@ -77,7 +77,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: bin
+          name: libgodot-xterm-${{ matrix.target }}
           path: |
             addons/godot_xterm/native/bin/*.so
             addons/godot_xterm/native/bin/*.dylib
