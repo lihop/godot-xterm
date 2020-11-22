@@ -7,11 +7,12 @@ on:
     branches: [ master ]
 
 jobs:
-  release-build:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         platform: [ linux, osx, windows ]
+        target: [ release, debug ]
         bits: [ 64, 32 ]
         include:
           - platform: linux
@@ -43,16 +44,19 @@ jobs:
           cache-name: cache-godot-cpp
         with:
           path: addons/godot_xterm/native/external/godot-cpp
-          key: godot-cpp-${{ matrix.platform }}-release-${{ matrix.bits }}-${{ env.GODOT_CPP_COMMIT_HASH }}
+          key: godot-cpp-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.GODOT_CPP_COMMIT_HASH }}
 
+      # Ubuntu-specific steps.
       - name: Install ubuntu build dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get install -y scons gcc-multilib g++-multilib
 
+      # MacOS-specific steps.
       - name: Install additional macos build dependencies
         if: ${{ matrix.os == 'macos-latest' }}
         run: brew install scons
 
+      # Windows-specific steps.
       - name: Install additional windows build dependencies
         if: ${{ matrix.os == 'windows-latest' }}
         run: choco install python3 && python -m pip install scons
@@ -63,12 +67,12 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           cd addons/godot_xterm/native/external/godot-cpp
-          scons platform=${{ matrix.platform }} target=release bits=${{ matrix.bits }} generate_bindings=yes -j2
+          scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} generate_bindings=yes -j2
 
       - name: Build libgodot-xterm
         run: |
           cd addons/godot_xterm/native
-          scons platform=${{ matrix.platform }} target=release bits=${{ matrix.bits }} -j2
+          scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} -j2
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
