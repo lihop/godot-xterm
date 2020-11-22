@@ -1,6 +1,0 @@
-FROM archlinux:20200908
-RUN pacman -Sy --needed --noconfirm \
-    git \
-    scons \
-    base-devel
-COPY . /src
