@@ -6,8 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+
+## [v1.2.1] - 2020-11-23
+### Changed
+- GitHub Actions workflow now produces both a release and debug zip archive.
+
 ### Fixed
-- For windows release builds, use the /MT flag rather than /MD. When built with /MD the plugin does not work with exported projects.
+- Release binary for Windows 64-bit export.
 
 
 ## [v1.2.0] - 2020-11-21
@@ -37,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Terminal `write()` method now accepts both String and PoolByteArray.
 
 
-[Unreleased]: https://github.com/lihop/godot-xterm/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/lihop/godot-xterm/compare/v1.2.1...HEAD
+[v1.2.1]: https://github.com/lihop/godot-xterm/compare/v1.2.0...v1.2.1
 [v1.2.0]: https://github.com/lihop/godot-xterm/compare/v1.0.0...v1.2.0
 [v1.0.0]: https://github.com/lihop/godot-xterm/releases/tag/v1.0.0
