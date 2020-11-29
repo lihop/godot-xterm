@@ -385,7 +385,7 @@ void Terminal::update_theme()
 		color_palette[color][1] = c.get_g8();
 		color_palette[color][2] = c.get_b8();
 
-		palette.erase(color) = c;
+		palette[color] = c;
 	};
 
 	set_pallete_color(TSM_COLOR_BLACK,         "Black",         0, 0, 0);
