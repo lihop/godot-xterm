@@ -2,13 +2,13 @@
 
 [ext_resource path="res://addons/godot_xterm/nodes/terminal/terminal.gdns" type="Script" id=1]
 [ext_resource path="res://addons/godot_xterm/nodes/pseudoterminal/pseudoterminal.gdns" type="Script" id=2]
-[ext_resource path="res://addons/godot_xterm/themes/default.theme" type="Theme" id=4]
+[ext_resource path="res://addons/godot_xterm/themes/default_dark.theme" type="Theme" id=3]
 
 [node name="Terminal" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 focus_mode = 2
-theme = ExtResource( 4 )
+theme = ExtResource( 3 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
