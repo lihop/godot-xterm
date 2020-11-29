@@ -372,11 +372,10 @@ void Terminal::update_color_palette()
 	// be used in a tsm color palette.
 	auto set_pallete_color = [this](tsm_vte_color color, String theme_color) -> void {
 		Color c = get_color(theme_color, "Terminal");
-		uint32_t argb32 = c.to_ARGB32();
 
-		color_palette[color][0] = (argb32 >> (8 * 0)) & 0xff;
-		color_palette[color][1] = (argb32 >> (8 * 1)) & 0xff;
-		color_palette[color][2] = (argb32 >> (8 * 2)) & 0xff;
+		color_palette[color][0] = c.get_r8();
+		color_palette[color][1] = c.get_g8();
+		color_palette[color][2] = c.get_b8();
 	};
 
 	set_pallete_color(TSM_COLOR_BLACK, "Black");
