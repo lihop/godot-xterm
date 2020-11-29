@@ -41,10 +41,11 @@ namespace godot
 
 		Vector2 cell_size;
 		std::map<int, Color> palette = {};
+		std::map<String, Ref<Font>> fontmap = {};
 
 		void update_size();
 
-		void update_color_palette();
+		void update_theme();
 		std::pair<Color, Color> get_cell_colors(int row, int col);
 		void draw_background(int row, int col, Color bgcol);
 		void draw_foreground(int row, int col, Color fgcol);

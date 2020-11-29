@@ -3,6 +3,7 @@
 #include <GlobalConstants.hpp>
 #include <InputEventKey.hpp>
 #include <OS.hpp>
+#include <ResourceLoader.hpp>
 #include <Theme.hpp>
 #include <xkbcommon/xkbcommon-keysyms.h>
 
@@ -251,6 +252,7 @@ void Terminal::_register_methods()
 	register_method("_ready", &Terminal::_ready);
 	register_method("_gui_input", &Terminal::_gui_input);
 	register_method("_draw", &Terminal::_draw);
+	register_method("_notification", &Terminal::_notification);
 
 	register_method("write", &Terminal::write);
 	register_method("update_size", &Terminal::update_size);
@@ -286,15 +288,7 @@ void Terminal::_init()
 		ERR_PRINT("Error creating new tsm vte");
 	}
 
-	update_color_palette();
-	if (tsm_vte_set_custom_palette(vte, color_palette))
-	{
-		ERR_PRINT("Error setting custom palette");
-	}
-	if (tsm_vte_set_palette(vte, "custom"))
-	{
-		ERR_PRINT("Error setting palette");
-	}
+	update_theme();
 }
 
 void Terminal::_ready()
@@ -309,6 +303,9 @@ void Terminal::_notification(int what)
 	{
 	case NOTIFICATION_RESIZED:
 		update_size();
+		break;
+	case NOTIFICATION_THEME_CHANGED:
+		update_theme();
 		break;
 	}
 }
@@ -350,7 +347,9 @@ void Terminal::_draw()
 		return;
 
 	/* Draw the full terminal rect background */
-	draw_rect(Rect2(Vector2(0, 0), get_rect().size), get_color("Background", "Terminal"));
+	Color background_color = palette[TSM_COLOR_BACKGROUND];
+
+	draw_rect(Rect2(Vector2(0, 0), get_rect().size), background_color);
 
 	for (int row = 0; row < rows; row++)
 	{
@@ -364,39 +363,80 @@ void Terminal::_draw()
 	}
 }
 
-void Terminal::update_color_palette()
+void Terminal::update_theme()
 {
 	/* Generate color palette based on theme */
 
 	// Converts a color from the Control's theme to one that can
 	// be used in a tsm color palette.
-	auto set_pallete_color = [this](tsm_vte_color color, String theme_color) -> void {
-		Color c = get_color(theme_color, "Terminal");
+	auto set_pallete_color = [this](tsm_vte_color color, String theme_color, int default_r, int default_g, int default_b) -> void {
+		Color c;
+
+		if (has_color(theme_color, "Terminal")) {
+			c = get_color(theme_color, "Terminal");
+		} else {
+			int r = default_r;
+			int g = default_g;
+			int b = default_b;
+			c = Color((float)r / 255.0, (float)g / 255.0, (float)b / 255.0);
+		}
 
 		color_palette[color][0] = c.get_r8();
 		color_palette[color][1] = c.get_g8();
 		color_palette[color][2] = c.get_b8();
+
+		palette.erase(color) = c;
 	};
 
-	set_pallete_color(TSM_COLOR_BLACK, "Black");
-	set_pallete_color(TSM_COLOR_RED, "Red");
-	set_pallete_color(TSM_COLOR_GREEN, "Green");
-	set_pallete_color(TSM_COLOR_YELLOW, "Yellow");
-	set_pallete_color(TSM_COLOR_BLUE, "Blue");
-	set_pallete_color(TSM_COLOR_MAGENTA, "Magenta");
-	set_pallete_color(TSM_COLOR_CYAN, "Cyan");
-	set_pallete_color(TSM_COLOR_LIGHT_GREY, "Light Grey");
-	set_pallete_color(TSM_COLOR_DARK_GREY, "Dark Grey");
-	set_pallete_color(TSM_COLOR_LIGHT_RED, "Light Red");
-	set_pallete_color(TSM_COLOR_LIGHT_GREEN, "Light Green");
-	set_pallete_color(TSM_COLOR_LIGHT_YELLOW, "Light Yellow");
-	set_pallete_color(TSM_COLOR_LIGHT_BLUE, "Light Blue");
-	set_pallete_color(TSM_COLOR_LIGHT_MAGENTA, "Light Magenta");
-	set_pallete_color(TSM_COLOR_LIGHT_CYAN, "Light Cyan");
-	set_pallete_color(TSM_COLOR_WHITE, "White");
+	set_pallete_color(TSM_COLOR_BLACK,         "Black",         0, 0, 0);
+	set_pallete_color(TSM_COLOR_RED,           "Red",           205, 0, 0);
+	set_pallete_color(TSM_COLOR_GREEN,         "Green",         0, 205, 0);
+	set_pallete_color(TSM_COLOR_YELLOW,        "Yellow",        205, 205, 0);
+	set_pallete_color(TSM_COLOR_BLUE,          "Blue",          0, 0, 238);
+	set_pallete_color(TSM_COLOR_MAGENTA,       "Magenta",       205, 0, 205);
+	set_pallete_color(TSM_COLOR_CYAN,          "Cyan",          0, 205, 205);
+	set_pallete_color(TSM_COLOR_LIGHT_GREY,    "Light Grey",    229, 229, 229);
+	set_pallete_color(TSM_COLOR_DARK_GREY,     "Dark Grey",     127, 127, 127);
+	set_pallete_color(TSM_COLOR_LIGHT_RED,     "Light Red",     255, 0, 0);
+	set_pallete_color(TSM_COLOR_LIGHT_GREEN,   "Light Green",   0, 255, 0);
+	set_pallete_color(TSM_COLOR_LIGHT_YELLOW,  "Light Yellow",  255, 255, 0);
+	set_pallete_color(TSM_COLOR_LIGHT_BLUE,    "Light Blue",    0, 0, 255);
+	set_pallete_color(TSM_COLOR_LIGHT_MAGENTA, "Light Magenta", 255, 0, 255);
+	set_pallete_color(TSM_COLOR_LIGHT_CYAN,    "Light Cyan",    0, 255, 255);
+	set_pallete_color(TSM_COLOR_WHITE,         "White",         255, 255, 255);
 
-	set_pallete_color(TSM_COLOR_BACKGROUND, "Background");
-	set_pallete_color(TSM_COLOR_FOREGROUND, "Foreground");
+	set_pallete_color(TSM_COLOR_BACKGROUND,    "Background",    255, 255, 255);
+	set_pallete_color(TSM_COLOR_FOREGROUND,    "Foreground",    0, 0, 0);
+
+	if (tsm_vte_set_custom_palette(vte, color_palette))
+	{
+		ERR_PRINT("Error setting custom palette");
+	}
+	if (tsm_vte_set_palette(vte, "custom"))
+	{
+		ERR_PRINT("Error setting palette");
+	}
+
+
+	/* Load fonts into the fontmap from theme */
+
+	auto set_font = [this](String font_style, String default_font_path) -> void {
+		Ref<Font> fontref;
+		ResourceLoader* rl = ResourceLoader::get_singleton();
+
+		if (has_font(font_style, "Terminal")) {
+			fontref = get_font(font_style, "Terminal");
+		} else {
+			fontref = rl->load(default_font_path);
+		}
+
+		fontmap.insert(std::pair<String, Ref<Font>>(font_style, fontref));
+	};
+
+	set_font("Bold Italic", "res://addons/godot_xterm/themes/fonts/cousine/cousine_bold_italic.tres");
+	set_font("Bold", "res://addons/godot_xterm/themes/fonts/cousine/cousine_bold.tres");
+	set_font("Italic", "res://addons/godot_xterm/themes/fonts/cousine/cousine_italic.tres");
+	set_font("Regular", "res://addons/godot_xterm/themes/fonts/cousine/cousine_regular.tres");
 }
 
 void Terminal::draw_background(int row, int col, Color bgcolor)
@@ -422,19 +462,19 @@ void Terminal::draw_foreground(int row, int col, Color fgcolor)
 
 	if (cell.attr.bold && cell.attr.italic)
 	{
-		fontref = get_font("Bold Italic", "Terminal");
+		fontref = fontmap["Bold Italic"];
 	}
 	else if (cell.attr.bold)
 	{
-		fontref = get_font("Bold", "Terminal");
+		fontref = fontmap["Bold"];
 	}
 	else if (cell.attr.italic)
 	{
-		fontref = get_font("Italic", "Terminal");
+		fontref = fontmap["Italic"];
 	}
 	else
 	{
-		fontref = get_font("Regular", "Terminal");
+		fontref = fontmap["Regular"];
 	}
 
 	/* Draw the foreground */
@@ -454,8 +494,7 @@ std::pair<Color, Color> Terminal::get_cell_colors(int row, int col)
 {
 	struct cell cell = cells[row][col];
 	Color fgcol, bgcol;
-	float fr = 1, fg = 1, fb = 1, br = 0, bg = 0, bb = 0;
-	Ref<Font> fontref = get_font("");
+	float fr = 0, fg = 0, fb = 0, br = 1, bg = 1, bb = 1;
 
 	/* Get foreground color */
 
@@ -506,7 +545,8 @@ void Terminal::update_size()
 {
 	sleep = true;
 
-	cell_size = get_font("Regular", "Terminal").ptr()->get_string_size("W");
+	Ref<Font> fontref = fontmap.count("Regular") ? fontmap["Regular"] : has_font("Regular", "Terminal") ? get_font("Regular", "Terminal") : get_font("");
+	cell_size = fontref->get_string_size("W");
 
 	rows = std::max(2, (int)floor(get_rect().size.y / cell_size.y));
 	cols = std::max(1, (int)floor(get_rect().size.x / cell_size.x));
