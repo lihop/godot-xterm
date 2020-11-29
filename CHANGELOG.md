@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Added
+- Theme colors now support transparency.
+
 ### Changed
 - Set a default theme if no theme property has been set.
 
