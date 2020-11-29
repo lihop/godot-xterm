@@ -9,8 +9,8 @@ Terminal emulator.
 
 <img align="right" src="./docs/important_properties.png"/>
 
-- If you are not seeing anything in the terminal check that a theme has been set. If there is no theme, everything will be drawn in black by default. A default theme can be found in the [themes directory](../../themes). 
 - If the terminal isn't responding to keyboard or mouse input check that `focus_mode` is set to `All`, otherwise `_gui_input()` won't be called so no input will be processed.
+- If you want to customize the colors and font of the terminal, be sure to set the theme property. A default theme that can be found in the [themes directory](../../themes) and can be used as a template for creating a custom theme.
 
 
 ## Description

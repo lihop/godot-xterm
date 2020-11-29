@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Changed
+- Set a default theme if no theme property has been set.
+
 ### Fixed
 - Don't swap red and blue channels of theme colors.
 - Use "Light Cyan" color from theme. Previously ignored.
