@@ -393,6 +393,7 @@ void Terminal::update_color_palette()
 	set_pallete_color(TSM_COLOR_LIGHT_YELLOW, "Light Yellow");
 	set_pallete_color(TSM_COLOR_LIGHT_BLUE, "Light Blue");
 	set_pallete_color(TSM_COLOR_LIGHT_MAGENTA, "Light Magenta");
+	set_pallete_color(TSM_COLOR_LIGHT_CYAN, "Light Cyan");
 	set_pallete_color(TSM_COLOR_WHITE, "White");
 
 	set_pallete_color(TSM_COLOR_BACKGROUND, "Background");
