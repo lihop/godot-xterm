@@ -5,13 +5,14 @@ extends Container
 
 const ESCAPE = 27
 const BACKSPACE = 8
-const BEEP = 7 
+const BEEP = 7
 const SPACE = 32
 const LEFT_BRACKET = 91
 const ENTER = 10
 const BACKSPACE_ALT = 127
 
 onready var viewport = get_viewport()
+
 
 func _ready():
 	viewport.connect("size_changed", self, "_resize")
@@ -24,9 +25,9 @@ func _input(event):
 	if event is InputEventKey and event.pressed:
 		var data = PoolByteArray([])
 		accept_event()
-		
+
 		# TODO: Handle more of these.
-		if (event.control and event.scancode == KEY_C):
+		if event.control and event.scancode == KEY_C:
 			data.append(3)
 		elif event.unicode:
 			data.append(event.unicode)

@@ -25,4 +25,5 @@ __meta__ = {
 }
 rows = 31
 cols = 102
+
 [connection signal="key_pressed" from="Terminal" to="." method="_on_Terminal_key_pressed"]

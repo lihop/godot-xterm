@@ -11,7 +11,6 @@ const CURSOR_LEFT = "\u001b[D"
 
 const DEFAULT_FOREGROUND_COLOR = "\u001b[0m"
 
-
 var terminal
 
 
@@ -24,11 +23,12 @@ func write_string(string: String, color: Color = Color.white) -> void:
 	if color:
 		var fg = "\u001b[38;2;%d;%d;%dm" % [color.r8, color.g8, color.b8]
 		terminal.write(fg.to_utf8())
-	
+
 	terminal.write(string.to_utf8())
-	
+
 	# Reset color back to default.
 	terminal.write("\u001b[0m".to_utf8())
+
 
 # tput_* functions based on the tput command.
 # See: https://man7.org/linux/man-pages/man1/tput.1.html for more info.
