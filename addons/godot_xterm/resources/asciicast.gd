@@ -1,14 +1,13 @@
 extends Animation
 
-
 signal data_written(data)
 signal data_read(data)
 
-export(int) var version: int = 2
+export (int) var version: int = 2
 # Initial terminal width (number of columns).
-export(int) var width: int
+export (int) var width: int
 # Initial terminal height (number of rows).
-export(int) var height: int
+export (int) var height: int
 
 
 func get_class() -> String:
@@ -20,4 +19,4 @@ func is_class(name) -> bool:
 
 
 func _init():
-	step = 0.01 # Parent override.
+	step = 0.01  # Parent override.
