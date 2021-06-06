@@ -196,7 +196,7 @@ env.Append(CPPPATH=[
     'external/godot-cpp/include/',
     'external/godot-cpp/include/core/',
     'external/godot-cpp/include/gen/',
-    'external/godot-cpp/godot_headers/'
+    'external/godot-cpp/godot-headers/'
 ])
 env.Append(LIBPATH=[
     'external/godot-cpp/bin/',
