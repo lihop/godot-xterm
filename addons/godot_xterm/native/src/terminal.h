@@ -34,7 +34,10 @@ protected:
 
 private:
   static const uint8_t default_color_palette[TSM_COLOR_NUM][3];
-  static const std::map<std::pair<int64_t, int64_t>, uint32_t> keymap;
+
+  static std::map<std::pair<int64_t, int64_t>, int> _key_list;
+  static void _populate_key_list();
+  static uint32_t mapkey(std::pair<int64_t, int64_t> key);
 
   Vector2 cell_size;
   std::map<int, Color> palette = {};
