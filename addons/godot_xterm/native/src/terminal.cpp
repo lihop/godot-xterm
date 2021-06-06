@@ -1,5 +1,5 @@
 #include "terminal.h"
-#include <GlobalConstants.hpp>
+#include <Dictionary.hpp>
 #include <InputEventKey.hpp>
 #include <OS.hpp>
 #include <ResourceLoader.hpp>
@@ -7,174 +7,212 @@
 #include <algorithm>
 #include <xkbcommon/xkbcommon-keysyms.h>
 
+// For _populate_key_list(), see below.
+#if defined(PLATFORM_WINDOWS)
+#include <GlobalConstants.hpp>
+#endif
+
 using namespace godot;
 
 const struct Terminal::cell Terminal::empty_cell = {{0, 0, 0, 0, 0}, {}};
 
-const std::map<std::pair<int64_t, int64_t>, uint32_t> Terminal::keymap = {
+std::map<std::pair<int64_t, int64_t>, int> Terminal::_key_list = {};
+void Terminal::_populate_key_list() {
+  if (!_key_list.empty())
+    return;
 
-    // Godot does not have seperate scancodes for keypad keys when NumLock is
-    // off.
-    // We can check the unicode value to determine whether it is off and set the
-    // appropriate scancode.
-    // Based on the patch which adds support for this to TextEdit/LineEdit:
-    // https://github.com/godotengine/godot/pull/3269/files
-    {{'0', GlobalConstants::KEY_KP_0}, XKB_KEY_KP_0},
-    {{0b0, GlobalConstants::KEY_KP_0}, XKB_KEY_KP_Insert},
-    {{'1', GlobalConstants::KEY_KP_1}, XKB_KEY_KP_1},
-    {{0b0, GlobalConstants::KEY_KP_1}, XKB_KEY_KP_End},
-    {{'2', GlobalConstants::KEY_KP_2}, XKB_KEY_KP_2},
-    {{0b0, GlobalConstants::KEY_KP_2}, XKB_KEY_KP_Down},
-    {{'3', GlobalConstants::KEY_KP_3}, XKB_KEY_KP_3},
-    {{0b0, GlobalConstants::KEY_KP_3}, XKB_KEY_KP_Page_Down},
-    {{'4', GlobalConstants::KEY_KP_4}, XKB_KEY_KP_4},
-    {{0b0, GlobalConstants::KEY_KP_4}, XKB_KEY_KP_Left},
-    {{'5', GlobalConstants::KEY_KP_5}, XKB_KEY_KP_5},
-    {{0b0, GlobalConstants::KEY_KP_5}, XKB_KEY_KP_Begin},
-    {{'6', GlobalConstants::KEY_KP_6}, XKB_KEY_KP_6},
-    {{0b0, GlobalConstants::KEY_KP_6}, XKB_KEY_KP_Right},
-    {{'7', GlobalConstants::KEY_KP_7}, XKB_KEY_KP_7},
-    {{0b0, GlobalConstants::KEY_KP_7}, XKB_KEY_KP_Home},
-    {{'8', GlobalConstants::KEY_KP_8}, XKB_KEY_KP_8},
-    {{0b0, GlobalConstants::KEY_KP_8}, XKB_KEY_KP_Up},
-    {{'9', GlobalConstants::KEY_KP_9}, XKB_KEY_KP_9},
-    {{0b0, GlobalConstants::KEY_KP_9}, XKB_KEY_KP_Page_Up},
-    {{'.', GlobalConstants::KEY_KP_PERIOD}, XKB_KEY_KP_Decimal},
-    {{0b0, GlobalConstants::KEY_KP_PERIOD}, XKB_KEY_KP_Delete},
-    {{'/', GlobalConstants::KEY_KP_DIVIDE}, XKB_KEY_KP_Divide},
-    {{'*', GlobalConstants::KEY_KP_MULTIPLY}, XKB_KEY_KP_Multiply},
-    {{'-', GlobalConstants::KEY_KP_SUBTRACT}, XKB_KEY_KP_Subtract},
-    {{'+', GlobalConstants::KEY_KP_ADD}, XKB_KEY_KP_Add},
-    {{0b0, GlobalConstants::KEY_KP_ENTER}, XKB_KEY_KP_Enter},
-    //{{ , }, XKB_KEY_KP_Equal},
-    //{{ , }, XKB_KEY_KP_Separator},
-    //{{ , }, XKB_KEY_KP_Tab},
-    //{{ , }, XKB_KEY_KP_F1},
-    //{{ , }, XKB_KEY_KP_F2},
-    //{{ , }, XKB_KEY_KP_F3},
-    //{{ , }, XKB_KEY_KP_F4},
+// GitHub action for Windows throws the error:
+// `error LNK2019: unresolved external symbol godot_get_global_constants
+// referenced in function "private: static void __cdecl
+// godot::Terminal::_populate_key_list(void)"` so use the old technique of
+// getting KeyList values from GlobalConstants header for now.
+#if defined(PLATFORM_WINDOWS)
+#define GLOBAL_CONSTANT(VAR) GlobalConstants::VAR
+#else
+#define GLOBAL_CONSTANT(VAR) get_constant(#VAR)
+  const godot_dictionary _constants = godot_get_global_constants();
+  const Dictionary *constants = (Dictionary *)&_constants;
 
-    // Godot scancodes do not distinguish between uppercase and lowercase
-    // letters, so we can check the unicode value to determine this.
-    {{'a', GlobalConstants::KEY_A}, XKB_KEY_a},
-    {{'A', GlobalConstants::KEY_A}, XKB_KEY_A},
-    {{'b', GlobalConstants::KEY_B}, XKB_KEY_b},
-    {{'B', GlobalConstants::KEY_B}, XKB_KEY_B},
-    {{'c', GlobalConstants::KEY_C}, XKB_KEY_c},
-    {{'C', GlobalConstants::KEY_C}, XKB_KEY_C},
-    {{'d', GlobalConstants::KEY_D}, XKB_KEY_d},
-    {{'D', GlobalConstants::KEY_D}, XKB_KEY_D},
-    {{'e', GlobalConstants::KEY_E}, XKB_KEY_e},
-    {{'E', GlobalConstants::KEY_E}, XKB_KEY_E},
-    {{'f', GlobalConstants::KEY_F}, XKB_KEY_f},
-    {{'F', GlobalConstants::KEY_F}, XKB_KEY_F},
-    {{'g', GlobalConstants::KEY_G}, XKB_KEY_g},
-    {{'G', GlobalConstants::KEY_G}, XKB_KEY_G},
-    {{'h', GlobalConstants::KEY_H}, XKB_KEY_h},
-    {{'H', GlobalConstants::KEY_H}, XKB_KEY_H},
-    {{'i', GlobalConstants::KEY_I}, XKB_KEY_i},
-    {{'I', GlobalConstants::KEY_I}, XKB_KEY_I},
-    {{'j', GlobalConstants::KEY_J}, XKB_KEY_j},
-    {{'J', GlobalConstants::KEY_J}, XKB_KEY_J},
-    {{'k', GlobalConstants::KEY_K}, XKB_KEY_k},
-    {{'K', GlobalConstants::KEY_K}, XKB_KEY_K},
-    {{'l', GlobalConstants::KEY_L}, XKB_KEY_l},
-    {{'L', GlobalConstants::KEY_L}, XKB_KEY_L},
-    {{'m', GlobalConstants::KEY_M}, XKB_KEY_m},
-    {{'M', GlobalConstants::KEY_M}, XKB_KEY_M},
-    {{'n', GlobalConstants::KEY_N}, XKB_KEY_n},
-    {{'N', GlobalConstants::KEY_N}, XKB_KEY_N},
-    {{'o', GlobalConstants::KEY_O}, XKB_KEY_o},
-    {{'O', GlobalConstants::KEY_O}, XKB_KEY_O},
-    {{'p', GlobalConstants::KEY_P}, XKB_KEY_p},
-    {{'P', GlobalConstants::KEY_P}, XKB_KEY_P},
-    {{'q', GlobalConstants::KEY_Q}, XKB_KEY_q},
-    {{'Q', GlobalConstants::KEY_Q}, XKB_KEY_Q},
-    {{'r', GlobalConstants::KEY_R}, XKB_KEY_r},
-    {{'R', GlobalConstants::KEY_R}, XKB_KEY_R},
-    {{'s', GlobalConstants::KEY_S}, XKB_KEY_s},
-    {{'S', GlobalConstants::KEY_S}, XKB_KEY_S},
-    {{'t', GlobalConstants::KEY_T}, XKB_KEY_t},
-    {{'T', GlobalConstants::KEY_T}, XKB_KEY_T},
-    {{'u', GlobalConstants::KEY_U}, XKB_KEY_u},
-    {{'U', GlobalConstants::KEY_U}, XKB_KEY_U},
-    {{'v', GlobalConstants::KEY_V}, XKB_KEY_v},
-    {{'V', GlobalConstants::KEY_V}, XKB_KEY_V},
-    {{'w', GlobalConstants::KEY_W}, XKB_KEY_w},
-    {{'W', GlobalConstants::KEY_W}, XKB_KEY_W},
-    {{'x', GlobalConstants::KEY_X}, XKB_KEY_x},
-    {{'X', GlobalConstants::KEY_X}, XKB_KEY_X},
-    {{'y', GlobalConstants::KEY_Y}, XKB_KEY_y},
-    {{'Y', GlobalConstants::KEY_Y}, XKB_KEY_Y},
-    {{'z', GlobalConstants::KEY_Z}, XKB_KEY_z},
-    {{'Z', GlobalConstants::KEY_Z}, XKB_KEY_Z},
+  auto get_constant = [constants](std::string name) -> int64_t {
+    godot::Variant key = (godot::Variant)(godot::String(name.c_str()));
+    return constants->operator[](key);
+  };
+#endif
 
-    {{'0', GlobalConstants::KEY_0}, XKB_KEY_0},
-    {{'1', GlobalConstants::KEY_1}, XKB_KEY_1},
-    {{'2', GlobalConstants::KEY_2}, XKB_KEY_2},
-    {{'3', GlobalConstants::KEY_3}, XKB_KEY_3},
-    {{'4', GlobalConstants::KEY_4}, XKB_KEY_4},
-    {{'5', GlobalConstants::KEY_5}, XKB_KEY_5},
-    {{'6', GlobalConstants::KEY_6}, XKB_KEY_6},
-    {{'7', GlobalConstants::KEY_7}, XKB_KEY_7},
-    {{'8', GlobalConstants::KEY_8}, XKB_KEY_8},
-    {{'9', GlobalConstants::KEY_9}, XKB_KEY_9},
+  // Godot does not have seperate scancodes for keypad keys when NumLock is off.
+  // We can check the unicode value to determine whether it is off and set the
+  // appropriate scancode.
+  // Based on the patch which adds support for this to TextEdit/LineEdit:
+  // https://github.com/godotengine/godot/pull/3269/files
+  _key_list.insert({{'0', GLOBAL_CONSTANT(KEY_KP_0)}, XKB_KEY_KP_0});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_0)}, XKB_KEY_KP_Insert});
+  _key_list.insert({{'1', GLOBAL_CONSTANT(KEY_KP_1)}, XKB_KEY_KP_1});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_1)}, XKB_KEY_KP_End});
+  _key_list.insert({{'2', GLOBAL_CONSTANT(KEY_KP_2)}, XKB_KEY_KP_2});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_2)}, XKB_KEY_KP_Down});
+  _key_list.insert({{'3', GLOBAL_CONSTANT(KEY_KP_3)}, XKB_KEY_KP_3});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_3)}, XKB_KEY_KP_Page_Down});
+  _key_list.insert({{'4', GLOBAL_CONSTANT(KEY_KP_4)}, XKB_KEY_KP_4});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_4)}, XKB_KEY_KP_Left});
+  _key_list.insert({{'5', GLOBAL_CONSTANT(KEY_KP_5)}, XKB_KEY_KP_5});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_5)}, XKB_KEY_KP_Begin});
+  _key_list.insert({{'6', GLOBAL_CONSTANT(KEY_KP_6)}, XKB_KEY_KP_6});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_6)}, XKB_KEY_KP_Right});
+  _key_list.insert({{'7', GLOBAL_CONSTANT(KEY_KP_7)}, XKB_KEY_KP_7});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_7)}, XKB_KEY_KP_Home});
+  _key_list.insert({{'8', GLOBAL_CONSTANT(KEY_KP_8)}, XKB_KEY_KP_8});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_8)}, XKB_KEY_KP_Up});
+  _key_list.insert({{'9', GLOBAL_CONSTANT(KEY_KP_9)}, XKB_KEY_KP_9});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_9)}, XKB_KEY_KP_Page_Up});
+  _key_list.insert({{'.', GLOBAL_CONSTANT(KEY_KP_PERIOD)}, XKB_KEY_KP_Decimal});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_PERIOD)}, XKB_KEY_KP_Delete});
+  _key_list.insert({{'/', GLOBAL_CONSTANT(KEY_KP_DIVIDE)}, XKB_KEY_KP_Divide});
+  _key_list.insert(
+      {{'*', GLOBAL_CONSTANT(KEY_KP_MULTIPLY)}, XKB_KEY_KP_Multiply});
+  _key_list.insert(
+      {{'-', GLOBAL_CONSTANT(KEY_KP_SUBTRACT)}, XKB_KEY_KP_Subtract});
+  _key_list.insert({{'+', GLOBAL_CONSTANT(KEY_KP_ADD)}, XKB_KEY_KP_Add});
+  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_ENTER)}, XKB_KEY_KP_Enter});
+  //_key_list.insert({{ , }, XKB_KEY_KP_Equal});
+  //_key_list.insert({{ , }, XKB_KEY_KP_Separator});
+  //_key_list.insert({{ , }, XKB_KEY_KP_Tab});
+  //_key_list.insert({{ , }, XKB_KEY_KP_F1});
+  //_key_list.insert({{ , }, XKB_KEY_KP_F2});
+  //_key_list.insert({{ , }, XKB_KEY_KP_F3});
+  //_key_list.insert({{ , }, XKB_KEY_KP_F4});
 
-    {{'[', GlobalConstants::KEY_BRACKETLEFT}, XKB_KEY_bracketleft},
-    {{'[', GlobalConstants::KEY_BRACKETLEFT}, XKB_KEY_bracketright},
-    {{'{', GlobalConstants::KEY_BRACELEFT}, XKB_KEY_braceleft},
-    {{'}', GlobalConstants::KEY_BRACERIGHT}, XKB_KEY_braceright},
+  // Godot scancodes do not distinguish between uppercase and lowercase
+  // letters, so we can check the unicode value to determine this.
+  _key_list.insert({{'a', GLOBAL_CONSTANT(KEY_A)}, XKB_KEY_a});
+  _key_list.insert({{'A', GLOBAL_CONSTANT(KEY_A)}, XKB_KEY_A});
+  _key_list.insert({{'b', GLOBAL_CONSTANT(KEY_B)}, XKB_KEY_b});
+  _key_list.insert({{'B', GLOBAL_CONSTANT(KEY_B)}, XKB_KEY_B});
+  _key_list.insert({{'c', GLOBAL_CONSTANT(KEY_C)}, XKB_KEY_c});
+  _key_list.insert({{'C', GLOBAL_CONSTANT(KEY_C)}, XKB_KEY_C});
+  _key_list.insert({{'d', GLOBAL_CONSTANT(KEY_D)}, XKB_KEY_d});
+  _key_list.insert({{'D', GLOBAL_CONSTANT(KEY_D)}, XKB_KEY_D});
+  _key_list.insert({{'e', GLOBAL_CONSTANT(KEY_E)}, XKB_KEY_e});
+  _key_list.insert({{'E', GLOBAL_CONSTANT(KEY_E)}, XKB_KEY_E});
+  _key_list.insert({{'f', GLOBAL_CONSTANT(KEY_F)}, XKB_KEY_f});
+  _key_list.insert({{'F', GLOBAL_CONSTANT(KEY_F)}, XKB_KEY_F});
+  _key_list.insert({{'g', GLOBAL_CONSTANT(KEY_G)}, XKB_KEY_g});
+  _key_list.insert({{'G', GLOBAL_CONSTANT(KEY_G)}, XKB_KEY_G});
+  _key_list.insert({{'h', GLOBAL_CONSTANT(KEY_H)}, XKB_KEY_h});
+  _key_list.insert({{'H', GLOBAL_CONSTANT(KEY_H)}, XKB_KEY_H});
+  _key_list.insert({{'i', GLOBAL_CONSTANT(KEY_I)}, XKB_KEY_i});
+  _key_list.insert({{'I', GLOBAL_CONSTANT(KEY_I)}, XKB_KEY_I});
+  _key_list.insert({{'j', GLOBAL_CONSTANT(KEY_J)}, XKB_KEY_j});
+  _key_list.insert({{'J', GLOBAL_CONSTANT(KEY_J)}, XKB_KEY_J});
+  _key_list.insert({{'k', GLOBAL_CONSTANT(KEY_K)}, XKB_KEY_k});
+  _key_list.insert({{'K', GLOBAL_CONSTANT(KEY_K)}, XKB_KEY_K});
+  _key_list.insert({{'l', GLOBAL_CONSTANT(KEY_L)}, XKB_KEY_l});
+  _key_list.insert({{'L', GLOBAL_CONSTANT(KEY_L)}, XKB_KEY_L});
+  _key_list.insert({{'m', GLOBAL_CONSTANT(KEY_M)}, XKB_KEY_m});
+  _key_list.insert({{'M', GLOBAL_CONSTANT(KEY_M)}, XKB_KEY_M});
+  _key_list.insert({{'n', GLOBAL_CONSTANT(KEY_N)}, XKB_KEY_n});
+  _key_list.insert({{'N', GLOBAL_CONSTANT(KEY_N)}, XKB_KEY_N});
+  _key_list.insert({{'o', GLOBAL_CONSTANT(KEY_O)}, XKB_KEY_o});
+  _key_list.insert({{'O', GLOBAL_CONSTANT(KEY_O)}, XKB_KEY_O});
+  _key_list.insert({{'p', GLOBAL_CONSTANT(KEY_P)}, XKB_KEY_p});
+  _key_list.insert({{'P', GLOBAL_CONSTANT(KEY_P)}, XKB_KEY_P});
+  _key_list.insert({{'q', GLOBAL_CONSTANT(KEY_Q)}, XKB_KEY_q});
+  _key_list.insert({{'Q', GLOBAL_CONSTANT(KEY_Q)}, XKB_KEY_Q});
+  _key_list.insert({{'r', GLOBAL_CONSTANT(KEY_R)}, XKB_KEY_r});
+  _key_list.insert({{'R', GLOBAL_CONSTANT(KEY_R)}, XKB_KEY_R});
+  _key_list.insert({{'s', GLOBAL_CONSTANT(KEY_S)}, XKB_KEY_s});
+  _key_list.insert({{'S', GLOBAL_CONSTANT(KEY_S)}, XKB_KEY_S});
+  _key_list.insert({{'t', GLOBAL_CONSTANT(KEY_T)}, XKB_KEY_t});
+  _key_list.insert({{'T', GLOBAL_CONSTANT(KEY_T)}, XKB_KEY_T});
+  _key_list.insert({{'u', GLOBAL_CONSTANT(KEY_U)}, XKB_KEY_u});
+  _key_list.insert({{'U', GLOBAL_CONSTANT(KEY_U)}, XKB_KEY_U});
+  _key_list.insert({{'v', GLOBAL_CONSTANT(KEY_V)}, XKB_KEY_v});
+  _key_list.insert({{'V', GLOBAL_CONSTANT(KEY_V)}, XKB_KEY_V});
+  _key_list.insert({{'w', GLOBAL_CONSTANT(KEY_W)}, XKB_KEY_w});
+  _key_list.insert({{'W', GLOBAL_CONSTANT(KEY_W)}, XKB_KEY_W});
+  _key_list.insert({{'x', GLOBAL_CONSTANT(KEY_X)}, XKB_KEY_x});
+  _key_list.insert({{'X', GLOBAL_CONSTANT(KEY_X)}, XKB_KEY_X});
+  _key_list.insert({{'y', GLOBAL_CONSTANT(KEY_Y)}, XKB_KEY_y});
+  _key_list.insert({{'Y', GLOBAL_CONSTANT(KEY_Y)}, XKB_KEY_Y});
+  _key_list.insert({{'z', GLOBAL_CONSTANT(KEY_Z)}, XKB_KEY_z});
+  _key_list.insert({{'Z', GLOBAL_CONSTANT(KEY_Z)}, XKB_KEY_Z});
 
-    {{'\\', GlobalConstants::KEY_BACKSLASH}, XKB_KEY_backslash},
-    {{'|', GlobalConstants::KEY_BAR}, XKB_KEY_bar},
-    {{'`', GlobalConstants::KEY_QUOTELEFT}, XKB_KEY_grave},
-    {{'~', GlobalConstants::KEY_ASCIITILDE}, XKB_KEY_asciitilde},
-    {{'/', GlobalConstants::KEY_SLASH}, XKB_KEY_slash},
-    {{'?', GlobalConstants::KEY_QUESTION}, XKB_KEY_question},
+  _key_list.insert({{'0', GLOBAL_CONSTANT(KEY_0)}, XKB_KEY_0});
+  _key_list.insert({{'1', GLOBAL_CONSTANT(KEY_1)}, XKB_KEY_1});
+  _key_list.insert({{'2', GLOBAL_CONSTANT(KEY_2)}, XKB_KEY_2});
+  _key_list.insert({{'3', GLOBAL_CONSTANT(KEY_3)}, XKB_KEY_3});
+  _key_list.insert({{'4', GLOBAL_CONSTANT(KEY_4)}, XKB_KEY_4});
+  _key_list.insert({{'5', GLOBAL_CONSTANT(KEY_5)}, XKB_KEY_5});
+  _key_list.insert({{'6', GLOBAL_CONSTANT(KEY_6)}, XKB_KEY_6});
+  _key_list.insert({{'7', GLOBAL_CONSTANT(KEY_7)}, XKB_KEY_7});
+  _key_list.insert({{'8', GLOBAL_CONSTANT(KEY_8)}, XKB_KEY_8});
+  _key_list.insert({{'9', GLOBAL_CONSTANT(KEY_9)}, XKB_KEY_9});
 
-    {{0, GlobalConstants::KEY_HOME}, XKB_KEY_Home},
-    {{0, GlobalConstants::KEY_BACKSPACE}, XKB_KEY_BackSpace},
-    {{0, GlobalConstants::KEY_BACKTAB}, XKB_KEY_ISO_Left_Tab},
-    {{0, GlobalConstants::KEY_CLEAR}, XKB_KEY_Clear},
-    {{0, GlobalConstants::KEY_PAUSE}, XKB_KEY_Pause},
-    {{0, GlobalConstants::KEY_SCROLLLOCK}, XKB_KEY_Scroll_Lock},
-    {{0, GlobalConstants::KEY_SYSREQ}, XKB_KEY_Sys_Req},
-    {{0, GlobalConstants::KEY_ESCAPE}, XKB_KEY_Escape},
-    {{0, GlobalConstants::KEY_ENTER}, XKB_KEY_Return},
-    {{0, GlobalConstants::KEY_INSERT}, XKB_KEY_Insert},
-    {{0, GlobalConstants::KEY_DELETE}, XKB_KEY_Delete},
-    {{0, GlobalConstants::KEY_PAGEUP}, XKB_KEY_Page_Up},
-    {{0, GlobalConstants::KEY_PAGEDOWN}, XKB_KEY_Page_Down},
-    {{0, GlobalConstants::KEY_UP}, XKB_KEY_Up},
-    {{0, GlobalConstants::KEY_DOWN}, XKB_KEY_Down},
-    {{0, GlobalConstants::KEY_RIGHT}, XKB_KEY_Right},
-    {{0, GlobalConstants::KEY_LEFT}, XKB_KEY_Left},
-    {{0, GlobalConstants::KEY_TAB}, XKB_KEY_Tab},
-    //{{ , }, XKB_KEY_Linefeed},
-    //{{ , }, XKB_KEY_Find},
-    //{{ , }, XKB_KEY_Select},
+  _key_list.insert(
+      {{'[', GLOBAL_CONSTANT(KEY_BRACKETLEFT)}, XKB_KEY_bracketleft});
+  _key_list.insert(
+      {{'[', GLOBAL_CONSTANT(KEY_BRACKETLEFT)}, XKB_KEY_bracketright});
+  _key_list.insert({{'{', GLOBAL_CONSTANT(KEY_BRACELEFT)}, XKB_KEY_braceleft});
+  _key_list.insert(
+      {{'}', GLOBAL_CONSTANT(KEY_BRACERIGHT)}, XKB_KEY_braceright});
 
-    {{0, GlobalConstants::KEY_F1}, XKB_KEY_F1},
-    {{0, GlobalConstants::KEY_F2}, XKB_KEY_F2},
-    {{0, GlobalConstants::KEY_F3}, XKB_KEY_F3},
-    {{0, GlobalConstants::KEY_F4}, XKB_KEY_F4},
-    {{0, GlobalConstants::KEY_F5}, XKB_KEY_F5},
-    {{0, GlobalConstants::KEY_F6}, XKB_KEY_F6},
-    {{0, GlobalConstants::KEY_F7}, XKB_KEY_F7},
-    {{0, GlobalConstants::KEY_F8}, XKB_KEY_F8},
-    {{0, GlobalConstants::KEY_F9}, XKB_KEY_F9},
-    {{0, GlobalConstants::KEY_F10}, XKB_KEY_F10},
-    {{0, GlobalConstants::KEY_F11}, XKB_KEY_F11},
-    {{0, GlobalConstants::KEY_F12}, XKB_KEY_F12},
-    {{0, GlobalConstants::KEY_F13}, XKB_KEY_F13},
-    {{0, GlobalConstants::KEY_F14}, XKB_KEY_F14},
-    {{0, GlobalConstants::KEY_F15}, XKB_KEY_F15},
-    {{0, GlobalConstants::KEY_F16}, XKB_KEY_F16},
-    //{{0, GlobalConstants::KEY_F17}, XKB_KEY_F17},
-    //{{0, GlobalConstants::KEY_F18}, XKB_KEY_F18},
-    //{{0, GlobalConstants::KEY_F19}, XKB_KEY_F19},
-    //{{0, GlobalConstants::KEY_F20}, XKB_KEY_F20},
+  _key_list.insert({{'\\', GLOBAL_CONSTANT(KEY_BACKSLASH)}, XKB_KEY_backslash});
+  _key_list.insert({{'|', GLOBAL_CONSTANT(KEY_BAR)}, XKB_KEY_bar});
+  _key_list.insert({{'`', GLOBAL_CONSTANT(KEY_QUOTELEFT)}, XKB_KEY_grave});
+  _key_list.insert(
+      {{'~', GLOBAL_CONSTANT(KEY_ASCIITILDE)}, XKB_KEY_asciitilde});
+  _key_list.insert({{'/', GLOBAL_CONSTANT(KEY_SLASH)}, XKB_KEY_slash});
+  _key_list.insert({{'?', GLOBAL_CONSTANT(KEY_QUESTION)}, XKB_KEY_question});
+
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_HOME)}, XKB_KEY_Home});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_BACKSPACE)}, XKB_KEY_BackSpace});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_BACKTAB)}, XKB_KEY_ISO_Left_Tab});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_CLEAR)}, XKB_KEY_Clear});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_PAUSE)}, XKB_KEY_Pause});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_SCROLLLOCK)}, XKB_KEY_Scroll_Lock});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_SYSREQ)}, XKB_KEY_Sys_Req});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_ESCAPE)}, XKB_KEY_Escape});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_ENTER)}, XKB_KEY_Return});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_INSERT)}, XKB_KEY_Insert});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_DELETE)}, XKB_KEY_Delete});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_PAGEUP)}, XKB_KEY_Page_Up});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_PAGEDOWN)}, XKB_KEY_Page_Down});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_UP)}, XKB_KEY_Up});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_DOWN)}, XKB_KEY_Down});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_RIGHT)}, XKB_KEY_Right});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_LEFT)}, XKB_KEY_Left});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_TAB)}, XKB_KEY_Tab});
+  //_key_list.insert({{ , }, XKB_KEY_Linefeed},
+  //_key_list.insert({{ , }, XKB_KEY_Find},
+  //_key_list.insert({{ , }, XKB_KEY_Select},
+
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F1)}, XKB_KEY_F1});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F2)}, XKB_KEY_F2});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F3)}, XKB_KEY_F3});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F4)}, XKB_KEY_F4});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F5)}, XKB_KEY_F5});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F6)}, XKB_KEY_F6});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F7)}, XKB_KEY_F7});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F8)}, XKB_KEY_F8});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F9)}, XKB_KEY_F9});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F10)}, XKB_KEY_F10});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F11)}, XKB_KEY_F11});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F12)}, XKB_KEY_F12});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F13)}, XKB_KEY_F13});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F14)}, XKB_KEY_F14});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F15)}, XKB_KEY_F15});
+  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F16)}, XKB_KEY_F16});
+  //_key_list.insert({{0, GLOBAL_CONSTANT(KEY_F17)}, XKB_KEY_F17});
+  //_key_list.insert({{0, GLOBAL_CONSTANT(KEY_F18)}, XKB_KEY_F18});
+  //_key_list.insert({{0, GLOBAL_CONSTANT(KEY_F19)}, XKB_KEY_F19});
+  //_key_list.insert({{0, GLOBAL_CONSTANT(KEY_F20)}, XKB_KEY_F20});
 };
+
+uint32_t Terminal::mapkey(std::pair<int64_t, int64_t> key) {
+  if (Terminal::_key_list.empty())
+    Terminal::_populate_key_list();
+  auto iter = _key_list.find(key);
+  return (iter != _key_list.end() ? iter->second : XKB_KEY_NoSymbol);
+}
 
 static struct {
   Color col;
@@ -310,8 +348,7 @@ void Terminal::_gui_input(Variant event) {
     if (k->get_shift())
       mods |= TSM_SHIFT_MASK;
 
-    auto iter = keymap.find({unicode, scancode});
-    uint32_t keysym = (iter != keymap.end() ? iter->second : XKB_KEY_NoSymbol);
+    uint32_t keysym = mapkey({unicode, scancode});
 
     input_event_key = k;
     tsm_vte_handle_keyboard(vte, keysym, ascii, mods,
