@@ -46,7 +46,7 @@ opts.Add(EnumVariable(
     'platform',
     'Target platform',
     host_platform,
-    allowed_values=('linux', 'osx', 'windows'),
+    allowed_values=('linux', 'javascript', 'osx', 'windows'),
     ignorecase=2
 ))
 opts.Add(EnumVariable(
@@ -76,6 +76,7 @@ if env['platform'] == 'linux':
 
     env['CC'] = 'gcc'
     env['CXX'] = 'g++'
+    env['LIBSUFFIX'] = '.a'
 
     env.Append(CCFLAGS=['-fPIC', '-Wwrite-strings'])
     env.Append(LINKFLAGS=["-Wl,-R'$$ORIGIN'"])
@@ -92,6 +93,28 @@ if env['platform'] == 'linux':
         env.Append(CCFLAGS=['-m32'])
         env.Append(LINKFLAGS=['-m32'])
 
+# Compile for HTML5.
+elif env['platform'] == 'javascript':
+    env.Append(CPPDEFINES=['PLATFORM_JS'])
+
+    env['bits'] = '32'
+    env['CC'] = 'emcc'
+    env['CXX'] = 'em++'
+    env['AR'] = 'emar'
+    env['RANLIB'] = 'emranlib'
+    env.Append(CPPFLAGS=['-s', 'SIDE_MODULE=1'])
+    env.Append(LINKFLAGS=['-s', 'SIDE_MODULE=1'])
+    env['SHOBJSUFFIX'] = '.bc'
+    env['SHLIBSUFFIX'] = '.wasm'
+    env['OBJPREFIX'] = ''
+    env['OBJSUFFIX'] = '.bc'
+    env['PROGPREFIX'] = ''
+    env['PROGSUFFIX'] = ''
+    env['LIBSUFFIX'] = '.bc'
+    env['LIBPREFIXES'] = ['$LIBPREFIX']
+    env['LIBSUFFIXES'] = ['$LIBSUFFIX']
+    env.Replace(SHLINKFLAGS='$LINKFLAGS')
+    env.Replace(SHLINKFLAGS='$LINKFLAGS')
 
 # Compile for OSX.
 elif env['platform'] == 'osx':
@@ -99,6 +122,7 @@ elif env['platform'] == 'osx':
 
     env['CC'] = 'clang'
     env['CXX'] = 'clang++'
+    env['LIBSUFFIX'] = '.a'
 
     if env['bits'] == '32':
         raise ValueError(
@@ -121,6 +145,7 @@ elif env['platform'] == 'osx':
 # Compile for Windows.
 elif env['platform'] == 'windows':
     env.Append(CPPDEFINES=['PLATFORM_WINDOWS'])
+    env['LIBSUFFIX'] = '.lib'
 
     # On Windows using MSVC.
     if host_platform == 'windows':
@@ -202,33 +227,42 @@ env.Append(LIBPATH=[
     'external/godot-cpp/bin/',
     'external/libtsm/build/bin/',
 ])
+
 env.Append(LIBS=[
-    'libgodot-cpp.{}.{}.{}'.format(
+    env.File('external/godot-cpp/bin/libgodot-cpp.{}.{}.{}{}'.format(
         env['platform'],
         env['target'],
-        env['bits']
-    ),
-    'libtsm.{}.{}.{}'.format(
+        'wasm' if env['platform'] == 'javascript' else env['bits'],
+        env['LIBSUFFIX'],
+    )),
+    env.File('external/libtsm/build/bin/libtsm.{}.{}.{}{}'.format(
         env['platform'],
         env['target'],
-        env['bits']
-    ),
+        env['bits'],
+        env['LIBSUFFIX'],
+    )),
 ])
 
 sources = []
 sources.append('src/libgodotxtermnative.cpp')
 sources.append('src/terminal.cpp')
 
-# Psuedoterminal not supported on windows yet.
-if env['platform'] != 'windows': 
+# Psuedoterminal not supported on windows (yet) or HTML5.
+if env['platform'] != 'windows' and env['platform'] != 'javascript':
     sources.append('src/pseudoterminal.cpp')
     env.Append(LIBS=['util'])
 
 if env['platform'] == 'linux':
+    libsuffix = "a"
     suffix = "so"
+elif env['platform'] == 'javascript':
+    libsuffix = "bc"
+    suffix = "wasm"
 elif env['platform'] == 'windows':
+    libsuffix = "lib"
     suffix = "dll"
 elif env['platform'] == 'osx':
+    libsuffix = "a"
     suffix = "dylib"
 
 library = env.SharedLibrary(

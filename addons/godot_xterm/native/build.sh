@@ -33,3 +33,7 @@ scons generate_bindings=yes -j$(nproc)
 # Build libgodot-xterm.
 cd ${NATIVE_DIR}
 scons -j$(nproc)
+
+echo "To Build libgodot-xterm for javascript platform inside a docker container, run:"
+echo 'UID_GID="$(id -u):$(id -g)" docker-compose run javascript-build'
+ 

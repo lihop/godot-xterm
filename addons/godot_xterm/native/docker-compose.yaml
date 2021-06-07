@@ -1,0 +1,6 @@
+services:
+  javascript-build:
+    build: misc/docker
+    user: ${UID_GID}
+    volumes:
+      - .:/godot

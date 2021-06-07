@@ -18,7 +18,7 @@ const TITLE_WIDTH = 42
 
 var menu_items := [
 	{"name": "Asciicast", "scene": preload("../asciicast/asciicast.tscn")},
-	{"name": "Terminal", "scene": preload("../terminal/terminal.tscn")},
+	{"name": "Terminal", "scene": preload("../web_console/web_console.tscn") if OS.has_feature("JavaScript") else preload("../terminal/terminal.tscn")},
 	{"name": "Exit"}
 ]
 
@@ -140,15 +140,19 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 						"Terminal not Supported on Windows"
 					)
 				var scene = item.scene.instance()
-				var pty = scene.get_node("Pseudoterminal")
+				var pty = scene if OS.has_feature("JavaScript") else scene.get_node("Pseudoterminal")
 				get_tree().get_root().add_child(scene)
 				visible = false
 				scene.grab_focus()
+				print("await the exit!")
 				yield(pty, "exited")
+				print("a got here")
 				visible = true
 				$Terminal.grab_focus()
 				scene.queue_free()
 			"Exit":
+				if OS.has_feature("JavaScript"):
+					JavaScript.eval("window.location.reload()")
 				get_tree().quit()
 
 
