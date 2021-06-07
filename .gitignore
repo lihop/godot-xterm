@@ -2,6 +2,7 @@
 .import/
 export.cfg
 export_presets.cfg
+export/
 
 # Mono-specific ignores
 .mono/
@@ -9,3 +10,6 @@ data_*/
 
 # Python-specific ignores
 .venv
+
+# Emscripten-specific ignores
+.emcache/

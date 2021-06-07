@@ -18,6 +18,7 @@ cols = 102
 
 [node name="Pseudoterminal" type="Node" parent="."]
 script = ExtResource( 2 )
+
 [connection signal="data_sent" from="." to="Pseudoterminal" method="write"]
 [connection signal="size_changed" from="." to="Pseudoterminal" method="resize"]
 [connection signal="data_sent" from="Pseudoterminal" to="." method="write"]

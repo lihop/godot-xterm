@@ -11,17 +11,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        platform: [ linux, osx, windows ]
+        platform: [ linux, javascript, osx, windows ]
         target: [ release, debug ]
         bits: [ 64, 32 ]
         include:
           - platform: linux
+            os: ubuntu-latest
+          - platform: javascript
             os: ubuntu-latest
           - platform: osx
             os: macos-latest
           - platform: windows
             os: windows-latest
         exclude:
+          - platform: javascript
+            bits: 64 # Currently only wasm32 is supported.
           - platform: osx
             bits: 32 # Only 64-bit supported on macOS.
           - platform: windows
@@ -45,11 +49,27 @@ jobs:
         with:
           path: addons/godot_xterm/native/external/godot-cpp
           key: godot-cpp-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.GODOT_CPP_COMMIT_HASH }}
+      - name: Cache emscripten
+        if: ${{ matrix.platform == 'javascript' }}
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-emscripten
+        with:
+          path: addons/godot_xterm/native/.emcache
+          key: emsdk-cache-${{ matrix.target }}
 
       # Ubuntu-specific steps.
       - name: Install ubuntu build dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get install -y scons gcc-multilib g++-multilib
+
+      # JavaScript-specific steps.
+      - name: Install javascript build dependencies
+        if: ${{ matrix.platform == 'javascript' }}
+        uses: mymindstorm/setup-emsdk@v9
+        with:
+          version: 2.0.10
+          actions-cache-folder: emsdk-cache-${{ matrix.target }}
 
       # MacOS-specific steps.
       - name: Install additional macos build dependencies
@@ -80,6 +100,7 @@ jobs:
           name: libgodot-xterm-${{ matrix.target }}
           path: |
             addons/godot_xterm/native/bin/*.so
+            addons/godot_xterm/native/bin/*.wasm
             addons/godot_xterm/native/bin/*.dylib
             addons/godot_xterm/native/bin/*.dll
 

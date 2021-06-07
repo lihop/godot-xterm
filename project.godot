@@ -30,7 +30,7 @@ window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PoolStringArray( "godot_xterm" )
+enabled=PoolStringArray( "res://addons/godot_xterm/plugin.cfg" )
 
 [rendering]
 

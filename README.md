@@ -2,7 +2,7 @@
 
 # GodotXterm 
 
-![Godot Version](https://img.shields.io/badge/godot-3.2+-blue.svg)
+![Godot Version](https://img.shields.io/badge/godot-3.3+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 [![Build Status](https://github.com/lihop/godot-xterm/workflows/build/badge.svg?branch=master)](https://github.com/lihop/godot-xterm/actions?query=branch%3Amaster)
 
@@ -16,12 +16,21 @@ Terminal emulator for Godot using GDNative and [libtsm](https://github.com/Aetf/
 
 ### Confirmed:
 - Linux 64-bit (primarily developed/tested on this platform)
+- HTML5 (also tested on this platform)
 - Linux 32-bit
 - MacOS 64-bit
 - Windows 64-bit
 
 ### Planned/untested:
 - Windows 32-bit
+
+
+## Demo
+
+- An online demo of an HTML5 export of this repo (using the GDNative export type, available since Godot 3.3) can be found [here](https://demo.godot-xterm.nix.nz).
+  Make sure you click the screen at least once after loading.
+
+- A Linux, MacOS, and Windows demo, which uses GodotXterm in conjunction with [Godot Python](https://github.com/touilleMan/godot-python) can be downloaded [here](https://lihop.itch.io/xterminate).
 
 ## Setup
 
@@ -36,6 +45,7 @@ Precompiled binaries can be downloaded from the GitHub releases page. Download t
 After extracting the zip file, the directory should contain the following:
 - `libgodot-xterm.linux.64.so`
 - `libgodot-xterm.linux.32.so`
+- `libgodot-xterm.javascript.32.wasm`
 - `libgodot-xterm.osx.64.dylib`
 - `libgodot-xterm.windows.64.dll`
 
@@ -44,6 +54,7 @@ This plugin follows the standard format of a GDNative plugin as shown in [GDNati
 Therefore, referring to the following documentation on compiling a GDNative plugin and compiling the Godot engine itself may be useful:
 - [GDNative C++ Example: Compiling the plugin](https://docs.godotengine.org/en/stable/tutorials/plugins/gdnative/gdnative-cpp-example.html#compiling-the-plugin).
 - [Compiling for X11 (Linux, \*BSD)](https://docs.godotengine.org/en/stable/development/compiling/compiling_for_x11.html)
+- [Compiling for the Web](https://docs.godotengine.org/en/3.3/development/compiling/compiling_for_web.html)
 - [Compiling for macOS](https://docs.godotengine.org/en/stable/development/compiling/compiling_for_osx.html)
 - [Compiling for Windows](https://docs.godotengine.org/en/stable/development/compiling/compiling_for_windows.html)
 
@@ -53,6 +64,7 @@ The main dependencies are:
 - [Git](https://git-scm.com/) (to clone git submodules)
 - [SCons](https://scons.org/) (a software construction tool)
 - A C/C++ compiler (i.e. [gcc](https://gcc.gnu.org/), [llvm](https://llvm.org/), [MSVC](https://visualstudio.microsoft.com/vs/features/cplusplus/))
+- [Emscripten](https://emscripten.org/) version 2.0.10 (for HTML5 build)
 
 **Note**: If you are cross-compiling, then you will likely need other dependencies than those listed below.
 
@@ -80,6 +92,12 @@ choco install python3 && python -m pip install scons
 #### Steps
 
 The [build.sh] script in `addons/godot_xterm/native` is provided for convenience and can be used on Linux to perform the steps below using the default scons options. On NixOS it will use the `shell.nix` file in the same directory to bring in all dependencies to the build environment.
+A Dockerfile is also provided to build for the javascript platform.
+It can be run (after cloning Git submodules) with:
+```
+UID_GID="$(id -u):$(id -g)" docker-compose run javascript-build
+```
+The 'wasm' binary will be placed in the `bin` directory alongside others.
 
 ##### 1. Clone Git Submodules
 This step only needs to be performed once and will clone the git repos this plugin depends on to `addons/godot_xterm/native/external`.
@@ -95,7 +113,7 @@ This step only needs to be performed once per platform/target/bits combination y
 cd addons/godot_xterm/native/external/godot-cpp
 scons platform=<platform> target=<target> bits=<bits> generate_bindings=yes
 ```
-Where `<platform>` is one of `linux`, `osx` or `windows`, `<target>` is one of `release` or `debug` and `<bits>` is one of `32` or `64`.
+Where `<platform>` is one of `linux`, `javascript`, `osx` or `windows`, `<target>` is one of `release` or `debug` and `<bits>` is one of `32` or `64`.
 The `generate_bindings=yes` option is essential.
   
 ##### 3. Build GodotXterm
@@ -147,7 +165,7 @@ There are three example scenes included in this project which you can study to l
 If you contribute code to this project, you are implicitly allowing your code to be distributed under the MIT license.
 You are also implicitly verifying that all code is your original work, or unoriginal work which is published under a compatible license or waiver.
 
-Copyright (c) 2020 [The GodotXterm authors](https://github.com/lihop/godot-xterm/graphs/contributors) (MIT License)<br>
+Copyright (c) 2020-2021 Leroy Hopson and [Contributors](https://github.com/lihop/godot-xterm/graphs/contributors) (MIT License)<br>
 
 The fonts used in this project are published under a seperate license.
 See the various license files in the [subdirectories](addons/godot_xterm/themes/fonts/) for each font.
