@@ -8,7 +8,7 @@
 #include <xkbcommon/xkbcommon-keysyms.h>
 
 // For _populate_key_list(), see below.
-#if defined(PLATFORM_WINDOWS)
+#if defined(__WIN32)
 #include <GlobalConstants.hpp>
 #endif
 
@@ -26,7 +26,7 @@ void Terminal::_populate_key_list() {
 // referenced in function "private: static void __cdecl
 // godot::Terminal::_populate_key_list(void)"` so use the old technique of
 // getting KeyList values from GlobalConstants header for now.
-#if defined(PLATFORM_WINDOWS)
+#if defined(__WIN32)
 #define GLOBAL_CONSTANT(VAR) GlobalConstants::VAR
 #else
 #define GLOBAL_CONSTANT(VAR) get_constant(#VAR)

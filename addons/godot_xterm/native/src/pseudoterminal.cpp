@@ -5,10 +5,10 @@
 #include <unistd.h>
 
 // Platform specific includes.
-#if defined(PLATFORM_LINUX)
+#if defined(__linux__)
 #include <pty.h>
 #endif
-#if defined(PLATFORM_OSX)
+#if defined(__APPLE__)
 #include <sys/ioctl.h>
 #include <util.h>
 #endif

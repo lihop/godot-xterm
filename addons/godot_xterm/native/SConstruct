@@ -72,7 +72,7 @@ env.AppendENVPath('PATH', os.getenv('PATH'))
 
 # Compile for Linux.
 if env['platform'] == 'linux':
-    env.Append(CPPDEFINES=['PLATFORM_LINUX'])
+    env.Append(CPPDEFINES=['__linux__'])
 
     env['CC'] = 'gcc'
     env['CXX'] = 'g++'
@@ -95,7 +95,7 @@ if env['platform'] == 'linux':
 
 # Compile for HTML5.
 elif env['platform'] == 'javascript':
-    env.Append(CPPDEFINES=['PLATFORM_JS'])
+    env.Append(CPPDEFINES=['__EMSCRIPTEN__'])
 
     env['bits'] = '32'
     env['CC'] = 'emcc'
@@ -118,7 +118,7 @@ elif env['platform'] == 'javascript':
 
 # Compile for OSX.
 elif env['platform'] == 'osx':
-    env.Append(CPPDEFINES=['PLATFORM_OSX'])
+    env.Append(CPPDEFINES=['__APPLE__'])
 
     env['CC'] = 'clang'
     env['CXX'] = 'clang++'
@@ -144,7 +144,7 @@ elif env['platform'] == 'osx':
 
 # Compile for Windows.
 elif env['platform'] == 'windows':
-    env.Append(CPPDEFINES=['PLATFORM_WINDOWS'])
+    env.Append(CPPDEFINES=['__WIN32'])
     env['LIBSUFFIX'] = '.lib'
 
     # On Windows using MSVC.
