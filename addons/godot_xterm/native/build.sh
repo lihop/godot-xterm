@@ -15,12 +15,12 @@ fi
 
 
 # Update git submodules.
-LIBTSM_DIR=${NATIVE_DIR}/external/libtsm
+LIBTSM_DIR=${NATIVE_DIR}/thirdparty/libtsm
 if [ ! -d "$LIBTSM_DIR" ]; then
 	cd ${NATIVE_DIR}
 	git submodule update --init --recursive -- $LIBTSM_DIR
 fi
-GODOT_CPP_DIR=${NATIVE_DIR}/external/godot-cpp
+GODOT_CPP_DIR=${NATIVE_DIR}/thirdparty/godot-cpp
 if [ ! -d "${GODOT_CPP_DIR}" ]; then
 	cd ${NATIVE_DIR}
 	git submodule update --init --recursive -- $GODOT_CPP_DIR

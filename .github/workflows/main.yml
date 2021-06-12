@@ -36,14 +36,14 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         run: |
-          echo ::set-env name=GODOT_CPP_COMMIT_HASH::$(git ls-tree HEAD addons/godot_xterm/native/external/godot-cpp -l | cut -d\  -f3)
+          echo ::set-env name=GODOT_CPP_COMMIT_HASH::$(git ls-tree HEAD addons/godot_xterm/native/thirdparty/godot-cpp -l | cut -d\  -f3)
       - name: Cache godot-cpp bindings
         uses: actions/cache@v2
         id: cache
         env:
           cache-name: cache-godot-cpp
         with:
-          path: addons/godot_xterm/native/external/godot-cpp
+          path: addons/godot_xterm/native/thirdparty/godot-cpp
           key: godot-cpp-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.GODOT_CPP_COMMIT_HASH }}
       - name: Cache emscripten
         if: ${{ matrix.platform == 'javascript' }}
@@ -82,7 +82,7 @@ jobs:
       - name: Build godot-cpp bindings
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          cd addons/godot_xterm/native/external/godot-cpp
+          cd addons/godot_xterm/native/thirdparty/godot-cpp
           scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} generate_bindings=yes -j2
 
       - name: Build libgodot-xterm

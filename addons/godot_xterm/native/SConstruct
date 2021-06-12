@@ -28,7 +28,7 @@ else:
         'platform=<platform>'
     )
 
-VariantDir('./external/libtsm/build', './external/libtsm/src', duplicate=0)
+VariantDir('./thirdparty/libtsm/build', './thirdparty/libtsm/src', duplicate=0)
 env = Environment(ENV = os.environ)
 
 is64 = sys.maxsize > 2**32
@@ -186,24 +186,24 @@ elif env['platform'] == 'windows':
 
 # Build libtsm as a static library.
 Execute([
-    Delete('external/libtsm/build/src'),
-    Delete('external/libtsm/build/external'),
-    Copy('external/libtsm/build/src', 'external/libtsm/src'),
-    Copy('external/libtsm/build/external', 'external/libtsm/external'),
+    Delete('thirdparty/libtsm/build/src'),
+    Delete('thirdparty/libtsm/build/external'),
+    Copy('thirdparty/libtsm/build/src', 'thirdparty/libtsm/src'),
+    Copy('thirdparty/libtsm/build/external', 'thirdparty/libtsm/external'),
 ])
 
 env.Append(CPPPATH=[
-    'external/libtsm/src/shared',
-    'external/libtsm/external',
+    'thirdparty/libtsm/src/shared',
+    'thirdparty/libtsm/external',
 ])
 
 sources = []
-sources.append('external/libtsm/build/src/shared/shl-htable.c')
-sources.append(Glob('external/libtsm/build/src/tsm/*.c'))
-sources.append(Glob('external/libtsm/build/external/wcwidth/*.c'))
+sources.append('thirdparty/libtsm/build/src/shared/shl-htable.c')
+sources.append(Glob('thirdparty/libtsm/build/src/tsm/*.c'))
+sources.append(Glob('thirdparty/libtsm/build/external/wcwidth/*.c'))
 
 libtsm = env.StaticLibrary(
-    target='external/libtsm/build/bin/libtsm.{}.{}.{}{}'.format(
+    target='thirdparty/libtsm/build/bin/libtsm.{}.{}.{}{}'.format(
         env['platform'],
         env['target'],
         env['bits'],
@@ -217,25 +217,25 @@ Default(libtsm)
 env.Append(CXXFLAGS=['-std=c++14'])
 env.Append(CPPPATH=[
     'src/',
-    'external/libtsm/build/src/tsm',
-    'external/godot-cpp/include/',
-    'external/godot-cpp/include/core/',
-    'external/godot-cpp/include/gen/',
-    'external/godot-cpp/godot-headers/'
+    'thirdparty/libtsm/build/src/tsm',
+    'thirdparty/godot-cpp/include/',
+    'thirdparty/godot-cpp/include/core/',
+    'thirdparty/godot-cpp/include/gen/',
+    'thirdparty/godot-cpp/godot-headers/'
 ])
 env.Append(LIBPATH=[
-    'external/godot-cpp/bin/',
-    'external/libtsm/build/bin/',
+    'thirdparty/godot-cpp/bin/',
+    'thirdparty/libtsm/build/bin/',
 ])
 
 env.Append(LIBS=[
-    env.File('external/godot-cpp/bin/libgodot-cpp.{}.{}.{}{}'.format(
+    env.File('thirdparty/godot-cpp/bin/libgodot-cpp.{}.{}.{}{}'.format(
         env['platform'],
         env['target'],
         'wasm' if env['platform'] == 'javascript' else env['bits'],
         env['LIBSUFFIX'],
     )),
-    env.File('external/libtsm/build/bin/libtsm.{}.{}.{}{}'.format(
+    env.File('thirdparty/libtsm/build/bin/libtsm.{}.{}.{}{}'.format(
         env['platform'],
         env['target'],
         env['bits'],
