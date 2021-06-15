@@ -4,3 +4,6 @@
 [submodule "addons/godot_xterm/libtsm"]
 	path = addons/godot_xterm/native/thirdparty/libtsm
 	url = https://github.com/lihop/libtsm
+[submodule "misc/export_templates/godot"]
+	path = misc/export_templates/godot
+	url = https://github.com/godotengine/godot
