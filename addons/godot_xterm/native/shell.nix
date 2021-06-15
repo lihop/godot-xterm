@@ -5,5 +5,9 @@ mkShell {
     scons
 
     cacert # Required for git clone on GithHub actions runner.
+
+    # Used to build for javascript platform.
+    docker
+    docker-compose
   ];
 }

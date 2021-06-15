@@ -2,7 +2,7 @@
 set -e
 
 
-# Get the absolute path to the directory this script is in.
+#GODOT_DIR Get the absolute path to the directory this script is in.
 NATIVE_DIR="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 
@@ -34,6 +34,6 @@ scons generate_bindings=yes -j$(nproc)
 cd ${NATIVE_DIR}
 scons -j$(nproc)
 
-echo "To Build libgodot-xterm for javascript platform inside a docker container, run:"
-echo 'UID_GID="$(id -u):$(id -g)" docker-compose run javascript-build'
- 
+# Use Docker to build libgodot-xterm javascript.
+UID_GID="0:0" docker-compose build javascript
+UID_GID="$(id -u):$(id -g)" docker-compose run javascript
