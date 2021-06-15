@@ -1,5 +1,5 @@
 #include "terminal.h"
-#if defined(__unix__) // Linux and macOS.
+#if defined(__unix__) /* Linux and macOS */ && !defined(__EMSCRIPTEN__)
 #include "pseudoterminal.h"
 #endif
 
@@ -16,7 +16,7 @@ extern "C" void GDN_EXPORT godot_nativescript_init(void *handle) {
   godot::Godot::nativescript_init(handle);
 
   godot::register_tool_class<godot::Terminal>();
-#if defined(__unix__)
+#if defined(__unix__) && !defined(__EMSCRIPTEN__)
   godot::register_class<godot::Pseudoterminal>();
 #endif
 }
