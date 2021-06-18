@@ -6,6 +6,7 @@ export/
 # Mono-specific ignores
 .mono/
 data_*/
+mono_crash.*
 
 # Python-specific ignores
 .venv
