@@ -1,0 +1,42 @@
+[gd_resource type="Theme" load_steps=9 format=2]
+
+[ext_resource path="res://addons/godot_xterm/themes/fonts/cousine/Cousine-BoldItalic.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://addons/godot_xterm/themes/fonts/cousine/Cousine-Bold.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://addons/godot_xterm/themes/fonts/cousine/Cousine-Regular.ttf" type="DynamicFontData" id=3]
+[ext_resource path="res://addons/godot_xterm/themes/fonts/cousine/Cousine-Italic.ttf" type="DynamicFontData" id=4]
+
+[sub_resource type="DynamicFont" id=1]
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=2]
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=3]
+font_data = ExtResource( 4 )
+
+[sub_resource type="DynamicFont" id=4]
+font_data = ExtResource( 3 )
+
+[resource]
+Terminal/colors/Background = Color( 0, 0, 0, 1 )
+Terminal/colors/Black = Color( 0, 0, 0, 1 )
+Terminal/colors/Blue = Color( 0, 0, 0.933333, 1 )
+Terminal/colors/Cyan = Color( 0, 0.803922, 0.803922, 1 )
+"Terminal/colors/Dark Grey" = Color( 0.498039, 0.498039, 0.498039, 1 )
+Terminal/colors/Foreground = Color( 1, 1, 1, 1 )
+Terminal/colors/Green = Color( 0, 0.803922, 0, 1 )
+"Terminal/colors/Light Blue" = Color( 0, 0, 1, 1 )
+"Terminal/colors/Light Cyan" = Color( 0, 1, 1, 1 )
+"Terminal/colors/Light Green" = Color( 0, 1, 0, 1 )
+"Terminal/colors/Light Grey" = Color( 0.898039, 0.898039, 0.898039, 1 )
+"Terminal/colors/Light Magenta" = Color( 1, 0, 1, 1 )
+"Terminal/colors/Light Red" = Color( 1, 0, 0, 1 )
+"Terminal/colors/Light Yellow" = Color( 1, 1, 0, 1 )
+Terminal/colors/Magenta = Color( 0.803922, 0, 0.803922, 1 )
+Terminal/colors/Red = Color( 0.803922, 0, 0, 1 )
+Terminal/colors/White = Color( 1, 1, 1, 1 )
+Terminal/colors/Yellow = Color( 0.803922, 0.803922, 0, 1 )
+Terminal/fonts/Bold = SubResource( 1 )
+"Terminal/fonts/Bold Italic" = SubResource( 2 )
+Terminal/fonts/Italic = SubResource( 3 )
+Terminal/fonts/Regular = SubResource( 4 )

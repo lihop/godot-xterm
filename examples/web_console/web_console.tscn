@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://addons/godot_xterm/themes/default_dark.theme" type="Theme" id=1]
+[ext_resource path="res://addons/godot_xterm/themes/default_dark.tres" type="Theme" id=1]
 [ext_resource path="res://addons/godot_xterm/nodes/terminal/terminal.gdns" type="Script" id=2]
 [ext_resource path="res://examples/web_console/web_console.gd" type="Script" id=3]
 
