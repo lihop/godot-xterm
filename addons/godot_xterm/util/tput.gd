@@ -11,14 +11,15 @@ const CURSOR_LEFT = "\u001b[D"
 
 const DEFAULT_FOREGROUND_COLOR = "\u001b[0m"
 
+
 class ANSIColor:
 	extends Object
 	# Using ANSIColor constants, rather than Color will respect the
 	# colors of the selected terminal theme. Whereas Color will set
 	# the exact color specified regardless of theme.
-	
-	const black = { fg = 30, bg = 40 }
-	const red = {fg = 31, bg = 41 }
+
+	const black = {fg = 30, bg = 40}
+	const red = {fg = 31, bg = 41}
 	const green = {fg = 32, bg = 42}
 	const yellow = {fg = 33, bg = 43}
 	const blue = {fg = 34, bg = 44}
@@ -35,9 +36,12 @@ class ANSIColor:
 	const bright_magenta = {fg = 95, bg = 105}
 	const bright_cyan = {fg = 96, bg = 106}
 	const bright_white = {fg = 97, bg = 107}
-	
+
 	func _init():
-		assert(false, "ANSIColor is an abstract class. You should only use the color constants (e.g. ANSIColor.black).")
+		assert(
+			false,
+			"ANSIColor is an abstract class. You should only use the color constants (e.g. ANSIColor.black)."
+		)
 
 
 var terminal

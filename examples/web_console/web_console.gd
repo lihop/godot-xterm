@@ -39,17 +39,17 @@ func grab_focus():
 func _on_Terminal_key_pressed(_data, event: InputEventKey):
 	if not event:
 		return
-	
+
 	# For some reason, data String is malformed on HTML5, so only use event.unicode.
 	var data = char(event.unicode)
-	
+
 	match event.scancode:
 		KEY_ENTER:
 			terminal.write("\r\n")
-			
+
 			if line == "q" or line == "quit" or line == "exit":
 				return emit_signal("exited", 0)
-			
+
 			if not _has_js:
 				var msg := "WebConsole only available in HTML5 build."
 				push_error(msg)
@@ -62,11 +62,11 @@ func _on_Terminal_key_pressed(_data, event: InputEventKey):
 				_tput.setaf(TPut.ANSIColor.magenta)
 				terminal.write(str(json))
 				_tput.sgr0()
-			
+
 			line = ""
 			#_tput.srg0()
 			prompt("\r\n>> ")
-			
+
 		KEY_BACKSPACE:
 			if line.length() > 0:
 				terminal.write("\b \b")
