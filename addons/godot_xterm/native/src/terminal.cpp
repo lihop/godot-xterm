@@ -14,8 +14,6 @@
 
 using namespace godot;
 
-const struct Terminal::cell Terminal::empty_cell = {{0, 0, 0, 0, 0}, {}};
-
 std::map<std::pair<int64_t, int64_t>, int> Terminal::_key_list = {};
 void Terminal::_populate_key_list() {
   if (!_key_list.empty())
@@ -243,29 +241,27 @@ static void write_cb(struct tsm_vte *vte, const char *u8, size_t len,
 }
 
 static int text_draw_cb(struct tsm_screen *con, uint64_t id, const uint32_t *ch,
-                        size_t len, unsigned int width, unsigned int posx,
-                        unsigned int posy, const struct tsm_screen_attr *attr,
+                        size_t len, unsigned int width, unsigned int col,
+                        unsigned int row, const struct tsm_screen_attr *attr,
                         tsm_age_t age, void *data) {
-
   Terminal *terminal = static_cast<Terminal *>(data);
 
-  if (age <= terminal->framebuffer_age)
+  if (terminal->update_mode == Terminal::UpdateMode::AUTO && age != 0 &&
+      age <= terminal->framebuffer_age)
     return 0;
+
+  std::pair<Color, Color> color_pair = terminal->get_cell_colors(attr);
+  terminal->draw_background(row, col, color_pair.first);
 
   size_t ulen;
   char buf[5] = {0};
 
-  if (len > 0) {
-    char *utf8 = tsm_ucs4_to_utf8_alloc(ch, len, &ulen);
-    memcpy(terminal->cells[posy][posx].ch, utf8, ulen);
-  } else {
-    terminal->cells[posy][posx] = {};
-  }
+  if (len < 1) // No foreground to draw.
+    return 0;
 
-  memcpy(&terminal->cells[posy][posx].attr, attr, sizeof(tsm_screen_attr));
-
-  if (!terminal->sleep)
-    terminal->update();
+  char *utf8 = tsm_ucs4_to_utf8_alloc(ch, len, &ulen);
+  memcpy(buf, utf8, ulen);
+  terminal->draw_foreground(row, col, buf, attr, color_pair.second);
 
   return 0;
 }
@@ -273,15 +269,19 @@ static int text_draw_cb(struct tsm_screen *con, uint64_t id, const uint32_t *ch,
 void Terminal::_register_methods() {
   register_method("_init", &Terminal::_init);
   register_method("_ready", &Terminal::_ready);
+  register_method("_notification", &Terminal::_notification);
   register_method("_gui_input", &Terminal::_gui_input);
   register_method("_draw", &Terminal::_draw);
-  register_method("_notification", &Terminal::_notification);
 
   register_method("write", &Terminal::write);
-  register_method("update_size", &Terminal::update_size);
+
+  register_method("_update_theme", &Terminal::update_theme);
+  register_method("_update_size", &Terminal::update_theme);
 
   register_property<Terminal, int>("rows", &Terminal::rows, 24);
   register_property<Terminal, int>("cols", &Terminal::cols, 80);
+  register_property<Terminal, int>("update_mode", &Terminal::update_mode,
+                                   UpdateMode::AUTO);
 
   register_signal<Terminal>("data_sent", "data",
                             GODOT_VARIANT_TYPE_POOL_BYTE_ARRAY);
@@ -296,7 +296,8 @@ Terminal::Terminal() {}
 Terminal::~Terminal() {}
 
 void Terminal::_init() {
-  sleep = true;
+  framebuffer_age = 0;
+  update_mode = UpdateMode::AUTO;
 
   if (tsm_screen_new(&screen, NULL, NULL)) {
     ERR_PRINT("Error creating new tsm screen");
@@ -307,14 +308,9 @@ void Terminal::_init() {
   if (tsm_vte_new(&vte, screen, write_cb, this, NULL, NULL)) {
     ERR_PRINT("Error creating new tsm vte");
   }
-
-  update_theme();
 }
 
-void Terminal::_ready() {
-  update_size();
-  connect("resized", this, "update_size");
-}
+void Terminal::_ready() { update_theme(); }
 
 void Terminal::_notification(int what) {
   switch (what) {
@@ -322,7 +318,7 @@ void Terminal::_notification(int what) {
     update_size();
     break;
   case NOTIFICATION_THEME_CHANGED:
-    update_theme();
+    // update_theme();
     break;
   }
 }
@@ -356,42 +352,32 @@ void Terminal::_gui_input(Variant event) {
 }
 
 void Terminal::_draw() {
-  if (sleep)
+  if (update_mode == UpdateMode::DISABLED)
     return;
 
-  /* Draw the full terminal rect background */
-  Color background_color = palette[TSM_COLOR_BACKGROUND];
-
-  draw_rect(Rect2(Vector2(0, 0), get_rect().size), background_color);
-
-  for (int row = 0; row < rows; row++) {
-    for (int col = 0; col < cols; col++) {
-      /* Draw cell background and foreground */
-      std::pair<Color, Color> color_pair = get_cell_colors(row, col);
-      draw_background(row, col, color_pair.first);
-      draw_foreground(row, col, color_pair.second);
-    }
+  if ((update_mode > UpdateMode::AUTO) || framebuffer_age == 0) {
+    /* Draw the full terminal rect background */
+    // Draw the rectangle slightly larger, so it fills the entire viewport.
+    Color background_color = palette[TSM_COLOR_BACKGROUND];
+    draw_rect(Rect2(Vector2(-4, -4), get_rect().size + Vector2(8, 8)),
+              background_color);
   }
+
+  framebuffer_age = tsm_screen_draw(screen, text_draw_cb, this);
+
+  if (update_mode == UpdateMode::ALL_NEXT_FRAME)
+    update_mode = UpdateMode::AUTO;
 }
 
 void Terminal::update_theme() {
   /* Generate color palette based on theme */
 
-  // Converts a color from the Control's theme to one that can
-  // be used in a tsm color palette.
   auto set_pallete_color = [this](tsm_vte_color color, String theme_color,
-                                  int default_r, int default_g,
-                                  int default_b) -> void {
+                                  Color default_color) -> void {
     Color c;
 
-    if (has_color(theme_color, "Terminal")) {
-      c = get_color(theme_color, "Terminal");
-    } else {
-      int r = default_r;
-      int g = default_g;
-      int b = default_b;
-      c = Color((float)r / 255.0, (float)g / 255.0, (float)b / 255.0);
-    }
+    c = has_color(theme_color, "Terminal") ? get_color(theme_color, "Terminal")
+                                           : default_color;
 
     color_palette[color][0] = c.get_r8();
     color_palette[color][1] = c.get_g8();
@@ -400,25 +386,30 @@ void Terminal::update_theme() {
     palette[color] = c;
   };
 
-  set_pallete_color(TSM_COLOR_BLACK, "Black", 0, 0, 0);
-  set_pallete_color(TSM_COLOR_RED, "Red", 205, 0, 0);
-  set_pallete_color(TSM_COLOR_GREEN, "Green", 0, 205, 0);
-  set_pallete_color(TSM_COLOR_YELLOW, "Yellow", 205, 205, 0);
-  set_pallete_color(TSM_COLOR_BLUE, "Blue", 0, 0, 238);
-  set_pallete_color(TSM_COLOR_MAGENTA, "Magenta", 205, 0, 205);
-  set_pallete_color(TSM_COLOR_CYAN, "Cyan", 0, 205, 205);
-  set_pallete_color(TSM_COLOR_LIGHT_GREY, "Light Grey", 229, 229, 229);
-  set_pallete_color(TSM_COLOR_DARK_GREY, "Dark Grey", 127, 127, 127);
-  set_pallete_color(TSM_COLOR_LIGHT_RED, "Light Red", 255, 0, 0);
-  set_pallete_color(TSM_COLOR_LIGHT_GREEN, "Light Green", 0, 255, 0);
-  set_pallete_color(TSM_COLOR_LIGHT_YELLOW, "Light Yellow", 255, 255, 0);
-  set_pallete_color(TSM_COLOR_LIGHT_BLUE, "Light Blue", 0, 0, 255);
-  set_pallete_color(TSM_COLOR_LIGHT_MAGENTA, "Light Magenta", 255, 0, 255);
-  set_pallete_color(TSM_COLOR_LIGHT_CYAN, "Light Cyan", 0, 255, 255);
-  set_pallete_color(TSM_COLOR_WHITE, "White", 255, 255, 255);
+  set_pallete_color(TSM_COLOR_BLACK, "Black", Color(0, 0, 0, 1));
+  set_pallete_color(TSM_COLOR_RED, "Red", Color(0.501961, 0, 0, 1));
+  set_pallete_color(TSM_COLOR_GREEN, "Green", Color(0, 0.501961, 0, 1));
+  set_pallete_color(TSM_COLOR_YELLOW, "Yellow",
+                    Color(0.501961, 0.501961, 0, 1));
+  set_pallete_color(TSM_COLOR_BLUE, "Blue", Color(0, 0, 0.501961, 1));
+  set_pallete_color(TSM_COLOR_MAGENTA, "Magenta",
+                    Color(0.501961, 0, 0.501961, 1));
+  set_pallete_color(TSM_COLOR_CYAN, "Cyan", Color(0, 0.501961, 0.501961, 1));
+  set_pallete_color(TSM_COLOR_DARK_GREY, "Dark Grey",
+                    Color(0.501961, 0.501961, 0.501961, 1));
+  set_pallete_color(TSM_COLOR_LIGHT_GREY, "Light Grey",
+                    Color(0.752941, 0.752941, 0.752941, 1));
+  set_pallete_color(TSM_COLOR_LIGHT_RED, "Light Red", Color(1, 0, 0, 1));
+  set_pallete_color(TSM_COLOR_LIGHT_GREEN, "Light Green", Color(0, 1, 0, 1));
+  set_pallete_color(TSM_COLOR_LIGHT_YELLOW, "Light Yellow", Color(1, 1, 0, 1));
+  set_pallete_color(TSM_COLOR_LIGHT_BLUE, "Light Blue", Color(0, 0, 1, 1));
+  set_pallete_color(TSM_COLOR_LIGHT_MAGENTA, "Light Magenta",
+                    Color(1, 0, 1, 1));
+  set_pallete_color(TSM_COLOR_LIGHT_CYAN, "Light Cyan", Color(0, 1, 1, 1));
+  set_pallete_color(TSM_COLOR_WHITE, "White", Color(1, 1, 1, 1));
 
-  set_pallete_color(TSM_COLOR_BACKGROUND, "Background", 255, 255, 255);
-  set_pallete_color(TSM_COLOR_FOREGROUND, "Foreground", 0, 0, 0);
+  set_pallete_color(TSM_COLOR_BACKGROUND, "Background", Color(0, 0, 0, 1));
+  set_pallete_color(TSM_COLOR_FOREGROUND, "Foreground", Color(1, 1, 1, 1));
 
   if (tsm_vte_set_custom_palette(vte, color_palette)) {
     ERR_PRINT("Error setting custom palette");
@@ -442,9 +433,8 @@ void Terminal::update_theme() {
     fontmap.insert(std::pair<String, Ref<Font>>(font_style, fontref));
   };
 
-  set_font(
-      "Bold Italic",
-      "res://addons/godot_xterm/themes/fonts/cousine/cousine_bold_italic.tres");
+  set_font("Bold Italic", "res://addons/godot_xterm/themes/fonts/cousine/"
+                          "cousine_bold_italic.tres");
   set_font("Bold",
            "res://addons/godot_xterm/themes/fonts/cousine/cousine_bold.tres");
   set_font("Italic",
@@ -452,32 +442,28 @@ void Terminal::update_theme() {
   set_font(
       "Regular",
       "res://addons/godot_xterm/themes/fonts/cousine/cousine_regular.tres");
+
+  update_size();
 }
 
 void Terminal::draw_background(int row, int col, Color bgcolor) {
-
   /* Draw the background */
   Vector2 background_pos = Vector2(col * cell_size.x, row * cell_size.y);
   Rect2 background_rect = Rect2(background_pos, cell_size);
   draw_rect(background_rect, bgcolor);
 }
 
-void Terminal::draw_foreground(int row, int col, Color fgcolor) {
-
-  struct cell cell = cells[row][col];
-
-  if (cell.ch == nullptr)
-    return; // No foreground to draw
-
+void Terminal::draw_foreground(int row, int col, char *ch,
+                               const tsm_screen_attr *attr, Color fgcolor) {
   /* Set the font */
 
   Ref<Font> fontref = get_font("");
 
-  if (cell.attr.bold && cell.attr.italic) {
+  if (attr->bold && attr->italic) {
     fontref = fontmap["Bold Italic"];
-  } else if (cell.attr.bold) {
+  } else if (attr->bold) {
     fontref = fontmap["Bold"];
-  } else if (cell.attr.italic) {
+  } else if (attr->italic) {
     fontref = fontmap["Italic"];
   } else {
     fontref = fontmap["Regular"];
@@ -485,65 +471,61 @@ void Terminal::draw_foreground(int row, int col, Color fgcolor) {
 
   /* Draw the foreground */
 
-  if (cell.attr.blink)
+  if (attr->blink)
     ; // TODO: Handle blink
 
   int font_height = fontref.ptr()->get_height();
   Vector2 foreground_pos =
       Vector2(col * cell_size.x, row * cell_size.y + font_height / 1.25);
-  draw_string(fontref, foreground_pos, cell.ch, fgcolor);
+  draw_string(fontref, foreground_pos, ch, fgcolor);
 
-  if (cell.attr.underline)
+  if (attr->underline)
     draw_string(fontref, foreground_pos, "_", fgcolor);
 }
 
-std::pair<Color, Color> Terminal::get_cell_colors(int row, int col) {
-  struct cell cell = cells[row][col];
+std::pair<Color, Color> Terminal::get_cell_colors(const tsm_screen_attr *attr) {
   Color fgcol, bgcol;
   float fr = 0, fg = 0, fb = 0, br = 1, bg = 1, bb = 1;
 
   /* Get foreground color */
 
-  if (cell.attr.fccode && palette.count(cell.attr.fccode)) {
-    fgcol = palette[cell.attr.fccode];
+  if (attr->fccode && palette.count(attr->fccode)) {
+    fgcol = palette[attr->fccode];
   } else {
-    fr = (float)cell.attr.fr / 255.0;
-    fg = (float)cell.attr.fg / 255.0;
-    fb = (float)cell.attr.fb / 255.0;
+    fr = (float)attr->fr / 255.0;
+    fg = (float)attr->fg / 255.0;
+    fb = (float)attr->fb / 255.0;
     fgcol = Color(fr, fg, fb);
 
-    if (cell.attr.fccode != -1) {
-      palette.insert(
-          std::pair<int, Color>(cell.attr.fccode, Color(fr, fg, fb)));
+    if (attr->fccode != -1) {
+      palette.insert(std::pair<int, Color>(attr->fccode, Color(fr, fg, fb)));
     }
   }
 
   /* Get background color */
 
-  if (cell.attr.bccode && palette.count(cell.attr.bccode)) {
-    bgcol = palette[cell.attr.bccode];
+  if (attr->bccode && palette.count(attr->bccode)) {
+    bgcol = palette[attr->bccode];
   } else {
-    br = (float)cell.attr.br / 255.0;
-    bg = (float)cell.attr.bg / 255.0;
-    bb = (float)cell.attr.bb / 255.0;
+    br = (float)attr->br / 255.0;
+    bg = (float)attr->bg / 255.0;
+    bb = (float)attr->bb / 255.0;
     bgcol = Color(br, bg, bb);
 
-    if (cell.attr.bccode != -1) {
-      palette.insert(
-          std::pair<int, Color>(cell.attr.bccode, Color(br, bg, bb)));
+    if (attr->bccode != -1) {
+      palette.insert(std::pair<int, Color>(attr->bccode, Color(br, bg, bb)));
     }
   }
 
-  if (cell.attr.inverse)
+  if (attr->inverse)
     std::swap(bgcol, fgcol);
 
   return std::make_pair(bgcol, fgcol);
 }
 
-// Recalculates the cell_size and number of cols/rows based on font size and the
-// Control's rect_size
 void Terminal::update_size() {
-  sleep = true;
+  // Recalculates the cell_size and number of cols/rows based on font size and
+  // the Control's rect_size.
 
   Ref<Font> fontref = fontmap.count("Regular")
                           ? fontmap["Regular"]
@@ -557,33 +539,12 @@ void Terminal::update_size() {
 
   emit_signal("size_changed", Vector2(cols, rows));
 
-  Cells new_cells = {};
-
-  for (int x = 0; x < rows; x++) {
-    Row row(cols);
-
-    for (int y = 0; y < cols; y++) {
-      if (x < cells.size() && y < cells[x].size()) {
-        row[y] = cells[x][y];
-      } else {
-        row[y] = empty_cell;
-      }
-    }
-
-    new_cells.push_back(row);
-  }
-
-  cells = new_cells;
-
   tsm_screen_resize(screen, cols, rows);
 
-  sleep = false;
-  framebuffer_age = tsm_screen_draw(screen, text_draw_cb, this);
   update();
 }
 
 void Terminal::write(Variant data) {
-
   const char *u8;
   size_t len;
 
@@ -606,5 +567,6 @@ void Terminal::write(Variant data) {
   }
 
   tsm_vte_input(vte, u8, len);
-  framebuffer_age = tsm_screen_draw(screen, text_draw_cb, this);
+
+  update();
 }
