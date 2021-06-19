@@ -156,9 +156,7 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 				get_tree().get_root().add_child(scene)
 				visible = false
 				scene.grab_focus()
-				print("await the exit!")
 				yield(pty, "exited")
-				print("a got here")
 				visible = true
 				$Terminal.grab_focus()
 				scene.queue_free()

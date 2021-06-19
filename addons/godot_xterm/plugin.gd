@@ -11,7 +11,7 @@ func _enter_tree():
 	var asciicast_script = preload("res://addons/godot_xterm/resources/asciicast.gd")
 	add_custom_type("Asciicast", "Animation", asciicast_script, null)
 
-	var terminal_script = preload("res://addons/godot_xterm/nodes/terminal/terminal.gdns")
+	var terminal_script = preload("res://addons/godot_xterm/nodes/terminal/terminal.gd")
 	var terminal_icon = preload("res://addons/godot_xterm/nodes/terminal/terminal_icon.svg")
 	add_custom_type("Terminal", "Control", terminal_script, terminal_icon)
 
