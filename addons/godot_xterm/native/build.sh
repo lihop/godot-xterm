@@ -28,11 +28,11 @@ fi
 
 # Build godot-cpp bindings.
 cd ${GODOT_CPP_DIR}
-scons generate_bindings=yes -j$(nproc)
+scons generate_bindings=yes target=debug -j$(nproc)
 
 # Build libgodot-xterm.
 cd ${NATIVE_DIR}
-scons -j$(nproc)
+scons target=debug -j$(nproc)
 
 # Use Docker to build libgodot-xterm javascript.
 UID_GID="0:0" docker-compose build javascript
