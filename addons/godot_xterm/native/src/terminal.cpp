@@ -8,7 +8,7 @@
 #include <xkbcommon/xkbcommon-keysyms.h>
 
 // For _populate_key_list(), see below.
-#if defined(__WIN32)
+#if !defined(__EMSCRIPTEN__)
 #include <GlobalConstants.hpp>
 #endif
 
@@ -21,12 +21,11 @@ void Terminal::_populate_key_list() {
   if (!_key_list.empty())
     return;
 
-// GitHub action for Windows throws the error:
-// `error LNK2019: unresolved external symbol godot_get_global_constants
-// referenced in function "private: static void __cdecl
-// godot::Terminal::_populate_key_list(void)"` so use the old technique of
-// getting KeyList values from GlobalConstants header for now.
-#if defined(__WIN32)
+// The following error is thrown on the javascript platform when using
+// GlobalConstants from the header: abort(Assertion failed: bad export type for
+// `_ZN5godot15GlobalConstants8KEY_KP_0E`: undefined). Build with -s
+// ASSERTIONS=1 for more info.
+#if !defined(__EMSCRIPTEN__)
 #define GLOBAL_CONSTANT(VAR) GlobalConstants::VAR
 #else
 #define GLOBAL_CONSTANT(VAR) get_constant(#VAR)
