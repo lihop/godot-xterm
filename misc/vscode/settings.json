@@ -1,0 +1,5 @@
+{
+    "editor.formatOnSave": true,
+    "clang-format.executable": "/run/current-system/sw/bin/clang-format",
+    "nixEnvSelector.nixShellConfig": "NOT_MODIFIED_ENV"
+}

@@ -13,3 +13,6 @@ mono_crash.*
 
 # Emscripten-specific ignores
 .emcache/
+
+# IDE-specific ignores
+.vscode
