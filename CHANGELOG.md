@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Supported Godot version -> 3.3.2.
 - Set a default theme if no theme property has been set.
+- Changed default font from Cousine to Hack, which is the same as Godot's script editor, and reduced size from 16 to 14.
 
 ### Fixed
 - Don't swap red and blue channels of theme colors.

@@ -1,23 +1,12 @@
-[gd_resource type="Theme" load_steps=9 format=2]
+[gd_resource type="Theme" load_steps=5 format=2]
 
-[ext_resource path="res://addons/godot_xterm/themes/fonts/cousine/Cousine-BoldItalic.ttf" type="DynamicFontData" id=1]
-[ext_resource path="res://addons/godot_xterm/themes/fonts/cousine/Cousine-Bold.ttf" type="DynamicFontData" id=2]
-[ext_resource path="res://addons/godot_xterm/themes/fonts/cousine/Cousine-Regular.ttf" type="DynamicFontData" id=3]
-[ext_resource path="res://addons/godot_xterm/themes/fonts/cousine/Cousine-Italic.ttf" type="DynamicFontData" id=4]
-
-[sub_resource type="DynamicFont" id=1]
-font_data = ExtResource( 2 )
-
-[sub_resource type="DynamicFont" id=2]
-font_data = ExtResource( 1 )
-
-[sub_resource type="DynamicFont" id=3]
-font_data = ExtResource( 4 )
-
-[sub_resource type="DynamicFont" id=4]
-font_data = ExtResource( 3 )
+[ext_resource path="res://addons/godot_xterm/themes/fonts/bold_italic.tres" type="DynamicFont" id=1]
+[ext_resource path="res://addons/godot_xterm/themes/fonts/italic.tres" type="DynamicFont" id=2]
+[ext_resource path="res://addons/godot_xterm/themes/fonts/bold.tres" type="DynamicFont" id=3]
+[ext_resource path="res://addons/godot_xterm/themes/fonts/regular.tres" type="DynamicFont" id=4]
 
 [resource]
+default_font = ExtResource( 4 )
 Terminal/colors/Background = Color( 0.172549, 0.172549, 0.172549, 1 )
 Terminal/colors/Black = Color( 0.247059, 0.247059, 0.247059, 1 )
 Terminal/colors/Blue = Color( 0.603922, 0.721569, 0.843137, 1 )
@@ -36,7 +25,7 @@ Terminal/colors/Magenta = Color( 0.862745, 0.54902, 0.764706, 1 )
 Terminal/colors/Red = Color( 0.439216, 0.313726, 0.313726, 1 )
 Terminal/colors/White = Color( 0.862745, 0.862745, 0.8, 1 )
 Terminal/colors/Yellow = Color( 0.87451, 0.686275, 0.541176, 1 )
-Terminal/fonts/Bold = SubResource( 1 )
-"Terminal/fonts/Bold Italic" = SubResource( 2 )
-Terminal/fonts/Italic = SubResource( 3 )
-Terminal/fonts/Regular = SubResource( 4 )
+Terminal/fonts/Bold = ExtResource( 3 )
+"Terminal/fonts/Bold Italic" = ExtResource( 1 )
+Terminal/fonts/Italic = ExtResource( 2 )
+Terminal/fonts/Regular = ExtResource( 4 )
