@@ -370,6 +370,18 @@ void Terminal::_draw() {
 }
 
 void Terminal::update_theme() {
+  ResourceLoader *rl = ResourceLoader::get_singleton();
+
+  /* Load the default theme if it exists and no theme is set */
+  // Having an actual theme resource set allows things like like font resizing.
+
+  const char *default_theme_path =
+      "res://addons/godot_xterm/themes/default.tres";
+
+  if (!get_theme().is_valid() && rl->exists(default_theme_path)) {
+    set_theme(rl->load(default_theme_path));
+  }
+
   /* Generate color palette based on theme */
 
   auto set_pallete_color = [this](tsm_vte_color color, String theme_color,
@@ -420,28 +432,22 @@ void Terminal::update_theme() {
 
   /* Load fonts into the fontmap from theme */
 
-  auto set_font = [this](String font_style, String default_font_path) -> void {
+  auto set_font = [this, rl](String font_style) -> void {
     Ref<Font> fontref;
-    ResourceLoader *rl = ResourceLoader::get_singleton();
 
     if (has_font(font_style, "Terminal")) {
       fontref = get_font(font_style, "Terminal");
     } else {
-      fontref = rl->load(default_font_path);
+      fontref = get_font("");
     }
 
     fontmap.insert(std::pair<String, Ref<Font>>(font_style, fontref));
   };
 
-  set_font("Bold Italic", "res://addons/godot_xterm/themes/fonts/cousine/"
-                          "cousine_bold_italic.tres");
-  set_font("Bold",
-           "res://addons/godot_xterm/themes/fonts/cousine/cousine_bold.tres");
-  set_font("Italic",
-           "res://addons/godot_xterm/themes/fonts/cousine/cousine_italic.tres");
-  set_font(
-      "Regular",
-      "res://addons/godot_xterm/themes/fonts/cousine/cousine_regular.tres");
+  set_font("Bold Italic");
+  set_font("Bold");
+  set_font("Italic");
+  set_font("Regular");
 
   update_size();
 }
