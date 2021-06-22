@@ -198,9 +198,9 @@ env.Append(CPPPATH=[
 ])
 
 sources = []
+sources.append('thirdparty/libtsm/build/external/wcwidth/wcwidth.c')
 sources.append('thirdparty/libtsm/build/src/shared/shl-htable.c')
 sources.append(Glob('thirdparty/libtsm/build/src/tsm/*.c'))
-sources.append(Glob('thirdparty/libtsm/build/external/wcwidth/*.c'))
 
 libtsm = env.StaticLibrary(
     target='thirdparty/libtsm/build/bin/libtsm.{}.{}.{}{}'.format(
