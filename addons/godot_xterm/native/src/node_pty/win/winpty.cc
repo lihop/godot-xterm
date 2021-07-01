@@ -8,9 +8,9 @@
  *   with pseudo-terminal file descriptors.
  */
 
+#include <Shlwapi.h> // PathCombine, PathIsRelative
 #include <iostream>
 #include <nan.h>
-#include <Shlwapi.h> // PathCombine, PathIsRelative
 #include <sstream>
 #include <stdlib.h>
 #include <string.h>
@@ -21,21 +21,21 @@
 #include "path_util.h"
 
 /**
-* Misc
-*/
+ * Misc
+ */
 extern "C" void init(v8::Local<v8::Object>);
 
 #define WINPTY_DBG_VARIABLE TEXT("WINPTYDBG")
 
 /**
-* winpty
-*/
+ * winpty
+ */
 static std::vector<winpty_t *> ptyHandles;
 static volatile LONG ptyCounter;
 
 /**
-* Helpers
-*/
+ * Helpers
+ */
 
 static winpty_t *get_pipe_handle(int handle) {
   for (size_t i = 0; i < ptyHandles.size(); ++i) {
@@ -73,14 +73,15 @@ void throw_winpty_error(const char *generalMsg, winpty_error_ptr_t error_ptr) {
 static NAN_METHOD(PtyGetExitCode) {
   Nan::HandleScope scope;
 
-  if (info.Length() != 1 ||
-      !info[0]->IsNumber()) {
+  if (info.Length() != 1 || !info[0]->IsNumber()) {
     Nan::ThrowError("Usage: pty.getExitCode(pidHandle)");
     return;
   }
 
   DWORD exitCode = 0;
-  GetExitCodeProcess((HANDLE)info[0]->IntegerValue(Nan::GetCurrentContext()).FromJust(), &exitCode);
+  GetExitCodeProcess(
+      (HANDLE)info[0]->IntegerValue(Nan::GetCurrentContext()).FromJust(),
+      &exitCode);
 
   info.GetReturnValue().Set(Nan::New<v8::Number>(exitCode));
 }
@@ -88,8 +89,7 @@ static NAN_METHOD(PtyGetExitCode) {
 static NAN_METHOD(PtyGetProcessList) {
   Nan::HandleScope scope;
 
-  if (info.Length() != 1 ||
-      !info[0]->IsNumber()) {
+  if (info.Length() != 1 || !info[0]->IsNumber()) {
     Nan::ThrowError("Usage: pty.getProcessList(pid)");
     return;
   }
@@ -103,7 +103,8 @@ static NAN_METHOD(PtyGetProcessList) {
   }
   int processList[64];
   const int processCount = 64;
-  int actualCount = winpty_get_console_process_list(pc, processList, processCount, nullptr);
+  int actualCount =
+      winpty_get_console_process_list(pc, processList, processCount, nullptr);
 
   v8::Local<v8::Array> result = Nan::New<v8::Array>(actualCount);
   for (uint32_t i = 0; i < actualCount; i++) {
@@ -115,15 +116,11 @@ static NAN_METHOD(PtyGetProcessList) {
 static NAN_METHOD(PtyStartProcess) {
   Nan::HandleScope scope;
 
-  if (info.Length() != 7 ||
-      !info[0]->IsString() ||
-      !info[1]->IsString() ||
-      !info[2]->IsArray() ||
-      !info[3]->IsString() ||
-      !info[4]->IsNumber() ||
-      !info[5]->IsNumber() ||
-      !info[6]->IsBoolean()) {
-    Nan::ThrowError("Usage: pty.startProcess(file, cmdline, env, cwd, cols, rows, debug)");
+  if (info.Length() != 7 || !info[0]->IsString() || !info[1]->IsString() ||
+      !info[2]->IsArray() || !info[3]->IsString() || !info[4]->IsNumber() ||
+      !info[5]->IsNumber() || !info[6]->IsBoolean()) {
+    Nan::ThrowError(
+        "Usage: pty.startProcess(file, cmdline, env, cwd, cols, rows, debug)");
     return;
   }
 
@@ -140,8 +137,9 @@ static NAN_METHOD(PtyStartProcess) {
 
     std::wstringstream envBlock;
 
-    for(uint32_t i = 0; i < envValues->Length(); i++) {
-      std::wstring envValue(path_util::to_wstring(Nan::Utf8String(Nan::Get(envValues, i).ToLocalChecked())));
+    for (uint32_t i = 0; i < envValues->Length(); i++) {
+      std::wstring envValue(path_util::to_wstring(
+          Nan::Utf8String(Nan::Get(envValues, i).ToLocalChecked())));
       envBlock << envValue << L'\0';
     }
 
@@ -170,11 +168,12 @@ static NAN_METHOD(PtyStartProcess) {
   bool debug = Nan::To<bool>(info[6]).FromJust();
 
   // Enable/disable debugging
-  SetEnvironmentVariable(WINPTY_DBG_VARIABLE, debug ? "1" : NULL); // NULL = deletes variable
+  SetEnvironmentVariable(WINPTY_DBG_VARIABLE,
+                         debug ? "1" : NULL); // NULL = deletes variable
 
   // Create winpty config
   winpty_error_ptr_t error_ptr = nullptr;
-  winpty_config_t* winpty_config = winpty_config_new(0, &error_ptr);
+  winpty_config_t *winpty_config = winpty_config_new(0, &error_ptr);
   if (winpty_config == nullptr) {
     throw_winpty_error("Error creating WinPTY config", error_ptr);
     goto cleanup;
@@ -197,7 +196,9 @@ static NAN_METHOD(PtyStartProcess) {
   ptyHandles.insert(ptyHandles.end(), pc);
 
   // Create winpty spawn config
-  winpty_spawn_config_t* config = winpty_spawn_config_new(WINPTY_SPAWN_FLAG_AUTO_SHUTDOWN, shellpath.c_str(), cmdline, cwd, env.c_str(), &error_ptr);
+  winpty_spawn_config_t *config = winpty_spawn_config_new(
+      WINPTY_SPAWN_FLAG_AUTO_SHUTDOWN, shellpath.c_str(), cmdline, cwd,
+      env.c_str(), &error_ptr);
   if (config == nullptr) {
     throw_winpty_error("Error creating WinPTY spawn config", error_ptr);
     goto cleanup;
@@ -206,7 +207,8 @@ static NAN_METHOD(PtyStartProcess) {
 
   // Spawn the new process
   HANDLE handle = nullptr;
-  BOOL spawnSuccess = winpty_spawn(pc, config, &handle, nullptr, nullptr, &error_ptr);
+  BOOL spawnSuccess =
+      winpty_spawn(pc, config, &handle, nullptr, nullptr, &error_ptr);
   winpty_spawn_config_free(config);
   if (!spawnSuccess) {
     throw_winpty_error("Unable to start terminal process", error_ptr);
@@ -216,20 +218,29 @@ static NAN_METHOD(PtyStartProcess) {
 
   // Set return values
   v8::Local<v8::Object> marshal = Nan::New<v8::Object>();
-  Nan::Set(marshal, Nan::New<v8::String>("innerPid").ToLocalChecked(), Nan::New<v8::Number>((int)GetProcessId(handle)));
-  Nan::Set(marshal, Nan::New<v8::String>("innerPidHandle").ToLocalChecked(), Nan::New<v8::Number>((int)handle));
-  Nan::Set(marshal, Nan::New<v8::String>("pid").ToLocalChecked(), Nan::New<v8::Number>((int)winpty_agent_process(pc)));
-  Nan::Set(marshal, Nan::New<v8::String>("pty").ToLocalChecked(), Nan::New<v8::Number>(InterlockedIncrement(&ptyCounter)));
-  Nan::Set(marshal, Nan::New<v8::String>("fd").ToLocalChecked(), Nan::New<v8::Number>(-1));
+  Nan::Set(marshal, Nan::New<v8::String>("innerPid").ToLocalChecked(),
+           Nan::New<v8::Number>((int)GetProcessId(handle)));
+  Nan::Set(marshal, Nan::New<v8::String>("innerPidHandle").ToLocalChecked(),
+           Nan::New<v8::Number>((int)handle));
+  Nan::Set(marshal, Nan::New<v8::String>("pid").ToLocalChecked(),
+           Nan::New<v8::Number>((int)winpty_agent_process(pc)));
+  Nan::Set(marshal, Nan::New<v8::String>("pty").ToLocalChecked(),
+           Nan::New<v8::Number>(InterlockedIncrement(&ptyCounter)));
+  Nan::Set(marshal, Nan::New<v8::String>("fd").ToLocalChecked(),
+           Nan::New<v8::Number>(-1));
   {
     LPCWSTR coninPipeName = winpty_conin_name(pc);
     std::wstring coninPipeNameWStr(coninPipeName);
-    std::string coninPipeNameStr(coninPipeNameWStr.begin(), coninPipeNameWStr.end());
-    Nan::Set(marshal, Nan::New<v8::String>("conin").ToLocalChecked(), Nan::New<v8::String>(coninPipeNameStr).ToLocalChecked());
+    std::string coninPipeNameStr(coninPipeNameWStr.begin(),
+                                 coninPipeNameWStr.end());
+    Nan::Set(marshal, Nan::New<v8::String>("conin").ToLocalChecked(),
+             Nan::New<v8::String>(coninPipeNameStr).ToLocalChecked());
     LPCWSTR conoutPipeName = winpty_conout_name(pc);
     std::wstring conoutPipeNameWStr(conoutPipeName);
-    std::string conoutPipeNameStr(conoutPipeNameWStr.begin(), conoutPipeNameWStr.end());
-    Nan::Set(marshal, Nan::New<v8::String>("conout").ToLocalChecked(), Nan::New<v8::String>(conoutPipeNameStr).ToLocalChecked());
+    std::string conoutPipeNameStr(conoutPipeNameWStr.begin(),
+                                  conoutPipeNameWStr.end());
+    Nan::Set(marshal, Nan::New<v8::String>("conout").ToLocalChecked(),
+             Nan::New<v8::String>(conoutPipeNameStr).ToLocalChecked());
   }
   info.GetReturnValue().Set(marshal);
 
@@ -244,9 +255,7 @@ cleanup:
 static NAN_METHOD(PtyResize) {
   Nan::HandleScope scope;
 
-  if (info.Length() != 3 ||
-      !info[0]->IsNumber() ||
-      !info[1]->IsNumber() ||
+  if (info.Length() != 3 || !info[0]->IsNumber() || !info[1]->IsNumber() ||
       !info[2]->IsNumber()) {
     Nan::ThrowError("Usage: pty.resize(pid, cols, rows)");
     return;
@@ -274,15 +283,14 @@ static NAN_METHOD(PtyResize) {
 static NAN_METHOD(PtyKill) {
   Nan::HandleScope scope;
 
-  if (info.Length() != 2 ||
-      !info[0]->IsNumber() ||
-      !info[1]->IsNumber()) {
+  if (info.Length() != 2 || !info[0]->IsNumber() || !info[1]->IsNumber()) {
     Nan::ThrowError("Usage: pty.kill(pid, innerPidHandle)");
     return;
   }
 
   int handle = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
-  HANDLE innerPidHandle = (HANDLE)info[1]->Int32Value(Nan::GetCurrentContext()).FromJust();
+  HANDLE innerPidHandle =
+      (HANDLE)info[1]->Int32Value(Nan::GetCurrentContext()).FromJust();
 
   winpty_t *pc = get_pipe_handle(handle);
   if (pc == nullptr) {
@@ -297,8 +305,8 @@ static NAN_METHOD(PtyKill) {
 }
 
 /**
-* Init
-*/
+ * Init
+ */
 
 extern "C" void init(v8::Local<v8::Object> target) {
   Nan::HandleScope scope;

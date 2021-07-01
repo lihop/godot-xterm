@@ -13,10 +13,10 @@
 
 namespace path_util {
 
-const wchar_t* to_wstring(const Nan::Utf8String& str);
+const wchar_t *to_wstring(const Nan::Utf8String &str);
 bool file_exists(std::wstring filename);
 std::wstring get_shell_path(std::wstring filename);
 
-}  // namespace path_util
+} // namespace path_util
 
-#endif  // NODE_PTY_PATH_UTIL_H_
+#endif // NODE_PTY_PATH_UTIL_H_

@@ -4,14 +4,14 @@
  * Copyright (c) 2018, Microsoft Corporation (MIT License).
  */
 
-#include <nan.h>
 #include <Shlwapi.h> // PathCombine
+#include <nan.h>
 
 #include "path_util.h"
 
 namespace path_util {
 
-const wchar_t* to_wstring(const Nan::Utf8String& str) {
+const wchar_t *to_wstring(const Nan::Utf8String &str) {
   const char *bytes = *str;
   unsigned int sizeOfStr = MultiByteToWideChar(CP_UTF8, 0, bytes, -1, NULL, 0);
   wchar_t *output = new wchar_t[sizeOfStr];
@@ -55,7 +55,7 @@ std::wstring get_shell_path(std::wstring filename) {
   for (int i = 0; i < paths.size(); ++i) {
     std::wstring path = paths[i];
     wchar_t searchPath[MAX_PATH];
-    ::PathCombineW(searchPath, const_cast<wchar_t*>(path.c_str()), filename_);
+    ::PathCombineW(searchPath, const_cast<wchar_t *>(path.c_str()), filename_);
 
     if (searchPath == NULL) {
       continue;
@@ -70,4 +70,4 @@ std::wstring get_shell_path(std::wstring filename) {
   return shellpath;
 }
 
-}  // namespace path_util
+} // namespace path_util
