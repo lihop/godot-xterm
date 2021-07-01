@@ -6,8 +6,7 @@
 #include <windows.h>
 
 static NAN_METHOD(ApiConsoleProcessList) {
-  if (info.Length() != 1 ||
-      !info[0]->IsNumber()) {
+  if (info.Length() != 1 || !info[0]->IsNumber()) {
     Nan::ThrowError("Usage: getConsoleProcessList(shellPid)");
     return;
   }
@@ -21,10 +20,11 @@ static NAN_METHOD(ApiConsoleProcessList) {
     Nan::ThrowError("AttachConsole failed");
   }
   auto processList = std::vector<DWORD>(64);
-  auto processCount = GetConsoleProcessList(&processList[0], processList.size());
+  auto processCount =
+      GetConsoleProcessList(&processList[0], processList.size());
   if (processList.size() < processCount) {
-      processList.resize(processCount);
-      processCount = GetConsoleProcessList(&processList[0], processList.size());
+    processList.resize(processCount);
+    processCount = GetConsoleProcessList(&processList[0], processList.size());
   }
   FreeConsole();
 
