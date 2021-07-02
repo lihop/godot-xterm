@@ -6,6 +6,7 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         platform: [ linux, javascript, osx, windows ]
         target: [ release, debug ]
