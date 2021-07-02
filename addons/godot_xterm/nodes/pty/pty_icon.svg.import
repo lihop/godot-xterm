@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/pseudoterminal_icon.svg-0b26aed87c28626d61aa92bd9e34d5a9.stex"
+path="res://.import/pty_icon.svg-e9e42570b4744b3370a02d174395c793.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/godot_xterm/nodes/pseudoterminal/pseudoterminal_icon.svg"
-dest_files=[ "res://.import/pseudoterminal_icon.svg-0b26aed87c28626d61aa92bd9e34d5a9.stex" ]
+source_file="res://addons/godot_xterm/nodes/pty/pty_icon.svg"
+dest_files=[ "res://.import/pty_icon.svg-e9e42570b4744b3370a02d174395c793.stex" ]
 
 [params]
 

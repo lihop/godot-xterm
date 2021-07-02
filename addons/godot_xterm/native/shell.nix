@@ -6,6 +6,9 @@ mkShell {
 
     cacert # Required for git clone on GithHub actions runner.
 
+    # Used to build libuv.
+    cmake
+
     # Used to build for javascript platform.
     docker
     docker-compose

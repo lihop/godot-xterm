@@ -150,11 +150,7 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 						"Terminal not Supported on Windows"
 					)
 				var scene = item.scene.instance()
-				var pty = (
-					scene
-					if OS.has_feature("JavaScript")
-					else scene.get_node("Pseudoterminal")
-				)
+				var pty = scene if OS.has_feature("JavaScript") else scene.get_node("PTY")
 				get_tree().get_root().add_child(scene)
 				visible = false
 				scene.grab_focus()
