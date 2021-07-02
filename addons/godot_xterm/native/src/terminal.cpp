@@ -1,3 +1,5 @@
+// Copyright (c) 2021, Leroy Hopson (MIT License).
+
 #include "terminal.h"
 #include <Dictionary.hpp>
 #include <InputEventKey.hpp>
@@ -543,36 +545,14 @@ void Terminal::update_size() {
   rows = std::max(2, (int)floor(get_rect().size.y / cell_size.y));
   cols = std::max(1, (int)floor(get_rect().size.x / cell_size.x));
 
-  emit_signal("size_changed", Vector2(cols, rows));
-
   tsm_screen_resize(screen, cols, rows);
 
-  update();
+  emit_signal("size_changed", Vector2(cols, rows));
 }
 
-void Terminal::write(Variant data) {
-  const char *u8;
-  size_t len;
-
-  switch (data.get_type()) {
-  case Variant::Type::POOL_BYTE_ARRAY: {
-    PoolByteArray bytes = data;
-    u8 = (char *)bytes.read().ptr();
-    len = bytes.size();
-    break;
-  }
-  case Variant::Type::STRING: {
-    String string = data;
-    u8 = string.alloc_c_string();
-    len = strlen(u8);
-    break;
-  }
-  default:
-    WARN_PRINT("Method expected a String or PoolByteArray");
-    return;
-  }
+void Terminal::write(String data) {
+  const char *u8 = data.alloc_c_string();
+  size_t len = strlen(u8);
 
   tsm_vte_input(vte, u8, len);
-
-  update();
 }

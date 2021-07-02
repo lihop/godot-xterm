@@ -16,13 +16,18 @@ enum UpdateMode {
 
 export (UpdateMode) var update_mode = UpdateMode.AUTO setget set_update_mode
 
-var rows: int setget , get_rows  # TODO: Show in inspector.
-var cols: int setget , get_cols  # TODO: Show in inspector.
+var cols = 2
+var rows = 2
 
 var _viewport: Viewport = preload("./viewport.tscn").instance()
 var _native_terminal: Control = _viewport.get_node("Terminal")
 var _screen := TextureRect.new()
 var _visibility_notifier := VisibilityNotifier2D.new()
+var _dirty := false
+
+var buffer := StreamPeerBuffer.new()
+
+var times = 0
 
 
 func set_update_mode(value):
@@ -31,16 +36,22 @@ func set_update_mode(value):
 
 
 func get_rows() -> int:
-	return _native_terminal.rows
+	return 0
 
 
 func get_cols() -> int:
-	return _native_terminal.cols
+	return 0
 
 
 func write(data) -> void:
 	assert(data is String or data is PoolByteArray)
-	_native_terminal.write(data)
+
+	# FIXME: This will occasionally cause a "Resumed function after yield, but class instance is gone" error after freeing the Terminal instance.
+	# However, this yield is necessary to ensure the terminal state machines framebuffer is up to date when we make all the draw_* calls.
+	yield(VisualServer, "frame_pre_draw")
+
+	_native_terminal.write(data if data is String else data.get_string_from_utf8())
+	_native_terminal.update()
 
 
 func _ready():
@@ -96,4 +107,13 @@ func _on_key_pressed(data: String, event: InputEventKey):
 
 
 func _on_size_changed(new_size: Vector2):
+	cols = new_size.x
+	rows = new_size.y
 	emit_signal("size_changed", new_size)
+
+
+func _set_size_warning(value):
+	if value:
+		push_warning(
+			"Terminal cols and rows are read only and determined by the font and rect sizes."
+		)

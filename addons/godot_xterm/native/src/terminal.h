@@ -1,3 +1,5 @@
+// Copyright (c) 2021, Leroy Hopson (MIT License).
+
 #ifndef TERMINAL_H
 #define TERMINAL_H
 
@@ -52,7 +54,7 @@ public:
   void _gui_input(Variant event);
   void _draw();
 
-  void write(Variant data);
+  void write(String data);
 
   enum UpdateMode {
     DISABLED,
