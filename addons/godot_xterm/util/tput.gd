@@ -1,5 +1,4 @@
 extends Reference
-class_name TPut
 
 # Control Sequence Introducer
 const CSI = "\u001b["

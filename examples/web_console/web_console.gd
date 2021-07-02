@@ -1,9 +1,11 @@
 extends Node
 
+const TPut := preload("res://addons/godot_xterm/util/tput.gd")
+
 signal exited(status)
 
 var line := ""
-var _tput: TPut
+var _tput
 
 onready var terminal = $Terminal
 onready var _has_js: bool = OS.has_feature("JavaScript")

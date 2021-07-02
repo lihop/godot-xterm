@@ -8,6 +8,8 @@ extends Control
 # - https://tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
 # - https://www.youtube.com/watch?v=jTSQlIK_92w
 
+const TPut := preload("res://addons/godot_xterm/util/tput.gd")
+
 # Title generated using command: toilet -f pagga GODOT XTERM
 const TITLE = """
 ░█▀▀░█▀█░█▀▄░█▀█░▀█▀░░░█░█░▀█▀░█▀▀░█▀▄░█▄█\r

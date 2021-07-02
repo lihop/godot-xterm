@@ -8,16 +8,6 @@
 
 config_version=4
 
-_global_script_classes=[ {
-"base": "Reference",
-"class": "TPut",
-"language": "GDScript",
-"path": "res://addons/godot_xterm/util/tput.gd"
-} ]
-_global_script_class_icons={
-"TPut": ""
-}
-
 [application]
 
 config/name="Godot Xterm"
