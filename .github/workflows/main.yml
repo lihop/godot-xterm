@@ -46,6 +46,18 @@ jobs:
         with:
           path: addons/godot_xterm/native/thirdparty/godot-cpp
           key: godot-cpp-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.GODOT_CPP_COMMIT_HASH }}
+      - name: Get libuv submodule commit hash
+        shell: bash
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        run: |
+          echo ::set-env name=LIBUV_COMMIT_HASH::$(git ls-tree HEAD addons/godot_xterm/native/thirdparty/libuv -l | cut -d\  -f3)
+      - name: Cache libuv
+        uses: actions/cache@v2
+        id: cache-libuv
+        with:
+          path: addons/godot_xterm/native/thirdparty/libuv
+          key: libuv-cache-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.LIBUV_COMMIT_HASH }}
       - name: Cache emscripten
         if: ${{ matrix.platform == 'javascript' }}
         uses: actions/cache@v2
@@ -85,6 +97,25 @@ jobs:
         run: |
           cd addons/godot_xterm/native/thirdparty/godot-cpp
           scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} generate_bindings=yes -j2
+
+      - name: Build libuv 
+        if: ${{ matrix.bits == 64 && steps.cache-libuv.outputs.cache-hit != 'true' }} 
+        uses: lukka/run-cmake@v3
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: '${{ github.workspace }}/addons/godot_xterm/native/thirdparty/libuv/CMakeLists.txt'
+          useVcpkgToolchainFile: true
+          cmakeAppendedArgs: '-DCMAKE_BUILD_TYPE=${{ matrix.target }} -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE'
+          buildDirectory: '${{ github.workspace }}/addons/godot_xterm/native/thirdparty/libuv/build'
+      - name: Build libuv 32 bit
+        if: ${{ matrix.bits == 32 && steps.cache-libuv.outputs.cache-hit != 'true' }} 
+        uses: lukka/run-cmake@v3
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: '${{ github.workspace }}/addons/godot_xterm/native/thirdparty/libuv/CMakeLists.txt'
+          useVcpkgToolchainFile: true
+          cmakeAppendedArgs: '-DCMAKE_BUILD_TYPE=${{ matrix.target }} -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32'
+          buildDirectory: '${{ github.workspace }}/addons/godot_xterm/native/thirdparty/libuv/build'
 
       - name: Build libgodot-xterm
         run: |

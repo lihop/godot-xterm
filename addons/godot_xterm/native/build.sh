@@ -15,20 +15,31 @@ fi
 
 
 # Update git submodules.
-LIBTSM_DIR=${NATIVE_DIR}/thirdparty/libtsm
-if [ -z "$(ls -A -- "$LIBTSM_DIR")" ]; then
-	cd ${NATIVE_DIR}
-	git submodule update --init --recursive -- $LIBTSM_DIR
-fi
-GODOT_CPP_DIR=${NATIVE_DIR}/thirdparty/godot-cpp
-if [ -z "$(ls -A -- "$GODOT_CPP_DIR")" ]; then
-	cd ${NATIVE_DIR}
-	git submodule update --init --recursive -- $GODOT_CPP_DIR
-fi
+updateSubmodules() {
+	eval $1=$2 # E.g LIBUV_DIR=${NATIVE_DIR}/thirdparty/libuv
+
+	if [ -z "$(ls -A -- "$2")" ]; then
+		cd ${NATIVE_DIR}
+		git submodule update --init --recursive -- $2
+	fi
+}
+
+updateSubmodules LIBUV_DIR ${NATIVE_DIR}/thirdparty/libuv
+updateSubmodules LIBTSM_DIR ${NATIVE_DIR}/thirdparty/libtsm 
+updateSubmodules GODOT_CPP_DIR ${NATIVE_DIR}/thirdparty/godot-cpp
+
 
 # Build godot-cpp bindings.
 cd ${GODOT_CPP_DIR}
 scons generate_bindings=yes target=debug -j$(nproc)
+
+# Build libuv as a static library.
+cd ${LIBUV_DIR}
+mkdir build || true
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=debug -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
+cd ..
+cmake --build build -j$(nproc)
 
 # Build libgodot-xterm.
 cd ${NATIVE_DIR}

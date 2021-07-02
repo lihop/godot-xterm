@@ -1,6 +1,7 @@
 tool
 extends EditorPlugin
 
+var pty_supported := OS.get_name() in ["X11", "Server", "OSX"]
 var asciicast_import_plugin
 
 
@@ -15,9 +16,13 @@ func _enter_tree():
 	var terminal_icon = preload("res://addons/godot_xterm/nodes/terminal/terminal_icon.svg")
 	add_custom_type("Terminal", "Control", terminal_script, terminal_icon)
 
-	var pseudoterminal_script = preload("res://addons/godot_xterm/nodes/pseudoterminal/pseudoterminal.gdns")
-	var pseudoterminal_icon = preload("res://addons/godot_xterm/nodes/pseudoterminal/pseudoterminal_icon.svg")
-	add_custom_type("Pseudoterminal", "Node", pseudoterminal_script, pseudoterminal_icon)
+	if pty_supported:
+		var pty_icon = load("res://addons/godot_xterm/nodes/pty/pty_icon.svg")
+		var pty_script
+		match OS.get_name():
+			"X11", "Server", "OSX":
+				pty_script = load("res://addons/godot_xterm/nodes/pty/unix/pty_unix.gd")
+		add_custom_type("PTY", "Node", pty_script, pty_icon)
 
 
 func _exit_tree():
@@ -26,4 +31,6 @@ func _exit_tree():
 
 	remove_custom_type("Asciicast")
 	remove_custom_type("Terminal")
-	remove_custom_type("Psuedoterminal")
+
+	if pty_supported:
+		remove_custom_type("PTY")

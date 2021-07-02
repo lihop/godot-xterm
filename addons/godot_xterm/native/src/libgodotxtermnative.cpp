@@ -1,6 +1,9 @@
 #include "terminal.h"
-#if defined(__unix__) /* Linux and macOS */ && !defined(__EMSCRIPTEN__)
-#include "pseudoterminal.h"
+
+#if !defined(__EMSCRIPTEN__) && !defined(__WIN32)
+#include "libuv_utils.h"
+#include "node_pty/unix/pty.h"
+#include "pipe.h"
 #endif
 
 extern "C" void GDN_EXPORT godot_gdnative_init(godot_gdnative_init_options *o) {
@@ -14,9 +17,10 @@ godot_gdnative_terminate(godot_gdnative_terminate_options *o) {
 
 extern "C" void GDN_EXPORT godot_nativescript_init(void *handle) {
   godot::Godot::nativescript_init(handle);
-
   godot::register_tool_class<godot::Terminal>();
-#if defined(__unix__) && !defined(__EMSCRIPTEN__)
-  godot::register_class<godot::Pseudoterminal>();
+#if !defined(__EMSCRIPTEN__) && !defined(__WIN32)
+  godot::register_tool_class<godot::Pipe>();
+  godot::register_tool_class<godot::LibuvUtils>();
+  godot::register_tool_class<godot::PTYUnix>();
 #endif
 }

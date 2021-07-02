@@ -3,4 +3,21 @@
     "clang-format.executable": "/run/current-system/sw/bin/clang-format",
     "gut-extension.additionalOptions": "-d --no-window",
     "nixEnvSelector.nixShellConfig": "NOT_MODIFIED_ENV",
+    "files.associations": {
+        "array": "cpp",
+        "istream": "cpp",
+        "limits": "cpp",
+        "numeric": "cpp",
+        "sstream": "cpp",
+        "streambuf": "cpp",
+        "utility": "cpp",
+        "optional": "cpp",
+        "ostream": "cpp",
+        "ratio": "cpp",
+        "system_error": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "*.inc": "cpp"
+    }
 }

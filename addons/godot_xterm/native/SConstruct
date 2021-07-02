@@ -218,10 +218,13 @@ env.Append(CXXFLAGS=['-std=c++14'])
 env.Append(CPPPATH=[
     'src/',
     'thirdparty/libtsm/build/src/tsm',
+    'thirdparty/libtsm/build/src/shared',
     'thirdparty/godot-cpp/include/',
     'thirdparty/godot-cpp/include/core/',
     'thirdparty/godot-cpp/include/gen/',
-    'thirdparty/godot-cpp/godot-headers/'
+    'thirdparty/godot-cpp/godot-headers/',
+    'thirdparty/libuv/src',
+    'thirdparty/libuv/include'
 ])
 env.Append(LIBPATH=[
     'thirdparty/godot-cpp/bin/',
@@ -247,10 +250,12 @@ sources = []
 sources.append('src/libgodotxtermnative.cpp')
 sources.append('src/terminal.cpp')
 
-# Psuedoterminal not supported on windows (yet) or HTML5.
-if env['platform'] != 'windows' and env['platform'] != 'javascript':
-    sources.append('src/pseudoterminal.cpp')
-    env.Append(LIBS=['util'])
+# PTY not supported on HTML5 or Windows (yet).
+if env['platform'] != 'javascript' and env['platform'] != 'windows':
+    sources.append('src/pipe.cpp')
+    sources.append('src/libuv_utils.cpp')
+    sources.append('src/node_pty/unix/pty.cc')
+    env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
 
 if env['platform'] == 'linux':
     libsuffix = "a"
