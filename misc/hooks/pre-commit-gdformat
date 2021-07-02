@@ -4,7 +4,8 @@ set -e
 
 GDTOOLKIT_VERSION=f5e2746d146200ec07ac6acb6fb378fd4c64f3f0
 
-FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep '\.gd$' | sed 's| |\\ |g')
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep '\.gd$' | grep -v '^addons/gd-plug' | grep -v '^addons/gut' | sed 's| |\\ |g')
+echo $FILES
 [ -z "$FILES" ] && exit 0
 
 # Setup GDScript Toolkit. 

@@ -16,3 +16,9 @@ mono_crash.*
 
 # IDE-specific ignores
 .vscode
+
+# Package-manager-specific ignores
+.plugged
+
+# Addon-specific ignores
+addons/gut
