@@ -66,6 +66,14 @@ opts.Add(EnumVariable(
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
 
+# Allows 32bit builds on windows 64bit. 
+if env['platform'] == 'windows':
+    if env['bits'] == '64':
+        env = Environment(TARGET_ARCH='amd64')
+    elif env['bits'] == '32':
+        env = Environment(TARGET_ARCH='x86')
+    opts.Update(env)
+
 # Add PATH to environment so scons can find commands such as g++, etc.
 env.AppendENVPath('PATH', os.getenv('PATH'))
 

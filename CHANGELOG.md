@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - HTML5 Support.
 - Theme colors now support transparency.
 - More themes: base16_dark, base16_light, default_dark, default_light, soft_black, solarized, solarized_black, solarized_white.
+- Support for Windows 32-bit (Terminal node only).
 
 ### Changed
 - Supported Godot version -> 3.3.2.
