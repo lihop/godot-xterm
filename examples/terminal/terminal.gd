@@ -1,4 +1,4 @@
-extends "res://addons/godot_xterm/nodes/terminal/terminal.gd"
+extends GDXterm.Terminal
 
 onready var pty = $PTY
 

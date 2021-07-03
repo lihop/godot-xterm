@@ -8,8 +8,6 @@ extends Control
 # - https://tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
 # - https://www.youtube.com/watch?v=jTSQlIK_92w
 
-const TPut := preload("res://addons/godot_xterm/util/tput.gd")
-
 # Title generated using command: toilet -f pagga GODOT XTERM
 const TITLE = """
 ░█▀▀░█▀█░█▀▄░█▀█░▀█▀░░░█░█░▀█▀░█▀▀░█▀▄░█▄█\r
@@ -38,7 +36,7 @@ var row: int
 var menu_start_row: int
 var offset: int
 
-onready var tput = TPut.new($Terminal)
+onready var tput = GDXterm.TPut.new($Terminal)
 
 
 func _ready():
@@ -105,10 +103,10 @@ func draw_menu():
 
 func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 	match data:
-		TPut.CURSOR_UP:  # Up arrow key
+		tput.CURSOR_UP:  # Up arrow key
 			selected_index = int(clamp(selected_index - 1, 0, menu_items.size() - 1))
 			draw_menu()
-		TPut.CURSOR_DOWN:  # Down arrow key
+		tput.CURSOR_DOWN:  # Down arrow key
 			selected_index = int(clamp(selected_index + 1, 0, menu_items.size() - 1))
 			draw_menu()
 		"1":
