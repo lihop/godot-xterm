@@ -20,8 +20,6 @@ Terminal emulator for Godot using GDNative and [libtsm](https://github.com/Aetf/
 - Linux 32-bit
 - MacOS 64-bit
 - Windows 64-bit
-
-### Planned/untested:
 - Windows 32-bit
 
 
