@@ -6,6 +6,7 @@ const DefaultTheme = preload("../../themes/default.tres")
 signal data_sent(data)
 signal key_pressed(data, event)
 signal size_changed(new_size)
+signal bell
 
 enum UpdateMode {
 	DISABLED,
@@ -62,6 +63,7 @@ func _ready():
 	_native_terminal.connect("data_sent", self, "_on_data_sent")
 	_native_terminal.connect("key_pressed", self, "_on_key_pressed")
 	_native_terminal.connect("size_changed", self, "_on_size_changed")
+	_native_terminal.connect("bell", self, "_on_bell")
 
 	_viewport.size = rect_size
 	_viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
@@ -110,6 +112,10 @@ func _on_size_changed(new_size: Vector2):
 	cols = new_size.x
 	rows = new_size.y
 	emit_signal("size_changed", new_size)
+
+
+func _on_bell():
+	emit_signal("bell")
 
 
 func _set_size_warning(value):

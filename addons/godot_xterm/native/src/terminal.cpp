@@ -268,6 +268,11 @@ static int text_draw_cb(struct tsm_screen *con, uint64_t id, const uint32_t *ch,
   return 0;
 }
 
+static void bell_cb(tsm_vte *_vte, void *data) {
+  Terminal *terminal = static_cast<Terminal *>(data);
+  terminal->emit_signal("bell");
+}
+
 void Terminal::_register_methods() {
   register_method("_init", &Terminal::_init);
   register_method("_ready", &Terminal::_ready);
@@ -291,6 +296,7 @@ void Terminal::_register_methods() {
                             "event", GODOT_VARIANT_TYPE_OBJECT);
   register_signal<Terminal>("size_changed", "new_size",
                             GODOT_VARIANT_TYPE_VECTOR2);
+  register_signal<Terminal>("bell", Dictionary());
 }
 
 Terminal::Terminal() {}
@@ -310,6 +316,8 @@ void Terminal::_init() {
   if (tsm_vte_new(&vte, screen, write_cb, this, NULL, NULL)) {
     ERR_PRINT("Error creating new tsm vte");
   }
+
+  tsm_vte_set_bell_cb(vte, bell_cb, this);
 }
 
 void Terminal::_ready() { update_theme(); }
