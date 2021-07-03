@@ -2,4 +2,4 @@ extends "res://addons/gd-plug/plug.gd"
 
 
 func _plugging():
-	plug("bitwes/Gut")
+	plug("AlexDarigan/WAT", {commit = "2136a1a440711bfdcc77ec8514d7590274bf6fb6"})

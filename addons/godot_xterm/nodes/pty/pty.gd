@@ -226,8 +226,9 @@ func fork(
 	push_error("Not implemented.")
 
 
-func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> void:
-	pass
+func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
+	assert(false, "Not implemented.")
+	return [FAILED]
 
 
 func _parse_env(env: Dictionary = {}) -> PoolStringArray:

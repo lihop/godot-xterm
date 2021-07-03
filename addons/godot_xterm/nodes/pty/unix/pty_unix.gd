@@ -97,6 +97,10 @@ func fork(
 	return OK
 
 
+func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
+	return PTYUnix.new().open(cols, rows)
+
+
 func _on_pipe_data_received(data):
 	emit_signal("data_received", data)
 

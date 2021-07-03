@@ -20,5 +20,7 @@ mono_crash.*
 # Package-manager-specific ignores
 .plugged
 
-# Addon-specific ignores
-addons/gut
+# Test-specific ignores
+addons/WAT
+test/results.xml
+test/test_metadata.json
