@@ -158,6 +158,10 @@ There are three example scenes included in this project which you can study to l
 - terminal.tscn
 - asciicast.tscn
 
+## Credits
+
+[bell.wav](/examples/bell.wav) by InspectorJ (<www.jshaw.co.uk>), downloaded from [freesound.org](https://freesound.org/people/InspectorJ/sounds/484344/), released under [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/).
+
 ## License
 
 If you contribute code to this project, you are implicitly allowing your code to be distributed under the MIT license.

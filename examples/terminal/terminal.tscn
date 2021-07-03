@@ -19,3 +19,10 @@ env = {
 "COLORTERM": "truecolor",
 "TERM": "xterm-256color"
 }
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.1
+autostart = true
+
+[connection signal="bell" from="." to="." method="_on_Terminal_bell"]
+[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
