@@ -1,8 +1,15 @@
 // Copyright (c) 2021, Leroy Hopson (MIT License).
 
+// This file contains snippets of code taken from Godot's TextEdit node.
+// The snippet code is copyright of its authors and released under the MIT
+// license:
+// - Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur (MIT License).
+// - Copyright (c) 2014-2021 Godot Engine contributors (MIT License).
+
 #include "terminal.h"
 #include <Dictionary.hpp>
 #include <InputEventKey.hpp>
+#include <InputEventMouseButton.hpp>
 #include <OS.hpp>
 #include <ResourceLoader.hpp>
 #include <Theme.hpp>
@@ -358,6 +365,35 @@ void Terminal::_gui_input(Variant event) {
     input_event_key = k;
     tsm_vte_handle_keyboard(vte, keysym, ascii, mods,
                             unicode ? unicode : TSM_VTE_INVALID);
+  }
+
+  Ref<InputEventMouseButton> mb = event;
+
+  if (mb.is_valid()) {
+    Vector2 mpos = mb->get_position();
+
+    if (mb->is_pressed()) {
+      if (mb->get_button_index() == GLOBAL_CONSTANT(BUTTON_WHEEL_UP)) {
+        if (mb->get_alt()) {
+          // Scroll 5 times as fast as normal (like in TextEdit).
+          tsm_screen_sb_up(screen, 15 * mb->get_factor());
+        } else {
+          // Scroll 3 lines.
+          tsm_screen_sb_up(screen, 3 * mb->get_factor());
+        }
+        update();
+      }
+      if (mb->get_button_index() == GLOBAL_CONSTANT(BUTTON_WHEEL_DOWN)) {
+        if (mb->get_alt()) {
+          // Scroll 5 times as fast as normal (like in TextEdit).
+          tsm_screen_sb_down(screen, 15 * mb->get_factor());
+        } else {
+          // Scroll 3 lines.
+          tsm_screen_sb_down(screen, 3 * mb->get_factor());
+        }
+        update();
+      }
+    }
   }
 }
 
