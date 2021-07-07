@@ -62,6 +62,11 @@ opts.Add(EnumVariable(
     allowed_values=('debug', 'release'),
     ignorecase=2
 ))
+opts.Add(BoolVariable(
+    'disable_pty',
+    'Disables the PTY and its dependencies (LibuvUtils and Pipe). Has no effect on platforms where PTY is not supported',
+    False
+))
 
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
@@ -258,8 +263,11 @@ sources = []
 sources.append('src/libgodotxtermnative.cpp')
 sources.append('src/terminal.cpp')
 
+
 # PTY not supported on HTML5 or Windows (yet).
-if env['platform'] != 'javascript' and env['platform'] != 'windows':
+if env['disable_pty'] or env['platform'] == 'javascript' or env['platform'] == 'windows':
+    env.Append(CPPDEFINES=['_PTY_DISABLED'])
+else:
     sources.append('src/pipe.cpp')
     sources.append('src/libuv_utils.cpp')
     sources.append('src/node_pty/unix/pty.cc')
