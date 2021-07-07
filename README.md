@@ -158,20 +158,28 @@ There are three example scenes included in this project which you can study to l
 - terminal.tscn
 - asciicast.tscn
 
-## Credits
+## [License](/LICENSE.md)
 
-[bell.wav](/examples/bell.wav) by InspectorJ (<www.jshaw.co.uk>), downloaded from [freesound.org](https://freesound.org/people/InspectorJ/sounds/484344/), released under [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/).
+Copyright (c) 2020-2021, Leroy Hopson and [contributors](https://github.com/lihop/godot-xterm/graphs/contributors) (MIT License).
 
-## License
+### Contributor License Agreement
 
 If you contribute code to this project, you are implicitly allowing your code to be distributed under the MIT license.
 You are also implicitly verifying that all code is your original work, or unoriginal work which is published under a compatible license or waiver.
 
-Copyright (c) 2020-2021 Leroy Hopson and [Contributors](https://github.com/lihop/godot-xterm/graphs/contributors) (MIT License)<br>
+### Sounds
 
-The fonts used in this project are published under a seperate license.
-See the various license files in the [subdirectories](addons/godot_xterm/themes/fonts/) for each font.
+- [bell.wav](/examples/bell.wav) by InspectorJ (<https://www.jshaw.co.uk>), downloaded from [freesound.org](https://freesound.org/people/InspectorJ/sounds/484344/), released under [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/).
 
+### Fonts
+
+- [Hack](https://sourcefoundry.org/hack/) (see [LICENSE.md](/addons/godot_xterm/themes/fonts/hack_v3.003/LICENSE.md)).
+
+### Third-party components
+
+The GDNative source code incorporates code snippets and source code from many third-party libraries. The licenses of these components can be found in the various sub-directories of this project (provided git submodules have been cloned). Many of these licenses must be distributed with source and binary distributions of this software. For convenience, the texts of these licenses have been bundled together (but clearly demarcated) in the [THIRDPARTY_NOTICES.txt](/THIRDPARTY_NOTICES.txt) file.
+
+**Note:** On platforms where the PTY node is not supported or if the library has been compiled with the option `disable_pty=yes` then only the licenses bundled in [THIRDPARTY_NOTICES_nopty.txt](/THIRDPARTY_NOTICES_nopty.txt) are applicable.
 
 [build.sh]: /addons/godot_xterm/native/build.sh
 [dist]: /addons/godot_xterm/native/dist

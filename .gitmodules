@@ -10,3 +10,5 @@
 [submodule "addons/godot_xterm/native/thirdparty/libuv"]
 	path = addons/godot_xterm/native/thirdparty/libuv
 	url = https://github.com/libuv/libuv
+[submodule "libuv/"]
+	url = https://github.com/lihop/libuv
