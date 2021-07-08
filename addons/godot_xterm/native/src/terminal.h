@@ -56,6 +56,9 @@ public:
 
   void write(String data);
 
+  void sb_up(int num);
+  void sb_down(int num);
+
   enum UpdateMode {
     DISABLED,
     AUTO,

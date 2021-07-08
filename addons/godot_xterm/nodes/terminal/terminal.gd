@@ -1,3 +1,9 @@
+# Copyright (c) 2021, Leroy Hopson (MIT License).
+#
+# This file contains snippets of code derived from Godot's TextEdit node.
+# These snippets are copyright of their authors and released under the MIT license:
+# - Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur (MIT License).
+# - Copyright (c) 2014-2021 Godot Engine contributors (MIT License).
 tool
 extends Control
 
@@ -87,6 +93,28 @@ func _refresh():
 
 func _gui_input(event):
 	_native_terminal._gui_input(event)
+	_handle_mouse_wheel(event)
+
+
+func _handle_mouse_wheel(event: InputEventMouseButton):
+	if not event or not event.is_pressed():
+		return
+
+	if event.button_index == BUTTON_WHEEL_UP:
+		if event.alt:
+			# Scroll 5 times as fast as normal (like TextEdit).
+			_native_terminal.sb_up(15 * event.factor)
+		else:
+			# Scroll 3 lines.
+			_native_terminal.sb_up(3 * event.factor)
+
+	if event.button_index == BUTTON_WHEEL_DOWN:
+		if event.alt:
+			# Scroll 5 times as fast as normal (like TextEdit).
+			_native_terminal.sb_down(15 * event.factor)
+		else:
+			# Scroll 3 lines.
+			_native_terminal.sb_down(3 * event.factor)
 
 
 func _notification(what: int) -> void:
