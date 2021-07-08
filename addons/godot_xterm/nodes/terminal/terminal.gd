@@ -31,6 +31,9 @@ export (UpdateMode) var update_mode = UpdateMode.AUTO setget set_update_mode
 var cols = 2
 var rows = 2
 
+# If true, text in the terminal will be copied to the clipboard when selected.
+export (bool) var copy_on_selection
+
 var _viewport: Viewport = preload("./viewport.tscn").instance()
 var _native_terminal: Control = _viewport.get_node("Terminal")
 var _screen := TextureRect.new()
@@ -167,6 +170,9 @@ func _handle_selection(event: InputEventMouse):
 
 func _on_selection_held() -> void:
 	if not Input.is_mouse_button_pressed(BUTTON_LEFT) or _selecting_mode == SelectionMode.NONE:
+		if copy_on_selection:
+			var selection = _native_terminal.copy_selection()
+			OS.set_clipboard(selection)
 		_selection_timer.stop()
 		return
 
