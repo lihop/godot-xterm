@@ -61,6 +61,7 @@ public:
   void start_selection(Vector2 position);
   void select_to_pointer(Vector2 position);
   void reset_selection();
+  String copy_selection();
 
   enum UpdateMode {
     DISABLED,

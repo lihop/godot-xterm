@@ -289,6 +289,7 @@ void Terminal::_register_methods() {
   register_method("start_selection", &Terminal::start_selection);
   register_method("select_to_pointer", &Terminal::select_to_pointer);
   register_method("reset_selection", &Terminal::reset_selection);
+  register_method("copy_selection", &Terminal::copy_selection);
 
   register_method("_update_theme", &Terminal::update_theme);
   register_method("_update_size", &Terminal::update_theme);
@@ -597,4 +598,12 @@ void Terminal::select_to_pointer(Vector2 position) {
 void Terminal::reset_selection() {
   tsm_screen_selection_reset(screen);
   update();
+}
+
+String Terminal::copy_selection() {
+  char *out = nullptr;
+  int len = tsm_screen_selection_copy(screen, &out);
+  String result = String(out);
+  std::free(out);
+  return result;
 }
