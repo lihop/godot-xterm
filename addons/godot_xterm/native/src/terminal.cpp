@@ -554,10 +554,14 @@ void Terminal::update_size() {
   // Recalculates the cell_size and number of cols/rows based on font size and
   // the Control's rect_size.
 
-  Ref<Font> fontref = fontmap.count("Regular") ? fontmap["Regular"]
-                      : has_font("Regular", "Terminal")
-                          ? get_font("Regular", "Terminal")
-                          : get_font("");
+  Ref<Font> fontref;
+  if (fontmap.count("Regular"))
+    fontref = fontmap["Regular"];
+  else if (has_font("Regular", "Terminal"))
+    fontref = get_font("Regular", "Terminal");
+  else
+    fontref = get_font("");
+
   cell_size = fontref->get_string_size("W");
 
   rows = std::max(2, (int)floor(get_rect().size.y / cell_size.y));
