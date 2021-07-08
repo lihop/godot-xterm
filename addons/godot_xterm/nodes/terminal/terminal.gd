@@ -21,6 +21,11 @@ enum UpdateMode {
 	ALL_NEXT_FRAME,
 }
 
+enum SelectionMode {
+	NONE,
+	POINTER,
+}
+
 export (UpdateMode) var update_mode = UpdateMode.AUTO setget set_update_mode
 
 var cols = 2
@@ -30,6 +35,11 @@ var _viewport: Viewport = preload("./viewport.tscn").instance()
 var _native_terminal: Control = _viewport.get_node("Terminal")
 var _screen := TextureRect.new()
 var _visibility_notifier := VisibilityNotifier2D.new()
+
+var _selecting := false
+var _selecting_mode: int = SelectionMode.NONE
+var _selection_timer := Timer.new()
+
 var _dirty := false
 
 var buffer := StreamPeerBuffer.new()
@@ -61,6 +71,14 @@ func write(data) -> void:
 	_native_terminal.update()
 
 
+func copy_selection() -> String:
+	return _native_terminal.copy_selection()
+
+
+func copy_all() -> String:
+	return _native_terminal.copy_all()
+
+
 func _ready():
 	if theme:
 		_native_terminal.theme = theme
@@ -79,9 +97,13 @@ func _ready():
 
 	_visibility_notifier.connect("screen_entered", self, "_refresh")
 
+	_selection_timer.wait_time = 0.05
+	_selection_timer.connect("timeout", self, "_on_selection_held")
+
 	add_child(_viewport)
 	add_child(_screen)
 	add_child(_visibility_notifier)
+	add_child(_selection_timer)
 
 	_refresh()
 
@@ -94,6 +116,7 @@ func _refresh():
 func _gui_input(event):
 	_native_terminal._gui_input(event)
 	_handle_mouse_wheel(event)
+	_handle_selection(event)
 
 
 func _handle_mouse_wheel(event: InputEventMouseButton):
@@ -115,6 +138,41 @@ func _handle_mouse_wheel(event: InputEventMouseButton):
 		else:
 			# Scroll 3 lines.
 			_native_terminal.sb_down(3 * event.factor)
+
+
+func _handle_selection(event: InputEventMouse):
+	if event is InputEventMouseButton:
+		if not event or not event.is_pressed() or not event.button_index == BUTTON_LEFT:
+			return
+
+		if _selecting:
+			_selecting = false
+			_selecting_mode = SelectionMode.NONE
+			_native_terminal.reset_selection()
+
+		# Single-click select pointer.
+		_selecting = false
+		_selecting_mode = SelectionMode.POINTER
+
+	elif event is InputEventMouseMotion:
+		if (
+			event.button_mask & BUTTON_MASK_LEFT
+			and _selecting_mode != SelectionMode.NONE
+			and not _selecting
+		):
+			_selecting = true
+			_native_terminal.start_selection(_mouse_to_cell(event.position))
+			_selection_timer.start()
+
+
+func _on_selection_held() -> void:
+	if not Input.is_mouse_button_pressed(BUTTON_LEFT) or _selecting_mode == SelectionMode.NONE:
+		_selection_timer.stop()
+		return
+
+	var position: Vector2 = _mouse_to_cell(get_local_mouse_position())
+	_native_terminal.select_to_pointer(position)
+	_selection_timer.start()
 
 
 func _notification(what: int) -> void:
@@ -144,6 +202,10 @@ func _on_size_changed(new_size: Vector2):
 
 func _on_bell():
 	emit_signal("bell")
+
+
+func _mouse_to_cell(pos: Vector2) -> Vector2:
+	return Vector2(pos / _native_terminal.cell_size)
 
 
 func _set_size_warning(value):
