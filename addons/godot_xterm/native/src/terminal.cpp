@@ -286,9 +286,15 @@ void Terminal::_register_methods() {
   register_method("sb_up", &Terminal::sb_up);
   register_method("sb_down", &Terminal::sb_down);
 
+  register_method("start_selection", &Terminal::start_selection);
+  register_method("select_to_pointer", &Terminal::select_to_pointer);
+  register_method("reset_selection", &Terminal::reset_selection);
+
   register_method("_update_theme", &Terminal::update_theme);
   register_method("_update_size", &Terminal::update_theme);
 
+  register_property<Terminal, Vector2>("cell_size", &Terminal::cell_size,
+                                       Vector2(0, 0));
   register_property<Terminal, int>("rows", &Terminal::rows, 24);
   register_property<Terminal, int>("cols", &Terminal::cols, 80);
   register_property<Terminal, int>("update_mode", &Terminal::update_mode,
@@ -547,11 +553,10 @@ void Terminal::update_size() {
   // Recalculates the cell_size and number of cols/rows based on font size and
   // the Control's rect_size.
 
-  Ref<Font> fontref = fontmap.count("Regular")
-                          ? fontmap["Regular"]
-                          : has_font("Regular", "Terminal")
-                                ? get_font("Regular", "Terminal")
-                                : get_font("");
+  Ref<Font> fontref = fontmap.count("Regular") ? fontmap["Regular"]
+                      : has_font("Regular", "Terminal")
+                          ? get_font("Regular", "Terminal")
+                          : get_font("");
   cell_size = fontref->get_string_size("W");
 
   rows = std::max(2, (int)floor(get_rect().size.y / cell_size.y));
@@ -576,5 +581,20 @@ void Terminal::sb_up(int num) {
 
 void Terminal::sb_down(int num) {
   tsm_screen_sb_down(screen, num);
+  update();
+}
+
+void Terminal::start_selection(Vector2 position) {
+  tsm_screen_selection_start(screen, position.x, position.y);
+  update();
+}
+
+void Terminal::select_to_pointer(Vector2 position) {
+  tsm_screen_selection_target(screen, position.x, position.y);
+  update();
+}
+
+void Terminal::reset_selection() {
+  tsm_screen_selection_reset(screen);
   update();
 }

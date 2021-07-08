@@ -29,7 +29,6 @@ private:
   static void _populate_key_list();
   static uint32_t mapkey(std::pair<int64_t, int64_t> key);
 
-  Vector2 cell_size;
   std::map<int, Color> palette = {};
   std::map<String, Ref<Font>> fontmap = {};
 
@@ -59,6 +58,10 @@ public:
   void sb_up(int num);
   void sb_down(int num);
 
+  void start_selection(Vector2 position);
+  void select_to_pointer(Vector2 position);
+  void reset_selection();
+
   enum UpdateMode {
     DISABLED,
     AUTO,
@@ -66,6 +69,7 @@ public:
     ALL_NEXT_FRAME,
   };
 
+  Vector2 cell_size;
   int rows;
   int cols;
   int update_mode;
