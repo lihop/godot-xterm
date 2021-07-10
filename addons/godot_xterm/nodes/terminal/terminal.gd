@@ -37,7 +37,6 @@ export (bool) var copy_on_selection
 var _viewport: Viewport = preload("./viewport.tscn").instance()
 var _native_terminal: Control = _viewport.get_node("Terminal")
 var _screen := TextureRect.new()
-var _visibility_notifier := VisibilityNotifier2D.new()
 
 var _selecting := false
 var _selecting_mode: int = SelectionMode.NONE
@@ -98,14 +97,11 @@ func _ready():
 	_screen.set_anchors_preset(PRESET_WIDE)
 	_screen.texture = _viewport.get_texture()
 
-	_visibility_notifier.connect("screen_entered", self, "_refresh")
-
 	_selection_timer.wait_time = 0.05
 	_selection_timer.connect("timeout", self, "_on_selection_held")
 
 	add_child(_viewport)
 	add_child(_screen)
-	add_child(_visibility_notifier)
 	add_child(_selection_timer)
 
 	_refresh()
@@ -185,7 +181,6 @@ func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_RESIZED:
 			_viewport.size = rect_size
-			_visibility_notifier.rect = get_rect()
 			_refresh()
 		NOTIFICATION_THEME_CHANGED:
 			_native_terminal.theme = theme
