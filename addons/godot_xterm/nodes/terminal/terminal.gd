@@ -108,6 +108,7 @@ func _ready():
 
 
 func _refresh():
+	_screen.update()
 	if update_mode == UpdateMode.AUTO:
 		_native_terminal.update_mode = UpdateMode.ALL_NEXT_FRAME
 

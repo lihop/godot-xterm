@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://addons/godot_xterm/editor_plugins/terminal/editor_terminal.gd" type="Script" id=1]
+[ext_resource path="res://addons/godot_xterm/nodes/pty/unix/pty_unix.gd" type="Script" id=2]
+
+[node name="Terminal" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+focus_mode = 1
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+copy_on_selection = true
+
+[node name="PTY" type="Node" parent="."]
+script = ExtResource( 2 )
+terminal_path = NodePath("..")
+env = {
+"COLORTERM": "truecolor",
+"TERM": "xterm-256color"
+}
