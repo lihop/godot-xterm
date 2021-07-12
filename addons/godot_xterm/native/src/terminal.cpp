@@ -288,6 +288,8 @@ void Terminal::_register_methods() {
 
   register_method("sb_up", &Terminal::sb_up);
   register_method("sb_down", &Terminal::sb_down);
+  register_method("sb_reset", &Terminal::sb_reset);
+  register_method("clear_sb", &Terminal::clear_sb);
 
   register_method("start_selection", &Terminal::start_selection);
   register_method("select_to_pointer", &Terminal::select_to_pointer);
@@ -567,7 +569,7 @@ void Terminal::update_size() {
 
   cell_size = fontref->get_string_size("W");
 
-  rows = std::max(2, (int)floor(get_rect().size.y / cell_size.y));
+  rows = std::max(1, (int)floor(get_rect().size.y / cell_size.y));
   cols = std::max(1, (int)floor(get_rect().size.x / cell_size.x));
 
   tsm_screen_resize(screen, cols, rows);
@@ -589,6 +591,16 @@ void Terminal::sb_up(int num) {
 
 void Terminal::sb_down(int num) {
   tsm_screen_sb_down(screen, num);
+  update();
+}
+
+void Terminal::sb_reset() {
+  tsm_screen_sb_reset(screen);
+  update();
+}
+
+void Terminal::clear_sb() {
+  tsm_screen_clear_sb(screen);
   update();
 }
 

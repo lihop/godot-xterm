@@ -57,6 +57,8 @@ public:
 
   void sb_up(int num);
   void sb_down(int num);
+  void sb_reset();
+  void clear_sb();
 
   void start_selection(Vector2 position);
   void select_to_pointer(Vector2 position);

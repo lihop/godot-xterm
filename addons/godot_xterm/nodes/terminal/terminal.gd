@@ -73,6 +73,13 @@ func write(data) -> void:
 	_native_terminal.update()
 
 
+func clear() -> void:
+	var initial_size = _native_terminal.rect_size
+	_native_terminal.rect_size.y = _native_terminal.cell_size.y
+	_native_terminal.clear_sb()
+	_native_terminal.rect_size = initial_size
+
+
 func copy_selection() -> String:
 	return _native_terminal.copy_selection()
 
@@ -115,6 +122,10 @@ func _refresh():
 
 func _gui_input(event):
 	_native_terminal._gui_input(event)
+
+	if event is InputEventKey:
+		_native_terminal.sb_reset()  # Return to bottom of scrollback buffer if we scrolled up.
+
 	_handle_mouse_wheel(event)
 	_handle_selection(event)
 

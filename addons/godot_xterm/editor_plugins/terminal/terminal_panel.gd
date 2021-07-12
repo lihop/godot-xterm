@@ -161,14 +161,17 @@ func _on_TerminalPopupMenu_id_pressed(id):
 	match id:
 		TerminalPopupMenuOptions.NEW_TERMINAL:
 			_on_AddButton_pressed()
-		TerminalPopupMenuOptions.PASTE:
-			if tabs.get_tab_count() > 0:
-				var terminal = tab_container.get_child(tab_container.current_tab)
+
+	if tabs.get_tab_count() > 0:
+		var terminal = tab_container.get_child(tab_container.current_tab)
+		match id:
+			TerminalPopupMenuOptions.PASTE:
 				for i in OS.clipboard.length():
 					var event = InputEventKey.new()
 					event.unicode = ord(OS.clipboard[i])
 					event.pressed = true
 					terminal._gui_input(event)
-		TerminalPopupMenuOptions.KILL_TERMINAL:
-			if tabs.get_tab_count() > 0:
+			TerminalPopupMenuOptions.CLEAR:
+				terminal.clear()
+			TerminalPopupMenuOptions.KILL_TERMINAL:
 				_on_Tabs_tab_close(tabs.current_tab)
