@@ -17,7 +17,7 @@ func _on_Terminal_bell():
 		return
 
 	var player := AudioStreamPlayer.new()
-	player.stream = preload("../bell.wav")
+	player.stream = preload("res://addons/godot_xterm/themes/audio/bell.wav")
 	player.autoplay = true
 	player.connect("finished", self, "_on_player_finished", [player])
 	add_child(player)

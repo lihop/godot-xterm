@@ -169,7 +169,7 @@ You are also implicitly verifying that all code is your original work, or unorig
 
 ### Sounds
 
-- [bell.wav](/examples/bell.wav) by InspectorJ (<https://www.jshaw.co.uk>), downloaded from [freesound.org](https://freesound.org/people/InspectorJ/sounds/484344/), released under [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/).
+- [bell.wav](/addons/godot_xterm/themes/audio/bell.wav) by InspectorJ (<https://www.jshaw.co.uk>), downloaded from [freesound.org](https://freesound.org/people/InspectorJ/sounds/484344/), released under [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/).
 
 ### Fonts
 
