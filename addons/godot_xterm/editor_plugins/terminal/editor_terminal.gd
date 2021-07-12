@@ -22,9 +22,6 @@ func _ready():
 
 	theme = Theme.new()
 
-	# Use the same font as EditorLog.
-	theme.default_font = get_font("output_source", "EditorFonts")
-
 	# Get colors from TextEdit theme. Created using the default (Adaptive) theme
 	# for reference, but will probably cause strange results if using another theme
 	# better to use a dedicated terminal theme, rather than relying on this.
