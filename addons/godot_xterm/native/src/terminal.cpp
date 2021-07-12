@@ -253,14 +253,17 @@ static int text_draw_cb(struct tsm_screen *con, uint64_t id, const uint32_t *ch,
       age <= terminal->framebuffer_age)
     return 0;
 
-  std::pair<Color, Color> color_pair = terminal->get_cell_colors(attr);
-  terminal->draw_background(row, col, color_pair.first);
+  if (width < 1) // No foreground or background to draw.
+    return 0;
 
-  size_t ulen;
-  char buf[5] = {0};
+  std::pair<Color, Color> color_pair = terminal->get_cell_colors(attr);
+  terminal->draw_background(row, col, color_pair.first, width);
 
   if (len < 1) // No foreground to draw.
     return 0;
+
+  size_t ulen;
+  char buf[5] = {0};
 
   char *utf8 = tsm_ucs4_to_utf8_alloc(ch, len, &ulen);
   memcpy(buf, utf8, ulen);
@@ -473,10 +476,10 @@ void Terminal::update_theme() {
   update_size();
 }
 
-void Terminal::draw_background(int row, int col, Color bgcolor) {
+void Terminal::draw_background(int row, int col, Color bgcolor, int width = 1) {
   /* Draw the background */
   Vector2 background_pos = Vector2(col * cell_size.x, row * cell_size.y);
-  Rect2 background_rect = Rect2(background_pos, cell_size);
+  Rect2 background_rect = Rect2(background_pos, cell_size * Vector2(width, 1));
   draw_rect(background_rect, bgcolor);
 }
 

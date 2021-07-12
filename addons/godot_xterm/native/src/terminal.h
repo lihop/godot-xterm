@@ -37,7 +37,7 @@ private:
 
 public:
   std::pair<Color, Color> get_cell_colors(const tsm_screen_attr *attr);
-  void draw_background(int row, int col, Color bgcol);
+  void draw_background(int row, int col, Color bgcol, int width);
   void draw_foreground(int row, int col, char *ch, const tsm_screen_attr *attr,
                        Color fgcol);
 
