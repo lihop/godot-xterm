@@ -68,6 +68,10 @@ func _input(event):
 	if not has_focus():
 		return
 
+	if event is InputEventKey:
+		if event.shift:
+			return
+
 	# We need to handle many input events otherwise keys such as TAB, ctrl, etc.
 	# will trigger editor shortcuts when using them in the terminal.
 	if event is InputEventKey:

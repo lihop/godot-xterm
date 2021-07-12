@@ -84,6 +84,12 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="PopupMenu" type="PopupMenu" parent="VBoxContainer/TabbarContainer"]
+margin_left = 906.0
+margin_right = 1024.0
+margin_bottom = 88.0
+items = [ "Kill", null, 0, false, false, 0, 0, null, "", false, "Kill Others", null, 0, false, false, 1, 0, null, "", false, "Kill to the Right", null, 0, false, false, 2, 0, null, "", false, "Kill All", null, 0, false, false, 3, 0, null, "", false ]
+
 [node name="TabContainer" type="TabContainer" parent="VBoxContainer"]
 margin_top = 24.0
 margin_right = 1024.0
@@ -95,6 +101,18 @@ custom_constants/top_margin = 0
 custom_constants/side_margin = 0
 tabs_visible = false
 
+[node name="TerminalPopupMenu" type="PopupMenu" parent="VBoxContainer"]
+margin_right = 193.0
+margin_bottom = 160.0
+size_flags_horizontal = 0
+size_flags_vertical = 0
+items = [ "New Terminal [Ctrl+Shift+T]", null, 0, false, false, 0, 0, null, "", false, "", null, 0, false, true, 1, 0, null, "", true, "Copy [Ctrl+Shift+C]", null, 0, false, false, 2, 0, null, "", false, "Paste [Ctrl+Shift+V]", null, 0, false, false, 3, 0, null, "", false, "Select All", null, 0, false, true, 4, 0, null, "", false, "", null, 0, false, false, 5, 0, null, "", true, "Clear", null, 0, false, true, 6, 0, null, "", false, "Kill Terminal", null, 0, false, false, 7, 0, null, "", false ]
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="tab_changed" from="VBoxContainer/TabbarContainer/Tabs" to="." method="_on_Tabs_tab_changed"]
 [connection signal="tab_close" from="VBoxContainer/TabbarContainer/Tabs" to="." method="_on_Tabs_tab_close"]
 [connection signal="pressed" from="VBoxContainer/TabbarContainer/Tabs/AddButton" to="." method="_on_AddButton_pressed"]
+[connection signal="gui_input" from="VBoxContainer/TabContainer" to="." method="_on_TabContainer_gui_input"]
+[connection signal="id_pressed" from="VBoxContainer/TerminalPopupMenu" to="." method="_on_TerminalPopupMenu_id_pressed"]

@@ -24,7 +24,10 @@ func _enter_tree():
 			"X11", "Server", "OSX":
 				pty_script = load("res://addons/godot_xterm/nodes/pty/unix/pty_unix.gd")
 		add_custom_type("PTY", "Node", pty_script, pty_icon)
+		var terminal_settings_script = preload("./editor_plugins/terminal/settings/terminal_settings.gd")
+		add_custom_type("TerminalSettings", "Resource", terminal_settings_script, null)
 		terminal_panel = preload("./editor_plugins/terminal/terminal_panel.tscn").instance()
+		terminal_panel.editor_plugin = self
 		terminal_panel.editor_interface = get_editor_interface()
 		add_control_to_bottom_panel(terminal_panel, "Terminal")
 
@@ -38,5 +41,6 @@ func _exit_tree():
 
 	if pty_supported:
 		remove_custom_type("PTY")
+		remove_custom_type("TerminalSettings")
 		remove_control_from_bottom_panel(terminal_panel)
 		terminal_panel.free()

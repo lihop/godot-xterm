@@ -8,9 +8,22 @@ tool
 extends Control
 
 const EditorTerminal := preload("./editor_terminal.tscn")
+const TerminalSettings := preload("./settings/terminal_settings.gd")
+
+const SETTINGS_FILE_PATH := "res://.gdxterm/settings.tres"
+
+enum TerminalPopupMenuOptions {
+	NEW_TERMINAL = 0,
+	COPY = 2,
+	PASTE = 3,
+	SELECT_ALL = 4,
+	CLEAR = 6,
+	KILL_TERMINAL = 7,
+}
 
 # Has access to the EditorSettings singleton so it can dynamically generate the
 # terminal color scheme based on editor theme settings.
+var editor_plugin: EditorPlugin
 var editor_interface: EditorInterface
 
 onready var editor_settings: EditorSettings = editor_interface.get_editor_settings()
@@ -18,9 +31,11 @@ onready var tabs: Tabs = $VBoxContainer/TabbarContainer/Tabs
 onready var tabbar_container: HBoxContainer = $VBoxContainer/TabbarContainer
 onready var add_button: ToolButton = $VBoxContainer/TabbarContainer/Tabs/AddButton
 onready var tab_container: TabContainer = $VBoxContainer/TabContainer
+onready var terminal_popup_menu: PopupMenu = $VBoxContainer/TerminalPopupMenu
 onready var ready := true
 
 var _theme := Theme.new()
+var _settings: TerminalSettings
 var _tab_container_min_size
 
 
@@ -29,7 +44,22 @@ func _ready():
 	_update_settings()
 
 
+func _load_or_create_settings() -> void:
+	var dir := Directory.new()
+
+	if not dir.dir_exists(SETTINGS_FILE_PATH.get_base_dir()):
+		dir.make_dir(SETTINGS_FILE_PATH.get_base_dir())
+
+	if not dir.file_exists(SETTINGS_FILE_PATH):
+		var settings := TerminalSettings.new()
+		ResourceSaver.save(SETTINGS_FILE_PATH, settings)
+
+	_settings = load(SETTINGS_FILE_PATH)
+
+
 func _update_settings() -> void:
+	_load_or_create_settings()
+
 	var editor_scale: float = editor_interface.get_editor_scale()
 	rect_min_size = Vector2(0, tabbar_container.rect_size.y + 182) * editor_scale
 
@@ -77,6 +107,7 @@ func _on_AddButton_pressed():
 	tabs.add_tab(shell.get_file())
 	terminal.editor_settings = editor_settings
 	terminal.set_anchors_preset(PRESET_WIDE)
+	terminal.connect("gui_input", self, "_on_TabContainer_gui_input")
 	tab_container.add_child(terminal)
 	terminal.pty.fork(shell)
 	terminal.grab_focus()
@@ -108,3 +139,36 @@ func _notification(what):
 			_update_terminal_tabs()
 		NOTIFICATION_WM_FOCUS_IN:
 			_update_terminal_tabs()
+
+
+func _input(event: InputEvent) -> void:
+	if not _settings or not event.is_pressed():
+		return
+
+	if _settings.new_terminal_shortcut and _settings.new_terminal_shortcut.shortcut:
+		if event.shortcut_match(_settings.new_terminal_shortcut.shortcut):
+			editor_plugin.make_bottom_panel_item_visible(self)
+			_on_AddButton_pressed()
+
+
+func _on_TabContainer_gui_input(event):
+	if event is InputEventMouseButton and event.button_index == BUTTON_RIGHT:
+		terminal_popup_menu.rect_position = event.global_position
+		terminal_popup_menu.popup()
+
+
+func _on_TerminalPopupMenu_id_pressed(id):
+	match id:
+		TerminalPopupMenuOptions.NEW_TERMINAL:
+			_on_AddButton_pressed()
+		TerminalPopupMenuOptions.PASTE:
+			if tabs.get_tab_count() > 0:
+				var terminal = tab_container.get_child(tab_container.current_tab)
+				for i in OS.clipboard.length():
+					var event = InputEventKey.new()
+					event.unicode = ord(OS.clipboard[i])
+					event.pressed = true
+					terminal._gui_input(event)
+		TerminalPopupMenuOptions.KILL_TERMINAL:
+			if tabs.get_tab_count() > 0:
+				_on_Tabs_tab_close(tabs.current_tab)

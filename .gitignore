@@ -24,3 +24,6 @@ mono_crash.*
 addons/WAT
 test/results.xml
 test/test_metadata.json
+
+# GodotXterm-specific ignores
+.gdxterm
