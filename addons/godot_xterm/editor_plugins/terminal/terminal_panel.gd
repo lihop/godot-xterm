@@ -142,6 +142,7 @@ func _input(event: InputEvent) -> void:
 
 	if _settings.new_terminal_shortcut and _settings.new_terminal_shortcut.shortcut:
 		if event.shortcut_match(_settings.new_terminal_shortcut.shortcut):
+			get_tree().set_input_as_handled()
 			editor_plugin.make_bottom_panel_item_visible(self)
 			_on_AddButton_pressed()
 
