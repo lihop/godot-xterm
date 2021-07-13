@@ -15,7 +15,6 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-copy_on_selection = true
 
 [node name="PTY" type="Node" parent="."]
 script = ExtResource( 2 )
