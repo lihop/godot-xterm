@@ -63,12 +63,7 @@ func _update_settings() -> void:
 	var editor_scale: float = editor_interface.get_editor_scale()
 	rect_min_size = Vector2(0, tabbar_container.rect_size.y + 182) * editor_scale
 
-	# Use the same policy as editor scene tabs.
-	tabs.tab_close_display_policy = (
-		Tabs.CLOSE_BUTTON_SHOW_ALWAYS
-		if editor_settings.get_setting("interface/scene_tabs/always_show_close_button")
-		else Tabs.CLOSE_BUTTON_SHOW_ACTIVE_ONLY
-	)
+	tabs.tab_close_display_policy = Tabs.CLOSE_BUTTON_SHOW_ALWAYS
 
 	_update_terminal_tabs()
 
