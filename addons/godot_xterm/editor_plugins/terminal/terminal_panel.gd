@@ -171,3 +171,8 @@ func _on_TerminalPopupMenu_id_pressed(id):
 				terminal.clear()
 			TerminalPopupMenuOptions.KILL_TERMINAL:
 				_on_Tabs_tab_close(tabs.current_tab)
+
+
+func _on_Tabs_reposition_active_tab_request(idx_to):
+	var active = tab_container.get_child(tab_container.current_tab)
+	tab_container.move_child(active, idx_to)
