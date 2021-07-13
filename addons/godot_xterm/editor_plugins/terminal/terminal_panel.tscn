@@ -112,9 +112,44 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="SizeLabel" type="Label" parent="."]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -52.0
+margin_top = -15.5
+margin_right = 52.0
+margin_bottom = 15.5
+text = "Size: %d rows; %d cols
+(%d x %d)"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="Panel" parent="SizeLabel"]
+show_behind_parent = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -5.0
+margin_top = -5.0
+margin_right = 5.0
+margin_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SizeLabelTimer" type="Timer" parent="SizeLabel"]
+
+[connection signal="resized" from="." to="." method="_on_Panel_resized"]
 [connection signal="reposition_active_tab_request" from="VBoxContainer/TabbarContainer/Tabs" to="." method="_on_Tabs_reposition_active_tab_request"]
 [connection signal="tab_changed" from="VBoxContainer/TabbarContainer/Tabs" to="." method="_on_Tabs_tab_changed"]
 [connection signal="tab_close" from="VBoxContainer/TabbarContainer/Tabs" to="." method="_on_Tabs_tab_close"]
 [connection signal="pressed" from="VBoxContainer/TabbarContainer/Tabs/AddButton" to="." method="_on_AddButton_pressed"]
 [connection signal="gui_input" from="VBoxContainer/TabContainer" to="." method="_on_TabContainer_gui_input"]
 [connection signal="id_pressed" from="VBoxContainer/TerminalPopupMenu" to="." method="_on_TerminalPopupMenu_id_pressed"]
+[connection signal="timeout" from="SizeLabel/SizeLabelTimer" to="." method="_on_SizeLabelTimer_timeout"]

@@ -32,6 +32,12 @@ onready var tabbar_container: HBoxContainer = $VBoxContainer/TabbarContainer
 onready var add_button: ToolButton = $VBoxContainer/TabbarContainer/Tabs/AddButton
 onready var tab_container: TabContainer = $VBoxContainer/TabContainer
 onready var terminal_popup_menu: PopupMenu = $VBoxContainer/TerminalPopupMenu
+
+# Size label.
+# Used to show the size of the terminal (rows/cols) and panel (pixels) when resized.
+onready var size_label: Label = $SizeLabel
+onready var size_label_timer: Timer = $SizeLabel/SizeLabelTimer
+
 onready var ready := true
 
 var _theme := Theme.new()
@@ -62,6 +68,7 @@ func _update_settings() -> void:
 
 	var editor_scale: float = editor_interface.get_editor_scale()
 	rect_min_size = Vector2(0, tabbar_container.rect_size.y + 182) * editor_scale
+	rect_size.y = 415
 
 	tabs.tab_close_display_policy = Tabs.CLOSE_BUTTON_SHOW_ALWAYS
 
@@ -239,3 +246,26 @@ func _on_TerminalPopupMenu_id_pressed(id):
 func _on_Tabs_reposition_active_tab_request(idx_to):
 	var active = tab_container.get_child(tab_container.current_tab)
 	tab_container.move_child(active, idx_to)
+
+
+func _on_Panel_resized():
+	if not size_label:
+		return
+
+	var size = tab_container.rect_size
+	if tabs.get_tab_count() > 0:
+		var terminal = tab_container.get_child(tabs.current_tab)
+		var cols = terminal.cols
+		var rows = terminal.rows
+		size_label.text = "Size: %d cols; %d rows\n(%d x %d px)" % [cols, rows, size.x, size.y]
+	else:
+		size_label.text = "Size:\n(%d x %d px)" % [size.x, size.y]
+
+	size_label.visible = true
+	size_label_timer.wait_time = 1
+	size_label_timer.start()
+
+
+func _on_SizeLabelTimer_timeout():
+	if size_label:
+		size_label.visible = false
