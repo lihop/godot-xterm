@@ -13,6 +13,7 @@ enum CWDType {
 ### Shortcuts ###
 
 export (ShortCut) var new_terminal_shortcut = preload("./default_new_terminal_shortcut.tres")
+export (ShortCut) var kill_terminal_shortcut = preload("./default_kill_terminal_shortcut.tres")
 export (ShortCut) var copy_shortcut = preload("./default_copy_shortcut.tres")
 export (ShortCut) var paste_shortcut = preload("./default_paste_shortcut.tres")
 

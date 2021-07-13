@@ -5,7 +5,7 @@ shift = true
 control = true
 command = true
 pressed = true
-scancode = 67
+scancode = 88
 
 [resource]
 shortcut = SubResource( 1 )
