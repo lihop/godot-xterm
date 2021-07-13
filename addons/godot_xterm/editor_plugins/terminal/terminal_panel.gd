@@ -16,7 +16,7 @@ enum TerminalPopupMenuOptions {
 	NEW_TERMINAL = 0,
 	COPY = 2,
 	PASTE = 3,
-	SELECT_ALL = 4,
+	COPY_ALL = 4,
 	CLEAR = 6,
 	KILL_TERMINAL = 7,
 }
@@ -216,6 +216,8 @@ func _on_TerminalPopupMenu_id_pressed(id):
 					event.unicode = ord(OS.clipboard[i])
 					event.pressed = true
 					terminal._gui_input(event)
+			TerminalPopupMenuOptions.COPY_ALL:
+				OS.clipboard = terminal.copy_all()
 			TerminalPopupMenuOptions.CLEAR:
 				terminal.clear()
 			TerminalPopupMenuOptions.KILL_TERMINAL:

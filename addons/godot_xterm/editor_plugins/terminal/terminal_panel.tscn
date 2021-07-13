@@ -107,7 +107,7 @@ margin_right = 193.0
 margin_bottom = 160.0
 size_flags_horizontal = 0
 size_flags_vertical = 0
-items = [ "New Terminal", null, 0, false, false, 0, 0, null, "", false, "", null, 0, false, true, 1, 0, null, "", true, "Copy", null, 0, false, false, 2, 0, null, "", false, "Paste", null, 0, false, false, 3, 0, null, "", false, "Select All", null, 0, false, true, 4, 0, null, "", false, "", null, 0, false, false, 5, 0, null, "", true, "Clear", null, 0, false, false, 6, 0, null, "", false, "Kill Terminal", null, 0, false, false, 7, 0, null, "", false ]
+items = [ "New Terminal", null, 0, false, false, 0, 0, null, "", false, "", null, 0, false, true, 1, 0, null, "", true, "Copy", null, 0, false, false, 2, 0, null, "", false, "Paste", null, 0, false, false, 3, 0, null, "", false, "Copy All", null, 0, false, false, 4, 0, null, "", false, "", null, 0, false, false, 5, 0, null, "", true, "Clear", null, 0, false, false, 6, 0, null, "", false, "Kill Terminal", null, 0, false, false, 7, 0, null, "", false ]
 __meta__ = {
 "_edit_use_anchors_": false
 }
