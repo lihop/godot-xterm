@@ -193,6 +193,18 @@ func _input(event: InputEvent) -> void:
 				get_tree().set_input_as_handled()
 				_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.PASTE)
 
+		# Next tab.
+		if _settings.next_tab_shortcut and _settings.next_tab_shortcut.shortcut:
+			if event.shortcut_match(_settings.next_tab_shortcut.shortcut):
+				get_tree().set_input_as_handled()
+				tabs.current_tab = min(tabs.current_tab + 1, tabs.get_tab_count() - 1)
+
+		# Previous tab.
+		if _settings.previous_tab_shortcut and _settings.previous_tab_shortcut.shortcut:
+			if event.shortcut_match(_settings.previous_tab_shortcut.shortcut):
+				get_tree().set_input_as_handled()
+				tabs.current_tab = max(tabs.current_tab - 1, 0)
+
 
 func _on_TabContainer_gui_input(event):
 	if event is InputEventMouseButton and event.button_index == BUTTON_RIGHT:

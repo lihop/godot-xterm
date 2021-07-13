@@ -68,8 +68,14 @@ func _input(event):
 	if not has_focus():
 		return
 
+	# Ignore some input that is used by shortcuts.
+	# TODO: Figure out how to handle this properly as the user might set their
+	# own custom shortcuts.
 	if event is InputEventKey:
 		if event.shift:
+			return
+
+		if event.control and event.scancode == KEY_PAGEUP or event.scancode == KEY_PAGEDOWN:
 			return
 
 	# We need to handle many input events otherwise keys such as TAB, ctrl, etc.

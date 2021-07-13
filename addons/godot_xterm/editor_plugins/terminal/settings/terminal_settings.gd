@@ -17,6 +17,9 @@ export (ShortCut) var kill_terminal_shortcut = preload("./default_kill_terminal_
 export (ShortCut) var copy_shortcut = preload("./default_copy_shortcut.tres")
 export (ShortCut) var paste_shortcut = preload("./default_paste_shortcut.tres")
 
+export (ShortCut) var next_tab_shortcut = preload("./default_tab_right_shortcut.tres")
+export (ShortCut) var previous_tab_shortcut = preload("./default_tab_left_shortcut.tres")
+
 ### Scroll settings ###
 
 # The maximum amount of lines the terminal keeps in its buffer.
