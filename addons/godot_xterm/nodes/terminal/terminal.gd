@@ -34,9 +34,21 @@ var rows = 2
 # If true, text in the terminal will be copied to the clipboard when selected.
 export (bool) var copy_on_selection
 
+# Bell
+# If enabled, bell_sound will play when the ASCII BELL "\u0007" character is printed.
+export var bell_enabled := true
+export var bell_sound: AudioStream = preload("../../themes/audio/bell.wav")
+# Number of milliseconds that must pass before emitting a new bell sound.
+# This important in cases where the bell character is being printed frequently
+# such as `while true; do echo -e "\a"; done`, as adding additional AudioStreamPlayer
+# nodes too frequently has a negative performance impact.
+export var bell_cooldown_msec: int = 100
+
 var _viewport: Viewport = preload("./viewport.tscn").instance()
 var _native_terminal: Control = _viewport.get_node("Terminal")
 var _screen := TextureRect.new()
+
+var _bell_timer := Timer.new()
 
 var _selecting := false
 var _selecting_mode: int = SelectionMode.NONE
@@ -96,13 +108,16 @@ func _ready():
 	_native_terminal.connect("data_sent", self, "_on_data_sent")
 	_native_terminal.connect("key_pressed", self, "_on_key_pressed")
 	_native_terminal.connect("size_changed", self, "_on_size_changed")
-	_native_terminal.connect("bell", self, "_on_bell")
 
 	_viewport.size = rect_size
 	_viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
 
 	_screen.set_anchors_preset(PRESET_WIDE)
 	_screen.texture = _viewport.get_texture()
+
+	_native_terminal.connect("bell", self, "_on_bell")
+	_bell_timer.one_shot = true
+	add_child(_bell_timer)
 
 	_selection_timer.wait_time = 0.05
 	_selection_timer.connect("timeout", self, "_on_selection_held")
@@ -214,7 +229,20 @@ func _on_size_changed(new_size: Vector2):
 
 
 func _on_bell():
+	if bell_enabled and bell_sound and _bell_timer.time_left == 0:
+		var player := AudioStreamPlayer.new()
+		player.stream = bell_sound
+		player.autoplay = true
+		player.playing = true
+		player.connect("finished", self, "_on_player_finished", [player])
+		add_child(player)
+		_bell_timer.start(0.001 * bell_cooldown_msec)
+
 	emit_signal("bell")
+
+
+func _on_player_finished(player: AudioStreamPlayer):
+	player.queue_free()
 
 
 func _mouse_to_cell(pos: Vector2) -> Vector2:
