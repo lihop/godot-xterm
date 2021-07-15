@@ -1,7 +1,7 @@
 tool
 extends EditorImportPlugin
 
-const Asciicast = preload("res://addons/godot_xterm/resources/asciicast.gd")
+const Asciicast = preload("../resources/asciicast.gd")
 
 
 func get_importer_name():

@@ -7,22 +7,23 @@ var terminal_panel: Control
 
 
 func _enter_tree():
-	asciicast_import_plugin = preload("res://addons/godot_xterm/import_plugins/asciicast_import_plugin.gd").new()
+	asciicast_import_plugin = preload("./import_plugins/asciicast_import_plugin.gd").new()
 	add_import_plugin(asciicast_import_plugin)
 
-	var asciicast_script = preload("res://addons/godot_xterm/resources/asciicast.gd")
+	var asciicast_script = preload("./resources/asciicast.gd")
 	add_custom_type("Asciicast", "Animation", asciicast_script, null)
 
-	var terminal_script = preload("res://addons/godot_xterm/nodes/terminal/terminal.gd")
-	var terminal_icon = preload("res://addons/godot_xterm/nodes/terminal/terminal_icon.svg")
+	var terminal_script = preload("./nodes/terminal/terminal.gd")
+	var terminal_icon = preload("./nodes/terminal/terminal_icon.svg")
 	add_custom_type("Terminal", "Control", terminal_script, terminal_icon)
 
 	if pty_supported:
-		var pty_icon = load("res://addons/godot_xterm/nodes/pty/pty_icon.svg")
+		var base_dir = get_script().resource_path.get_base_dir()
+		var pty_icon = load("%s/nodes/pty/pty_icon.svg" % base_dir)
 		var pty_script
 		match OS.get_name():
 			"X11", "Server", "OSX":
-				pty_script = load("res://addons/godot_xterm/nodes/pty/unix/pty_unix.gd")
+				pty_script = load("%s/nodes/pty/unix/pty_unix.gd" % base_dir)
 		add_custom_type("PTY", "Node", pty_script, pty_icon)
 		var terminal_settings_script = preload("./editor_plugins/terminal/settings/terminal_settings.gd")
 		add_custom_type("TerminalSettings", "Resource", terminal_settings_script, null)
