@@ -1,6 +1,8 @@
 tool
 extends "res://addons/godot_xterm/nodes/terminal/terminal.gd"
 
+signal exited(exit_code, signum)
+
 var editor_settings: EditorSettings
 var timer := Timer.new()
 
@@ -83,3 +85,8 @@ func _input(event):
 	if event is InputEventKey:
 		get_tree().set_input_as_handled()
 		_gui_input(event)
+
+
+func _on_PTY_exited(exit_code: int, signum: int):
+	print("exit_code: ", exit_code, " signum: ", signum)
+	emit_signal("exited", exit_code, signum)

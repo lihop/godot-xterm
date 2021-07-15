@@ -8,6 +8,7 @@ tool
 extends Control
 
 const EditorTerminal := preload("./editor_terminal.tscn")
+const PTY := preload("../../nodes/pty/pty.gd")
 const TerminalSettings := preload("./settings/terminal_settings.gd")
 
 const SETTINGS_FILE_PATH := "res://.gdxterm/settings.tres"
@@ -128,6 +129,7 @@ func _on_AddButton_pressed():
 	terminal.editor_settings = editor_settings
 	terminal.set_anchors_preset(PRESET_WIDE)
 	terminal.connect("gui_input", self, "_on_TabContainer_gui_input")
+	terminal.connect("exited", self, "_on_Terminal_exited", [terminal])
 	tab_container.add_child(terminal)
 	terminal.pty.fork(shell)
 	terminal.grab_focus()
@@ -269,3 +271,10 @@ func _on_Panel_resized():
 func _on_SizeLabelTimer_timeout():
 	if size_label:
 		size_label.visible = false
+
+
+func _on_Terminal_exited(exit_code, signum, terminal):
+	# Leave non-zero exit code terminals open in case they have some important
+	# error information.
+	if exit_code == 0:
+		_on_Tabs_tab_close(terminal.get_index())

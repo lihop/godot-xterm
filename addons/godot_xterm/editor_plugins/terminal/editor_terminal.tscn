@@ -23,3 +23,5 @@ env = {
 "COLORTERM": "truecolor",
 "TERM": "xterm-256color"
 }
+
+[connection signal="exited" from="PTY" to="." method="_on_PTY_exited"]
