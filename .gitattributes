@@ -1,0 +1,2 @@
+# linguist override to identify .gd files as GDScript rather than GAP.
+*.gd linguist-language=GDScript
