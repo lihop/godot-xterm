@@ -425,30 +425,46 @@ void Terminal::update_theme() {
     palette[color] = c;
   };
 
-  set_pallete_color(TSM_COLOR_BLACK, "Black", Color(0, 0, 0, 1));
-  set_pallete_color(TSM_COLOR_RED, "Red", Color(0.501961, 0, 0, 1));
-  set_pallete_color(TSM_COLOR_GREEN, "Green", Color(0, 0.501961, 0, 1));
-  set_pallete_color(TSM_COLOR_YELLOW, "Yellow",
-                    Color(0.501961, 0.501961, 0, 1));
-  set_pallete_color(TSM_COLOR_BLUE, "Blue", Color(0, 0, 0.501961, 1));
-  set_pallete_color(TSM_COLOR_MAGENTA, "Magenta",
-                    Color(0.501961, 0, 0.501961, 1));
-  set_pallete_color(TSM_COLOR_CYAN, "Cyan", Color(0, 0.501961, 0.501961, 1));
-  set_pallete_color(TSM_COLOR_DARK_GREY, "Dark Grey",
-                    Color(0.501961, 0.501961, 0.501961, 1));
-  set_pallete_color(TSM_COLOR_LIGHT_GREY, "Light Grey",
-                    Color(0.752941, 0.752941, 0.752941, 1));
-  set_pallete_color(TSM_COLOR_LIGHT_RED, "Light Red", Color(1, 0, 0, 1));
-  set_pallete_color(TSM_COLOR_LIGHT_GREEN, "Light Green", Color(0, 1, 0, 1));
-  set_pallete_color(TSM_COLOR_LIGHT_YELLOW, "Light Yellow", Color(1, 1, 0, 1));
-  set_pallete_color(TSM_COLOR_LIGHT_BLUE, "Light Blue", Color(0, 0, 1, 1));
-  set_pallete_color(TSM_COLOR_LIGHT_MAGENTA, "Light Magenta",
-                    Color(1, 0, 1, 1));
-  set_pallete_color(TSM_COLOR_LIGHT_CYAN, "Light Cyan", Color(0, 1, 1, 1));
-  set_pallete_color(TSM_COLOR_WHITE, "White", Color(1, 1, 1, 1));
+  /* Default to Xterm colors */
 
-  set_pallete_color(TSM_COLOR_BACKGROUND, "Background", Color(0, 0, 0, 1));
-  set_pallete_color(TSM_COLOR_FOREGROUND, "Foreground", Color(1, 1, 1, 1));
+  /* ANSI 0 */
+  set_pallete_color(TSM_COLOR_BLACK, "Black", Color::html("#000000"));
+  /* ANSI 1 */
+  set_pallete_color(TSM_COLOR_RED, "Red", Color::html("#CD0000"));
+  /* ANSI 2 */
+  set_pallete_color(TSM_COLOR_GREEN, "Green", Color::html("#00CD00"));
+  /* ANSI 3 */
+  set_pallete_color(TSM_COLOR_YELLOW, "Yellow", Color::html("#CDCD00"));
+  /* ANSI 4 */
+  set_pallete_color(TSM_COLOR_BLUE, "Blue", Color::html("#0000EE"));
+  /* ANSI 5 */
+  set_pallete_color(TSM_COLOR_MAGENTA, "Magenta", Color::html("#CD00CD"));
+  /* ANSI 6 */
+  set_pallete_color(TSM_COLOR_CYAN, "Cyan", Color::html("#00CDCD"));
+  /* ANSI 7 (White) */
+  set_pallete_color(TSM_COLOR_LIGHT_GREY, "Light Grey", Color::html("#E5E5E5"));
+  /* ANSI 8 (Bright Black) */
+  set_pallete_color(TSM_COLOR_DARK_GREY, "Dark Grey", Color::html("#7F7F7F"));
+  /* ANSI 9 */
+  set_pallete_color(TSM_COLOR_LIGHT_RED, "Light Red", Color::html("#FF0000"));
+  /* ANSI 10 */
+  set_pallete_color(TSM_COLOR_LIGHT_GREEN, "Light Green",
+                    Color::html("#00FF00"));
+  /* ANSI 11 */
+  set_pallete_color(TSM_COLOR_LIGHT_YELLOW, "Light Yellow",
+                    Color::html("#FFFF00"));
+  /* ANSI 12 */
+  set_pallete_color(TSM_COLOR_LIGHT_BLUE, "Light Blue", Color::html("#0000FC"));
+  /* ANSI 13 */
+  set_pallete_color(TSM_COLOR_LIGHT_MAGENTA, "Light Magenta",
+                    Color::html("#FF00FF"));
+  /* ANSI 14 */
+  set_pallete_color(TSM_COLOR_LIGHT_CYAN, "Light Cyan", Color::html("#00FFFF"));
+  /* ANSI 15 (Bright White) */
+  set_pallete_color(TSM_COLOR_WHITE, "White", Color::html("#FFFFFF"));
+
+  set_pallete_color(TSM_COLOR_FOREGROUND, "Foreground", Color::html("#000000"));
+  set_pallete_color(TSM_COLOR_BACKGROUND, "Background", Color::html("#FFFFFF"));
 
   if (tsm_vte_set_custom_palette(vte, color_palette)) {
     ERR_PRINT("Error setting custom palette");

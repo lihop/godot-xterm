@@ -1,9 +1,14 @@
 #include "terminal.h"
 
-#if !defined(__EMSCRIPTEN__) && !defined(__WIN32)
+#if !defined(_PTY_DISABLED)
 #include "libuv_utils.h"
-#include "node_pty/unix/pty.h"
 #include "pipe.h"
+#if defined(__unix__)
+#include "node_pty/unix/pty.h"
+#endif
+#if defined(__WIN32)
+//#include "node_pty/win/conpty.h"
+#endif
 #endif
 
 extern "C" void GDN_EXPORT godot_gdnative_init(godot_gdnative_init_options *o) {
@@ -23,6 +28,9 @@ extern "C" void GDN_EXPORT godot_nativescript_init(void *handle) {
   godot::register_tool_class<godot::LibuvUtils>();
 #if defined(__unix__)
   godot::register_tool_class<godot::PTYUnix>();
+#endif
+#if defined(__WIN32)
+  // godot::register_tool_class<godot::ConPTY>();
 #endif
 #endif
 }

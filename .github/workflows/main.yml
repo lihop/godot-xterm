@@ -98,29 +98,38 @@ jobs:
           cd addons/godot_xterm/native/thirdparty/godot-cpp
           scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} generate_bindings=yes -j2
 
-      - name: Build libuv 
-        if: ${{ matrix.bits == 64 && steps.cache-libuv.outputs.cache-hit != 'true' }} 
-        uses: lukka/run-cmake@v3
+      - name: Setup cmake
+        if: steps.cache-libuv.outputs.cache-hit != 'true'
+        uses: jwlawson/actions-setup-cmake@v1.9
         with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeListsTxtPath: '${{ github.workspace }}/addons/godot_xterm/native/thirdparty/libuv/CMakeLists.txt'
-          useVcpkgToolchainFile: true
-          cmakeAppendedArgs: '-DCMAKE_BUILD_TYPE=${{ matrix.target }} -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE'
-          buildDirectory: '${{ github.workspace }}/addons/godot_xterm/native/thirdparty/libuv/build'
-      - name: Build libuv 32 bit
-        if: ${{ matrix.bits == 32 && steps.cache-libuv.outputs.cache-hit != 'true' }} 
-        uses: lukka/run-cmake@v3
-        with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeListsTxtPath: '${{ github.workspace }}/addons/godot_xterm/native/thirdparty/libuv/CMakeLists.txt'
-          useVcpkgToolchainFile: true
-          cmakeAppendedArgs: '-DCMAKE_BUILD_TYPE=${{ matrix.target }} -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32'
-          buildDirectory: '${{ github.workspace }}/addons/godot_xterm/native/thirdparty/libuv/build'
+          cmake-version: '3.15.4'
+          use-32bit: ${{ matrix.bits == 32 && matrix.os == 'windows-latest' }}
+      - name: Build libuv
+        if: steps.cache-libuv.outputs.cache-hit != 'true'
+        shell: bash
+        env:
+          TARGET: ${{ matrix.target }}
+          BITS: ${{ matrix.bits }}
+          OS: ${{ matrix.os }}
+        run: |
+          cd addons/godot_xterm/native/thirdparty/libuv
+          args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE"
+          if [ "$BITS" -eq 32 -a "$OS" == "windows-latest" ]; then
+            cmake -G "Visual Studio 16 2019" -A Win32 -S $(pwd) -B "build" $args
+          else
+            mkdir build || true
+            cd build
+            if [ "$BITS" -eq 32 ]; then args="$args -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32"; fi
+            cmake .. $args
+            cd ..
+          fi
+          cmake --build build --config $TARGET
 
       - name: Build libgodot-xterm
         run: |
           cd addons/godot_xterm/native
-          scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} -j2
+          # Disable PTY on release windows builds as it has linking errors when built on GithHub actions.
+          scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} disable_pty=${{ matrix.target == 'release' && matrix.platform == 'windows' && 'yes' || 'no' }} -j2
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2

@@ -3,13 +3,8 @@
 #ifndef GODOT_XTERM_PIPE_H
 #define GODOT_XTERM_PIPE_H
 
-#include <Array.hpp>
-#include <FuncRef.hpp>
 #include <Godot.hpp>
 #include <Reference.hpp>
-#include <StreamPeer.hpp>
-#include <StreamPeerBuffer.hpp>
-#include <StreamPeerGDNative.hpp>
 #include <uv.h>
 
 namespace godot {
@@ -21,18 +16,6 @@ public:
   uv_pipe_t handle;
 
   static void _register_methods();
-
-  enum Status {
-    NONE,
-    CONNECTING,
-    CONNECTED,
-    ERROR,
-  };
-
-  int STATUS_NONE = Status::NONE;
-  int STATUS_CONNECTING = Status::CONNECTING;
-  int STATUS_CONNECTED = Status::CONNECTING;
-  int STATUS_ERROR = Status::ERROR;
 
   Pipe();
   ~Pipe();
@@ -47,11 +30,8 @@ public:
   void pause();
   void resume();
 
-protected:
-  const godot_net_stream_peer *interface;
-
 public:
-  Status status;
+  int status;
 
 private:
   void _poll_connection();

@@ -2,6 +2,7 @@
  * Copyright (c) 2013-2015, Christopher Jeffrey, Peter Sunde (MIT License)
  * Copyright (c) 2016, Daniel Imms (MIT License).
  * Copyright (c) 2018, Microsoft Corporation (MIT License).
+ * Copyright (c) 2021, Leroy Hopson (MIT License).
  *
  * pty.cc:
  *   This file is responsible for starting processes
@@ -379,18 +380,9 @@ static NAN_METHOD(PtyConnect) {
   info.GetReturnValue().Set(marshal);
 }
 
-static NAN_METHOD(PtyResize) {
-  Nan::HandleScope scope;
-
-  if (info.Length() != 3 || !info[0]->IsNumber() || !info[1]->IsNumber() ||
-      !info[2]->IsNumber()) {
-    Nan::ThrowError("Usage: pty.resize(id, cols, rows)");
-    return;
-  }
-
-  int id = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
-  SHORT cols = info[1]->Uint32Value(Nan::GetCurrentContext()).FromJust();
-  SHORT rows = info[2]->Uint32Value(Nan::GetCurrentContext()).FromJust();
+void ConPTY::resize(int id, int cols, int rows) {
+  // SHORT cols = info[1]->Uint32Value(Nan::GetCurrentContext()).FromJust();
+  // SHORT rows = info[2]->Uint32Value(Nan::GetCurrentContext()).FromJust();
 
   const pty_baton *handle = get_pty_baton(id);
 
@@ -405,20 +397,9 @@ static NAN_METHOD(PtyResize) {
       pfnResizePseudoConsole(handle->hpc, size);
     }
   }
-
-  return info.GetReturnValue().SetUndefined();
 }
 
-static NAN_METHOD(PtyKill) {
-  Nan::HandleScope scope;
-
-  if (info.Length() != 1 || !info[0]->IsNumber()) {
-    Nan::ThrowError("Usage: pty.kill(id)");
-    return;
-  }
-
-  int id = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
-
+void ConPTY::kill(int id) {
   const pty_baton *handle = get_pty_baton(id);
 
   HANDLE hLibrary = LoadLibraryExW(L"kernel32.dll", 0, 0);
@@ -441,12 +422,12 @@ static NAN_METHOD(PtyKill) {
  * Init
  */
 
-extern "C" void init(v8::Local<v8::Object> target) {
-  Nan::HandleScope scope;
-  Nan::SetMethod(target, "startProcess", PtyStartProcess);
-  Nan::SetMethod(target, "connect", PtyConnect);
-  Nan::SetMethod(target, "resize", PtyResize);
-  Nan::SetMethod(target, "kill", PtyKill);
+void ConPTY::_register_methods() {
+  register_method("_init", &ConPTY::_init);
+  register_method("start_process", &ConPTY::start_process);
+  register_method("connect_to_named_pipe", &ConPTY::connect_to_named_pipe);
+  register_method("resize", &ConPTY::resize);
+  register_method("kill", &ConPTY::kill);
 };
 
-NODE_MODULE(pty, init);
+void ConPTY::_init() {}

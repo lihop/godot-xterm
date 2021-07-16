@@ -13,6 +13,10 @@
 #include <vector>
 #include <xkbcommon/xkbcommon-keysyms.h>
 
+#ifndef ULONG
+#define ULONG size_t
+#endif
+
 using namespace godot;
 
 void Pipe::_register_methods() {
@@ -54,9 +58,11 @@ godot_error Pipe::open(int fd, bool ipc = false) {
 
 godot_error Pipe::write(String p_data) {
   char *s = p_data.alloc_c_string();
-  size_t len = strlen(s);
+  ULONG len = strlen(s);
 
-  uv_buf_t bufs[] = {{.base = s, .len = len}};
+  uv_buf_t bufs[1];
+  bufs[0].base = s;
+  bufs[0].len = len;
 
   uv_write_t req;
 

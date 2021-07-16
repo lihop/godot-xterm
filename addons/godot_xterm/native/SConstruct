@@ -264,14 +264,25 @@ sources.append('src/libgodotxtermnative.cpp')
 sources.append('src/terminal.cpp')
 
 
-# PTY not supported on HTML5 or Windows (yet).
-if env['disable_pty'] or env['platform'] == 'javascript' or env['platform'] == 'windows':
+# PTY not supported on HTML5.
+if env['disable_pty'] or env['platform'] == 'javascript':
     env.Append(CPPDEFINES=['_PTY_DISABLED'])
 else:
     sources.append('src/pipe.cpp')
     sources.append('src/libuv_utils.cpp')
-    sources.append('src/node_pty/unix/pty.cc')
-    env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
+    if env['platform'] != 'windows':
+        sources.append('src/node_pty/unix/pty.cc')
+        env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
+    else:
+        #sources.append('src/node_pty/win/conpty.cc')
+        env.Append(LIBS=[
+            env.File(f'thirdparty/libuv/build/{env["target"].capitalize()}/uv_a.lib'),
+            'Advapi32.lib',
+            'Iphlpapi.lib',
+            'user32.lib',
+            'userenv.lib',
+            'Ws2_32.lib',
+        ])
 
 if env['platform'] == 'linux':
     libsuffix = "a"
