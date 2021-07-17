@@ -9,6 +9,6 @@ services:
       - -c
       - |
         cd /src/thirdparty/godot-cpp
-        scons platform=javascript target=debug -j$$(nproc)
+        scons platform=javascript target=$${TARGET:-debug} -j$$(nproc)
         cd /src
-        scons platform=javascript target=debug -j$$(nproc)
+        scons platform=javascript target=$${TARGET:-debug} -j$$(nproc)
