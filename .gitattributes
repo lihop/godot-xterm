@@ -1,2 +1,15 @@
-# linguist override to identify .gd files as GDScript rather than GAP.
+# Properly detect languages on Github.
+*.h linguist-language=cpp
 *.gd linguist-language=GDScript
+
+# Normalize EOL for all files that Git considers text files.
+* text=auto eol=lf
+# The above only works properly for Git 2.10+, so for older versions
+# we need to manually list the binary files we don't want modified.
+*.dll binary
+*.dylib binary
+*.png binary
+*.so binary
+*.ttf binary
+*.wasm binary
+*.wav binary
