@@ -58,12 +58,14 @@ func draw_all(_size = Vector2.ZERO):
 
 
 func draw_title():
+	tput.setaf(Color("#FFECA0"))
 	tput.cup(row, 0)
 
 	for line in TITLE.split("\r"):
 		row += 1
 		tput.cup(row, offset)
 		$Terminal.write(line)
+	tput.sgr0()
 
 	# Get the plugin version from the plugin's config file.
 	var config = ConfigFile.new()
@@ -92,7 +94,7 @@ func draw_menu():
 		tput.cup(row, offset)
 
 		if selected_index == i:
-			tput.setab(Color("#FF7500"))
+			tput.setab(Color("#FF786B"))
 			tput.setaf(Color.black)
 
 		$Terminal.write("%s. %s" % [i + 1, item.name])
