@@ -219,10 +219,14 @@ jobs:
         with:
           run: godot_executable/${{ env.GODOT }} --no-window -s plug.gd install
 
+      # Use export to force re-import of files, even though it will fail if we
+      # don't have any export templates installed it should still import the
+      # files first.
       - name: Import files
         uses: GabrielBB/xvfb-action@v1
         with:
-          run: ./godot_executable/${{ env.GODOT }} --editor --quit
+          run: ./godot_executable/${{ env.GODOT }} --export HTML5
+        continue-on-error: true
 
       - name: Run tests
         uses: GabrielBB/xvfb-action@v1

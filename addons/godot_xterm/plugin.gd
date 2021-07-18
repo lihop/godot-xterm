@@ -3,12 +3,16 @@ extends EditorPlugin
 
 var pty_supported := OS.get_name() in ["X11", "Server", "OSX"]
 var asciicast_import_plugin
+var xrdb_import_plugin
 var terminal_panel: Control
 
 
 func _enter_tree():
 	asciicast_import_plugin = preload("./import_plugins/asciicast_import_plugin.gd").new()
 	add_import_plugin(asciicast_import_plugin)
+
+	xrdb_import_plugin = preload("./import_plugins/xrdb_import_plugin.gd").new()
+	add_import_plugin(xrdb_import_plugin)
 
 	var asciicast_script = preload("./resources/asciicast.gd")
 	add_custom_type("Asciicast", "Animation", asciicast_script, null)
@@ -36,6 +40,9 @@ func _enter_tree():
 func _exit_tree():
 	remove_import_plugin(asciicast_import_plugin)
 	asciicast_import_plugin = null
+
+	remove_import_plugin(xrdb_import_plugin)
+	xrdb_import_plugin = null
 
 	remove_custom_type("Asciicast")
 	remove_custom_type("Terminal")

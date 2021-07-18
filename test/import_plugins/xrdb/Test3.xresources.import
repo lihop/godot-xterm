@@ -1,0 +1,13 @@
+[remap]
+
+importer="godot_xterm_xrdb_importer"
+type="Theme"
+path="res://.import/Test3.xresources-bec998d839dd0fca9b82fa130c7bada8.res"
+
+[deps]
+
+source_file="res://test/import_plugins/xrdb/Test3.xresources"
+dest_files=[ "res://.import/Test3.xresources-bec998d839dd0fca9b82fa130c7bada8.res" ]
+
+[params]
+
