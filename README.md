@@ -177,9 +177,9 @@ You are also implicitly verifying that all code is your original work, or unorig
 
 ### Third-party components
 
-The GDNative source code incorporates code snippets and source code from many third-party libraries. The licenses of these components can be found in the various sub-directories of this project (provided git submodules have been cloned). Many of these licenses must be distributed with source and binary distributions of this software. For convenience, the texts of these licenses have been bundled together (but clearly demarcated) in the [THIRDPARTY_NOTICES.txt](/THIRDPARTY_NOTICES.txt) file.
+The GDNative source code incorporates code snippets and source code from many third-party libraries. The licenses of these components can be found in the various sub-directories of this project (provided git submodules have been cloned). Many of these licenses must be distributed with source and binary distributions of this software. For convenience, the texts of these licenses have been bundled together (but clearly demarcated) in the [THIRDPARTY_NOTICES.txt](/addons/godot_xterm/THIRDPARTY_NOTICES.txt) file.
 
-**Note:** On platforms where the PTY node is not supported or if the library has been compiled with the option `disable_pty=yes` then only the licenses bundled in [THIRDPARTY_NOTICES_nopty.txt](/THIRDPARTY_NOTICES_nopty.txt) are applicable.
+**Note:** On platforms where the PTY node is not supported or if the library has been compiled with the option `disable_pty=yes` then only the licenses bundled in [THIRDPARTY_NOTICES_nopty.txt](/addons/godot_xterm/THIRDPARTY_NOTICES_nopty.txt) are applicable.
 
 [build.sh]: /addons/godot_xterm/native/build.sh
 [dist]: /addons/godot_xterm/native/dist

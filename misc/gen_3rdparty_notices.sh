@@ -6,7 +6,7 @@
 # Based on the format of microsoft/vscodes ThirdPartyNotices.txt file:
 # https://github.com/Microsoft/vscode/blob/main/ThirdPartyNotices.txt
 
-out=THIRDPARTY_NOTICES.txt
+out=addons/godot_xterm/THIRDPARTY_NOTICES.txt
 
 # List of licenses to be concatenated.
 # Format (space seperated): Software name, Path to license file from git repo root.

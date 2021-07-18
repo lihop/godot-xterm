@@ -13,3 +13,34 @@
 *.ttf binary
 *.wasm binary
 *.wav binary
+
+# Files to exclude from asset-lib download.
+/.github export-ignore
+/addons/gd-plug export-ignore
+/docs export-ignore
+/examples export-ignore
+/misc export-ignore
+/test export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.gitmodules export-ignore
+/CHANGELOG.md export-ignore
+/LICENSE.md export-ignore
+/README.md export-ignore
+/default_env.tres export-ignore
+/export_presets.cfg export-ignore
+/icon.png export-ignore
+/icon.png.import export-ignore
+/plug.gd export-ignore
+/project.godot export-ignore
+/.github export-ignore
+/.import export-ignore
+/test export-ignore
+/project.godot export-ignore
+/default_env.tres export-ignore
+/.gutconfig.json export-ignore
+/README.md export-ignore
+/addons/gd-plug export-ignore
+/plug.gd export-ignore
+/LICENSE export-ignore
+/misc export-ignore
