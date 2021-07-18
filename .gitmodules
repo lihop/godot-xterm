@@ -12,3 +12,5 @@
 	url = https://github.com/libuv/libuv
 [submodule "libuv/"]
 	url = https://github.com/lihop/libuv
+[submodule "libuv"]
+	url = https://github.com/libuv/libuv

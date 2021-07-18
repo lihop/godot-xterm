@@ -17,7 +17,7 @@ godot-cpp ./addons/godot_xterm/native/thirdparty/godot-cpp/LICENSE.md
 godot-headers ./addons/godot_xterm/native/thirdparty/godot-cpp/godot-headers/LICENSE.md
 htable ./addons/godot_xterm/native/thirdparty/libtsm/LICENSE_htable
 libtsm ./addons/godot_xterm/native/thirdparty/libtsm/COPYING
-libuv ./addons/godot_xterm/native/thirdparty/libuv/LICENSE-full
+libuv ./addons/godot_xterm/native/thirdparty/LICENSE_libuv-full
 node-pty ./addons/godot_xterm/native/src/node_pty/LICENSE_node-pty
 tmux ./addons/godot_xterm/native/src/node_pty/LICENSE_tmux
 wcwidth ./addons/godot_xterm/native/thirdparty/libtsm/external/wcwidth/LICENSE.txt
