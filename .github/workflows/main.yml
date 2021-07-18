@@ -43,7 +43,7 @@ jobs:
           cache-name: cache-godot-cpp
         with:
           path: addons/godot_xterm/native/thirdparty/godot-cpp
-          key: godot-cpp-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.GODOT_CPP_COMMIT_HASH }}
+          key: godot-cpp-v1-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.GODOT_CPP_COMMIT_HASH }}
       - name: Get libuv submodule commit hash
         shell: bash
         env:
@@ -55,7 +55,7 @@ jobs:
         id: cache-libuv
         with:
           path: addons/godot_xterm/native/thirdparty/libuv
-          key: libuv-cache-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.LIBUV_COMMIT_HASH }}
+          key: libuv-cache-v1-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.LIBUV_COMMIT_HASH }}
       - name: Cache emscripten
         if: ${{ matrix.platform == 'javascript' }}
         uses: actions/cache@v2
@@ -63,7 +63,7 @@ jobs:
           cache-name: cache-emscripten
         with:
           path: addons/godot_xterm/native/.emcache
-          key: emsdk-cache-${{ matrix.target }}
+          key: emsdk-cache-v1-${{ matrix.target }}
 
       # Ubuntu-specific steps.
       - name: Install ubuntu build dependencies
@@ -114,6 +114,11 @@ jobs:
         run: |
           cd addons/godot_xterm/native/thirdparty/libuv
           args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE"
+          if [ "$TARGET" == "release" ]; then
+            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
+          else
+            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"
+          fi
           if [ "$BITS" -eq 32 -a "$OS" == "windows-latest" ]; then
             cmake -G "Visual Studio 16 2019" -A Win32 -S $(pwd) -B "build" $args
           else
@@ -128,8 +133,7 @@ jobs:
       - name: Build libgodot-xterm
         run: |
           cd addons/godot_xterm/native
-          # Disable PTY on release windows builds as it has linking errors when built on GithHub actions.
-          scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} disable_pty=${{ matrix.target == 'release' && matrix.platform == 'windows' && 'yes' || 'no' }} -j2
+          scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} -j2
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2

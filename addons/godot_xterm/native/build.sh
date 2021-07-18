@@ -64,7 +64,13 @@ scons generate_bindings=yes target=$target -j$nproc
 cd ${LIBUV_DIR}
 mkdir build || true
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=$target -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
+args="-DCMAKE_BUILD_TYPE=$target -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE"
+if [ "$target" == "release" ]; then
+	args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
+else
+	args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"
+fi
+cmake .. $args
 cd ..
 cmake --build build --config $target -j$nproc
 

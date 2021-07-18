@@ -123,7 +123,7 @@ elif env['platform'] == 'javascript':
     env['OBJSUFFIX'] = '.bc'
     env['PROGPREFIX'] = ''
     env['PROGSUFFIX'] = ''
-    env['LIBSUFFIX'] = '.bc'
+    env['LIBSUFFIX'] = '.a'
     env['LIBPREFIXES'] = ['$LIBPREFIX']
     env['LIBSUFFIXES'] = ['$LIBSUFFIX']
     env.Replace(SHLINKFLAGS='$LINKFLAGS')
@@ -162,11 +162,10 @@ elif env['platform'] == 'windows':
 
     # On Windows using MSVC.
     if host_platform == 'windows':
-        env.Append(LINKFLAGS=['/W3', '/GR'])
         if env['target'] == 'debug':
             env.Append(CCFLAGS=['/Z7', '/Od', '/EHsc', '/D_DEBUG', '/MDd'])
         elif env['target'] == 'release':
-            env.Append(CCFLAGS=['/O2', '/EHsc', '/DNDEBUG', '/MT'])
+            env.Append(CCFLAGS=['/O2', '/EHsc', '/DNDEBUG', '/MD'])
 
     # On Windows, Linux, or MacOS using MinGW.
     elif host_platform == 'linux' or host_platform == 'osx':
@@ -227,7 +226,9 @@ Default(libtsm)
 
 
 # Build libgodot-xterm.
-env.Append(CXXFLAGS=['-std=c++14'])
+if env['platform'] != 'windows':
+    env.Append(CXXFLAGS=['-std=c++14'])
+
 env.Append(CPPPATH=[
     'src/',
     'thirdparty/libtsm/build/src/tsm',
@@ -288,7 +289,7 @@ if env['platform'] == 'linux':
     libsuffix = "a"
     suffix = "so"
 elif env['platform'] == 'javascript':
-    libsuffix = "bc"
+    libsuffix = "a"
     suffix = "wasm"
 elif env['platform'] == 'windows':
     libsuffix = "lib"
