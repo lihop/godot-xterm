@@ -16,12 +16,16 @@ mono_crash.*
 
 # IDE-specific ignores
 .vscode
+.vs
 
 # Package-manager-specific ignores
 .plugged
+addons/*
+!addons/gd-plug
+!addons/godot_xterm
 
 # Test-specific ignores
-addons/WAT
+.gutconfig.json
 test/results.xml
 test/test_metadata.json
 

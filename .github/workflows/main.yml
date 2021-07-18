@@ -1,9 +1,10 @@
-name: build
+name: 'Build and Test'
 
 on: [ push ]
 
 jobs:
   build:
+    name: 'Build'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -144,4 +145,93 @@ jobs:
             addons/godot_xterm/native/bin/*.wasm
             addons/godot_xterm/native/bin/*.dylib
             addons/godot_xterm/native/bin/*.dll
+
+  test:
+    name: 'Test'
+    needs: build
+    env:
+      GODOT: Godot_v3.3.2-stable_${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ x11.64 ] #, x11.32, win64.exe, win32.exe, osx.universal ]
+        target: [ release, debug ]
+        include:
+          - platform: x11.64
+            os: ubuntu-latest
+          # For Windows platform we need to install mesa-dist-win.
+          # 32 bit X11 and MacOS also needs special attention.
+          # So disable all of them for now.
+          #- platform: x11.32
+          #  os: ubuntu-latest
+          #- platform: win64.exe
+          #  os: windows-latest
+          #- platform: win32.exe
+          #  os: windows-latest
+          #- platform: osx.universal
+          #  os: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Cache Godot
+        uses: actions/cache@v2
+        id: cache-godot
+        env:
+          cache-name: cache-godot
+        with:
+          path: godot_executable/
+          key: godot-cache-v1-${{ env.GODOT }}
+
+      #- name: Install 32 bit dependencies on 64 bit Ubuntu
+      #  if: ${{ matrix.platform == 'x11.32' }}
+      #  run: sudo apt-get install -y libxcursor-dev:i386
+      - name: Install Ubuntu dependencies
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: sudo apt-get install -y pulseaudio
+
+      - name: Download Godot
+        uses: suisei-cn/actions-download-file@v1
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        with:
+          url: https://downloads.tuxfamily.org/godotengine/3.3.2/${{ env.GODOT }}.zip
+          target: godot_executable/
+      - name: Extract Godot
+        shell: bash
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          cd godot_executable
+          unzip ${{ env.GODOT }}.zip
+      - name: Symlink Godot
+        if: ${{ matrix.platform == 'osx.universal' }}
+        run: ln -s godot_executable/Godot.app/Contents/MacOS/Godot godot_executable/${{ env.GODOT }}
+
+      - name: Install binary build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: libgodot-xterm-${{ matrix.target }}
+          path: addons/godot_xterm/native/bin
+
+      - name: Install plugins
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: godot_executable/${{ env.GODOT }} --no-window -s plug.gd install
+
+      - name: Import files
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: ./godot_executable/${{ env.GODOT }} --editor --quit
+
+      - name: Run tests
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: ./godot_executable/${{ env.GODOT }} --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
+
+      - name: Run unix tests
+        if: ${{ matrix.platform != 'win64.exe' && matrix.platform != 'win32.exe' }}
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: ./godot_executable/${{ env.GODOT }} --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
 

@@ -1,0 +1,11 @@
+{
+  "dirs": [
+    "res://platform/windows"
+  ],
+  "prefix": "",
+  "suffix": ".test.gd",
+  "include_subdirs": true,
+  "log_level": 2,
+  "should_exit": true
+}
+}

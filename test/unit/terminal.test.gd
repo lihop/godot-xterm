@@ -1,20 +1,12 @@
-extends WAT.Test
+extends "res://addons/gut/test.gd"
 
 var term: GDXterm.Terminal
 
 
-func pre():
+func before_each():
 	term = GDXterm.Terminal.new()
 	term.rect_size = Vector2(400, 200)
-	add_child(term)
-
-
-func post():
-	term.free()
-
-
-func after():
-	term.free()
+	add_child_autofree(term)
 
 
 func test_bell() -> void:
@@ -23,5 +15,5 @@ func test_bell() -> void:
 	term.write("\a")
 	term.write("\u0007")
 	term.write("'Ask not for whom the \a tolls; it tolls for thee' - John Donne")
-	yield(until_signal(term, "bell", 1), YIELD)
-	asserts.signal_was_emitted_x_times(term, "bell", 5)
+	yield(yield_to(term, "bell", 1), YIELD)
+	assert_signal_emit_count(term, "bell", 5)

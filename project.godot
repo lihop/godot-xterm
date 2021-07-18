@@ -56,7 +56,7 @@ window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/WAT/plugin.cfg", "res://addons/godot_xterm/plugin.cfg" )
+enabled=PoolStringArray( "godot_xterm", "gut" )
 
 [rendering]
 

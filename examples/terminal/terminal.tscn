@@ -20,5 +20,3 @@ env = {
 "COLORTERM": "truecolor",
 "TERM": "xterm-256color"
 }
-
-[connection signal="bell" from="." to="." method="_on_Terminal_bell"]

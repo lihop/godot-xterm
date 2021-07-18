@@ -1,32 +1,28 @@
-extends WAT.Test
+extends "res://addons/gut/test.gd"
 
 var pty: GDXterm.PTYUnix
 
 
-func pre():
+func before_each():
 	pty = GDXterm.PTYUnix.new()
-	add_child(pty)
-
-
-func post():
-	pty.queue_free()
+	add_child_autofree(pty)
 
 
 func test_fork_succeeds():
 	var err = pty.fork("sh")
-	asserts.is_equal(err, OK)
+	assert_eq(err, OK)
 
 
 func test_open_succeeds():
 	var result = pty.open()
-	asserts.is_equal(result[0], OK)
+	assert_eq(result[0], OK)
 
 
 func test_open_creates_a_new_pty():
 	var num_pts = Helper._get_pts().size()
 	pty.open()
 	var new_num_pts = Helper._get_pts().size()
-	asserts.is_equal(new_num_pts, num_pts + 1)
+	assert_eq(new_num_pts, num_pts + 1)
 
 
 func test_open_pty_has_correct_name():
@@ -35,7 +31,7 @@ func test_open_pty_has_correct_name():
 	var new_pts = Helper._get_pts()
 	for pt in original_pts:
 		new_pts.erase(pt)
-	asserts.is_equal(result[1].pty, new_pts[0])
+	assert_eq(result[1].pty, new_pts[0])
 
 
 func test_open_pty_has_correct_win_size():
@@ -43,8 +39,8 @@ func test_open_pty_has_correct_win_size():
 	var rows = 9314
 	var result = pty.open(cols, rows)
 	var winsize = Helper._get_winsize(result[1].master)
-	asserts.is_equal(winsize.cols, cols)
-	asserts.is_equal(winsize.rows, rows)
+	assert_eq(winsize.cols, cols)
+	assert_eq(winsize.rows, rows)
 
 
 class Helper:

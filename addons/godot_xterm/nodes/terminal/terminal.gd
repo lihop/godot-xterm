@@ -37,7 +37,7 @@ export (bool) var copy_on_selection
 # Bell
 # If enabled, bell_sound will play when the ASCII BELL "\u0007" character is printed.
 export var bell_enabled := true
-export var bell_sound: AudioStream = preload("../../themes/audio/bell.wav")
+export var bell_sound: AudioStream
 # Number of milliseconds that must pass before emitting a new bell sound.
 # This important in cases where the bell character is being printed frequently
 # such as `while true; do echo -e "\a"; done`, as adding additional AudioStreamPlayer
