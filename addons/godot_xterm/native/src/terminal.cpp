@@ -11,7 +11,7 @@
 #include <xkbcommon/xkbcommon-keysyms.h>
 
 // For _populate_key_list(), see below.
-#if !defined(__EMSCRIPTEN__)
+#if !defined(__EMSCRIPTEN__) && !defined(__APPLE__)
 #include <GlobalConstants.hpp>
 #endif
 
@@ -26,7 +26,7 @@ void Terminal::_populate_key_list() {
 // GlobalConstants from the header: abort(Assertion failed: bad export type for
 // `_ZN5godot15GlobalConstants8KEY_KP_0E`: undefined). Build with -s
 // ASSERTIONS=1 for more info.
-#if !defined(__EMSCRIPTEN__)
+#if !defined(__EMSCRIPTEN__) && !defined(__APPLE__)
 #define GLOBAL_CONSTANT(VAR) GlobalConstants::VAR
 #else
 #define GLOBAL_CONSTANT(VAR) get_constant(#VAR)

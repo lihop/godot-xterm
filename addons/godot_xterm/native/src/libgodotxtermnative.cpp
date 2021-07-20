@@ -3,7 +3,7 @@
 #if !defined(_PTY_DISABLED)
 #include "libuv_utils.h"
 #include "pipe.h"
-#if defined(__unix__)
+#if defined(__linux__) || defined(__APPLE__)
 #include "node_pty/unix/pty.h"
 #endif
 #if defined(__WIN32)
@@ -26,7 +26,7 @@ extern "C" void GDN_EXPORT godot_nativescript_init(void *handle) {
 #if !defined(_PTY_DISABLED)
   godot::register_tool_class<godot::Pipe>();
   godot::register_tool_class<godot::LibuvUtils>();
-#if defined(__unix__)
+#if defined(__linux__) || defined(__APPLE__)
   godot::register_tool_class<godot::PTYUnix>();
 #endif
 #if defined(__WIN32)
