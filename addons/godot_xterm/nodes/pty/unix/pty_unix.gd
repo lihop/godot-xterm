@@ -70,7 +70,7 @@ func fork(
 	# Exit callback.
 	_exit_cb = FuncRef.new()
 	_exit_cb.set_instance(self)
-	_exit_cb.function = "_on_exit"
+	_exit_cb.set_function("_on_exit")
 
 	# Actual fork.
 	var result = PTYUnix.new().fork(  # VERY IMPORTANT: The must be set null or 0, otherwise will get an ENOTSOCK error after connecting our pipe to the fd.

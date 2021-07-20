@@ -67,7 +67,10 @@ func _load_or_create_settings() -> void:
 func _update_settings() -> void:
 	_load_or_create_settings()
 
-	var editor_scale: float = editor_interface.get_editor_scale()
+	var editor_scale: float = 1.0
+	if editor_interface.has_method("get_editor_scale"):
+		editor_scale = editor_interface.get_editor_scale()
+
 	rect_min_size = Vector2(0, tabbar_container.rect_size.y + 182) * editor_scale
 	rect_size.y = 415
 
