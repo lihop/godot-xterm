@@ -2,6 +2,19 @@ name: 'Build and Test'
 
 on: [ push ]
 
+env:
+  GODOT: Godot_v3.3.2-stable
+  GODOT_VERSION: 3.3.2
+  GODOT_RELEASE: stable
+
+  # Caches should be automatically invalidated when versions change,
+  # but invalidation can be forced by incrementing these numbers.
+  EMSCRIPTEN_CACHE_VERSION: 1
+  EXPORT_TEMPLATE_CACHE_VERSION: 1
+  GODOT_CACHE_VERSION: 1
+  GODOT_CPP_CACHE_VERSION: 1
+  LIBUV_CACHE_VERSION: 1
+
 jobs:
   build:
     name: 'Build'
@@ -44,7 +57,7 @@ jobs:
           cache-name: cache-godot-cpp
         with:
           path: addons/godot_xterm/native/thirdparty/godot-cpp
-          key: godot-cpp-v1-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.GODOT_CPP_COMMIT_HASH }}
+          key: godot-cpp-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.GODOT_CPP_COMMIT_HASH }}-v${{ env.GODOT_CPP_CACHE_VERSION }}
       - name: Get libuv submodule commit hash
         shell: bash
         env:
@@ -56,7 +69,7 @@ jobs:
         id: cache-libuv
         with:
           path: addons/godot_xterm/native/thirdparty/libuv
-          key: libuv-cache-v1-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.LIBUV_COMMIT_HASH }}
+          key: libuv-cache-${{ matrix.platform }}-${{ matrix.target }}-${{ matrix.bits }}-${{ env.LIBUV_COMMIT_HASH }}-v${{ env.LIBUV_CACHE_VERSION }}
       - name: Cache emscripten
         if: ${{ matrix.platform == 'javascript' }}
         uses: actions/cache@v2
@@ -64,7 +77,7 @@ jobs:
           cache-name: cache-emscripten
         with:
           path: addons/godot_xterm/native/.emcache
-          key: emsdk-cache-v1-${{ matrix.target }}
+          key: emsdk-cache-${{ matrix.target }}-v${{ env.EMSCRIPTEN_CACHE_VERSION }}
 
       # Ubuntu-specific steps.
       - name: Install ubuntu build dependencies
@@ -146,98 +159,203 @@ jobs:
             addons/godot_xterm/native/bin/*.dylib
             addons/godot_xterm/native/bin/*.dll
 
-  test:
-    name: 'Test'
-    needs: build
-    env:
-      GODOT: Godot_v3.3.2-stable_${{ matrix.platform }}
+
+  # GDNative HTML5 export templates aren't provided so we must build them
+  export_template:
+    name: 'Export Template'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [ release, debug ]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Get godot submodule commit hash
+        shell: bash
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        run: |
+          echo ::set-env name=GODOT_COMMIT_HASH::$(git ls-tree HEAD misc/export_templates/godot -l | cut -d\  -f3)
+      - name: Cache export template
+        uses: actions/cache@v2
+        id: cache-export-template
+        env:
+          cache-name: cache-export-template
+        with:
+          path: misc/export_templates/godot/bin
+          key: godot-${{ env.GODOT_COMMIT_HASH }}-${{ matrix.target }}-v${{ env.EXPORT_TEMPLATE_CACHE_VERSION }}
+      - name: Build template in docker container
+        if: steps.cache-export-template.outputs.cache-hit != 'true'
+        run: cd misc/export_templates && ./build.sh -t ${{ matrix.target }}
+      - name: Upload export template
+        uses: actions/upload-artifact@v2
+        with:
+          name: html5-gdnative-export-templates
+          path: misc/export_templates/godot/bin/webassembly_gdnative_${{matrix.target}}.zip
+
+
+  install_godot:
+    name: 'Install Godot'
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
-        platform: [ x11.64 ] #, x11.32, win64.exe, win32.exe, osx.universal ]
-        target: [ release, debug ]
+        platform: [ x11.64, linux_headless.64, osx.universal ] #, x11.32, win64.exe, win32.exe ]
         include:
           - platform: x11.64
             os: ubuntu-latest
+          - platform: linux_headless.64
+            os: ubuntu-latest
+          - platform: osx.universal
+            os: macos-latest
           # For Windows platform we need to install mesa-dist-win.
-          # 32 bit X11 and MacOS also needs special attention.
-          # So disable all of them for now.
+          # 32 bit X11 also needs special attention.
+          # So disable both of them for now.
           #- platform: x11.32
           #  os: ubuntu-latest
           #- platform: win64.exe
           #  os: windows-latest
           #- platform: win32.exe
           #  os: windows-latest
-          #- platform: osx.universal
-          #  os: macos-latest
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
-
-      - name: Cache Godot
+      - name: Cache Godot executable
         uses: actions/cache@v2
         id: cache-godot
         env:
           cache-name: cache-godot
         with:
           path: godot_executable/
-          key: godot-cache-v1-${{ env.GODOT }}
-
-      #- name: Install 32 bit dependencies on 64 bit Ubuntu
-      #  if: ${{ matrix.platform == 'x11.32' }}
-      #  run: sudo apt-get install -y libxcursor-dev:i386
-      - name: Install Ubuntu dependencies
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: sudo apt-get install -y pulseaudio
-
+          key: godot-cache-${{ env.GODOT }}_${{ matrix.platform }}-v${{ env.GODOT_CACHE_VERSION }}
       - name: Download Godot
         uses: suisei-cn/actions-download-file@v1
         if: steps.cache-godot.outputs.cache-hit != 'true'
         with:
-          url: https://downloads.tuxfamily.org/godotengine/3.3.2/${{ env.GODOT }}.zip
+          url: https://downloads.tuxfamily.org/godotengine/${{ env.GODOT_VERSION }}/${{ env.GODOT }}_${{ matrix.platform }}.zip
           target: godot_executable/
       - name: Extract Godot
         shell: bash
         if: steps.cache-godot.outputs.cache-hit != 'true'
         run: |
           cd godot_executable
-          unzip ${{ env.GODOT }}.zip
+          unzip ${{ env.GODOT }}_${{ matrix.platform }}.zip
       - name: Symlink Godot
-        if: ${{ matrix.platform == 'osx.universal' }}
-        run: ln -s godot_executable/Godot.app/Contents/MacOS/Godot godot_executable/${{ env.GODOT }}
+        if: steps.cache-godot.outputs.cache-hit != 'true' && matrix.platform == 'osx.universal'
+        run: ln -s Godot.app/Contents/MacOS/Godot godot_executable/${{ env.GODOT }}_${{ matrix.platform }}
 
+
+  test:
+    name: 'Test'
+    needs: [ install_godot, build, export_template ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ x11.64, osx.universal ] #, x11.32, win64.exe, win32.exe ]
+        target: [ release, debug ]
+        include:
+          - platform: x11.64
+            os: ubuntu-latest
+          - platform: osx.universal
+            os: macos-latest
+          # For Windows platform we need to install mesa-dist-win.
+          # 32 bit X11 also needs special attention.
+          # So disable both of them for now.
+          #- platform: x11.32
+          #  os: ubuntu-latest
+          #- platform: win64.exe
+          #  os: windows-latest
+          #- platform: win32.exe
+          #  os: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Cache godot executable
+        uses: actions/cache@v2
+        id: cache-godot
+        env:
+          cache-name: cache-godot
+        with:
+          path: godot_executable/
+          key: godot-cache-${{ env.GODOT }}_${{ matrix.platform }}-v${{ env.GODOT_CACHE_VERSION }}
+      - name: Install Ubuntu dependencies
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: sudo apt-get install -y pulseaudio
       - name: Install binary build artifacts
         uses: actions/download-artifact@v2
         with:
           name: libgodot-xterm-${{ matrix.target }}
           path: addons/godot_xterm/native/bin
-
       - name: Install plugins
         uses: GabrielBB/xvfb-action@v1
         with:
-          run: godot_executable/${{ env.GODOT }} --no-window -s plug.gd install
+          run: godot_executable/${{ env.GODOT }}_${{ matrix.platform }} --no-window -s plug.gd install
 
-      # Use export to force re-import of files, even though it will fail if we
-      # don't have any export templates installed it should still import the
-      # files first.
+      # HACK: Use export to force re-import of files.
+      # See the proposal to support command line import https://github.com/godotengine/godot-proposals/issues/1362
+      - name: Install html5 export templates
+        uses: actions/download-artifact@v2
+        with:
+          name: html5-gdnative-export-templates
+          path: misc/export_templates/godot/bin
+      - name: Create export directory
+        run: mkdir -p docs/demo
       - name: Import files
         uses: GabrielBB/xvfb-action@v1
         with:
-          run: ./godot_executable/${{ env.GODOT }} --export HTML5
-        continue-on-error: true
+          run: ./godot_executable/${{ env.GODOT }}_${{ matrix.platform }} --export HTML5
 
       - name: Run tests
         uses: GabrielBB/xvfb-action@v1
         with:
-          run: ./godot_executable/${{ env.GODOT }} --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
-
+          run: ./godot_executable/${{ env.GODOT }}_${{ matrix.platform }} --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
       - name: Run unix tests
         if: ${{ matrix.platform != 'win64.exe' && matrix.platform != 'win32.exe' }}
         uses: GabrielBB/xvfb-action@v1
         with:
-          run: ./godot_executable/${{ env.GODOT }} --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
+          run: ./godot_executable/${{ env.GODOT }}_${{ matrix.platform }} --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
+
+
+  html5_export:
+    name: 'HTML5 Export'
+    needs: [ install_godot, build, export_template ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Cache godot executable
+      uses: actions/cache@v2
+      id: cache-godot
+      env:
+        cache-name: cache-godot
+      with:
+        path: godot_executable/
+        key: godot-cache-${{ env.GODOT }}_linux_headless.64-v${{ env.GODOT_CACHE_VERSION }}
+    - name: Install binary build artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: libgodot-xterm-release
+        path: addons/godot_xterm/native/bin
+    - name: Install html5 export templates
+      uses: actions/download-artifact@v2
+      with:
+        name: html5-gdnative-export-templates
+        path: misc/export_templates/godot/bin
+    - name: Create export directory
+      run: mkdir -p docs/demo
+    - name: Export html5
+      run: ./godot_executable/${{ env.GODOT }}_linux_headless.64 --export HTML5
+    # FIXME: HTML5 Exports not properly exporting .cast files.
+    # So skip upload for now.
+    #- name: Upload export
+    #  uses: actions/upload-artifact@v2
+    #  with:
+    #    name: html5-demo
+    #    path: docs/demo
 
 
   # Git archive should only include addons/godot_xterm directory.
@@ -274,3 +392,4 @@ jobs:
           echo "Expected directory (addons/godot_xterm) not found."
           exit 1
         fi
+

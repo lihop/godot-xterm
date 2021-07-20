@@ -1,6 +1,14 @@
 extends "res://addons/gut/test.gd"
 
 var pty: GDXterm.PTYUnix
+var helper: Helper
+
+
+func before_all():
+	if OS.get_name() == "OSX":
+		helper = MacOSHelper.new()
+	else:
+		helper = LinuxHelper.new()
 
 
 func before_each():
@@ -19,16 +27,16 @@ func test_open_succeeds():
 
 
 func test_open_creates_a_new_pty():
-	var num_pts = Helper._get_pts().size()
+	var num_pts = helper._get_pts().size()
 	pty.open()
-	var new_num_pts = Helper._get_pts().size()
+	var new_num_pts = helper._get_pts().size()
 	assert_eq(new_num_pts, num_pts + 1)
 
 
 func test_open_pty_has_correct_name():
-	var original_pts = Helper._get_pts()
+	var original_pts = helper._get_pts()
 	var result = pty.open()
-	var new_pts = Helper._get_pts()
+	var new_pts = helper._get_pts()
 	for pt in original_pts:
 		new_pts.erase(pt)
 	assert_eq(result[1].pty, new_pts[0])
@@ -38,30 +46,15 @@ func test_open_pty_has_correct_win_size():
 	var cols = 7684
 	var rows = 9314
 	var result = pty.open(cols, rows)
-	var winsize = Helper._get_winsize(result[1].master)
+	var winsize = helper._get_winsize(result[1].master)
 	assert_eq(winsize.cols, cols)
 	assert_eq(winsize.rows, rows)
 
 
 class Helper:
 	static func _get_pts() -> Array:
-		var dir := Directory.new()
-
-		var pty_dir = "/dev/pts" if OS.get_name() == "X11" else "/dev"
-		var pty_prefix = "tty" if OS.get_name() == "OSX" else ""
-
-		if dir.open(pty_dir) != OK or dir.list_dir_begin(true, true) != OK:
-			assert(false, "Could not open /dev/pts.")
-
-		var pts := []
-		var file_name: String = dir.get_next()
-
-		while file_name != "":
-			if file_name.trim_prefix(pty_prefix).is_valid_integer():
-				pts.append("/dev/pts/%s" % file_name)
-			file_name = dir.get_next()
-
-		return pts
+		assert(false, "Abstract method")
+		return []
 
 	static func _get_winsize(fd: int) -> Dictionary:
 		var output = []
@@ -88,3 +81,32 @@ class Helper:
 
 		var size = str2var("Vector2" + output[0].strip_edges())
 		return {rows = int(size.x), cols = int(size.y)}
+
+
+class LinuxHelper:
+	extends Helper
+	static func _get_pts() -> Array:
+		var dir := Directory.new()
+
+		if dir.open("/dev/pts") != OK or dir.list_dir_begin(true, true) != OK:
+			assert(false, "Could not open /dev/pts.")
+
+		var pts := []
+		var file_name: String = dir.get_next()
+
+		while file_name != "":
+			if file_name.is_valid_integer():
+				pts.append("/dev/pts/%s" % file_name)
+			file_name = dir.get_next()
+
+		return pts
+
+
+class MacOSHelper:
+	extends Helper
+	static func _get_pts() -> Array:
+		# TODO: Implement for macOS.
+		# On macOS there is no /dev/pts directory, rather new ptys are created
+		# under /dev/ttysXYZ.
+		assert(false, "Not implemented")
+		return []
