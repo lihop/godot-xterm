@@ -480,6 +480,8 @@ void Terminal::update_theme() {
 
     if (has_font(font_style, "Terminal")) {
       fontref = get_font(font_style, "Terminal");
+    } else if (has_font("Regular", "Terminal")) {
+      fontref = get_font("Regular", "Terminal");
     } else {
       fontref = get_font("");
     }
