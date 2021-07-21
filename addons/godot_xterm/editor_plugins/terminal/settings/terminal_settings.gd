@@ -41,7 +41,7 @@ export var ctrl_scroll_to_resize_font := true
 # Bell settings.
 export var visual_bell := true
 export var audio_bell := true
-export var bell_sound: AudioStream = preload("../../../themes/audio/bell.wav")
+export var bell_sound: AudioStream
 
 # Exec args.
 export (FileType) var file_type := FileType.USE_SHELL_ENV

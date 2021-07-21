@@ -2,12 +2,12 @@
 
 importer="wav"
 type="AudioStreamSample"
-path="res://.import/bell.wav-54a2dcec0c35ce7bf9aa23071616df00.sample"
+path="res://.import/bell.wav-0bb68f27c3e29a9aad676dc03d89b163.sample"
 
 [deps]
 
-source_file="res://addons/godot_xterm/themes/audio/bell.wav"
-dest_files=[ "res://.import/bell.wav-54a2dcec0c35ce7bf9aa23071616df00.sample" ]
+source_file="res://themes/audio/bell.wav"
+dest_files=[ "res://.import/bell.wav-0bb68f27c3e29a9aad676dc03d89b163.sample" ]
 
 [params]
 

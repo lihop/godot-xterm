@@ -10,6 +10,7 @@ func before_each():
 
 
 func test_bell() -> void:
+	term.bell_cooldown = 0
 	term.write(char(7))
 	term.write(char(0x07))
 	term.write("\a")
@@ -17,3 +18,14 @@ func test_bell() -> void:
 	term.write("'Ask not for whom the \a tolls; it tolls for thee' - John Donne")
 	yield(yield_to(term, "bell", 1), YIELD)
 	assert_signal_emit_count(term, "bell", 5)
+
+
+func test_bell_cooldown() -> void:
+	watch_signals(term)
+	term.bell_cooldown = 0.5
+	term.write("\a")
+	term.write("\a")
+	yield(yield_for(0.5), YIELD)
+	term.write("\a")
+	yield(yield_to(term, "bell", 1), YIELD)
+	assert_signal_emit_count(term, "bell", 2)

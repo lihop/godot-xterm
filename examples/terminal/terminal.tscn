@@ -1,5 +1,6 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
+[ext_resource path="res://themes/audio/bell.wav" type="AudioStream" id=1]
 [ext_resource path="res://addons/godot_xterm/nodes/pty/unix/pty_unix.gd" type="Script" id=2]
 [ext_resource path="res://examples/terminal/terminal.gd" type="Script" id=3]
 
@@ -12,6 +13,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 copy_on_selection = true
+bell_cooldown = 0.1
 
 [node name="PTY" type="Node" parent="."]
 script = ExtResource( 2 )
@@ -20,3 +22,8 @@ env = {
 "COLORTERM": "truecolor",
 "TERM": "xterm-256color"
 }
+
+[node name="Bell" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 1 )
+
+[connection signal="bell" from="." to="Bell" method="play"]

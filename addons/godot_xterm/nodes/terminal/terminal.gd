@@ -35,14 +35,16 @@ var rows = 2
 export (bool) var copy_on_selection
 
 # Bell
-# If enabled, bell_sound will play when the ASCII BELL "\u0007" character is printed.
-export var bell_enabled := true
-export var bell_sound: AudioStream
-# Number of milliseconds that must pass before emitting a new bell sound.
-# This important in cases where the bell character is being printed frequently
-# such as `while true; do echo -e "\a"; done`, as adding additional AudioStreamPlayer
-# nodes too frequently has a negative performance impact.
-export var bell_cooldown_msec: int = 100
+# If muted, the "bell" signal will not be emitted when the bell "\u0007" character
+# is written to the terminal.
+export var bell_muted := false
+# Amount of time in seconds that must pass before emitting a new "bell" signal.
+# This can be useful in cases where the bell character is being written too
+# frequently such as `while true; do echo -e "\a"; done`.
+export var bell_cooldown: float = 0.1
+
+export var blink_on_time: float = 0.6
+export var blink_off_time: float = 0.3
 
 var _viewport: Viewport = preload("./viewport.tscn").instance()
 var _native_terminal: Control = _viewport.get_node("Terminal")
@@ -229,20 +231,10 @@ func _on_size_changed(new_size: Vector2):
 
 
 func _on_bell():
-	if bell_enabled and bell_sound and _bell_timer.time_left == 0:
-		var player := AudioStreamPlayer.new()
-		player.stream = bell_sound
-		player.autoplay = true
-		player.playing = true
-		player.connect("finished", self, "_on_player_finished", [player])
-		add_child(player)
-		_bell_timer.start(0.001 * bell_cooldown_msec)
-
-	emit_signal("bell")
-
-
-func _on_player_finished(player: AudioStreamPlayer):
-	player.queue_free()
+	if not bell_muted and (bell_cooldown == 0 or _bell_timer.time_left == 0):
+		emit_signal("bell")
+		if bell_cooldown > 0:
+			_bell_timer.start(bell_cooldown)
 
 
 func _mouse_to_cell(pos: Vector2) -> Vector2:
