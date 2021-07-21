@@ -39,7 +39,9 @@ func import(source_file, save_path, options, r_platform_variant, r_gen_files):
 		return err
 
 	var theme: Theme = XrdbTheme.new()
-	theme.default_font = preload("../themes/fonts/regular.tres")
+	theme.set_font("Regular", "Terminal", preload("../themes/fonts/regular.tres"))
+	for font in ["Bold", "Italic", "Bold Italic"]:
+		theme.set_font(font, "Terminal", null)
 
 	var word_regex = RegEx.new()
 	word_regex.compile("\\S+")
