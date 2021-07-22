@@ -9,6 +9,8 @@ void LibuvUtils::_register_methods() {
   register_method("get_os_environ", &LibuvUtils::get_os_environ);
   register_method("get_os_release", &LibuvUtils::get_os_release);
   register_method("get_cwd", &LibuvUtils::get_cwd);
+
+  register_method("kill", &LibuvUtils::kill);
 }
 
 LibuvUtils::LibuvUtils() {}
@@ -59,6 +61,10 @@ String LibuvUtils::get_cwd() {
   String result = String(buffer);
   std::free(buffer);
   return result;
+}
+
+godot_error LibuvUtils::kill(int pid, int signum) {
+  RETURN_UV_ERR(uv_kill(pid, signum));
 }
 
 godot_error LibuvUtils::translate_uv_errno(int uv_err) {

@@ -25,5 +25,9 @@ static func get_windows_build_number() -> int:
 	assert(false, "Not implemented.")
 	return 0
 
+static func kill(pid: int, signum: int):
+	if pid > 1:
+		return LibuvUtils.new().kill(pid, signum)
+
 static func new():
 	assert(false, "Abstract sealed (i.e. static) class should not be instantiated.")

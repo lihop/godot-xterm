@@ -31,13 +31,15 @@ void Pipe::_register_methods() {
 }
 
 Pipe::Pipe() {}
-Pipe::~Pipe() {}
+Pipe::~Pipe() { close(); }
 
 void Pipe::_init() {}
 
 void _poll_connection();
 
 void _read_cb(uv_stream_t *handle, ssize_t nread, const uv_buf_t *buf);
+
+void _close_cb(uv_handle_t *handle);
 
 void _write_cb(uv_write_t *req, int status);
 
@@ -54,6 +56,11 @@ godot_error Pipe::open(int fd, bool ipc = false) {
       uv_read_start((uv_stream_t *)&handle, _alloc_buffer, _read_cb));
 
   return GODOT_OK;
+}
+
+void Pipe::close() {
+  uv_close((uv_handle_t *)&handle, NULL);
+  uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 }
 
 godot_error Pipe::write(String p_data) {
@@ -88,10 +95,10 @@ void _read_cb(uv_stream_t *handle, ssize_t nread, const uv_buf_t *buf) {
     switch (nread) {
     case UV_EOF:
       // Normal after shell exits.
-      return;
     case UV_EIO:
       // Can happen when the process exits.
       // As long as PTY has caught it, we should be fine.
+      uv_read_stop(handle);
       return;
     default:
       UV_ERR_PRINT(nread);

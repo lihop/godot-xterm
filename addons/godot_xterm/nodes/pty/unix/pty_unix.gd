@@ -42,7 +42,6 @@ func _resize(cols: int, rows: int) -> void:
 
 func _fork_thread(args):
 	var result = preload("./pty_unix.gdns").new().callv("fork", args)
-	print(result)
 	return result
 
 
@@ -88,6 +87,8 @@ func fork(
 		status = STATUS_ERROR
 		return FAILED
 
+	pid = result[1].pid
+
 	_pipe = Pipe.new()
 	_pipe.open(_fd)
 
@@ -101,12 +102,20 @@ func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
 	return PTYUnix.new().open(cols, rows)
 
 
+func _exit_tree():
+	_exit_cb = null
+	if pid > 1:
+		LibuvUtils.kill(pid, Signal.SIGHUP)
+
+
 func _on_pipe_data_received(data):
 	emit_signal("data_received", data)
 
 
 func _on_exit(exit_code: int, signum: int) -> void:
-	emit_signal("exited", exit_code, signum)
+	if is_instance_valid(self):
+		pid = -1
+		emit_signal("exited", exit_code, signum)
 
 
 func _sanitize_env(env: Dictionary) -> Dictionary:

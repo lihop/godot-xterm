@@ -23,6 +23,7 @@ public:
   void _init();
 
   godot_error open(int fd, bool ipc);
+  void close();
   int get_status();
 
   godot_error write(String p_data);

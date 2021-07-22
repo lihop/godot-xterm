@@ -20,5 +20,4 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
 [connection signal="key_pressed" from="Terminal" to="." method="_on_Terminal_key_pressed"]

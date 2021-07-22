@@ -1,5 +1,7 @@
 extends "res://addons/gut/test.gd"
 
+const LibuvUtils := preload("res://addons/godot_xterm/nodes/pty/libuv_utils.gd")
+
 var pty: GDXterm.PTYUnix
 var helper: Helper
 
@@ -49,6 +51,16 @@ func test_open_pty_has_correct_win_size():
 	var winsize = helper._get_winsize(result[1].master)
 	assert_eq(winsize.cols, cols)
 	assert_eq(winsize.rows, rows)
+
+
+func test_closes_pty_on_exit():
+	var num_pts = helper._get_pts().size()
+	pty.fork("sleep", ["1000"])
+	remove_child(pty)
+	pty.free()
+	yield(yield_for(1), YIELD)
+	var new_num_pts = helper._get_pts().size()
+	assert_eq(new_num_pts, num_pts)
 
 
 class Helper:

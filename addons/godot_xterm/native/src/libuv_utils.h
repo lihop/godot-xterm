@@ -9,7 +9,9 @@
             String(uv_strerror(uv_err)));
 
 #define RETURN_UV_ERR(uv_err)                                                  \
-  UV_ERR_PRINT(uv_err);                                                        \
+  if (uv_err < 0) {                                                            \
+    UV_ERR_PRINT(uv_err);                                                      \
+  }                                                                            \
   return LibuvUtils::translate_uv_errno(uv_err);
 
 #define RETURN_IF_UV_ERR(uv_err)                                               \
@@ -33,6 +35,8 @@ public:
   Dictionary get_os_environ();
   String get_os_release();
   String get_cwd();
+
+  godot_error kill(int pid, int signum);
 
 public:
   static godot_error translate_uv_errno(int uv_err);

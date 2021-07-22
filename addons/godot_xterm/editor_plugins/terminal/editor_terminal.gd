@@ -88,5 +88,4 @@ func _input(event):
 
 
 func _on_PTY_exited(exit_code: int, signum: int):
-	print("exit_code: ", exit_code, " signum: ", signum)
 	emit_signal("exited", exit_code, signum)

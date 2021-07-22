@@ -212,8 +212,11 @@ func destroy() -> void:
 # Kill the pty.
 # sigint: The signal to send. By default this is SIGHUP.
 # This is not supported on Windows.
-func kill(sigint: int = Signal.SIGHUP) -> void:
-	pass
+func kill(signum: int = Signal.SIGHUP) -> void:
+	if _pipe:
+		_pipe.close()
+	if pid > 0:
+		LibuvUtils.kill(pid, signum)
 
 
 func fork(
