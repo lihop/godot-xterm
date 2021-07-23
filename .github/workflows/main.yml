@@ -308,7 +308,7 @@ jobs:
       matrix:
         os: [ windows-latest, macos-latest ]
         bits: [ 64, 32 ]
-        godot_version: [ 'v3.3.2-stable', 'v3.4-beta1' ]
+        godot_version: [ '3.2', '3.3.2', '3.4-beta1' ]
         target: [ release, debug ]
         exclude:
           - os: macos-latest
@@ -345,8 +345,13 @@ jobs:
         run: godot --export HTML5
 
       - name: Run tests
+        if: ${{ matrix.godot_version != '3.2' }}
         shell: bash
         run: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
+      - name: Run v3.2 tests
+        if: ${{ matrix.godot_version == '3.2' }}
+        shell: bash
+        run: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.3.2.json
       - name: Run unix tests
         if: ${{ matrix.os == 'macos-latest' || matrix.os == 'ubuntu-latest' }}
         run: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
