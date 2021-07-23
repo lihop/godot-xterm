@@ -1,6 +1,9 @@
 name: 'Build and Test'
 
-on: [ push ]
+on:
+  push:
+  schedule: # Keep the cache alive!
+    - cron: 7 1 * * fri
 
 env:
   GODOT: Godot_v3.3.2-stable
@@ -200,23 +203,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        platform: [ x11.64, linux_headless.64, osx.universal ] #, x11.32, win64.exe, win32.exe ]
+        platform: [ x11.64, linux_headless.64 ]
         include:
           - platform: x11.64
             os: ubuntu-latest
           - platform: linux_headless.64
             os: ubuntu-latest
-          - platform: osx.universal
-            os: macos-latest
-          # For Windows platform we need to install mesa-dist-win.
-          # 32 bit X11 also needs special attention.
-          # So disable both of them for now.
-          #- platform: x11.32
-          #  os: ubuntu-latest
-          #- platform: win64.exe
-          #  os: windows-latest
-          #- platform: win32.exe
-          #  os: windows-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -253,22 +245,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ x11.64, osx.universal ] #, x11.32, win64.exe, win32.exe ]
+        platform: [ x11.64 ]
         target: [ release, debug ]
         include:
           - platform: x11.64
             os: ubuntu-latest
-          - platform: osx.universal
-            os: macos-latest
-          # For Windows platform we need to install mesa-dist-win.
-          # 32 bit X11 also needs special attention.
-          # So disable both of them for now.
-          #- platform: x11.32
-          #  os: ubuntu-latest
-          #- platform: win64.exe
-          #  os: windows-latest
-          #- platform: win32.exe
-          #  os: windows-latest
     steps:
       - uses: actions/checkout@v2
         with:
@@ -282,7 +263,6 @@ jobs:
           path: godot_executable/
           key: godot-cache-${{ env.GODOT }}_${{ matrix.platform }}-v${{ env.GODOT_CACHE_VERSION }}
       - name: Install Ubuntu dependencies
-        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sudo apt-get install -y pulseaudio
       - name: Install binary build artifacts
         uses: actions/download-artifact@v2
@@ -313,10 +293,63 @@ jobs:
         with:
           run: ./godot_executable/${{ env.GODOT }}_${{ matrix.platform }} --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
       - name: Run unix tests
-        if: ${{ matrix.platform != 'win64.exe' && matrix.platform != 'win32.exe' }}
         uses: GabrielBB/xvfb-action@v1
         with:
           run: ./godot_executable/${{ env.GODOT }}_${{ matrix.platform }} --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
+
+
+  # setup-godot action not currently working with x11 64/32bit, so just test with Windows/macOS for now.
+  test_v2:
+    name: 'Test v2'
+    needs: [ build, export_template ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest, macos-latest ]
+        bits: [ 64, 32 ]
+        godot_version: [ 'v3.3.2-stable', 'v3.4-beta1' ]
+        target: [ release, debug ]
+        exclude:
+          - os: macos-latest
+            bits: 32
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Setup Godot
+        uses: lihop/setup-godot@a8c51922588e49157a71bdd0e2c792f542f24d0a
+        with:
+          version: ${{ matrix.godot_version }}
+          bits: ${{ matrix.bits }}
+      - name: Install binary build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: libgodot-xterm-${{ matrix.target }}
+          path: addons/godot_xterm/native/bin
+      - name: Install plugins
+        shell: bash
+        run: godot --no-window -s plug.gd install
+
+      # HACK: Use export to force re-import of files.
+      # See the proposal to support command line import https://github.com/godotengine/godot-proposals/issues/1362
+      - name: Install html5 export templates
+        uses: actions/download-artifact@v2
+        with:
+          name: html5-gdnative-export-templates
+          path: misc/export_templates/godot/bin
+      - name: Create export directory
+        run: mkdir -p docs/demo
+      - name: Import files
+        shell: bash
+        run: godot --export HTML5
+
+      - name: Run tests
+        shell: bash
+        run: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
+      - name: Run unix tests
+        if: ${{ matrix.os == 'macos-latest' || matrix.os == 'ubuntu-latest' }}
+        run: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
 
 
   html5_export:
