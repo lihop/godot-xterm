@@ -58,7 +58,7 @@ func draw_all(_size = Vector2.ZERO):
 
 
 func draw_title():
-	tput.setaf(Color("#FFECA0"))
+	tput.setaf(tput.ANSIColor.bright_yellow)
 	tput.cup(row, 0)
 
 	for line in TITLE.split("\r"):
@@ -94,8 +94,8 @@ func draw_menu():
 		tput.cup(row, offset)
 
 		if selected_index == i:
-			tput.setab(Color("#FF786B"))
-			tput.setaf(Color.black)
+			tput.setab(tput.ANSIColor.red)
+			tput.setaf(tput.ANSIColor.black)
 
 		$Terminal.write("%s. %s" % [i + 1, item.name])
 
@@ -130,12 +130,10 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 				var scene = item.scene.instance()
 				var animation_player: AnimationPlayer = scene.get_node("AnimationPlayer")
 				scene.connect("key_pressed", self, "_on_Asciicast_key_pressed", [animation_player])
-				get_tree().get_root().add_child(scene)
-				visible = false
+				add_child(scene)
 				scene.grab_focus()
 				yield(animation_player, "animation_finished")
-				visible = true
-				get_tree().get_root().remove_child(scene)
+				remove_child(scene)
 				$Terminal.grab_focus()
 				scene.queue_free()
 			"Terminal":
@@ -151,11 +149,9 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 					)
 				var scene = item.scene.instance()
 				var pty = scene if OS.has_feature("JavaScript") else scene.get_node("PTY")
-				get_tree().get_root().add_child(scene)
-				visible = false
+				add_child(scene)
 				scene.grab_focus()
 				yield(pty, "exited")
-				visible = true
 				$Terminal.grab_focus()
 				scene.queue_free()
 			"Exit":

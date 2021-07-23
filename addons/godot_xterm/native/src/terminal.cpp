@@ -398,25 +398,34 @@ void Terminal::_draw() {
 
 void Terminal::update_theme() {
   ResourceLoader *rl = ResourceLoader::get_singleton();
+  Ref<Theme> default_theme;
 
   /* Load the default theme if it exists and no theme is set */
-  // Having an actual theme resource set allows things like like font resizing.
+  // Don't actually set the theme to default (to allow inheritence of themes),
+  // but do load default values from it.
 
   const char *default_theme_path =
       "res://addons/godot_xterm/themes/default.tres";
 
   if (!get_theme().is_valid() && rl->exists(default_theme_path)) {
-    set_theme(rl->load(default_theme_path));
+    default_theme = rl->load(default_theme_path);
   }
 
   /* Generate color palette based on theme */
 
-  auto set_pallete_color = [this](tsm_vte_color color, String theme_color,
-                                  Color default_color) -> void {
+  auto set_pallete_color = [this, default_theme](tsm_vte_color color,
+                                                 String theme_color,
+                                                 Color default_color) -> void {
     Color c;
 
-    c = has_color(theme_color, "Terminal") ? get_color(theme_color, "Terminal")
-                                           : default_color;
+    c = has_color(theme_color, "Terminal")
+            ? get_color(theme_color, "Terminal")
+            : has_color_override(theme_color)
+                  ? get_color(theme_color, "")
+                  : (default_theme != nullptr &&
+                     default_theme->has_color(theme_color, "Terminal"))
+                        ? default_theme->get_color(theme_color, "Terminal")
+                        : default_color;
 
     color_palette[color][0] = c.get_r8();
     color_palette[color][1] = c.get_g8();
@@ -475,13 +484,18 @@ void Terminal::update_theme() {
 
   /* Load fonts into the fontmap from theme */
 
-  auto set_font = [this, rl](String font_style) -> void {
+  auto load_font = [this, default_theme](String font_style) -> void {
     Ref<Font> fontref;
 
     if (has_font(font_style, "Terminal")) {
       fontref = get_font(font_style, "Terminal");
+    } else if (has_font_override(font_style)) {
+      fontref = get_font(font_style, "");
     } else if (has_font("Regular", "Terminal")) {
       fontref = get_font("Regular", "Terminal");
+    } else if (default_theme != nullptr &&
+               default_theme->has_font("Regular", "Terminal")) {
+      fontref = default_theme->get_font("Regular", "Terminal");
     } else {
       fontref = get_font("");
     }
@@ -489,12 +503,12 @@ void Terminal::update_theme() {
     fontmap.insert(std::pair<String, Ref<Font>>(font_style, fontref));
   };
 
-  set_font("Bold Italic");
-  set_font("Bold");
-  set_font("Italic");
-  set_font("Regular");
+  load_font("Bold Italic");
+  load_font("Bold");
+  load_font("Italic");
+  load_font("Regular");
 
-  update_size();
+  // update_size();
 }
 
 void Terminal::draw_background(int row, int col, Color bgcolor, int width = 1) {

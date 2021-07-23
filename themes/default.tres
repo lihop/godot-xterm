@@ -1,13 +1,11 @@
 [gd_resource type="Theme" load_steps=5 format=2]
 
-[ext_resource path="res://addons/godot_xterm/themes/fonts/regular.tres" type="DynamicFont" id=1]
 [ext_resource path="res://themes/fonts/bold_italic.tres" type="DynamicFont" id=2]
 [ext_resource path="res://themes/fonts/italic.tres" type="DynamicFont" id=3]
 [ext_resource path="res://themes/fonts/bold.tres" type="DynamicFont" id=4]
-
+[ext_resource path="res://themes/fonts/regular.tres" type="DynamicFont" id=5]
 
 [resource]
-default_font = ExtResource( 1 )
 Terminal/colors/Background = Color( 0.12549, 0.145098, 0.192157, 1 )
 Terminal/colors/Black = Color( 0, 0, 0, 1 )
 Terminal/colors/Blue = Color( 0.341176, 0.698039, 1, 1 )
@@ -29,4 +27,4 @@ Terminal/colors/Yellow = Color( 1, 0.866667, 0.396078, 1 )
 Terminal/fonts/Bold = ExtResource( 4 )
 "Terminal/fonts/Bold Italic" = ExtResource( 2 )
 Terminal/fonts/Italic = ExtResource( 3 )
-Terminal/fonts/Regular = ExtResource( 1 )
+Terminal/fonts/Regular = ExtResource( 5 )

@@ -1,15 +1,15 @@
 [gd_resource type="DynamicFont" load_steps=6 format=2]
 
-[ext_resource path="res://addons/godot_xterm/themes/fonts/nerd_fonts/symbols_2048_em_nerd_font_complete-2.1.0.ttf" type="DynamicFontData" id=1]
-[ext_resource path="res://addons/godot_xterm/themes/fonts/noto_color_emoji/noto_color_emoji-20201206-phase3.ttf" type="DynamicFontData" id=2]
-[ext_resource path="res://addons/godot_xterm/themes/fonts/unifont/unifont-13.0.06.ttf" type="DynamicFontData" id=3]
+[ext_resource path="res://themes/fonts/unifont/unifont_upper-13.0.06.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://themes/fonts/unifont/unifont-13.0.06.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://themes/fonts/noto_color_emoji/noto_color_emoji-20201206-phase3.ttf" type="DynamicFontData" id=3]
 [ext_resource path="res://addons/godot_xterm/themes/fonts/hack/hack_regular-3.003.ttf" type="DynamicFontData" id=4]
-[ext_resource path="res://addons/godot_xterm/themes/fonts/unifont/unifont_upper-13.0.06.ttf" type="DynamicFontData" id=5]
+[ext_resource path="res://themes/fonts/nerd_fonts/symbols_2048_em_nerd_font_complete-2.1.0.ttf" type="DynamicFontData" id=5]
 
 [resource]
 size = 14
 font_data = ExtResource( 4 )
-fallback/0 = ExtResource( 1 )
-fallback/1 = ExtResource( 2 )
-fallback/2 = ExtResource( 3 )
-fallback/3 = ExtResource( 5 )
+fallback/0 = ExtResource( 5 )
+fallback/1 = ExtResource( 3 )
+fallback/2 = ExtResource( 2 )
+fallback/3 = ExtResource( 1 )

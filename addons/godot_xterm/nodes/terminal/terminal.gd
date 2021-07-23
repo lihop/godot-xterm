@@ -7,8 +7,6 @@
 tool
 extends Control
 
-const DefaultTheme = preload("../../themes/default.tres")
-
 signal data_sent(data)
 signal key_pressed(data, event)
 signal size_changed(new_size)
@@ -46,6 +44,7 @@ export var bell_cooldown: float = 0.1
 export var blink_on_time: float = 0.6
 export var blink_off_time: float = 0.3
 
+var _default_theme: Theme = preload("../../themes/default.tres")
 var _viewport: Viewport = preload("./viewport.tscn").instance()
 var _native_terminal: Control = _viewport.get_node("Terminal")
 var _screen := TextureRect.new()
@@ -103,8 +102,7 @@ func copy_all() -> String:
 
 
 func _ready():
-	if theme:
-		_native_terminal.theme = theme
+	_update_theme()
 
 	_native_terminal.update_mode = update_mode
 	_native_terminal.connect("data_sent", self, "_on_data_sent")
@@ -129,6 +127,30 @@ func _ready():
 	add_child(_selection_timer)
 
 	_refresh()
+
+
+func _update_theme():
+	# Themes are not propagated through the Viewport, so in order for theme
+	# inheritance to work we can pass through the theme variables manually.
+	for color in _default_theme.get_color_list("Terminal"):
+		var c: Color
+		if has_color(color, "Terminal"):
+			c = get_color(color, "Terminal")
+		else:
+			c = _default_theme.get_color(color, "Terminal")
+		_native_terminal.add_color_override(color, c)
+	for font in _default_theme.get_font_list("Terminal"):
+		var f: Font
+		if has_font(font, "Terminal"):
+			f = get_font(font, "Terminal")
+		else:
+			if _default_theme.has_font(font, "Terminal"):
+				f = _default_theme.get_font(font, "Terminal")
+			else:
+				f = _default_theme.get_font(font, "Regular")
+		_native_terminal.add_font_override(font, f)
+	_native_terminal._update_theme()
+	_native_terminal._update_size()
 
 
 func _refresh():
@@ -212,7 +234,7 @@ func _notification(what: int) -> void:
 			_viewport.size = rect_size
 			_refresh()
 		NOTIFICATION_THEME_CHANGED:
-			_native_terminal.theme = theme
+			_update_theme()
 			_refresh()
 
 
