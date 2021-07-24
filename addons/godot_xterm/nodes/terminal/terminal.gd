@@ -143,6 +143,8 @@ func _update_theme():
 		var f: Font
 		if has_font(font, "Terminal"):
 			f = get_font(font, "Terminal")
+		elif has_font("Regular", "Terminal"):
+			f = get_font("Regular", "Terminal")
 		else:
 			if _default_theme.has_font(font, "Terminal"):
 				f = _default_theme.get_font(font, "Terminal")
