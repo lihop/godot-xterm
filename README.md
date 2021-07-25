@@ -51,7 +51,7 @@ If you have a question not answered by the docs, or would like more support, fee
 
 ## Demos
 
-- [Online demo](https://demo.godot-xterm.nix.nz) of an HTML5 export of this repo (using the GDNative export type, available since Godot 3.3).
+- [Online demo](https://lihop.github.io/godot-xterm-dist/) of an HTML5 export of this repo (using the GDNative export type, available since Godot 3.3).
   Make sure you click the screen at least once after loading.
 
 - [Xterminate](https://lihop.itch.io/xterminate). A Linux, macOS, and Windows demo, which uses an older version GodotXterm in conjunction with [Godot Python](https://github.com/touilleMan/godot-python).
