@@ -22,12 +22,6 @@ const DEFAULT_ENV := {TERM = DEFAULT_NAME, COLORTERM = "truecolor"}
 #const FLOW_CONTROL_PAUSE = char(0x13) # defaults to XOFF
 #const FLOW_CONTROL_RESUME = char(0x11) # defaults to XON
 
-enum Status { NONE, OPEN, EXITED, ERROR }
-const STATUS_NONE = Status.NONE
-const STATUS_OPEN = Status.OPEN
-const STATUS_EXITED = Status.EXITED
-const STATUS_ERROR = Status.ERROR
-
 # Any signal_number can be sent to the pty's process using the kill() function,
 # these are just the signals with numbers specified in the POSIX standard.
 enum Signal {
@@ -47,31 +41,22 @@ enum Signal {
 
 signal data_received(data)
 signal exited(exit_code, signum)
-signal errored(message)
 
 export (NodePath) var terminal_path := NodePath() setget set_terminal_path
 
-var status := STATUS_NONE
-var error_string := ""
-var terminal: Terminal = null setget set_terminal
-
-## Name of the terminal to be set in environment ($TERM variable).
-#export (String) var term_name: String
+var _terminal: Terminal = null setget _set_terminal
 
 # The name of the process.
-var process: String
+#var process: String
 
 # The process ID.
-var pid: int
+var _pid: int
 
 # The column size in characters.
 export (int) var cols: int = DEFAULT_COLS setget set_cols
 
 # The row size in characters.
 export (int) var rows: int = DEFAULT_ROWS setget set_rows
-
-# Working directory to be set for the child program.
-#export (String) var cwd := LibuvUtils.get_cwd()
 
 # Environment to be set for the child program.
 export (Dictionary) var env := DEFAULT_ENV
@@ -80,9 +65,6 @@ export (Dictionary) var env := DEFAULT_ENV
 # the environment variables of the operating system (e.g. printenv), with the
 # former taking precedence in the case of conflicts.
 export (bool) var use_os_env := true
-
-# If true, pty will call fork() in in _ready().
-export (bool) var autostart := false
 
 # (EXPERIMENTAL)
 # If true, PTY node will create a blocking libuv loop in a new thread.
@@ -112,7 +94,6 @@ export (bool) var autostart := false
 ## The string that should resume the pty when `handle_flow_control` is true. Default is XON ("\u0011").
 #var flow_control_resume: String = FLOW_CONTROL_RESUME
 
-#var _native_term # Platform appropriate instance of this class.
 var _pipe: Pipe
 
 
@@ -126,32 +107,32 @@ func set_rows(value: int):
 
 func set_terminal_path(value := NodePath()):
 	terminal_path = value
-	set_terminal(get_node_or_null(terminal_path))
+	_set_terminal(get_node_or_null(terminal_path))
 
 
-func set_terminal(value: Terminal):
-	if terminal == value:
+func _set_terminal(value: Terminal):
+	if _terminal == value:
 		return
 
 	# Disconect the current terminal, if any.
-	if terminal:
-		disconnect("data_received", terminal, "write")
-		terminal.disconnect("data_sent", self, "write")
-		terminal.disconnect("size_changed", self, "resize")
+	if _terminal:
+		disconnect("data_received", _terminal, "write")
+		_terminal.disconnect("data_sent", self, "write")
+		_terminal.disconnect("size_changed", self, "resizev")
 
-	terminal = value
+	_terminal = value
 
-	if not terminal:
+	if not _terminal:
 		return
 
 	# Connect the new terminal.
 	# FIXME! resize(terminal.get_cols(), terminal.get_rows())
-	if not terminal.is_connected("size_changed", self, "resize"):
-		terminal.connect("size_changed", self, "resize")
-	if not terminal.is_connected("data_sent", self, "write"):
-		terminal.connect("data_sent", self, "write")
-	if not is_connected("data_received", terminal, "write"):
-		connect("data_received", terminal, "write")
+	if not _terminal.is_connected("size_changed", self, "resizev"):
+		_terminal.connect("size_changed", self, "resizev")
+	if not _terminal.is_connected("data_sent", self, "write"):
+		_terminal.connect("data_sent", self, "write")
+	if not is_connected("data_received", _terminal, "write"):
+		connect("data_received", _terminal, "write")
 
 
 # Writes data to the socket.
@@ -185,28 +166,18 @@ func _write(data: String) -> void:
 # Also accepts a single Vector2 argument where x is the the number of columns
 # and y is the number of rows.
 func resize(cols, rows = null) -> void:
-	assert(
-		(cols is Vector2 and rows == null) or (cols is int and rows is int),
-		"Usage: resize(size: Vector2) or resize(cols: int, rows: int)"
-	)
-
-	if cols is Vector2:
-		rows = cols.y  # Must get rows before reassigning cols!
-		cols = cols.x
-
 	if cols <= 0 or rows <= 0 or cols == NAN or rows == NAN or cols == INF or rows == INF:
 		push_error("Resizing must be done using positive cols and rows.")
-
 	_resize(cols, rows)
+
+
+# Same as resize() but takes a Vector2.
+func resizev(size: Vector2) -> void:
+	resize(size.x, size.y)
 
 
 func _resize(cols: int, rows: int) -> void:
 	assert(false, "Not implemented.")
-
-
-# Close, kill and destroy the pipe.
-func destroy() -> void:
-	pass
 
 
 # Kill the pty.
@@ -215,8 +186,8 @@ func destroy() -> void:
 func kill(signum: int = Signal.SIGHUP) -> void:
 	if _pipe:
 		_pipe.close()
-	if pid > 0:
-		LibuvUtils.kill(pid, signum)
+	if _pid > 0:
+		LibuvUtils.kill(_pid, signum)
 
 
 func fork(
@@ -225,8 +196,9 @@ func fork(
 	p_cwd: String = LibuvUtils.get_cwd(),
 	p_cols: int = DEFAULT_COLS,
 	p_rows: int = DEFAULT_ROWS
-):
-	push_error("Not implemented.")
+) -> int:
+	assert(false, "Not implemented.")
+	return FAILED
 
 
 func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:

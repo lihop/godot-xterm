@@ -21,16 +21,11 @@ var thread: Thread
 var _fd: int = -1
 var _exit_cb: FuncRef
 
-static func get_uid() -> int:
-	return -1  # Not implemented.
+#static func get_uid() -> int:
+#	return -1  # Not implemented.
 
-static func get_gid() -> int:
-	return -1  # Not implemented.
-
-
-func _ready():
-	if autostart:
-		fork()
+#static func get_gid() -> int:
+#	return -1  # Not implemented.
 
 
 func _resize(cols: int, rows: int) -> void:
@@ -54,7 +49,7 @@ func fork(
 	uid: int = -1,
 	gid: int = -1,
 	utf8 = true
-):
+) -> int:
 	# File.
 	if file.empty():
 		file = FALLBACK_FILE
@@ -78,16 +73,14 @@ func fork(
 
 	if result[0] != OK:
 		push_error("Fork failed.")
-		status = STATUS_ERROR
 		return FAILED
 
 	_fd = result[1].fd
 	if _fd < 0:
 		push_error("File descriptor must be a non-negative integer value.")
-		status = STATUS_ERROR
 		return FAILED
 
-	pid = result[1].pid
+	_pid = result[1].pid
 
 	_pipe = Pipe.new()
 	_pipe.open(_fd)
@@ -104,8 +97,8 @@ func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
 
 func _exit_tree():
 	_exit_cb = null
-	if pid > 1:
-		LibuvUtils.kill(pid, Signal.SIGHUP)
+	if _pid > 1:
+		LibuvUtils.kill(_pid, Signal.SIGHUP)
 
 
 func _on_pipe_data_received(data):
@@ -114,7 +107,7 @@ func _on_pipe_data_received(data):
 
 func _on_exit(exit_code: int, signum: int) -> void:
 	if is_instance_valid(self):
-		pid = -1
+		_pid = -1
 		emit_signal("exited", exit_code, signum)
 
 
