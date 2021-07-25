@@ -6,21 +6,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+
+## [v2.0.0] - 2021-07-25
 ### Added
+- Terminal editor plugin. Adds integrated terminal to Godot editor.
+- Xresources import plugin.
+- [#39][i39]: Support for the bell "\u0007" character.
 - HTML5 Support.
-- Theme colors now support transparency.
-- More themes: base16_dark, base16_light, default_dark, default_light, soft_black, solarized, solarized_black, solarized_white.
-- Support for Windows 32-bit (Terminal node only).
+- [#24][i24]: Support for Windows 32-bit (Terminal node only).
 
 ### Changed
+- [#44][i44]: Default theme to match Godot's default theme.
 - Supported Godot version -> 3.3.2.
 - Set a default theme if no theme property has been set.
 - Changed default font from Cousine to Hack, which is the same as Godot's script editor, and reduced size from 16 to 14.
 - TPut no longer registered as a unique global class (i.e. removed `class_name TPut`).
 
 ### Fixed
+- [#40][i40]: Vim related bugs, caused by incorrectly handled control sequences.
 - Don't swap red and blue channels of theme colors.
 - Use "Light Cyan" color from theme. Previously ignored.
+
+[i24]: https://github.com/lihop/godot-xterm/issues/24
+[i39]: https://github.com/lihop/godot-xterm/issues/39
+[i40]: https://github.com/lihop/godot-xterm/issues/40
+[i44]: https://github.com/lihop/godot-xterm/issues/44
 
 
 ## [v1.2.1] - 2020-11-23
@@ -58,7 +69,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Terminal `write()` method now accepts both String and PoolByteArray.
 
 
-[Unreleased]: https://github.com/lihop/godot-xterm/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/lihop/godot-xterm/compare/v2.0.0...HEAD
+[v2.0.0]: https://github.com/lihop/godot-xterm/compare/v1.2.1...v2.0.0
 [v1.2.1]: https://github.com/lihop/godot-xterm/compare/v1.2.0...v1.2.1
 [v1.2.0]: https://github.com/lihop/godot-xterm/compare/v1.0.0...v1.2.0
 [v1.0.0]: https://github.com/lihop/godot-xterm/releases/tag/v1.0.0
