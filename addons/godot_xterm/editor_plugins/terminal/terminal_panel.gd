@@ -52,6 +52,11 @@ func _ready():
 
 
 func _load_or_create_settings() -> void:
+	# Use only default settings for now, until settings are properly defined
+	# and documented.
+	_settings = TerminalSettings.new()
+	return
+
 	var dir := Directory.new()
 
 	if not dir.dir_exists(SETTINGS_FILE_PATH.get_base_dir()):
