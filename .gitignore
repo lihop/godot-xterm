@@ -14,7 +14,8 @@ mono_crash.*
 # Emscripten-specific ignores
 .emcache/
 
-# IDE-specific ignores
+# Editor/IDE-specific ignores
+*.swp
 .vscode
 .vs
 
