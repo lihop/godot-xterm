@@ -1,0 +1,13 @@
+[remap]
+
+importer="godot_xterm_xrdb_importer"
+type="Theme"
+path="res://.import/retro_green.xresources-3110df277701da17f502f808acb29c51.res"
+
+[deps]
+
+source_file="res://themes/retro_green.xresources"
+dest_files=[ "res://.import/retro_green.xresources-3110df277701da17f502f808acb29c51.res" ]
+
+[params]
+
