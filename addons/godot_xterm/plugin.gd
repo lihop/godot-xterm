@@ -17,7 +17,7 @@ func _enter_tree():
 	var asciicast_script = preload("./resources/asciicast.gd")
 	add_custom_type("Asciicast", "Animation", asciicast_script, null)
 
-	var terminal_script = preload("./nodes/terminal/terminal.gd")
+	var terminal_script = preload("./terminal.gd")
 	var terminal_icon = preload("./nodes/terminal/terminal_icon.svg")
 	add_custom_type("Terminal", "Control", terminal_script, terminal_icon)
 
@@ -27,7 +27,7 @@ func _enter_tree():
 		var pty_script
 		match OS.get_name():
 			"X11", "Server", "OSX":
-				pty_script = load("%s/nodes/pty/unix/pty_unix.gd" % base_dir)
+				pty_script = load("%s/nodes/pty/pty.gd" % base_dir)
 		add_custom_type("PTY", "Node", pty_script, pty_icon)
 		var terminal_settings_script = preload("./editor_plugins/terminal/settings/terminal_settings.gd")
 		add_custom_type("TerminalSettings", "Resource", terminal_settings_script, null)

@@ -44,8 +44,8 @@ export var bell_cooldown: float = 0.1
 export var blink_on_time: float = 0.6
 export var blink_off_time: float = 0.3
 
-var _default_theme: Theme = preload("../../themes/default.tres")
-var _viewport: Viewport = preload("./viewport.tscn").instance()
+var _default_theme: Theme = preload("./themes/default.tres")
+var _viewport: Viewport = preload("./nodes/terminal/viewport.tscn").instance()
 var _native_terminal: Control = _viewport.get_node("Terminal")
 var _screen := TextureRect.new()
 

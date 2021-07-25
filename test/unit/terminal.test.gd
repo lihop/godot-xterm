@@ -1,10 +1,12 @@
 extends "res://addons/gut/test.gd"
 
-var term: GDXterm.Terminal
+const Terminal := preload("res://addons/godot_xterm/terminal.gd")
+
+var term: Terminal
 
 
 func before_each():
-	term = GDXterm.Terminal.new()
+	term = Terminal.new()
 	term.rect_size = Vector2(400, 200)
 	add_child_autofree(term)
 

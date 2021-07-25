@@ -8,6 +8,8 @@ extends Control
 # - https://tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html
 # - https://www.youtube.com/watch?v=jTSQlIK_92w
 
+const TPut = preload("res://addons/godot_xterm/util/tput.gd")
+
 # Title generated using command: toilet -f pagga GODOT XTERM
 const TITLE = """
 ░█▀▀░█▀█░█▀▄░█▀█░▀█▀░░░█░█░▀█▀░█▀▀░█▀▄░█▄█\r
@@ -36,10 +38,12 @@ var row: int
 var menu_start_row: int
 var offset: int
 
-onready var tput = GDXterm.TPut.new($Terminal)
+onready var tput = TPut.new($Terminal)
 
 
 func _ready():
+	if not $Terminal.is_connected("key_pressed", self, "_on_Terminal_key_pressed"):
+		$Terminal.connect("key_pressed", self, "_on_Terminal_key_pressed")
 	# warning-ignore:return_value_discarded
 	$Terminal.connect("size_changed", self, "draw_all")
 	$Terminal.grab_focus()

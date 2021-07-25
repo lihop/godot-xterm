@@ -9,7 +9,7 @@ extends Node
 
 const LibuvUtils := preload("./libuv_utils.gd")
 const Pipe := preload("./pipe.gdns")
-const Terminal := preload("../terminal/terminal.gd")
+const Terminal := preload("../../terminal.gd")
 
 const DEFAULT_NAME := "xterm-256color"
 const DEFAULT_COLS := 80

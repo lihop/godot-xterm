@@ -1,8 +1,9 @@
 extends "res://addons/gut/test.gd"
 
 const LibuvUtils := preload("res://addons/godot_xterm/nodes/pty/libuv_utils.gd")
+var PTY = load("res://addons/godot_xterm/pty.gd")
 
-var pty: GDXterm.PTYUnix
+var pty
 var helper: Helper
 
 
@@ -14,7 +15,7 @@ func before_all():
 
 
 func before_each():
-	pty = GDXterm.PTYUnix.new()
+	pty = PTY.new()
 	add_child_autofree(pty)
 
 

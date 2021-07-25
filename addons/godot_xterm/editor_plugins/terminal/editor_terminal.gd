@@ -1,5 +1,5 @@
 tool
-extends "../../nodes/terminal/terminal.gd"
+extends "../../terminal.gd"
 
 signal exited(exit_code, signum)
 

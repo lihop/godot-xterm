@@ -1,4 +1,4 @@
-extends "res://addons/godot_xterm/nodes/terminal/terminal.gd"
+extends "res://addons/godot_xterm/terminal.gd"
 
 export (String) var exec_path := "bash"
 export (String) var socat_path := "socat"  # E.g. /usr/bin/socat

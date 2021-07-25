@@ -5,9 +5,9 @@
 # Copyright (c) 2021, Leroy Hopson (MIT License).
 
 tool
-extends "../pty.gd"
+extends "./nodes/pty/pty.gd"
 
-const PTYUnix = preload("./pty_unix.gdns")
+const PTYUnix = preload("./nodes/pty/unix/pty_unix.gdns")
 
 const FALLBACK_FILE = "sh"
 
@@ -36,7 +36,7 @@ func _resize(cols: int, rows: int) -> void:
 
 
 func _fork_thread(args):
-	var result = preload("./pty_unix.gdns").new().callv("fork", args)
+	var result = preload("./nodes/pty/unix/pty_unix.gdns").new().callv("fork", args)
 	return result
 
 

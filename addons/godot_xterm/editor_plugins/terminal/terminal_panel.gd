@@ -8,7 +8,7 @@ tool
 extends Control
 
 const EditorTerminal := preload("./editor_terminal.tscn")
-const PTY := preload("../../nodes/pty/pty.gd")
+const PTY := preload("../../pty.gd")
 const TerminalSettings := preload("./settings/terminal_settings.gd")
 
 const SETTINGS_FILE_PATH := "res://.gdxterm/settings.tres"

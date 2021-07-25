@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://addons/godot_xterm/nodes/terminal/terminal.gd" type="Script" id=1]
+[ext_resource path="res://addons/godot_xterm/terminal.gd" type="Script" id=1]
 [ext_resource path="res://examples/menu/menu.gd" type="Script" id=2]
 
 [node name="Menu" type="Control"]
@@ -19,4 +19,9 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-[connection signal="key_pressed" from="Terminal" to="." method="_on_Terminal_key_pressed"]
+update_mode = 1
+copy_on_selection = false
+bell_muted = false
+bell_cooldown = 0.1
+blink_on_time = 0.6
+blink_off_time = 0.3
