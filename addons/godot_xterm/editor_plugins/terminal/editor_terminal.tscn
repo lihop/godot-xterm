@@ -25,6 +25,5 @@ env = {
 }
 
 [node name="Bell" type="AudioStreamPlayer" parent="."]
-
 [connection signal="bell" from="." to="Bell" method="play"]
 [connection signal="exited" from="PTY" to="." method="_on_PTY_exited"]

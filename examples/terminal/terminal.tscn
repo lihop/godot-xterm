@@ -13,7 +13,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 copy_on_selection = true
-bell_cooldown = 0.1
 
 [node name="PTY" type="Node" parent="."]
 script = ExtResource( 2 )
@@ -25,5 +24,4 @@ env = {
 
 [node name="Bell" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 1 )
-
 [connection signal="bell" from="." to="Bell" method="play"]
