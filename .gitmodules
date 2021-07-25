@@ -16,3 +16,9 @@
 	url = https://github.com/libuv/libuv
 [submodule "godot-cpp/"]
 	url = https://github.com/godotengine/godot-cpp
+[submodule "docs/godot-xterm.wiki"]
+	path = docs/godot-xterm.wiki
+	url = https://github.com/lihop/godot-xterm.wiki
+[submodule "docs/wiki"]
+	path = docs/wiki
+	url = https://github.com/lihop/godot-xterm.wiki
