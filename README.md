@@ -49,6 +49,11 @@ If you have a question not answered by the docs, or would like more support, fee
   Example xresources files can be exported from [terminal.sexy](https://terminal.sexy).
   The [iTerm2-Color-Schemes repo](https://github.com/mbadolato/iTerm2-Color-Schemes) also has many example color scheme files in [xrdb](https://github.com/mbadolato/iTerm2-Color-Schemes/tree/master/xrdb) and [Xresources](https://github.com/mbadolato/iTerm2-Color-Schemes) format.
 
+## Installation
+
+GodotXterm is available on the Godot Asset Library: <https://godotengine.org/asset-library/asset/1007>.
+For more ways to install see the [Installation](https://github.com/lihop/godot-xterm/wiki/Installation) page on the wiki.
+
 ## Demos
 
 - [Online demo](https://lihop.github.io/godot-xterm-dist/) of an HTML5 export of this repo (using the GDNative export type, available since Godot 3.3).
