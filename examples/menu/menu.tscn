@@ -19,9 +19,3 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-update_mode = 1
-copy_on_selection = false
-bell_muted = false
-bell_cooldown = 0.1
-blink_on_time = 0.6
-blink_off_time = 0.3
