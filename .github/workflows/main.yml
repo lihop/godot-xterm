@@ -214,7 +214,7 @@ jobs:
           retention-days: 1 # Minimum.
           path: |
             addons
-            !addons/godot-xterm
+            !addons/godot_xterm
  
 
   html5_export:
@@ -286,7 +286,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: plugins
-          path: ./
+          path: ./addons
       - name: Run tests
         if: ${{ matrix.godot_version != 'v3.2-stable' }}
         shell: bash
