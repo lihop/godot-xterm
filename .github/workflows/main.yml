@@ -261,7 +261,7 @@ jobs:
       matrix:
         os: [ windows-latest, macos-latest, ubuntu-latest ]
         bits: [ 64, 32 ]
-        godot_version: [ 'v3.2-stable', 'v3.3.2-stable', 'v3.4-beta1' ]
+        godot_version: [ 'v3.2-stable', 'v3.3.4-stable', 'v3.4-stable' ]
         exclude:
           - os: macos-latest
             bits: 32
