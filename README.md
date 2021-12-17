@@ -2,9 +2,9 @@
 
 # GodotXterm 
 
-![Godot Version](https://img.shields.io/badge/godot-3.3+-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-[![Build Status](https://github.com/lihop/godot-xterm/workflows/build/badge.svg?branch=master)](https://github.com/lihop/godot-xterm/actions?query=branch%3Amaster)
+![Godot Version](https://img.shields.io/badge/Godot-3.3+-blue.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+[![Build and Test](https://github.com/lihop/godot-xterm/actions/workflows/main.yml/badge.svg?event=schedule)](https://github.com/lihop/godot-xterm/actions/workflows/main.yml)
 
 GDNative terminal for Godot.
 Built using [libtsm](https://www.freedesktop.org/wiki/Software/libtsm/), [libuv](https://github.com/libuv/libuv), and [node-pty](https://github.com/microsoft/node-pty).
