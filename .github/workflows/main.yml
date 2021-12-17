@@ -2,8 +2,8 @@ name: 'Build and Test'
 
 on:
   push:
-  schedule: # Keep the cache alive!
-    - cron: 7 1 * * fri
+  schedule: # Build and test daily.
+    - cron: 0 11 * * *
 
 env:
   GODOT: Godot_v3.3.2-stable
