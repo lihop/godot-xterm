@@ -204,7 +204,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup Godot
-        uses: lihop/setup-godot@v0.1.0
+        uses: lihop/setup-godot@v0.1.1
       - name: Install plugins
         run: godot --no-window -s plug.gd install
       - name: Upload install plugins for use by other jobs
@@ -226,7 +226,7 @@ jobs:
       with:
         submodules: recursive
     - name: Setup Godot
-      uses: lihop/setup-godot@v0.1.0
+      uses: lihop/setup-godot@v0.1.1
     - name: Install binary build artifacts
       uses: actions/download-artifact@v2
       with:
@@ -273,7 +273,7 @@ jobs:
         with:
           submodules: recursive
       - name: Setup Godot
-        uses: lihop/setup-godot@v0.1.0
+        uses: lihop/setup-godot@v0.1.1
         with:
           version: ${{ matrix.godot_version }}
           bits: ${{ matrix.bits }}
