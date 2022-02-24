@@ -6,8 +6,8 @@ on:
     - cron: 0 11 * * *
 
 env:
-  GODOT: Godot_v3.4.2-stable
-  GODOT_VERSION: 3.4.2
+  GODOT: Godot_v3.4.3-stable
+  GODOT_VERSION: 3.4.3
   GODOT_RELEASE: stable
 
   # Caches should be automatically invalidated when versions change,
@@ -261,7 +261,7 @@ jobs:
       matrix:
         os: [ windows-latest, macos-latest, ubuntu-latest ]
         bits: [ 64, 32 ]
-        godot_version: [ 'v3.2-stable', 'v3.3.4-stable', 'v3.4.2-stable' ]
+        godot_version: [ 'v3.2-stable', 'v3.3.4-stable', 'v3.4.3-stable', 'v3.5-beta1' ]
         exclude:
           - os: macos-latest
             bits: 32
