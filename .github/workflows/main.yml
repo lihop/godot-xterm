@@ -6,8 +6,8 @@ on:
     - cron: 0 11 * * *
 
 env:
-  GODOT: Godot_v3.3.2-stable
-  GODOT_VERSION: 3.3.2
+  GODOT: Godot_v3.4.2-stable
+  GODOT_VERSION: 3.4.2
   GODOT_RELEASE: stable
 
   # Caches should be automatically invalidated when versions change,
@@ -90,9 +90,9 @@ jobs:
       # JavaScript-specific steps.
       - name: Install javascript build dependencies
         if: ${{ matrix.platform == 'javascript' }}
-        uses: mymindstorm/setup-emsdk@v9
+        uses: mymindstorm/setup-emsdk@v11
         with:
-          version: 2.0.10
+          version: 3.1.5
           actions-cache-folder: emsdk-cache-${{ matrix.target }}
 
       # MacOS-specific steps.
@@ -261,7 +261,7 @@ jobs:
       matrix:
         os: [ windows-latest, macos-latest, ubuntu-latest ]
         bits: [ 64, 32 ]
-        godot_version: [ 'v3.2-stable', 'v3.3.4-stable', 'v3.4-stable' ]
+        godot_version: [ 'v3.2-stable', 'v3.3.4-stable', 'v3.4.2-stable' ]
         exclude:
           - os: macos-latest
             bits: 32
