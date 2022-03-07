@@ -85,7 +85,7 @@ jobs:
       # Ubuntu-specific steps.
       - name: Install ubuntu build dependencies
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: sudo apt-get install -y scons gcc-multilib g++-multilib
+        run: sudo apt-get update && sudo apt-get install -y scons gcc-multilib g++-multilib
 
       # JavaScript-specific steps.
       - name: Install javascript build dependencies
