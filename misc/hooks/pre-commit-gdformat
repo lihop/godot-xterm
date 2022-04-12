@@ -1,8 +1,12 @@
 #! /usr/bin/env nix-shell
 #! nix-shell -i sh -p python38
+
+# SPDX-FileCopyrightText: 2021 Leroy Hopson
+# SPDX-License-Identifier: CC0-1.0
+
 set -e 
 
-GDTOOLKIT_VERSION=f5e2746d146200ec07ac6acb6fb378fd4c64f3f0
+GDTOOLKIT_VERSION=eb2d2756bd4ea97f6234d3bde3fc36d348b7352f
 
 FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep '\.gd$' | grep -v '^addons/gd-plug' | grep -v '^addons/gut' | sed 's| |\\ |g')
 echo $FILES
@@ -13,13 +17,10 @@ if [ ! -f .venv/bin/activate ] || ! source .venv/bin/activate; then
 	python -m venv .venv && source .venv/bin/activate;
 fi
 if ! gdformat --version; then
-	pip install git+git://github.com/Scony/godot-gdscript-toolkit@${GDTOOLKIT_VERSION};
+	pip install git+https://github.com/Scony/godot-gdscript-toolkit@${GDTOOLKIT_VERSION};
 fi
 
-# Format all selected files.
-echo "$FILES" | xargs gdformat
-
-# Add back the formatted files to staging.
-echo "$FILES" | xargs git add
+# Lint all selected files.
+echo "$FILES" | xargs gdformat --check
 
 exit 0
