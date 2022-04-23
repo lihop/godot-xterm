@@ -32,5 +32,6 @@
 /misc export-ignore
 /project.godot export-ignore
 /README.md export-ignore
+/requirements.txt export-ignore
 /test export-ignore
 /themes export-ignore
