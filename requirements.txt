@@ -1,0 +1,4 @@
+docopt==0.6.2
+gdtoolkit==3.3.1
+lark-parser==0.8.0
+PyYAML==6.0
