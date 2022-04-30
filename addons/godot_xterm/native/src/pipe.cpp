@@ -25,6 +25,7 @@ void Pipe::_register_methods() {
   register_method("poll", &Pipe::_poll_connection);
   register_method("open", &Pipe::open);
   register_method("write", &Pipe::write);
+  register_method("close", &Pipe::close);
 
   register_signal<Pipe>("data_received", "data",
                         GODOT_VARIANT_TYPE_POOL_BYTE_ARRAY);

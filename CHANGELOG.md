@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `libgodot-xterm.osx.64.dylib` is now a universal binary that runs natively
   on both x86_64 and arm64.
 
+### Fixed
+- The `kill()` method of unix PTY node can now be called without error as the underlying
+  `pipe.close()` method of the gdnative library is now registered.
+
+
 ## [v2.0.0](https://github.com/lihop/godot-xterm/compare/v1.2.1...v2.0.0) - 2021-07-25
 ### Added
 - Terminal editor plugin. Adds integrated terminal to Godot editor.
