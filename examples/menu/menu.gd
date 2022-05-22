@@ -43,6 +43,7 @@ onready var tput = TPut.new($Terminal)
 
 func _ready():
 	if not $Terminal.is_connected("key_pressed", self, "_on_Terminal_key_pressed"):
+		# warning-ignore:return_value_discarded
 		$Terminal.connect("key_pressed", self, "_on_Terminal_key_pressed")
 	# warning-ignore:return_value_discarded
 	$Terminal.connect("size_changed", self, "draw_all")
