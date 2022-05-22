@@ -419,14 +419,12 @@ void Terminal::update_theme() {
                                                  Color default_color) -> void {
     Color c;
 
-    c = has_color(theme_color, "Terminal")
-            ? get_color(theme_color, "Terminal")
-            : has_color_override(theme_color)
-                  ? get_color(theme_color, "")
-                  : (default_theme != nullptr &&
-                     default_theme->has_color(theme_color, "Terminal"))
-                        ? default_theme->get_color(theme_color, "Terminal")
-                        : default_color;
+    c = has_color(theme_color, "Terminal") ? get_color(theme_color, "Terminal")
+        : has_color_override(theme_color)  ? get_color(theme_color, "")
+        : (default_theme != nullptr &&
+           default_theme->has_color(theme_color, "Terminal"))
+            ? default_theme->get_color(theme_color, "Terminal")
+            : default_color;
 
     color_palette[color][0] = c.get_r8();
     color_palette[color][1] = c.get_g8();
