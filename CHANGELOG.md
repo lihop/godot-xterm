@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Linux binaries now support systems with older GLIBC versions. By building the
   binaries inside a docker container with an older GLIBC version, the minimum
   required GLIBC version is now 2.17 which was released in 2012.
+- Target Godot version from 3.3.2-stable -> 3.4.4-stable.
 
 ### Fixed
 - The `kill()` method of unix PTY node can now be called without error as the underlying
