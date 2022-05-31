@@ -58,13 +58,14 @@ updateSubmodules GODOT_CPP_DIR ${NATIVE_DIR}/thirdparty/godot-cpp
 # Build godot-cpp bindings.
 cd ${GODOT_CPP_DIR}
 echo "scons generate_bindings=yes target=$target -j$nproc"
-scons generate_bindings=yes target=$target -j$nproc
+scons generate_bindings=yes macos_arch=$(uname -m) target=$target -j$nproc
 
 # Build libuv as a static library.
 cd ${LIBUV_DIR}
 mkdir build || true
 cd build
-args="-DCMAKE_BUILD_TYPE=$target -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE"
+args="-DCMAKE_BUILD_TYPE=$target -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+	-DCMAKE_OSX_ARCHITECTURES=$(uname -m)"
 if [ "$target" == "release" ]; then
 	args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
 else
@@ -76,7 +77,7 @@ cmake --build build --config $target -j$nproc
 
 # Build libgodot-xterm.
 cd ${NATIVE_DIR}
-scons target=$target disable_pty=$disable_pty -j$nproc
+scons target=$target macos_arch=$(uname -m) disable_pty=$disable_pty -j$nproc
 
 # Use Docker to build libgodot-xterm javascript.
 if [ -x "$(command -v docker-compose)" ]; then

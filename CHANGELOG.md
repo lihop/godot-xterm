@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.0.0...HEAD)
-
+### Added
+- Support for macOS universal (x86_64/arm64) binaries. The macOS binary
+  `libgodot-xterm.osx.64.dylib` is now a universal binary that runs natively
+  on both x86_64 and arm64.
 
 ## [v2.0.0](https://github.com/lihop/godot-xterm/compare/v1.2.1...v2.0.0) - 2021-07-25
 ### Added

@@ -130,7 +130,8 @@ jobs:
           OS: ${{ matrix.os }}
         run: |
           cd addons/godot_xterm/native/thirdparty/libuv
-          args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE"
+          args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
           if [ "$TARGET" == "release" ]; then
             args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
           else
