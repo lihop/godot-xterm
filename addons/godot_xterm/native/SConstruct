@@ -62,6 +62,8 @@ opts.Add(EnumVariable(
     allowed_values=('debug', 'release'),
     ignorecase=2
 ))
+opts.Add(EnumVariable("macos_arch", "Target macOS architecture",
+         "universal", ["universal", "x86_64", "arm64"]))
 opts.Add(BoolVariable(
     'disable_pty',
     'Disables the PTY and its dependencies (LibuvUtils and Pipe). Has no effect on platforms where PTY is not supported',
@@ -139,15 +141,17 @@ elif env['platform'] == 'osx':
 
     if env['bits'] == '32':
         raise ValueError(
-            'Only 64-bit builds are supported for the macOS target.'
+            'Only 64-bit builds are supported for the osx platform.'
         )
 
-    env.Append(CCFLAGS=['-arch', 'x86_64'])
-    env.Append(LINKFLAGS=[
-        '-arch',
-        'x86_64',
-        '-Wl,-undefined,dynamic_lookup',
-    ])
+    if env["macos_arch"] == "universal":
+        env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+        env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
+    else:
+        env.Append(LINKFLAGS=["-arch", env["macos_arch"]])
+        env.Append(CCFLAGS=["-arch", env["macos_arch"]])
+
+    env.Append(LINKFLAGS=['-Wl,-undefined,dynamic_lookup'])
 
     if env['target'] == 'debug':
         env.Append(CCFLAGS=['-Og', '-g'])
@@ -249,7 +253,8 @@ env.Append(LIBS=[
     env.File('thirdparty/godot-cpp/bin/libgodot-cpp.{}.{}.{}{}'.format(
         env['platform'],
         env['target'],
-        'wasm' if env['platform'] == 'javascript' else env['bits'],
+        'wasm' if env['platform'] == 'javascript' else env['macos_arch'] if (
+            env['macos_arch'] != 'universal' and env['platform'] == 'osx') else env['bits'],
         env['LIBSUFFIX'],
     )),
     env.File('thirdparty/libtsm/build/bin/libtsm.{}.{}.{}{}'.format(
