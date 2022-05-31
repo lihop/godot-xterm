@@ -8,6 +8,7 @@
 #include <ResourceLoader.hpp>
 #include <Theme.hpp>
 #include <algorithm>
+#include <string>
 #include <xkbcommon/xkbcommon-keysyms.h>
 
 // For _populate_key_list(), see below.
