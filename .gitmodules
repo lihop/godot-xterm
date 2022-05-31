@@ -1,24 +1,15 @@
-[submodule "addons/godot_xterm/godot-cpp"]
+[submodule "docs/wiki"]
+	path = docs/wiki
+	url = https://github.com/lihop/godot-xterm.wiki
+[submodule "addons/godot_xterm/native/thirdparty/godot-cpp"]
 	path = addons/godot_xterm/native/thirdparty/godot-cpp
-	url = https://github.com/lihop/godot-cpp
-[submodule "addons/godot_xterm/libtsm"]
+	url = https://github.com/godotengine/godot-cpp
+[submodule "addons/godot_xterm/native/thirdparty/libuv"]
+	path = addons/godot_xterm/native/thirdparty/libuv
+	url = https://github.com/libuv/libuv
+[submodule "addons/godot_xterm/native/thirdparty/libtsm"]
 	path = addons/godot_xterm/native/thirdparty/libtsm
 	url = https://github.com/lihop/libtsm
 [submodule "misc/export_templates/godot"]
 	path = misc/export_templates/godot
 	url = https://github.com/godotengine/godot
-[submodule "addons/godot_xterm/native/thirdparty/libuv"]
-	path = addons/godot_xterm/native/thirdparty/libuv
-	url = https://github.com/libuv/libuv
-[submodule "libuv/"]
-	url = https://github.com/lihop/libuv
-[submodule "libuv"]
-	url = https://github.com/libuv/libuv
-[submodule "godot-cpp/"]
-	url = https://github.com/godotengine/godot-cpp
-[submodule "docs/godot-xterm.wiki"]
-	path = docs/godot-xterm.wiki
-	url = https://github.com/lihop/godot-xterm.wiki
-[submodule "docs/wiki"]
-	path = docs/wiki
-	url = https://github.com/lihop/godot-xterm.wiki
