@@ -17,9 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   required GLIBC version is now 2.17 which was released in 2012.
 - Target Godot version from 3.3.2-stable -> 3.4.4-stable.
 
+### Removed
+- Removed custom TerminalSettings Resource type.
+  This Resource was not being used but would still appear in every resource dropdown.
+  Related issue [godotengine/godot#24643](https://github.com/godotengine/godot/issues/24643).
+
 ### Fixed
 - The `kill()` method of unix PTY node can now be called without error as the underlying
   `pipe.close()` method of the gdnative library is now registered.
+
 
 
 ## [v2.0.0](https://github.com/lihop/godot-xterm/compare/v1.2.1...v2.0.0) - 2021-07-25
