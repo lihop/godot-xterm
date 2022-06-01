@@ -67,22 +67,27 @@ func _poll():
 
 
 func _input(event):
-	if not has_focus():
-		return
-
-	# Ignore some input that is used by shortcuts.
-	# TODO: Figure out how to handle this properly as the user might set their
-	# own custom shortcuts.
-	if event is InputEventKey:
-		if event.shift:
+	if has_focus() and event is InputEventKey and event.is_pressed():
+		if event.control and event.scancode in [KEY_PAGEUP, KEY_PAGEDOWN]:
+			# Handled by switch tabs shortcut.
 			return
 
-		if event.control and event.scancode == KEY_PAGEUP or event.scancode == KEY_PAGEDOWN:
+		if event.control and event.shift:
+			# Not handled by terminal.
 			return
 
-	# We need to handle many input events otherwise keys such as TAB, ctrl, etc.
-	# will trigger editor shortcuts when using them in the terminal.
-	if event is InputEventKey:
+		# Handle all other InputEventKey events to prevent triggering of editor
+		# shortcuts when using the terminal.
+		#
+		# Currently the only way to get shortcuts is by calling editor_settings.get_setting("shortcuts")
+		# and it returns an array that *only* contains shortcuts that have been modified from the original.
+		# Once https://github.com/godotengine/godot-proposals/issues/4112 is resolved it should be possible
+		# to get all shortcuts by their editor setting string as documented here:
+		# https://docs.godotengine.org/en/stable/tutorials/editor/default_key_mapping.html.
+		# In this case we could simply add a setting called something like "allowed shortcuts" or
+		# "propagated shortcuts" consisting of an array of shortcut editor setting strings.
+		# For example "editor/save_scene" which saves the scene and by default maps to 'Ctrl + S'.
+		# Then any shortcut events listed here can be handled by the terminal *and* the editor.
 		get_tree().set_input_as_handled()
 		_gui_input(event)
 
