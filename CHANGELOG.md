@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Linux binaries now support systems with older GLIBC versions. By building the
   binaries inside a docker container with an older GLIBC version, the minimum
   required GLIBC version is now 2.17 which was released in 2012.
+- Prevent all editor shortcuts while terminal is focused except for:
+  - The shortcuts used to switch between terminal tabs (Ctrl+Page up, Ctrl+Page down).
+  - Shortcuts starting with Ctrl + Shift. This includes the remaining default terminal
+    panel shortcuts such as 'Copy' (Ctrl+Shift+C) and 'New Terminal' (Ctrl+Shift+T).
 - Target Godot version from 3.3.2-stable -> 3.4.4-stable.
 
 ### Removed
