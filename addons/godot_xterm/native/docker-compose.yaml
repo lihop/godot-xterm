@@ -12,3 +12,46 @@ services:
         scons platform=javascript target=$${TARGET:-debug} -j$$(nproc)
         cd /src
         scons platform=javascript target=$${TARGET:-debug} -j$$(nproc)
+  godot-cpp-linux:
+    user: ${UID_GID}
+    build:
+      context: .
+      dockerfile: linux.Dockerfile
+    volumes:
+      - ./thirdparty/godot-cpp:/godot-cpp
+    working_dir: /godot-cpp
+  libuv-linux:
+    user: ${UID_GID}
+    build:
+      context: .
+      dockerfile: linux.Dockerfile
+    volumes:
+      - ./thirdparty/libuv:/libuv
+    working_dir: /libuv
+    command:
+      - /bin/bash
+      - -c
+      - |
+        target=$${TARGET:-release}
+        bits=$${BITS:-'64'}
+        mkdir build 2>/dev/null ;
+        args="-DCMAKE_BUILD_TYPE=$$target \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE"
+        if [[ $$bits -eq 32 ]]; then
+          args="$$args -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32";
+        else
+          args="$$args -DCMAKE_SYSTEM_PROCESSOR=x86_64 -DCMAKE_C_FLAGS=";
+        fi
+        pushd build
+        cmake .. $$args
+        popd
+        cmake --build build
+  libgodot-xterm-linux:
+    user: ${UID_GID}
+    build:
+      context: .
+      dockerfile: linux.Dockerfile
+    volumes:
+      - .:/godot-xterm
+    working_dir: /godot-xterm

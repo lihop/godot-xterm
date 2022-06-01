@@ -17,18 +17,59 @@ env:
   GODOT_CACHE_VERSION: 1
 
 jobs:
-  build:
-    name: 'Build'
+  build_docker:
+    name: 'Build Docker (linux, ${{ matrix.target }}, ${{ matrix.bits }})'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [ release, debug ]
+        bits: [ 64, 32 ]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Cache submodules
+        uses: ./.github/actions/cache-submodules
+        id: cache-submodules
+        with:
+          platform: linux
+          target: ${{ matrix.target }}
+          bits: ${{ matrix.bits }}
+      - name: Pull docker images
+        run: docker-compose pull
+        working-directory: addons/godot_xterm/native
+      - name: Cache docker image layers
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+      - name: Build godot-cpp bindings
+        if: steps.cache-submodules.outputs.cache-hit != 'true'
+        working-directory: addons/godot_xterm/native
+        run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e BITS=${{ matrix.bits }} godot-cpp-linux
+      - name: Build libuv
+        if: steps.cache-submodules.outputs.cache-hit != 'true'
+        working-directory: addons/godot_xterm/native
+        run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e BITS=${{ matrix.bits }} libuv-linux
+      - name: Build libgodot-xterm
+        working-directory: addons/godot_xterm/native
+        run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e BITS=${{ matrix.bits }} libgodot-xterm-linux
+      - name: Upload binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: libgodot-xterm-${{ matrix.target }}
+          path: |
+            addons/godot_xterm/native/bin/*.so
+
+  build_native:
+    name: 'Build Native'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [ linux, javascript, osx, windows ]
+        platform: [ javascript, osx, windows ]
         target: [ release, debug ]
         bits: [ 64, 32 ]
         include:
-          - platform: linux
-            os: ubuntu-latest
           - platform: javascript
             os: ubuntu-latest
           - platform: osx
@@ -59,40 +100,31 @@ jobs:
         with:
           path: addons/godot_xterm/native/.emcache
           key: emsdk-cache-${{ matrix.target }}-v${{ env.EMSCRIPTEN_CACHE_VERSION }}
-
-      # Ubuntu-specific steps.
-      - name: Install ubuntu build dependencies
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: sudo apt-get update && sudo apt-get install -y scons gcc-multilib g++-multilib
-
-      # JavaScript-specific steps.
       - name: Install javascript build dependencies
         if: ${{ matrix.platform == 'javascript' }}
         uses: mymindstorm/setup-emsdk@v11
         with:
           version: 3.1.5
           actions-cache-folder: emsdk-cache-${{ matrix.target }}
-
-      # MacOS-specific steps.
+      - name: Install additional javascript build dependencies
+        if: ${{ matrix.platform == 'javascript' }}
+        run: sudo apt-get update && sudo apt-get install -y scons gcc-multilib g++-multilib
       - name: Install additional macos build dependencies
         if: ${{ matrix.os == 'macos-latest' }}
         run: brew install scons
-
-      # Windows-specific steps.
       - name: Install additional windows build dependencies
         if: ${{ matrix.os == 'windows-latest' }}
         run: python -m pip install scons
-      - uses: ilammy/msvc-dev-cmd@v1.9.0
+      - name: Setup MSVC command prompt
+        uses: ilammy/msvc-dev-cmd@v1.9.0
         if: ${{ matrix.os == 'windows-latest' }}
         with:
           arch: win${{ matrix.bits }}
-
       - name: Build godot-cpp bindings
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         run: |
           cd addons/godot_xterm/native/thirdparty/godot-cpp
           scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} generate_bindings=yes -j2
-
       - name: Setup cmake
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         uses: jwlawson/actions-setup-cmake@v1.9
@@ -125,22 +157,18 @@ jobs:
             cd ..
           fi
           cmake --build build --config $TARGET
-
       - name: Build libgodot-xterm
         run: |
           cd addons/godot_xterm/native
           scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} -j2
-
-      - name: Upload build artifacts
+      - name: Upload binaries
         uses: actions/upload-artifact@v2
         with:
           name: libgodot-xterm-${{ matrix.target }}
           path: |
-            addons/godot_xterm/native/bin/*.so
             addons/godot_xterm/native/bin/*.wasm
             addons/godot_xterm/native/bin/*.dylib
             addons/godot_xterm/native/bin/*.dll
-
 
   # GDNative HTML5 export templates aren't provided so we must build them
   export_template:
@@ -198,7 +226,7 @@ jobs:
 
   html5_export:
     name: 'HTML5 Export'
-    needs: [ build, export_template ]
+    needs: [ build_docker, build_native, export_template ]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -233,7 +261,7 @@ jobs:
 
   test:
     name: 'Test'
-    needs: [ install_plugins, build ]
+    needs: [ install_plugins, build_docker, build_native ]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

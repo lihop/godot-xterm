@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `libgodot-xterm.osx.64.dylib` is now a universal binary that runs natively
   on both x86_64 and arm64.
 
+### Changed
+- Linux binaries now support systems with older GLIBC versions. By building the
+  binaries inside a docker container with an older GLIBC version, the minimum
+  required GLIBC version is now 2.17 which was released in 2012.
+
 ### Fixed
 - The `kill()` method of unix PTY node can now be called without error as the underlying
   `pipe.close()` method of the gdnative library is now registered.
