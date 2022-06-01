@@ -445,8 +445,8 @@ static void pty_after_waitpid(uv_async_t *async) {
 
   Array argv = Array::make(baton->exit_code, baton->signal_code);
 
-  ERR_FAIL_COND(baton->cb == nullptr);
-  baton->cb->call_funcv(argv);
+  if (baton->cb != nullptr && baton->cb->is_valid())
+    baton->cb->call_funcv(argv);
 
   uv_close((uv_handle_t *)async, pty_after_close);
 }
