@@ -282,7 +282,7 @@ else:
     else:
         #sources.append('src/node_pty/win/conpty.cc')
         env.Append(LIBS=[
-            env.File(f'thirdparty/libuv/build/{env["target"].capitalize()}/uv_a.lib'),
+            env.File('thirdparty/libuv/build/{}/uv_a.lib'.format(env["target"].capitalize())),
             'Advapi32.lib',
             'Iphlpapi.lib',
             'user32.lib',
