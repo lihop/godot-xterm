@@ -25,7 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - The `kill()` method of unix PTY node can now be called without error as the underlying
   `pipe.close()` method of the gdnative library is now registered.
-
+- Fixed 'Condition "!obj" is true.' error that would often print to console when
+  closing terminals in the Terminal panel of the editor plugin.
 
 
 ## [v2.0.0](https://github.com/lihop/godot-xterm/compare/v1.2.1...v2.0.0) - 2021-07-25
