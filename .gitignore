@@ -19,12 +19,6 @@ mono_crash.*
 .vscode
 .vs
 
-# Package-manager-specific ignores
-.plugged
-addons/*
-!addons/gd-plug
-!addons/godot_xterm
-
 # Test-specific ignores
 .gutconfig.json
 test/results.xml

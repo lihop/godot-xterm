@@ -8,6 +8,22 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "Reference",
+"class": "GutHookScript",
+"language": "GDScript",
+"path": "res://addons/gut/hook_script.gd"
+}, {
+"base": "Node",
+"class": "GutTest",
+"language": "GDScript",
+"path": "res://addons/gut/test.gd"
+} ]
+_global_script_class_icons={
+"GutHookScript": "",
+"GutTest": ""
+}
+
 [application]
 
 config/name="Godot Xterm"
@@ -20,7 +36,7 @@ window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PoolStringArray( "godot_xterm", "gut" )
+enabled=PoolStringArray( "res://addons/godot_xterm/plugin.cfg" )
 
 [rendering]
 
