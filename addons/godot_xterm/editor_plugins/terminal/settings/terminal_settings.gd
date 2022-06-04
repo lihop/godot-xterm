@@ -12,13 +12,13 @@ enum CWDType {
 
 ### Shortcuts ###
 
-export (ShortCut) var new_terminal_shortcut = preload("./default_new_terminal_shortcut.tres")
-export (ShortCut) var kill_terminal_shortcut = preload("./default_kill_terminal_shortcut.tres")
-export (ShortCut) var copy_shortcut = preload("./default_copy_shortcut.tres")
-export (ShortCut) var paste_shortcut = preload("./default_paste_shortcut.tres")
+export(ShortCut) var new_terminal_shortcut = preload("./default_new_terminal_shortcut.tres")
+export(ShortCut) var kill_terminal_shortcut = preload("./default_kill_terminal_shortcut.tres")
+export(ShortCut) var copy_shortcut = preload("./default_copy_shortcut.tres")
+export(ShortCut) var paste_shortcut = preload("./default_paste_shortcut.tres")
 
-export (ShortCut) var next_tab_shortcut = preload("./default_tab_right_shortcut.tres")
-export (ShortCut) var previous_tab_shortcut = preload("./default_tab_left_shortcut.tres")
+export(ShortCut) var next_tab_shortcut = preload("./default_tab_right_shortcut.tres")
+export(ShortCut) var previous_tab_shortcut = preload("./default_tab_left_shortcut.tres")
 
 ### Scroll settings ###
 
@@ -44,10 +44,10 @@ export var audio_bell := true
 export var bell_sound: AudioStream
 
 # Exec args.
-export (FileType) var file_type := FileType.USE_SHELL_ENV
+export(FileType) var file_type := FileType.USE_SHELL_ENV
 export var custom_file := "/bin/sh"
 
-export (CWDType) var cwd_type := CWDType.USE_PROJECT_DIRECTORY
+export(CWDType) var cwd_type := CWDType.USE_PROJECT_DIRECTORY
 export var custom_cwd := ""
 
 export var args := PoolStringArray()
