@@ -24,13 +24,13 @@ enum SelectionMode {
 	POINTER,
 }
 
-export (UpdateMode) var update_mode = UpdateMode.AUTO setget set_update_mode
+export(UpdateMode) var update_mode = UpdateMode.AUTO setget set_update_mode
 
 var cols = 2
 var rows = 2
 
 # If true, text in the terminal will be copied to the clipboard when selected.
-export (bool) var copy_on_selection
+export(bool) var copy_on_selection
 
 # Bell
 # If muted, the "bell" signal will not be emitted when the bell "\u0007" character

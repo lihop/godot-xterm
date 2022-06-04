@@ -42,7 +42,7 @@ enum Signal {
 signal data_received(data)
 signal exited(exit_code, signum)
 
-export (NodePath) var terminal_path := NodePath() setget set_terminal_path
+export(NodePath) var terminal_path := NodePath() setget set_terminal_path
 
 var _terminal: Terminal = null setget _set_terminal
 
@@ -53,18 +53,18 @@ var _terminal: Terminal = null setget _set_terminal
 var _pid: int
 
 # The column size in characters.
-export (int) var cols: int = DEFAULT_COLS setget set_cols
+export(int) var cols: int = DEFAULT_COLS setget set_cols
 
 # The row size in characters.
-export (int) var rows: int = DEFAULT_ROWS setget set_rows
+export(int) var rows: int = DEFAULT_ROWS setget set_rows
 
 # Environment to be set for the child program.
-export (Dictionary) var env := DEFAULT_ENV
+export(Dictionary) var env := DEFAULT_ENV
 
 # If true the environment variables in the env Dictionary will be merged with
 # the environment variables of the operating system (e.g. printenv), with the
 # former taking precedence in the case of conflicts.
-export (bool) var use_os_env := true
+export(bool) var use_os_env := true
 
 # (EXPERIMENTAL)
 # If true, PTY node will create a blocking libuv loop in a new thread.

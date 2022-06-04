@@ -98,6 +98,7 @@ class Helper:
 
 class LinuxHelper:
 	extends Helper
+
 	static func _get_pts() -> Array:
 		var dir := Directory.new()
 
@@ -117,6 +118,7 @@ class LinuxHelper:
 
 class MacOSHelper:
 	extends Helper
+
 	static func _get_pts() -> Array:
 		# TODO: Implement for macOS.
 		# On macOS there is no /dev/pts directory, rather new ptys are created

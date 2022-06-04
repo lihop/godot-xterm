@@ -1,9 +1,9 @@
 extends "res://addons/godot_xterm/terminal.gd"
 
-export (String) var exec_path := "bash"
-export (String) var socat_path := "socat"  # E.g. /usr/bin/socat
-export (int) var port := 2023
-export (bool) var verbose := false
+export(String) var exec_path := "bash"
+export(String) var socat_path := "socat"  # E.g. /usr/bin/socat
+export(int) var port := 2023
+export(bool) var verbose := false
 
 var _timeout = 30
 var _pid: int
