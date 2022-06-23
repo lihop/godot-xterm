@@ -5,11 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "cpp - Build and debug active file",
+            "name": "Editor (gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
             "program": "/run/current-system/sw/bin/godot",
-            "args": [],
+            "args": [
+                "--editor",
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -19,15 +21,41 @@
                 {
                     "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
+                    "ignoreFailures": true,
                 },
-                //{
-                //    "description": "Debug forked child process",
-                //    "text": "-gdb-set follow-fork-mode child",
-                //}
+                {
+                    "description":  "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true,
+                },
+                {
+                    "description": "Debug forked child process",
+                    "text": "-gdb-set follow-fork-mode child",
+                },
             ],
-            "preLaunchTask": "build",
-            "miDebuggerPath": "gdb"
-        }
-    ]
+        },
+        {
+            "name": "Test (gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/run/current-system/sw/bin/godot",
+            "args": [
+                "--no-window",
+                "-s",
+                "addons/gut/gut_cmdln.gd"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true,
+                },
+            ],
+        },
+    ],
 }
