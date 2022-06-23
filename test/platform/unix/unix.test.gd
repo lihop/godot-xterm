@@ -73,6 +73,12 @@ func test_closes_pty_on_exit():
 	assert_eq(new_num_pts, num_pts)
 
 
+func test_emits_exited_signal_when_child_process_exits():
+	pty.call_deferred("fork", "exit")
+	yield(yield_to(pty, "exited", 1), YIELD)
+	assert_signal_emitted(pty, "exited")
+
+
 class Helper:
 	static func _get_pts() -> Array:
 		assert(false, "Abstract method")

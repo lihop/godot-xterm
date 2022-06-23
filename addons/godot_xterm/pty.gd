@@ -96,9 +96,10 @@ func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
 
 
 func _exit_tree():
-	_exit_cb = null
 	if _pid > 1:
 		LibuvUtils.kill(_pid, Signal.SIGHUP)
+		while _pipe.get_status() != 0:
+			continue
 
 
 func _on_pipe_data_received(data):
