@@ -25,6 +25,7 @@ void Pipe::_register_methods() {
   register_method("poll", &Pipe::_poll_connection);
   register_method("open", &Pipe::open);
   register_method("write", &Pipe::write);
+  register_method("get_status", &Pipe::get_status);
   register_method("close", &Pipe::close);
 
   register_signal<Pipe>("data_received", "data",
@@ -56,11 +57,12 @@ godot_error Pipe::open(int fd, bool ipc = false) {
   RETURN_IF_UV_ERR(
       uv_read_start((uv_stream_t *)&handle, _alloc_buffer, _read_cb));
 
+  status = 1;
   return GODOT_OK;
 }
 
 void Pipe::close() {
-  uv_close((uv_handle_t *)&handle, NULL);
+  uv_close((uv_handle_t *)&handle, _close_cb);
   uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 }
 
@@ -84,6 +86,8 @@ godot_error Pipe::write(String p_data) {
 }
 
 int Pipe::get_status() {
+  if (!uv_is_active((uv_handle_t *)&handle))
+    status = 0;
   _poll_connection();
   return status;
 }
@@ -119,4 +123,9 @@ void _write_cb(uv_write_t *req, int status) {}
 void _alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
   buf->base = (char *)malloc(suggested_size);
   buf->len = suggested_size;
+}
+
+void _close_cb(uv_handle_t *handle) {
+  Pipe *pipe = static_cast<Pipe *>(handle->data);
+  pipe->status = 0;
 }
