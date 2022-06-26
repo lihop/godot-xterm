@@ -54,6 +54,15 @@ func test_open_pty_has_correct_win_size():
 	assert_eq(winsize.rows, rows)
 
 
+func test_win_size_supports_max_unsigned_short_value():
+	var cols = 65535
+	var rows = 65535
+	var result = pty.open(cols, rows)
+	var winsize = helper._get_winsize(result[1].master)
+	assert_eq(winsize.cols, cols)
+	assert_eq(winsize.cols, rows)
+
+
 func test_closes_pty_on_exit():
 	var num_pts = helper._get_pts().size()
 	pty.fork("sleep", ["1000"])
@@ -83,7 +92,7 @@ class Helper:
 			[
 				"-c",
 				(
-					"import struct, fcntl, termios; print(struct.unpack('hh', fcntl.ioctl(%d, termios.TIOCGWINSZ, '1234')))"
+					"import struct, fcntl, termios; print(struct.unpack('HH', fcntl.ioctl(%d, termios.TIOCGWINSZ, '1234')))"
 					% fd
 				)
 			],
