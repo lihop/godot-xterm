@@ -61,6 +61,8 @@ var buffer := StreamPeerBuffer.new()
 
 var times = 0
 
+var _buffer := []
+
 
 func set_update_mode(value):
 	update_mode = value
@@ -78,12 +80,15 @@ func get_cols() -> int:
 func write(data) -> void:
 	assert(data is String or data is PoolByteArray)
 
-	# FIXME: This will occasionally cause a "Resumed function after yield, but class instance is gone" error after freeing the Terminal instance.
-	# However, this yield is necessary to ensure the terminal state machines framebuffer is up to date when we make all the draw_* calls.
-	yield(VisualServer, "frame_pre_draw")
+	# Will be cleared when _flush() is called after VisualServer emits the "frame_pre_draw" signal.
+	_buffer.push_back(data)
 
-	_native_terminal.write(data if data is String else data.get_string_from_utf8())
-	_native_terminal.update()
+
+func _flush():
+	for data in _buffer:
+		_native_terminal.write(data if data is String else data.get_string_from_utf8())
+		_native_terminal.update()
+	_buffer.clear()
 
 
 func clear() -> void:
@@ -127,6 +132,12 @@ func _ready():
 	add_child(_selection_timer)
 
 	_refresh()
+
+	# Ensure the terminal state machine's framebuffer is up to date before
+	# we make all the draw_* calls caused by writing. We need to use signals
+	# here rather than yield otherwise we will sometimes get a "Resumed
+	# function after yield but class instance is gone" error.
+	VisualServer.connect("frame_pre_draw", self, "_flush")
 
 
 func _update_theme():
