@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Shortcuts starting with Ctrl + Shift. This includes the remaining default terminal
     panel shortcuts such as 'Copy' (Ctrl+Shift+C) and 'New Terminal' (Ctrl+Shift+T).
 - Target Godot version from 3.3.2-stable -> 3.4.4-stable.
+- Prevent scrollback buffer reset (i.e. scrolling to the bottom of terminal output) when
+  pressing modifier keys in isolation or when copying text using the shortcut Ctrl+Shift+C.
 
 ### Removed
 - Removed custom TerminalSettings Resource type.

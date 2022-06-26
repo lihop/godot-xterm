@@ -175,8 +175,14 @@ func _refresh():
 func _gui_input(event):
 	_native_terminal._gui_input(event)
 
-	if event is InputEventKey:
-		_native_terminal.sb_reset()  # Return to bottom of scrollback buffer if we scrolled up.
+	if event is InputEventKey and event.pressed:
+		# Return to bottom of scrollback buffer if we scrolled up. Ignore modifier
+		# keys pressed in isolation or if Ctrl+Shift modifier keys are pressed.
+		if (
+			not event.scancode in [KEY_ALT, KEY_SHIFT, KEY_CONTROL, KEY_META, KEY_MASK_CMD]
+			and not (event.control and event.shift)
+		):
+			_native_terminal.sb_reset()
 
 	_handle_mouse_wheel(event)
 	_handle_selection(event)
