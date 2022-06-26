@@ -33,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   closing terminals in the Terminal panel of the editor plugin.
 - Fixed leaked instances that would occur when PTY exited but child process was still
   running.
+- Fixed "Resumed function after yield, but class instance is gone" error that would
+  sometimes occur when closing a Terminal after calling write() but before VisualServer
+  had finished drawing the current frame.
 
 
 ## [v2.0.0](https://github.com/lihop/godot-xterm/compare/v1.2.1...v2.0.0) - 2021-07-25
