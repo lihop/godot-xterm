@@ -24,6 +24,62 @@ func test_fork_succeeds():
 	assert_eq(err, OK)
 
 
+func test_fork_has_output():
+	pty.call_deferred("fork", "exit")
+	yield(yield_to(pty, "data_received", 1), YIELD)
+	var expected := PoolByteArray(
+		[
+			101,
+			120,
+			101,
+			99,
+			118,
+			112,
+			40,
+			51,
+			41,
+			32,
+			102,
+			97,
+			105,
+			108,
+			101,
+			100,
+			46,
+			58,
+			32,
+			78,
+			111,
+			32,
+			115,
+			117,
+			99,
+			104,
+			32,
+			102,
+			105,
+			108,
+			101,
+			32,
+			111,
+			114,
+			32,
+			100,
+			105,
+			114,
+			101,
+			99,
+			116,
+			111,
+			114,
+			121,
+			13,
+			10
+		]
+	)
+	assert_signal_emitted_with_parameters(pty, "data_received", [expected])
+
+
 func test_open_succeeds():
 	var result = pty.open()
 	assert_eq(result[0], OK)
