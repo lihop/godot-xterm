@@ -27,7 +27,7 @@ func _enter_tree():
 		var pty_script
 		match OS.get_name():
 			"X11", "Server", "OSX":
-				pty_script = load("%s/nodes/pty/pty.gd" % base_dir)
+				pty_script = load("%s/pty.gd" % base_dir)
 		add_custom_type("PTY", "Node", pty_script, pty_icon)
 		terminal_panel = preload("./editor_plugins/terminal/terminal_panel.tscn").instance()
 		terminal_panel.editor_plugin = self

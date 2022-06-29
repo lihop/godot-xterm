@@ -61,8 +61,8 @@ func _ready():
 
 
 func _poll():
-	if pty and pty._pipe:
-		pty._pipe.poll()
+	if pty and pty.has_method("get_master"):
+		pty.get_master().poll()
 		update()
 
 
