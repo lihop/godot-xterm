@@ -5,7 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.0.0...HEAD)
+## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.1.0...HEAD)
+
+
+## [2.1.0](https://github.com/lihop/godot-xterm/compare/v2.0.0...v2.1.0) - 2022-07-11
 ### Added
 - Support for macOS universal (x86_64/arm64) binaries. The macOS binary
   `libgodot-xterm.osx.64.dylib` is now a universal binary that runs natively
@@ -17,16 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   required GLIBC version is now 2.17 which was released in 2012.
 - Prevent all editor shortcuts while terminal is focused except for:
   - The shortcuts used to switch between terminal tabs (Ctrl+Page up, Ctrl+Page down).
-  - Shortcuts starting with Ctrl + Shift. This includes the remaining default terminal
+  - Shortcuts starting with Ctrl+Shift. This includes the remaining default terminal
     panel shortcuts such as 'Copy' (Ctrl+Shift+C) and 'New Terminal' (Ctrl+Shift+T).
-- Target Godot version from 3.3.2-stable -> 3.4.4-stable.
+- Changed target Godot version from 3.3.2-stable -> 3.4.4-stable.
 - Prevent scrollback buffer reset (i.e. scrolling to the bottom of terminal output) when
   pressing modifier keys in isolation or when copying text using the shortcut Ctrl+Shift+C.
 
 ### Removed
 - Removed custom TerminalSettings Resource type.
   This Resource was not being used but would still appear in every resource dropdown.
-  Related issue [godotengine/godot#24643](https://github.com/godotengine/godot/issues/24643).
+  (Related issue [godotengine/godot#24643](https://github.com/godotengine/godot/issues/24643)).
 
 ### Fixed
 - The `kill()` method of unix PTY node can now be called without error as the underlying
@@ -36,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed leaked instances that would occur when PTY exited but child process was still
   running.
 - Fixed "Resumed function after yield, but class instance is gone" error that would
-  sometimes occur when closing a Terminal after calling write() but before VisualServer
+  sometimes occur when closing a Terminal after calling `write()` but before VisualServer
   had finished drawing the current frame.
 
 
