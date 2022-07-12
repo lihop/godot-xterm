@@ -209,7 +209,7 @@ jobs:
       with:
         submodules: recursive
     - name: Setup Godot
-      uses: lihop/setup-godot@v1.0.0
+      uses: lihop/setup-godot@v1.0.1
     - name: Install binary build artifacts
       uses: actions/download-artifact@v2
       with:
@@ -251,7 +251,7 @@ jobs:
         with:
           submodules: recursive
       - name: Setup Godot
-        uses: lihop/setup-godot@v1.0.0
+        uses: lihop/setup-godot@v1.0.1
         with:
           version: ${{ matrix.godot_version }}
           bits: ${{ matrix.bits }}
