@@ -242,12 +242,9 @@ jobs:
       matrix:
         os: [ windows-latest, macos-latest, ubuntu-latest ]
         bits: [ 64, 32 ]
-        godot_version: [ 'v3.2-stable', 'v3.3.4-stable', 'v3.4.4-stable', 'v3.5-beta1' ]
+        godot_version: [ 'v3.3.4-stable', 'v3.4.4-stable', 'v3.5-beta1' ]
         exclude:
           - os: macos-latest
-            bits: 32
-          - os: ubuntu-latest
-            godot_version: 'v3.2-stable'
             bits: 32
     steps:
       - uses: actions/checkout@v2
@@ -264,13 +261,8 @@ jobs:
           name: libgodot-xterm-release
           path: addons/godot_xterm/native/bin
       - name: Run tests
-        if: ${{ matrix.godot_version != 'v3.2-stable' }}
         shell: bash
         run: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
-      - name: Run v3.2 tests
-        if: ${{ matrix.godot_version == 'v3.2-stable' }}
-        shell: bash
-        run: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.3.2.json
       - name: Run unix tests
         if: ${{ matrix.os != 'windows-latest' }}
         run: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
