@@ -82,5 +82,5 @@ scons target=$target macos_arch=$(uname -m) disable_pty=$disable_pty -j$nproc
 # Use Docker to build libgodot-xterm javascript.
 if [ -x "$(command -v docker-compose)" ]; then
 	UID_GID="0:0" TARGET=$target docker-compose build javascript
-	UID_GID="$(id -u):$(id -g)" TARGET=$target docker-compose run javascript
+	UID_GID="$(id -u):$(id -g)" TARGET=$target docker-compose run --rm javascript
 fi

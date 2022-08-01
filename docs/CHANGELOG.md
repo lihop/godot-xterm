@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.2.0...HEAD)
+### Changed
+- Custom export templates are no longer required when exporting to HTML5 from Godot v3.5.x.
+
 ### Removed
 - Removed support for deprecated theme item names.
 - Removed deprecated get_master() method of PTY.

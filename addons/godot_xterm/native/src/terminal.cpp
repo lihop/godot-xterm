@@ -31,7 +31,7 @@ void Terminal::_populate_key_list() {
 #define GLOBAL_CONSTANT(VAR) GlobalConstants::VAR
 #else
 #define GLOBAL_CONSTANT(VAR) get_constant(#VAR)
-  const godot_dictionary _constants = godot_get_global_constants();
+  const godot_dictionary _constants = godot::api->godot_get_global_constants();
   const Dictionary *constants = (Dictionary *)&_constants;
 
   auto get_constant = [constants](std::string name) -> int64_t {

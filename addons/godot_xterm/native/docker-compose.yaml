@@ -1,6 +1,8 @@
 services:
   javascript:
-    build: ../../../misc/docker
+    build:
+      context: .
+      dockerfile: javascript.Dockerfile
     user: ${UID_GID}
     volumes:
       - .:/src

@@ -102,7 +102,7 @@ jobs:
         if: ${{ matrix.platform == 'javascript' }}
         uses: mymindstorm/setup-emsdk@v11
         with:
-          version: 3.1.5
+          version: 3.1.14
           actions-cache-folder: emsdk-cache-${{ matrix.target }}
       - name: Install additional javascript build dependencies
         if: ${{ matrix.platform == 'javascript' }}
@@ -168,43 +168,9 @@ jobs:
             addons/godot_xterm/native/bin/*.dylib
             addons/godot_xterm/native/bin/*.dll
 
-  # GDNative HTML5 export templates aren't provided so we must build them
-  export_template:
-    name: 'Export Template'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target: [ release, debug ]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Get godot submodule commit hash
-        shell: bash
-        env:
-          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-        run: |
-          echo ::set-env name=GODOT_COMMIT_HASH::$(git ls-tree HEAD misc/export_templates/godot -l | cut -d\  -f3)
-      - name: Cache export template
-        uses: actions/cache@v2
-        id: cache-export-template
-        env:
-          cache-name: cache-export-template
-        with:
-          path: misc/export_templates/godot/bin
-          key: godot-${{ env.GODOT_COMMIT_HASH }}-${{ matrix.target }}-v${{ env.EXPORT_TEMPLATE_CACHE_VERSION }}
-      - name: Build template in docker container
-        if: steps.cache-export-template.outputs.cache-hit != 'true'
-        run: cd misc/export_templates && ./build.sh -t ${{ matrix.target }}
-      - name: Upload export template
-        uses: actions/upload-artifact@v2
-        with:
-          name: html5-gdnative-export-templates
-          path: misc/export_templates/godot/bin/webassembly_gdnative_${{matrix.target}}.zip
-
   html5_export:
     name: 'HTML5 Export'
-    needs: [ build_docker, build_native, export_template ]
+    needs: [ build_docker, build_native ]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -217,23 +183,39 @@ jobs:
       with:
         name: libgodot-xterm-release
         path: addons/godot_xterm/native/bin
-    - name: Install html5 export templates
-      uses: actions/download-artifact@v2
+    - name: Import assets
+      shell: bash
+      # The GodotXterm plugin will be disabled the first time we run the editor as resources that it depends
+      # (e.g. icons) will not have been imported yet so the plugin will fail to load. Without the plugin
+      # enabled resources imported by GodotXterm import plugins (e.g. .cast) will not be imported. Therefore,
+      # we need to re-enable the plugin by checking out project.godot and running the editor again.
+      run: godot --editor .github/import_assets.tscn && git checkout project.godot && godot --editor .github/import_assets.tscn
+    - name: Export HTML5
+      run: godot --no-window --export HTML5
+    - name: NPM cache
+      uses: c-hive/gha-npm-cache@v1
       with:
-        name: html5-gdnative-export-templates
-        path: misc/export_templates/godot/bin
-    - name: Create export directory
-      run: mkdir -p docs/demo
-    - name: Export html5
-      run: godot --export HTML5
-    # FIXME: HTML5 Exports not properly exporting .cast files.
-    # So skip upload for now.
-    #- name: Upload export
-    #  uses: actions/upload-artifact@v2
-    #  with:
-    #    name: html5-demo
-    #    path: docs/demo
-
+        directory: test/html5
+    - name: Smoke test HTML5 export
+      shell: bash
+      working-directory: test/html5
+      run: |
+        npm ci
+        npx serve ../../docs/demo -p 3000 &
+        npx cypress run
+    - name: Upload cypress artifacts (on failure)
+      uses: actions/upload-artifact@v2
+      if: ${{ failure() }}
+      with:
+        name: cypress-artifacts
+        path: |-
+          test/html5/cypress/screenshots
+          test/html5/cypress/videos
+    - name: Upload export
+      uses: actions/upload-artifact@v2
+      with:
+        name: html5-demo
+        path: docs/demo
 
   test:
     name: 'Test'

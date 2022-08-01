@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "tool
+extends Timer
+
+func _enter_tree():
+	start()
+
+func _on_timeout():
+	get_tree().quit(0)
+"
+
+[node name="Timer" type="Timer"]
+process_mode = 0
+wait_time = 10.0
+one_shot = true
+autostart = true
+script = SubResource( 1 )
+
+[connection signal="timeout" from="." to="." method="_on_timeout"]
