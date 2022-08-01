@@ -40,6 +40,6 @@ enabled=PoolStringArray( "res://addons/godot_xterm/plugin.cfg" )
 
 [rendering]
 
+quality/driver/driver_name="GLES2"
 quality/filters/anisotropic_filter_level=16
-quality/filters/msaa=4
 environment/default_environment="res://default_env.tres"
