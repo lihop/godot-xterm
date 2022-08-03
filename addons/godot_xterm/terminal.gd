@@ -184,6 +184,10 @@ func _gui_input(event):
 		):
 			_native_terminal.sb_reset()
 
+		# Prevent focus changing to other inputs when pressing Tab or Arrow keys.
+		if event.scancode in [KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_TAB]:
+			accept_event()
+
 	_handle_mouse_wheel(event)
 	_handle_selection(event)
 
