@@ -41,7 +41,9 @@ jobs:
       - name: Build godot-cpp bindings
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         working-directory: addons/godot_xterm/native
-        run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e BITS=${{ matrix.bits }} godot-cpp-linux
+        run: |
+          docker-compose build godot-cpp-linux
+          UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e BITS=${{ matrix.bits }} godot-cpp-linux
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         working-directory: addons/godot_xterm/native
