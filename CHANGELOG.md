@@ -6,9 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.1.0...HEAD)
+### Added
+- Added `get_master()` method to PTY node (Linux and macOS only) which returns the
+  underlying [Pipe](/addons/godot_xterm/native/src/pipe.cpp) object of the master
+  side of the psuedoterminal pair. This can be used to manually call `poll()` on the
+  pipe in case `_process()` is disabled.
+
+### Fixed
+- [#51][i51]: Fixed issue where terminal would lose focus on Tab/Arrow key presses
+  when in a scene with other input nodes. Thanks [@ConteZero] for reporting.
+
+[i51]: https://github.com/lihop/godot-xterm/issues/51
+[@ConteZero]: https://github.com/ConteZero
 
 
-## [2.1.0](https://github.com/lihop/godot-xterm/compare/v2.0.0...v2.1.0) - 2022-07-11
+## [v2.1.0](https://github.com/lihop/godot-xterm/compare/v2.0.0...v2.1.0) - 2022-07-11
 ### Added
 - Support for macOS universal (x86_64/arm64) binaries. The macOS binary
   `libgodot-xterm.osx.64.dylib` is now a universal binary that runs natively
