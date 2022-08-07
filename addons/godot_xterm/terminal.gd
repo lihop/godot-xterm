@@ -83,6 +83,10 @@ func write(data) -> void:
 	# Will be cleared when _flush() is called after VisualServer emits the "frame_pre_draw" signal.
 	_buffer.push_back(data)
 
+	# Ensure redraw is requested if terminal is visible.
+	if visible:
+		update()
+
 
 func _flush():
 	for data in _buffer:
