@@ -4,7 +4,6 @@ extends "../../terminal.gd"
 signal exited(exit_code, signum)
 
 var editor_settings: EditorSettings
-var timer := Timer.new()
 
 onready var pty = $PTY
 
@@ -50,20 +49,6 @@ func _ready():
 		}
 	)
 	_native_terminal._update_theme()
-
-	# In editor _process is not called continuously unless the "Update Continuously"
-	# editor setting is enabled. This setting is disabled by default and uses 100%
-	# of one core when enabled, so best to leave it off and use a timer instead.
-	add_child(timer)
-	timer.wait_time = 0.025
-	timer.connect("timeout", self, "_poll")
-	timer.start()
-
-
-func _poll():
-	if pty and pty.has_method("get_master"):
-		pty.get_master().poll()
-		update()
 
 
 func _input(event):

@@ -15,7 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - [#51][i51]: Fixed issue where terminal would lose focus on Tab/Arrow key presses
   when in a scene with other input nodes. Thanks [@ConteZero] for reporting.
+- [#53][i53]: Fixed issue where terminal was not updating when there was no GUI
+  activity. Thanks [@ConteZero] for providing feedback on this issue.
 
+[i53]: https://github.com/lihop/godot-xterm/issues/53
 [i51]: https://github.com/lihop/godot-xterm/issues/51
 [@ConteZero]: https://github.com/ConteZero
 
