@@ -17,7 +17,7 @@ For an exhaustive list of terminal control sequences (not all of which are suppo
 
 
 ## Overview 
-![Terminal Flow Diagram](/media/flow_diagram.svg)
+![Terminal Flow Diagram](../media/flow_diagram.svg)
 <sub>"Terminal Flow Diagram" is a derivative of ["computer keyboard 2"](https://openclipart.org/detail/2396/computer-keyboard-2) and ["monitor"](https://openclipart.org/detail/1637/monitor), from U.S. patent drawings, uploaded by [johnny_automatic](https://openclipart.org/artist/johnny_automatic), used under [CC0](https://creativecommons.org/share-your-work/public-domain/cc0/).<sub/>
 
 ### (1) User Input

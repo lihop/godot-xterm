@@ -21,7 +21,7 @@ See issue [\#25](https://github.com/lihop/godot-xterm/issues/25).
 
 ## Overview
 
-![PTY Diagram](/media/pty_diagram.png)
+![PTY Diagram](../media/pty_diagram.png)
 <sub>"PTY Diagram" is a derivative of [Termios-script-diagram.svg](https://commons.wikimedia.org/wiki/File:Termios-script-diagram.svg) by [Krishnavedala](https://en.wikipedia.org/wiki/User:Krishnavedala?rdfrom=commons:User:Krishnavedala), used under [CC0](https://creativecommons.org/share-your-work/public-domain/cc0/).
 
 
