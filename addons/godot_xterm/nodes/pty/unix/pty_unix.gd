@@ -46,12 +46,6 @@ enum Signal {
 # The process ID.
 var _pid: int
 
-# The column size in characters.
-var cols: int = DEFAULT_COLS setget set_cols
-
-# The row size in characters.
-var rows: int = DEFAULT_ROWS setget set_rows
-
 # Environment to be set for the child program.
 var env := DEFAULT_ENV
 
@@ -71,14 +65,6 @@ var _fd: int = -1
 var _exit_cb: FuncRef
 
 
-func set_cols(value: int):
-	resize(value, rows)
-
-
-func set_rows(value: int):
-	resize(cols, value)
-
-
 # Writes data to the socket.
 # data: The data to write.
 func write(data) -> void:
@@ -92,13 +78,8 @@ func write(data) -> void:
 
 
 func resize(cols: int, rows: int) -> void:
-	if cols <= 0 or rows <= 0 or cols == NAN or rows == NAN or cols == INF or rows == INF:
-		push_error("Resizing must be done using positive cols and rows.")
-
-	if _fd < 0:
-		return
-
-	PTYUnix.new().resize(_fd, cols, rows)
+	if _fd >= 0:
+		PTYUnix.new().resize(_fd, cols, rows)
 
 
 func kill(signum: int = Signal.SIGHUP) -> void:
@@ -135,8 +116,8 @@ func fork(
 	file: String = OS.get_environment("SHELL"),
 	args: PoolStringArray = PoolStringArray(),
 	cwd = LibuvUtils.get_cwd(),
-	p_cols: int = DEFAULT_COLS,
-	p_rows: int = DEFAULT_ROWS,
+	cols: int = DEFAULT_COLS,
+	rows: int = DEFAULT_ROWS,
 	uid: int = -1,
 	gid: int = -1,
 	utf8 = true
