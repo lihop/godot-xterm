@@ -28,10 +28,10 @@ export(NodePath) var terminal_path := NodePath() setget set_terminal_path
 var _terminal: _Terminal = null setget _set_terminal
 
 # The column size in characters.
-export(int) var cols: int = DEFAULT_COLS setget set_cols
+export(int) var cols: int = DEFAULT_COLS setget set_cols, get_cols
 
 # The row size in characters.
-export(int) var rows: int = DEFAULT_ROWS setget set_rows
+export(int) var rows: int = DEFAULT_ROWS setget set_rows, get_rows
 
 # Environment to be set for the child program.
 export(Dictionary) var env := DEFAULT_ENV
@@ -41,6 +41,8 @@ export(Dictionary) var env := DEFAULT_ENV
 # former taking precedence in the case of conflicts.
 export(bool) var use_os_env := true
 
+var _cols := DEFAULT_COLS
+var _rows := DEFAULT_ROWS
 var _pty_native: _PTYNative
 
 
@@ -58,12 +60,25 @@ func _init():
 	add_child(_pty_native)
 
 
+func _ready():
+	if terminal_path and not _terminal:
+		set_terminal_path(terminal_path)
+
+
 func set_cols(value: int):
-	resize(value, rows)
+	resize(value, _rows)
+
+
+func get_cols() -> int:
+	return _cols
 
 
 func set_rows(value: int):
-	resize(cols, value)
+	resize(_cols, value)
+
+
+func get_rows() -> int:
+	return _rows
 
 
 func set_terminal_path(value := NodePath()):
@@ -87,7 +102,7 @@ func _set_terminal(value: _Terminal):
 		return
 
 	# Connect the new terminal.
-	# FIXME! resize(terminal.get_cols(), terminal.get_rows())
+	resize(_terminal.cols, _terminal.rows)
 	if not _terminal.is_connected("size_changed", self, "resizev"):
 		_terminal.connect("size_changed", self, "resizev")
 	if not _terminal.is_connected("data_sent", self, "write"):
@@ -105,13 +120,20 @@ func write(data) -> void:
 # Resizes the dimensions of the pty.
 # cols: The number of columns.
 # rows: The number of rows.
-func resize(cols, rows = null) -> void:
-	_pty_native.resize(cols, rows)
+func resize(cols = _cols, rows = _rows) -> void:
+	if not _valid_size(cols, rows):
+		push_error("Size of cols/rows must be a positive integer.")
+		return
+
+	_cols = cols
+	_rows = rows
+
+	_pty_native.resize(_cols, _rows)
 
 
 # Same as resize() but takes a Vector2.
 func resizev(size: Vector2) -> void:
-	resize(size.x, size.y)
+	resize(int(size.x), int(size.y))
 
 
 # Kill the pty.
@@ -133,13 +155,17 @@ func fork(
 	file: String = OS.get_environment("SHELL"),
 	args: PoolStringArray = PoolStringArray(),
 	cwd = _LibuvUtils.get_cwd(),
-	p_cols: int = DEFAULT_COLS,
-	p_rows: int = DEFAULT_ROWS,
+	cols: int = _cols,
+	rows: int = _rows,
 	uid: int = -1,
 	gid: int = -1,
 	utf8 = true
 ) -> int:
-	return _pty_native.fork(file, args, cwd, p_cols, p_rows, uid, gid, utf8)
+	resize(cols, rows)  # Ensures error message is printed if cols/rows are invalid.
+	if not _valid_size(cols, rows):
+		return ERR_INVALID_PARAMETER
+
+	return _pty_native.fork(file, args, cwd, _cols, _rows, uid, gid, utf8)
 
 
 func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
@@ -156,3 +182,7 @@ func _on_pty_native_data_received(data):
 
 func _on_pty_native_exited(exit_code: int, signum: int) -> void:
 	emit_signal("exited", exit_code, signum)
+
+
+static func _valid_size(cols: int, rows: int) -> bool:
+	return cols > 0 and rows > 0 and cols != NAN and rows != NAN and cols != INF and rows != INF

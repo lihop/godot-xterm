@@ -1,0 +1,131 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://addons/godot_xterm/terminal.gd" type="Script" id=1]
+[ext_resource path="res://addons/godot_xterm/pty.gd" type="Script" id=2]
+
+[node name="PTYandTerminal" type="Node"]
+
+[node name="PTYChild" type="Node" parent="."]
+
+[node name="Terminal" type="Control" parent="PTYChild"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="PTY" type="Node" parent="PTYChild/Terminal"]
+script = ExtResource( 2 )
+terminal_path = NodePath("..")
+env = {
+"COLORTERM": "truecolor",
+"TERM": "xterm-256color"
+}
+
+[node name="PTYSiblingAbove" type="Node" parent="."]
+
+[node name="PTY" type="Node" parent="PTYSiblingAbove"]
+script = ExtResource( 2 )
+terminal_path = NodePath("../Terminal")
+env = {
+"COLORTERM": "truecolor",
+"TERM": "xterm-256color"
+}
+
+[node name="Terminal" type="Control" parent="PTYSiblingAbove"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="PTYSiblingBelow" type="Node" parent="."]
+
+[node name="Terminal" type="Control" parent="PTYSiblingBelow"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="PTY" type="Node" parent="PTYSiblingBelow"]
+script = ExtResource( 2 )
+terminal_path = NodePath("../Terminal")
+env = {
+"COLORTERM": "truecolor",
+"TERM": "xterm-256color"
+}
+
+[node name="PTYCousinAbove" type="Node" parent="."]
+
+[node name="Node" type="Node" parent="PTYCousinAbove"]
+
+[node name="PTY" type="Node" parent="PTYCousinAbove/Node"]
+script = ExtResource( 2 )
+terminal_path = NodePath("../../Terminal")
+env = {
+"COLORTERM": "truecolor",
+"TERM": "xterm-256color"
+}
+
+[node name="Terminal" type="Control" parent="PTYCousinAbove"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="PTYCousinBelow" type="Node" parent="."]
+
+[node name="Terminal" type="Control" parent="PTYCousinBelow"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="Node" type="Node" parent="PTYCousinBelow"]
+
+[node name="PTY" type="Node" parent="PTYCousinBelow/Node"]
+script = ExtResource( 2 )
+terminal_path = NodePath("../../Terminal")
+env = {
+"COLORTERM": "truecolor",
+"TERM": "xterm-256color"
+}
+
+[node name="PTYCousinAbove2" type="Node" parent="."]
+
+[node name="Node" type="Node" parent="PTYCousinAbove2"]
+
+[node name="Node" type="Node" parent="PTYCousinAbove2/Node"]
+
+[node name="PTY" type="Node" parent="PTYCousinAbove2/Node/Node"]
+script = ExtResource( 2 )
+terminal_path = NodePath("../../../Control/Terminal")
+env = {
+"COLORTERM": "truecolor",
+"TERM": "xterm-256color"
+}
+
+[node name="Control" type="Control" parent="PTYCousinAbove2"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Terminal" type="Control" parent="PTYCousinAbove2/Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="PTYCousinBelow2" type="Node" parent="."]
+
+[node name="Control" type="Control" parent="PTYCousinBelow2"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Terminal" type="Control" parent="PTYCousinBelow2/Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="Node" type="Node" parent="PTYCousinBelow2"]
+
+[node name="Node" type="Node" parent="PTYCousinBelow2/Node"]
+
+[node name="PTY" type="Node" parent="PTYCousinBelow2/Node/Node"]
+script = ExtResource( 2 )
+terminal_path = NodePath("../../../Control/Terminal")
+env = {
+"COLORTERM": "truecolor",
+"TERM": "xterm-256color"
+}
