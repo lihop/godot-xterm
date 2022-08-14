@@ -212,12 +212,12 @@ class TestPTYSize:
 
 			assert_eq(
 				stty_rows,
-				terminal.rows,
+				terminal.get_rows(),
 				"Expected stty to report correct number of rows for layout '%s'" % s
 			)
 			assert_eq(
 				stty_cols,
-				terminal.cols,
+				terminal.get_cols(),
 				"Expected stty to report correct number of columns for layout '%s'" % s
 			)
 

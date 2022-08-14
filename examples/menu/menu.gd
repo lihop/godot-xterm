@@ -52,7 +52,7 @@ func _ready():
 
 
 func draw_all(_size = Vector2.ZERO):
-	offset = int(floor(($Terminal.cols / 2.0) - (TITLE_WIDTH / 2.0)))
+	offset = int(floor(($Terminal.get_cols() / 2.0) - (TITLE_WIDTH / 2.0)))
 	tput.reset()
 	row = 5
 	tput.civis()  # Hide the cursor.
@@ -94,7 +94,7 @@ func draw_menu():
 		var item = menu_items[i]
 
 		if not col_offset:
-			col_offset = int(floor(($Terminal.cols / 2) - (item.name.length() / 2)))
+			col_offset = int(floor(($Terminal.get_cols() / 2) - (item.name.length() / 2)))
 
 		tput.cup(row, offset)
 

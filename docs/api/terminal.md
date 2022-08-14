@@ -47,19 +47,21 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 |--------------|--------------------------------------|---------|
 | [bool]       | [bell_muted](#prop-bell_muted)       | `false` |
 | [float]      | [bell_cooldown](#prop-bell_cooldown) | `0.1`   |
-| [int]        | [cols](#prop-cols)                   | `2`     |
-| [int]        | [rows](#prop-rows)                   | `2`     |
+| [int]        | [cols](#prop-cols) *(deprecated)*    | `2`     |
+| [int]        | [rows](#prop-rows) *(deprecated)*    | `2`     |
 | [UpdateMode] | [update_mode](#prop-update_mode)     | `AUTO`  |
 
 
 ## Methods
 
-| Returns  | Signature                                                       |
-|----------|-----------------------------------------------------------------|
-| void     | [clear](#mthd-clear) **()**                                     |
-| [String] | [copy_all](#mthd-copy_all) **()**                               |
-| [String] | [copy_selection](#mthd-copy_selection) **()**                   |
-| void     | [write](#mthd-write) **(** [String]\|[PoolByteArray] data **)** |
+| Returns  | Signature                                                         |
+|----------|-------------------------------------------------------------------|
+| void     | [clear](#mthd-clear) **()**                                       |
+| [String] | [copy_all](#mthd-copy_all) **()**                                 |
+| [String] | [copy_selection](#mthd-copy_selection) **()**                     |
+| [int]    | [get_cols](#mthd-get_cols) **()**                                 |
+| [int]    | [get_rows](#mthd-get_rows) **()**                                 |
+| void     | [write](#mthd-write) **(** [String] \| [PoolByteArray] data **)** |
 
 
 ## Signals
@@ -105,19 +107,6 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 
 ## Property Descriptions
 
-- <a name="prop-rows" /> [int] **rows**
-
-  |           |            |
-  |-----------|------------|
-  | *Default* | `2`        |
-  | *Setter*  | None       |
-  | *Getter*  | None       | 
-  
-  The number of rows in the terminal's rect.
-  When using a monospace font, this is typically the number of characters that can fit from the top to the bottom.
-  It will automatically update as the Control's rect_size changes, and therefore shouldn't be used to set the size of the terminal directly.
-
----
 
 - <a name="prop-cols" /> [int] **cols**
 
@@ -125,11 +114,23 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
   |-----------|------------|
   | *Default* | `2`        |
   | *Setter*  | None       |
-  | *Getter*  | None       | 
+  | *Getter*  | get_cols() |
+
+  *Deprecated*. This property is deprecated and will be removed in a future version.
+  Please use [get_cols](#mthd-get_cols) instead.
+
+---
+
+- <a name="prop-rows" /> [int] **rows** ***Deprecated***
+
+  |           |            |
+  |-----------|------------|
+  | *Default* | `2`        |
+  | *Setter*  | None       |
+  | *Getter*  | get_rows() |
   
-  The number of columns in the terminal's rect.
-  When using a monospace font, this is typically the number of characters that can fit from one side to another.
-  It will automatically update as the Control's rect_size changes, and therefore shouldn't be used to set the size of the terminal directly.
+  *Deprecated*. This property is deprecated and will be removed in a future version.
+  Please use the [get_rows](#mthd-get_rows) instead.
 
 ---
 
@@ -192,6 +193,22 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 
   Copies only selected (i.e. highlighted) text in the terminal.
   Will return an empty string if nothing is highligted.
+
+---
+
+- <a name="mthd-get_cols" /> [int] **get_cols** **()**
+
+  Returns the width of the terminal in characters.
+  When using a monospace font, this is the number of visible characters that can fit from one side of the terminal to the other in a single row.
+  It will automatically update according to the terminal's rect_size and theme's font size.
+
+---
+
+- <a name="mthd-get_rows" /> [int] **get_rows** **()**
+
+  Returns the height of the terminal in characters.
+  When using a monospace font, this is the number of visible characters that can fit from the top of the terminal to the bottom in a single column.
+  It will automatically update according to the terminal's rect_size and theme's font size.
 
 ---
 

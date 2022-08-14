@@ -26,8 +26,8 @@ enum SelectionMode {
 
 export(UpdateMode) var update_mode = UpdateMode.AUTO setget set_update_mode
 
-var cols = 2
-var rows = 2
+var cols = 2 setget _set_cols, _get_cols  # Deprecated.
+var rows = 2 setget _set_rows, _get_rows  # Deprecated.
 
 # If true, text in the terminal will be copied to the clipboard when selected.
 export(bool) var copy_on_selection
@@ -44,6 +44,9 @@ export var bell_cooldown: float = 0.1
 export var blink_on_time: float = 0.6
 export var blink_off_time: float = 0.3
 
+var _cols := 2
+var _rows := 2
+
 var _default_theme: Theme = preload("./themes/default.tres")
 var _viewport: Viewport = preload("./nodes/terminal/viewport.tscn").instance()
 var _native_terminal: Control = _viewport.get_node("Terminal")
@@ -55,12 +58,6 @@ var _selecting := false
 var _selecting_mode: int = SelectionMode.NONE
 var _selection_timer := Timer.new()
 
-var _dirty := false
-
-var buffer := StreamPeerBuffer.new()
-
-var times = 0
-
 var _buffer := []
 
 
@@ -69,12 +66,38 @@ func set_update_mode(value):
 	_native_terminal.update_mode = value
 
 
-func get_rows() -> int:
-	return 0
-
-
 func get_cols() -> int:
-	return 0
+	return _cols
+
+
+func _get_cols() -> int:
+	push_warning(
+		"The 'cols' property of Terminal is deprecated and will be removed in a future version. Please use the `get_cols()` method instead."
+	)
+	return get_cols()
+
+
+func _set_cols(_value) -> void:
+	push_error(
+		"The 'cols' property of Terminal is read-only and determined by rect_size and the theme's font size."
+	)
+
+
+func get_rows() -> int:
+	return _rows
+
+
+func _get_rows() -> int:
+	push_warning(
+		"The 'rows' property of Terminal is deprecated and will be removed in a future version. Please use the `get_rows()` method instead."
+	)
+	return get_rows()
+
+
+func _set_rows(_value) -> void:
+	push_error(
+		"The 'rows' property of Terminal is read-only and determined by rect_size and the theme's font size."
+	)
 
 
 func write(data) -> void:
@@ -277,8 +300,8 @@ func _on_key_pressed(data: PoolByteArray, event: InputEventKey):
 
 
 func _on_size_changed(new_size: Vector2):
-	cols = new_size.x
-	rows = new_size.y
+	_cols = new_size.x
+	_rows = new_size.y
 	emit_signal("size_changed", new_size)
 
 
@@ -291,10 +314,3 @@ func _on_bell():
 
 func _mouse_to_cell(pos: Vector2) -> Vector2:
 	return Vector2(pos / _native_terminal.cell_size)
-
-
-func _set_size_warning(value):
-	if value:
-		push_warning(
-			"Terminal cols and rows are read only and determined by the font and rect sizes."
-		)

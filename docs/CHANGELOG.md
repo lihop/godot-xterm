@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.1.1...HEAD)
+### Changed
+- Deprecated the `cols` and `rows` properties of Terminal.
+  These properties will be removed in a future version.
+  Please use `get_cols()` and `get_rows()` instead.
+
 ### Removed
 - Dropped support for Godot version 3.3.x.
 

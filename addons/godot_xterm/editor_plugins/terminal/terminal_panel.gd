@@ -265,8 +265,8 @@ func _on_Panel_resized():
 	var size = tab_container.rect_size
 	if tabs.get_tab_count() > 0:
 		var terminal = tab_container.get_child(tabs.current_tab)
-		var cols = terminal.cols
-		var rows = terminal.rows
+		var cols = terminal.get_cols()
+		var rows = terminal.get_rows()
 		size_label.text = "Size: %d cols; %d rows\n(%d x %d px)" % [cols, rows, size.x, size.y]
 	else:
 		size_label.text = "Size:\n(%d x %d px)" % [size.x, size.y]

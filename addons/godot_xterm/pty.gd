@@ -102,7 +102,7 @@ func _set_terminal(value: _Terminal):
 		return
 
 	# Connect the new terminal.
-	resize(_terminal.cols, _terminal.rows)
+	resize(_terminal.get_cols(), _terminal.get_rows())
 	if not _terminal.is_connected("size_changed", self, "resizev"):
 		_terminal.connect("size_changed", self, "resizev")
 	if not _terminal.is_connected("data_sent", self, "write"):
