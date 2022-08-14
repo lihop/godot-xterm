@@ -66,20 +66,18 @@ void Pipe::close() {
   uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 }
 
-godot_error Pipe::write(String p_data) {
-  char *s = p_data.alloc_c_string();
-  ULONG len = strlen(s);
+godot_error Pipe::write(PoolByteArray data) {
+  char *s = (char *)data.read().ptr();
+  ULONG len = data.size();
 
-  uv_buf_t bufs[1];
-  bufs[0].base = s;
-  bufs[0].len = len;
+  uv_buf_t buf;
+  uv_write_t *req = (uv_write_t *)malloc(sizeof(uv_write_t));
 
-  uv_write_t req;
+  buf.base = s;
+  buf.len = len;
+  req->data = (void *)buf.base;
 
-  req.data = s;
-
-  uv_write(&req, (uv_stream_t *)&handle, bufs, 1, _write_cb);
-
+  uv_write(req, (uv_stream_t *)&handle, &buf, 1, _write_cb);
   uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 
   return GODOT_OK;
@@ -92,10 +90,16 @@ int Pipe::get_status() {
   return status;
 }
 
-void Pipe::_poll_connection() { uv_run(uv_default_loop(), UV_RUN_NOWAIT); }
+void Pipe::_poll_connection() {
+  if (status == 1 && !uv_is_active((uv_handle_t *)&handle))
+    uv_read_start((uv_stream_t *)&handle, _alloc_buffer, _read_cb);
+
+  uv_run(uv_default_loop(), UV_RUN_NOWAIT);
+}
 
 void _read_cb(uv_stream_t *handle, ssize_t nread, const uv_buf_t *buf) {
   Pipe *pipe = static_cast<Pipe *>(handle->data);
+
   if (nread < 0) {
     switch (nread) {
     case UV_EOF:
@@ -104,6 +108,7 @@ void _read_cb(uv_stream_t *handle, ssize_t nread, const uv_buf_t *buf) {
       // Can happen when the process exits.
       // As long as PTY has caught it, we should be fine.
       uv_read_stop(handle);
+      pipe->status = 0;
       return;
     default:
       UV_ERR_PRINT(nread);
@@ -113,12 +118,19 @@ void _read_cb(uv_stream_t *handle, ssize_t nread, const uv_buf_t *buf) {
 
   PoolByteArray data;
   data.resize(nread);
-  memcpy(data.write().ptr(), buf->base, nread);
+  { memcpy(data.write().ptr(), buf->base, nread); }
+  std::free((char *)buf->base);
 
   pipe->emit_signal("data_received", data);
+
+  // Stop reading until the next poll, otherwise _read_cb could be called
+  // repeatedly, blocking Godot, and eventually resulting in a memory pool
+  // allocation error. This can be triggered with the command `cat /dev/urandom`
+  // if reading is not stopped.
+  uv_read_stop(handle);
 }
 
-void _write_cb(uv_write_t *req, int status) {}
+void _write_cb(uv_write_t *req, int status) { std::free(req); }
 
 void _alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
   buf->base = (char *)malloc(suggested_size);

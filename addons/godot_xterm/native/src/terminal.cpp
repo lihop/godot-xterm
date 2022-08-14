@@ -224,19 +224,17 @@ static void term_output(const char *s, size_t len, void *user) {}
 
 static void write_cb(struct tsm_vte *vte, const char *u8, size_t len,
                      void *data) {
-
   Terminal *term = static_cast<Terminal *>(data);
 
   PoolByteArray bytes = PoolByteArray();
-
-  for (int i = 0; i < len; i++)
-    bytes.append(u8[i]);
+  bytes.resize(len);
+  { memcpy(bytes.write().ptr(), u8, len); }
 
   if (len > 0) {
     if (term->input_event_key.is_valid()) {
       // The callback was fired from a key press event so emit the "key_pressed"
       // signal.
-      term->emit_signal("key_pressed", String(u8), term->input_event_key);
+      term->emit_signal("key_pressed", bytes, term->input_event_key);
       term->input_event_key.unref();
     }
 
@@ -263,7 +261,7 @@ static int text_draw_cb(struct tsm_screen *con, uint64_t id, const uint32_t *ch,
   if (len < 1) // No foreground to draw.
     return 0;
 
-  size_t ulen;
+  size_t ulen = 0;
   char buf[5] = {0};
 
   char *utf8 = tsm_ucs4_to_utf8_alloc(ch, len, &ulen);
@@ -310,8 +308,9 @@ void Terminal::_register_methods() {
 
   register_signal<Terminal>("data_sent", "data",
                             GODOT_VARIANT_TYPE_POOL_BYTE_ARRAY);
-  register_signal<Terminal>("key_pressed", "data", GODOT_VARIANT_TYPE_STRING,
-                            "event", GODOT_VARIANT_TYPE_OBJECT);
+  register_signal<Terminal>("key_pressed", "data",
+                            GODOT_VARIANT_TYPE_POOL_BYTE_ARRAY, "event",
+                            GODOT_VARIANT_TYPE_OBJECT);
   register_signal<Terminal>("size_changed", "new_size",
                             GODOT_VARIANT_TYPE_VECTOR2);
   register_signal<Terminal>("bell", Dictionary());
@@ -609,11 +608,8 @@ void Terminal::update_size() {
   emit_signal("size_changed", Vector2(cols, rows));
 }
 
-void Terminal::write(String data) {
-  const char *u8 = data.alloc_c_string();
-  size_t len = strlen(u8);
-
-  tsm_vte_input(vte, u8, len);
+void Terminal::write(PoolByteArray data) {
+  tsm_vte_input(vte, (char *)data.read().ptr(), data.size());
 }
 
 void Terminal::sb_up(int num) {

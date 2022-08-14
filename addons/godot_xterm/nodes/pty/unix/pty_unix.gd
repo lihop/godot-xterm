@@ -68,13 +68,12 @@ var _exit_cb: FuncRef
 # Writes data to the socket.
 # data: The data to write.
 func write(data) -> void:
-	assert(data is String or data is PoolByteArray)
-
-	if data is PoolByteArray:
-		data = data.get_string_from_utf8()
-
+	assert(
+		data is PoolByteArray or data is String,
+		"Invalid type for argument 'data'. Should be of type PoolByteArray or String"
+	)
 	if _pipe:
-		_pipe.write(data)
+		_pipe.write(data if data is PoolByteArray else data.to_utf8())
 
 
 func resize(cols: int, rows: int) -> void:
