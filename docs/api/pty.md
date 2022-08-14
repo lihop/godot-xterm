@@ -142,7 +142,6 @@ See issue [\#25](https://github.com/lihop/godot-xterm/issues/25).
 ## Method Descriptions
 
 - <a name="mthd-fork" /> [Error] **fork** **(** [String] file=`$SHELL`, [PoolStringArray] args=[], [String] cwd=`$PWD`, [int] cols=80, [int] rows=24 **)**
-{ .red }
 
   Opens a pseudoterminal and starts a new process using the program specified by `file`.
   `file` defaults to the value of the `SHELL` environment variable, falling back to `sh`.
