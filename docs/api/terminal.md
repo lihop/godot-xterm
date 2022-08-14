@@ -182,13 +182,13 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 
 ---
 
-- <a name="mthd-copy_all" /> String **copy_all** **()**
+- <a name="mthd-copy_all" /> [String] **copy_all** **()**
 
   Copies all of the text in the terminal including scrollback buffer.
 
 ---
 
-- <a name="mthd-copy_selection" /> String **copy_selection** **()**
+- <a name="mthd-copy_selection" /> [String] **copy_selection** **()**
 
   Copies only selected (i.e. highlighted) text in the terminal.
   Will return an empty string if nothing is highligted.
