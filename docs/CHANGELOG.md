@@ -6,21 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.1.0...HEAD)
-### Added
-- Added `get_master()` method to PTY node (Linux and macOS only) which returns the
-  underlying [Pipe](/addons/godot_xterm/native/src/pipe.cpp) object of the master
-  side of the psuedoterminal pair. This can be used to manually call `poll()` on the
-  pipe in case `_process()` is disabled.
 
 ### Fixed
+Thanks to [@ConteZero](https://github.com/contezero) for reporting and providing feedback on these issues:
 - [#51][i51]: Fixed issue where terminal would lose focus on Tab/Arrow key presses
-  when in a scene with other input nodes. Thanks [@ConteZero] for reporting.
+  when in a scene with other input nodes.
 - [#53][i53]: Fixed issue where terminal was not updating when there was no GUI
-  activity. Thanks [@ConteZero] for providing feedback on this issue.
+  activity.
+- [#55][i55]: Fixed unicode errors that would occur when using PTY with Terminal.
+- [#56][i56]: Fixed incorrect initial size of PTY when used with Terminal.
 
-[i53]: https://github.com/lihop/godot-xterm/issues/53
+
 [i51]: https://github.com/lihop/godot-xterm/issues/51
-[@ConteZero]: https://github.com/ConteZero
+[i53]: https://github.com/lihop/godot-xterm/issues/53
+[i55]: https://github.com/lihop/godot-xterm/issues/55
+[i56]: https://github.com/lihop/godot-xterm/issues/56
 
 
 ## [v2.1.0](https://github.com/lihop/godot-xterm/compare/v2.0.0...v2.1.0) - 2022-07-11
