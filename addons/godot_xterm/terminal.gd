@@ -78,7 +78,10 @@ func get_cols() -> int:
 
 
 func write(data) -> void:
-	assert(data is String or data is PoolByteArray)
+	assert(
+		data is PoolByteArray or data is String,
+		"Invalid type for argument 'data'. Should be of type PoolByteArray or String."
+	)
 
 	# Will be cleared when _flush() is called after VisualServer emits the "frame_pre_draw" signal.
 	_buffer.push_back(data)
@@ -90,7 +93,7 @@ func write(data) -> void:
 
 func _flush():
 	for data in _buffer:
-		_native_terminal.write(data if data is String else data.get_string_from_utf8())
+		_native_terminal.write(data if data is PoolByteArray else data.to_utf8())
 		_native_terminal.update()
 	_buffer.clear()
 
@@ -269,8 +272,8 @@ func _on_data_sent(data: PoolByteArray):
 	emit_signal("data_sent", data)
 
 
-func _on_key_pressed(data: String, event: InputEventKey):
-	emit_signal("key_pressed", data, event)
+func _on_key_pressed(data: PoolByteArray, event: InputEventKey):
+	emit_signal("key_pressed", data.get_string_from_utf8(), event)
 
 
 func _on_size_changed(new_size: Vector2):

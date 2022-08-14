@@ -53,7 +53,7 @@ public:
   void _gui_input(Variant event);
   void _draw();
 
-  void write(String data);
+  void write(PoolByteArray data);
 
   void sb_up(int num);
   void sb_down(int num);

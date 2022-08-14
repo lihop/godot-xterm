@@ -26,7 +26,7 @@ public:
   void close();
   int get_status();
 
-  godot_error write(String p_data);
+  godot_error write(PoolByteArray data);
 
   void pause();
   void resume();

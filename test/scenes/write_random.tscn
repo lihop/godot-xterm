@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends \"res://addons/godot_xterm/terminal.gd\"
+
+var rng := RandomNumberGenerator.new()
+
+
+func _ready():
+	rng.seed = 0
+
+
+func _process(_delta):
+	for _i in range(4096):
+		write(PoolByteArray([rng.randi() % 256]))
+"
+
+[node name="Terminal" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = SubResource( 1 )
