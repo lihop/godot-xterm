@@ -5,8 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.1.0...HEAD)
+## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.1.1...HEAD)
 
+
+## [v2.1.1](https://github.com/lihop/godot-xterm/compare/v2.1.0...v2.1.1) - 2022-08-15
 ### Fixed
 Thanks to [@ConteZero](https://github.com/contezero) for reporting and providing feedback on these issues:
 - [#51][i51]: Fixed issue where terminal would lose focus on Tab/Arrow key presses
@@ -15,7 +17,6 @@ Thanks to [@ConteZero](https://github.com/contezero) for reporting and providing
   activity.
 - [#55][i55]: Fixed unicode errors that would occur when using PTY with Terminal.
 - [#56][i56]: Fixed incorrect initial size of PTY when used with Terminal.
-
 
 [i51]: https://github.com/lihop/godot-xterm/issues/51
 [i53]: https://github.com/lihop/godot-xterm/issues/53
