@@ -21,7 +21,7 @@ https://user-images.githubusercontent.com/3696783/126894061-a69eb6ad-9979-4723-a
 
 </div>
 
-[![Live Demo](./media/live_demo_button.png)](https://lihop.github.io/godot-xterm-dist/)
+[![Live Demo](./media/live_demo_button.png)](https://lihop.github.io/godot-xterm-dist/demo)
 [![View it on GitHub](./media/view_it_on_github_button.png)](https://github.com/lihop/godot-xterm)
 
 #### Table of Contents
@@ -79,7 +79,7 @@ See the [Setup section](https://lihop.github.io/godot-xterm/setup) for more deta
 
 Other examples of GodotXterm usage are available online:
 
-- [**Live Demo**](https://lihop.github.io/godot-xterm-dist/): An HTML5 export of the GodotXterm repo's example scenes.
+- [**Live Demo**](https://lihop.github.io/godot-xterm-dist/demo): An HTML5 export of the GodotXterm repo's example scenes.
 
 - [**The Guest**](https://lihop.itch.io/the-guest): A Linux only submission to the [Linux Game Jam 2022](https://itch.io/jam/linux-game-jam-2022). Uses GodotXterm in conjunction with the [gdtemu addon](https://github.com/lihop/gdtemu) and Linux's Kernel-based Virtual Machine, to provide the player with interactive VM that can be used in the game world.
 
