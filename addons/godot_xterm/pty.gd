@@ -173,6 +173,9 @@ func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
 
 
 func get_master():
+	push_warning(
+		"The method get_master() is deprecated and will be removed in a future version. If you really need to get the underlying Pipe of the pty, then you can access '_pty_native._pipe', but this is not supported and may change at any time."
+	)
 	return _pty_native.get_master()
 
 
