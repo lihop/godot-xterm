@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.1.1...HEAD)
+### Removed
+- Dropped support for Godot version 3.3.x.
 
 
 ## [v2.1.1](https://github.com/lihop/godot-xterm/compare/v2.1.0...v2.1.1) - 2022-08-15

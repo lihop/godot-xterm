@@ -3,7 +3,7 @@
 # GodotXterm - Terminal Emulator
 <br/>
 
-[![Godot Version](https://img.shields.io/badge/Godot-3.3+-blue.svg)](https://godotengine.org)
+[![Godot Version](https://img.shields.io/badge/Godot-3.4.x-blue.svg)](#supported-godot-versions)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/lihop/godot-xterm/blob/stable/LICENSE.md)
 [![Build and Test](https://github.com/lihop/godot-xterm/actions/workflows/main.yml/badge.svg?event=schedule)](https://github.com/lihop/godot-xterm/actions/workflows/main.yml)
 
@@ -28,9 +28,10 @@ https://user-images.githubusercontent.com/3696783/126894061-a69eb6ad-9979-4723-a
 1. [Features](#features)
 2. [Screenshots](#screenshots)
 3. [Demos and Examples](#demos-and-examples)
-4. [Installation](#installation)
-5. [Documentation](#documentation)
-6. [License](#license)
+4. [Supported Godot Versions](#supported-godot-versions)
+5. [Installation](#installation)
+6. [Documentation](#documentation)
+7. [License](#license)
 
 ## Features
 
@@ -86,6 +87,13 @@ Other examples of GodotXterm usage are available online:
 - [**Xterminate**](https://lihop.itch.io/xterminate): A Linux, macOS, and Windows demo which uses an older version GodotXterm in conjunction with [Godot Python](https://github.com/touilleMan/godot-python).
 
 Are you using GodotXterm in your project and want it listed here? Please [open a pull request](https://github.com/lihop/godot-xterm/pulls) to have it added.
+
+## Supported Godot Versions
+
+GodotXterm aims to support the current stable release of Godot, but may lag slightly.
+Currently, Godot versions 3.4.x are supported with support for 3.5 coming soon.
+Versions 3.3.x are no longer officially supported but *may* work if the GDNative libraries are
+compiled using an older version of godot-cpp.
 
 ## Installation
 
