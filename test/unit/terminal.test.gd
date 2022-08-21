@@ -1,37 +1,5 @@
 extends "res://addons/gut/test.gd"
 
-const Terminal := preload("res://addons/godot_xterm/terminal.gd")
-
-var term: Terminal
-
-
-func before_each():
-	term = Terminal.new()
-	term.rect_size = Vector2(400, 200)
-	add_child_autofree(term)
-
-
-func test_bell() -> void:
-	term.bell_cooldown = 0
-	term.write(char(7))
-	term.write(char(0x07))
-	term.write("\a")
-	term.write("\u0007")
-	term.write("'Ask not for whom the \a tolls; it tolls for thee' - John Donne")
-	yield(yield_to(term, "bell", 5), YIELD)
-	assert_signal_emit_count(term, "bell", 5)
-
-
-func test_bell_cooldown() -> void:
-	watch_signals(term)
-	term.bell_cooldown = 0.5
-	term.write("\a")
-	term.write("\a")
-	yield(yield_for(1), YIELD)
-	term.write("\a")
-	yield(yield_to(term, "bell", 5), YIELD)
-	assert_signal_emit_count(term, "bell", 2)
-
 
 class TestMultipleInputs:
 	# Tests for when Terminal is around other input nodes and arrow keys or TAB
