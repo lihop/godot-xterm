@@ -208,8 +208,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        submodules: recursive
     - name: Setup Godot
       uses: lihop/setup-godot@v1.0.2
     - name: Install binary build artifacts
@@ -250,8 +248,6 @@ jobs:
             bits: 32
     steps:
       - uses: actions/checkout@v2
-        with:
-          submodules: recursive
       - name: Setup Godot
         uses: lihop/setup-godot@v1.0.2
         with:
