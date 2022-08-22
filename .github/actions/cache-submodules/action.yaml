@@ -17,11 +17,12 @@ runs:
       working-directory: addons/godot_xterm/native/thirdparty
       shell: bash
       run: |
+        cache_version=1 # Increment this number to invalidate the cache.
         godot_cpp_rev=$(git ls-tree HEAD godot-cpp --object-only)
         libuv_rev=$(git ls-tree HEAD libuv --object-only)
         libtsm_rev=$(git ls-tree HEAD libtsm --object-only)
         hash_cmd=$([[ $RUNNER_OS == 'Windows' ]] && echo 'sha1sum' || echo 'shasum')
-        hash_of_hashes=$(echo -n "$godot_cpp_rev$libuv_rev$libtsm_rev" | $hash_cmd | head -c 40)
+        hash_of_hashes=$(echo -n "$godot_cpp_rev$libuv_rev$libtsm_rev$cache_version" | $hash_cmd | head -c 40)
         echo "::set-output name=hash::$hash_of_hashes"
     - name: Cache submodules
       uses: actions/cache@v3
@@ -29,6 +30,3 @@ runs:
       with:
         path: addons/godot_xterm/native/thirdparty
         key: thirdparty-${{ inputs.platform }}-${{ inputs.bits }}-${{ inputs.target }}-${{ steps.hash.outputs.hash }}
-        restore-keys: |
-          thirdparty-${{ inputs.platform }}-${{ inputs.bits }}-${{ inputs.target }}-
-          thirdparty-${{ inputs.platform }}-${{ inputs.bits }}-
