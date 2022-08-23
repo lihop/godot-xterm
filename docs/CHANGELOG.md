@@ -10,9 +10,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deprecated the `cols` and `rows` properties of Terminal.
   These properties will be removed in a future version.
   Please use `get_cols()` and `get_rows()` instead.
+- Deprecated the undocumented `get_master()` method of PTY that returned its Pipe.
+  This method will be removed in a future version.
+  The Pipe class is for internal use only and may be changed at any time.
 
 ### Removed
-- Dropped support for Godot version 3.3.x.
+- Removed support for Godot version 3.3.x. GodotXterm *might* still work with this
+  version of Godot if compiled with the correct version of godot-cpp, but compatibility 
+  is no longer officially supported.
+
+### Fixed
+- [#57][i57]: Screen is no longer erased on resize when using a custom theme.
+- [#58][i58]: Screen is no longer erased when changing themes.
+
+[i57]: https://github.com/lihop/godot-xterm/issues/57
+[i58]: https://github.com/lihop/godot-xterm/issues/58
 
 
 ## [v2.1.1](https://github.com/lihop/godot-xterm/compare/v2.1.0...v2.1.1) - 2022-08-15
