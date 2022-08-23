@@ -10,11 +10,11 @@ extends Control
 
 const TPut = preload("res://addons/godot_xterm/util/tput.gd")
 
-# Title generated using command: toilet -f pagga GODOT XTERM
+# Title generated using command: toilet -f pagga GODOTXTERM
 const TITLE = """
-░█▀▀░█▀█░█▀▄░█▀█░▀█▀░░░█░█░▀█▀░█▀▀░█▀▄░█▄█\r
-░█░█░█░█░█░█░█░█░░█░░░░▄▀▄░░█░░█▀▀░█▀▄░█░█\r
-░▀▀▀░▀▀▀░▀▀░░▀▀▀░░▀░░░░▀░▀░░▀░░▀▀▀░▀░▀░▀░▀\r
+░█▀▀░█▀█░█▀▄░█▀█░▀█▀░█░█░▀█▀░█▀▀░█▀▄░█▄█\r
+░█░█░█░█░█░█░█░█░░█░░▄▀▄░░█░░█▀▀░█▀▄░█░█\r
+░▀▀▀░▀▀▀░▀▀░░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀░▀░▀░▀\r
 """
 const TITLE_WIDTH = 42
 
