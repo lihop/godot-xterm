@@ -209,7 +209,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Setup Godot
-      uses: lihop/setup-godot@v1.0.2
+      uses: lihop/setup-godot@v1
     - name: Install binary build artifacts
       uses: actions/download-artifact@v2
       with:
@@ -249,7 +249,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup Godot
-        uses: lihop/setup-godot@v1.0.2
+        uses: lihop/setup-godot@v1
         with:
           version: ${{ matrix.godot_version }}
           bits: ${{ matrix.bits }}
