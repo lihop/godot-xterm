@@ -39,8 +39,8 @@ func import(source_file, save_path, options, r_platform_variant, r_gen_files):
 		return err
 
 	var theme: Theme = XrdbTheme.new()
-	theme.set_font("Regular", "Terminal", preload("../themes/fonts/regular.tres"))
-	for font in ["Bold", "Italic", "Bold Italic"]:
+	theme.set_font("regular", "Terminal", preload("../themes/fonts/regular.tres"))
+	for font in ["bold", "italic", "bold_italic"]:
 		theme.set_font(font, "Terminal", null)
 
 	var word_regex = RegEx.new()
@@ -77,48 +77,48 @@ func import(source_file, save_path, options, r_platform_variant, r_gen_files):
 
 		match name:
 			"color0", "ansi_0_color":
-				theme.set_color("Black", "Terminal", color)
+				theme.set_color("black", "Terminal", color)
 			"color1", "ansi_1_color":
-				theme.set_color("Red", "Terminal", color)
+				theme.set_color("red", "Terminal", color)
 			"color2", "ansi_2_color":
-				theme.set_color("Green", "Terminal", color)
+				theme.set_color("green", "Terminal", color)
 			"color3", "ansi_3_color":
-				theme.set_color("Yellow", "Terminal", color)
+				theme.set_color("yellow", "Terminal", color)
 			"color4", "ansi_4_color":
-				theme.set_color("Blue", "Terminal", color)
+				theme.set_color("blue", "Terminal", color)
 			"color5", "ansi_5_color":
-				theme.set_color("Magenta", "Terminal", color)
+				theme.set_color("magenta", "Terminal", color)
 			"color6", "ansi_6_color":
-				theme.set_color("Cyan", "Terminal", color)
+				theme.set_color("cyan", "Terminal", color)
 			"color7", "ansi_7_color":
-				theme.set_color("Light Grey", "Terminal", color)
+				theme.set_color("white", "Terminal", color)
 			"color8", "ansi_8_color":
-				theme.set_color("Dark Grey", "Terminal", color)
+				theme.set_color("bright_black", "Terminal", color)
 			"color9", "ansi_9_color":
-				theme.set_color("Light Red", "Terminal", color)
+				theme.set_color("bright_red", "Terminal", color)
 			"color10", "ansi_10_color":
-				theme.set_color("Light Green", "Terminal", color)
+				theme.set_color("bright_green", "Terminal", color)
 			"color11", "ansi_11_color":
-				theme.set_color("Light Yellow", "Terminal", color)
+				theme.set_color("bright_yellow", "Terminal", color)
 			"color12", "ansi_12_color":
-				theme.set_color("Light Blue", "Terminal", color)
+				theme.set_color("bright_blue", "Terminal", color)
 			"color13", "ansi_13_color":
-				theme.set_color("Light Magenta", "Terminal", color)
+				theme.set_color("bright_magenta", "Terminal", color)
 			"color14", "ansi_14_color":
-				theme.set_color("Light Cyan", "Terminal", color)
+				theme.set_color("bright_cyan", "Terminal", color)
 			"color15", "ansi_15_color":
-				theme.set_color("White", "Terminal", color)
+				theme.set_color("bright_white", "Terminal", color)
 			"foreground", "foreground_color":
-				theme.set_color("Foreground", "Terminal", color)
+				theme.set_color("foreground", "Terminal", color)
 			"background", "background_color":
-				theme.set_color("Background", "Terminal", color)
+				theme.set_color("background", "Terminal", color)
 			"selection_color":
-				theme.set_color("Selection", "Terminal", color)
+				theme.set_color("selection", "Terminal", color)
 			"selected_text_color":
-				theme.set_color("Selected Text", "Terminal", color)
+				theme.set_color("selected_text", "Terminal", color)
 			"cursorcolor", "cursor_color":
-				theme.set_color("Cursor", "Terminal", color)
+				theme.set_color("cursor", "Terminal", color)
 			"cursor_text_color":
-				theme.set_color("Cursor Text", "Terminal", color)
+				theme.set_color("cursor_text", "Terminal", color)
 
 	return ResourceSaver.save("%s.%s" % [save_path, get_save_extension()], theme)

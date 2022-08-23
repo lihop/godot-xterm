@@ -13,6 +13,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deprecated the undocumented `get_master()` method of PTY that returned its Pipe.
   This method will be removed in a future version.
   The Pipe class is for internal use only and may be changed at any time.
+- Changed theme item names to be compatible with Godot version 3.5 (no spaces),
+  consistent with other theme item names (snake_case), and to match the ANSI
+  color names listed on the [ANSI escape code Wikipedia page](https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit).
+  Old names are deprecated and will be removed in a future version.
+  Please update theme item names as follows (paying particular attention to `Light Grey`, `Dark Grey`, `White`, `Bold Italic`, and the `Light *` variants):
+  - Colors:
+    - `Black` -> `black`
+    - `Red` -> `red`
+    - `Green` -> `green`
+    - `Yellow` -> `yellow`
+    - `Blue` -> `blue`
+    - `Magenta` -> `magenta`
+    - `Cyan` -> `cyan`
+    - `Light Grey` -> `white`
+    - `Dark Grey` -> `bright_black`
+    - `Light Red` -> `bright_red`
+    - `Light Green` -> `bright_green`
+    - `Light Yellow` -> `bright_yellow`
+    - `Light Blue` -> `bright_blue`
+    - `Light Magenta` -> `bright_magenta`
+    - `Light Cyan` -> `bright_cyan`
+    - `White` -> `bright_white`
+    - `Foreground` -> `foreground`
+    - `Background` -> `background`
+    - `Cursor` -> `cursor`
+  - Fonts:
+    - `Regular` -> `regular`
+    - `Italic` -> `italic`
+    - `Bold` -> `bold`
+    - `Bold Italic` -> `bold_italic`
 
 ### Removed
 - Removed support for Godot version 3.3.x. GodotXterm *might* still work with this

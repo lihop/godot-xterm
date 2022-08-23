@@ -47,7 +47,7 @@ var _tab_container_min_size
 
 
 func _ready():
-	tab_container.add_stylebox_override("panel", get_stylebox("Background", "EditorStyles"))
+	tab_container.add_stylebox_override("panel", get_stylebox("background", "EditorStyles"))
 	_update_settings()
 
 

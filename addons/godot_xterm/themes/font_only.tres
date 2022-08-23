@@ -5,7 +5,7 @@ size = 14
 extra_spacing_bottom = 1
 
 [resource]
-Terminal/fonts/Bold = null
-"Terminal/fonts/Bold Italic" = null
-Terminal/fonts/Italic = null
-Terminal/fonts/Regular = SubResource( 1 )
+Terminal/fonts/bold = null
+Terminal/fonts/bold_italic = null
+Terminal/fonts/italic = null
+Terminal/fonts/regular = SubResource( 1 )

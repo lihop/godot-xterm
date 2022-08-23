@@ -1,0 +1,28 @@
+[gd_resource type="Theme" load_steps=2 format=2]
+
+[ext_resource path="res://addons/godot_xterm/themes/fonts/regular.tres" type="DynamicFont" id=4]
+
+[resource]
+default_font = ExtResource( 4 )
+Terminal/colors/Background = Color( 0.921569, 0.921569, 0.921569, 1 )
+Terminal/colors/Black = Color( 0, 0, 0, 1 )
+Terminal/colors/Blue = Color( 0.239216, 0.392157, 0.866667, 1 )
+Terminal/colors/Cyan = Color( 0, 0.65098, 0.729412, 1 )
+"Terminal/colors/Dark Grey" = Color( 0.25098, 0.25098, 0.25098, 1 )
+Terminal/colors/Foreground = Color( 0.25098, 0.25098, 0.25098, 1 )
+Terminal/colors/Green = Color( 0, 0.380392, 0.188235, 1 )
+"Terminal/colors/Light Blue" = Color( 0.160784, 0.545098, 1, 1 )
+"Terminal/colors/Light Cyan" = Color( 0.133333, 0.8, 1, 1 )
+"Terminal/colors/Light Green" = Color( 0, 0.760784, 0.380392, 1 )
+"Terminal/colors/Light Grey" = Color( 0.898039, 0.898039, 0.898039, 1 )
+"Terminal/colors/Light Magenta" = Color( 0.658824, 0.364706, 0.913725, 1 )
+"Terminal/colors/Light Red" = Color( 1, 0.439216, 0.521569, 1 )
+"Terminal/colors/Light Yellow" = Color( 1, 0.866667, 0.396078, 1 )
+Terminal/colors/Magenta = Color( 0.439216, 0.164706, 1, 1 )
+Terminal/colors/Red = Color( 0.74902, 0.352941, 0.313726, 1 )
+Terminal/colors/White = Color( 1, 1, 1, 1 )
+Terminal/colors/Yellow = Color( 0.698039, 0.572549, 0.0627451, 1 )
+Terminal/fonts/Bold = null
+"Terminal/fonts/Bold Italic" = null
+Terminal/fonts/Italic = null
+Terminal/fonts/Regular = ExtResource( 4 )

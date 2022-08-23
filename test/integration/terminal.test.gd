@@ -49,22 +49,22 @@ class TestTheme:
 	const alt_theme := preload("res://addons/godot_xterm/themes/default_light.tres")
 
 	const COLORS := [
-		"Black",
-		"Red",
-		"Green",
-		"Yellow",
-		"Blue",
-		"Magenta",
-		"Cyan",
-		"Light Grey",
-		"Dark Grey",
-		"Light Red",
-		"Light Green",
-		"Light Yellow",
-		"Light Blue",
-		"Light Magenta",
-		"Light Cyan",
-		"White",
+		"black",
+		"red",
+		"green",
+		"yellow",
+		"blue",
+		"magenta",
+		"cyan",
+		"white",
+		"bright_black",
+		"bright_red",
+		"bright_green",
+		"bright_yellow",
+		"bright_blue",
+		"bright_magenta",
+		"bright_cyan",
+		"bright_white",
 	]
 
 	var terminal: Terminal
@@ -105,24 +105,18 @@ class TestTheme:
 		yield(yield_frames(1), YIELD)
 
 	func test_terminal_display_colors_from_default_theme():
-		if _version_gt_3_4():
-			return
 		terminal.theme = null
 		add_child(terminal)
 		yield(yield_to(terminal, "theme_changed", 5), YIELD)
 		_check_colors(default_theme)
 
 	func test_terminal_displays_colors_from_theme():
-		if _version_gt_3_4():
-			return
 		terminal.theme = alt_theme
 		add_child(terminal)
 		yield(yield_to(terminal, "theme_changed", 5), YIELD)
 		_check_colors(alt_theme)
 
 	func test_visible_characters_still_displayed_after_resize_with_default_theme():
-		if _version_gt_3_4():
-			return
 		terminal.theme = null
 		add_child(terminal)
 		yield(yield_frames(1), YIELD)
@@ -131,8 +125,6 @@ class TestTheme:
 		_check_colors(default_theme)
 
 	func test_visible_characters_still_displayed_after_resize_with_custom_theme():
-		if _version_gt_3_4():
-			return
 		# Issue 57: https://github.com/lihop/godot-xterm/issues/57
 		terminal.theme = alt_theme
 		add_child(terminal)
@@ -142,8 +134,6 @@ class TestTheme:
 		_check_colors(alt_theme)
 
 	func test_updates_colors_after_theme_set():
-		if _version_gt_3_4():
-			return
 		# Issue 58: https://github.com/lihop/godot-xterm/issues/58
 		terminal.theme = null
 		add_child(terminal)
@@ -153,8 +143,6 @@ class TestTheme:
 		_check_colors(alt_theme)
 
 	func test_updates_colors_after_theme_unset():
-		if _version_gt_3_4():
-			return
 		# Issue 58: https://github.com/lihop/godot-xterm/issues/58
 		terminal.theme = alt_theme
 		add_child(terminal)
@@ -164,8 +152,6 @@ class TestTheme:
 		_check_colors(default_theme)
 
 	func test_updates_colors_after_theme_changed():
-		if _version_gt_3_4():
-			return
 		# Issue 58: https://github.com/lihop/godot-xterm/issues/58
 		terminal.theme = alt_theme
 		add_child(terminal)
@@ -173,3 +159,17 @@ class TestTheme:
 		terminal.theme = default_theme
 		yield(yield_to(terminal, "theme_changed", 5), YIELD)
 		_check_colors(default_theme)
+
+	func test_deprecated_theme_item_names_continue_to_work_until_removed():
+		# This test can be removed after support for deperacted theme item names is removed.
+		# Not applicable to version 3.5 as deprecated theme can't be imported in that version.
+		var version := Engine.get_version_info()
+		if version.major > 3 or (version.major == 3 and version.minor >= 5):
+			return
+
+		var deprecated_theme := preload("../files/deprecated_theme.tres")
+		terminal.theme = deprecated_theme
+		yield(yield_to(terminal, "theme_changed", 5), YIELD)
+		add_child(terminal)
+		yield(yield_to(terminal, "theme_changed", 5), YIELD)
+		_check_colors(alt_theme)

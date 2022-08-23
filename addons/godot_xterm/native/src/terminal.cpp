@@ -435,43 +435,46 @@ void Terminal::update_theme() {
   /* Default to Xterm colors */
 
   /* ANSI 0 */
-  set_pallete_color(TSM_COLOR_BLACK, "Black", Color::html("#000000"));
+  set_pallete_color(TSM_COLOR_BLACK, "black", Color::html("#000000"));
   /* ANSI 1 */
-  set_pallete_color(TSM_COLOR_RED, "Red", Color::html("#CD0000"));
+  set_pallete_color(TSM_COLOR_RED, "red", Color::html("#CD0000"));
   /* ANSI 2 */
-  set_pallete_color(TSM_COLOR_GREEN, "Green", Color::html("#00CD00"));
+  set_pallete_color(TSM_COLOR_GREEN, "green", Color::html("#00CD00"));
   /* ANSI 3 */
-  set_pallete_color(TSM_COLOR_YELLOW, "Yellow", Color::html("#CDCD00"));
+  set_pallete_color(TSM_COLOR_YELLOW, "yellow", Color::html("#CDCD00"));
   /* ANSI 4 */
-  set_pallete_color(TSM_COLOR_BLUE, "Blue", Color::html("#0000EE"));
+  set_pallete_color(TSM_COLOR_BLUE, "blue", Color::html("#0000EE"));
   /* ANSI 5 */
-  set_pallete_color(TSM_COLOR_MAGENTA, "Magenta", Color::html("#CD00CD"));
+  set_pallete_color(TSM_COLOR_MAGENTA, "magenta", Color::html("#CD00CD"));
   /* ANSI 6 */
-  set_pallete_color(TSM_COLOR_CYAN, "Cyan", Color::html("#00CDCD"));
+  set_pallete_color(TSM_COLOR_CYAN, "cyan", Color::html("#00CDCD"));
   /* ANSI 7 (White) */
-  set_pallete_color(TSM_COLOR_LIGHT_GREY, "Light Grey", Color::html("#E5E5E5"));
+  set_pallete_color(TSM_COLOR_LIGHT_GREY, "white", Color::html("#E5E5E5"));
   /* ANSI 8 (Bright Black) */
-  set_pallete_color(TSM_COLOR_DARK_GREY, "Dark Grey", Color::html("#7F7F7F"));
+  set_pallete_color(TSM_COLOR_DARK_GREY, "bright_black",
+                    Color::html("#7F7F7F"));
   /* ANSI 9 */
-  set_pallete_color(TSM_COLOR_LIGHT_RED, "Light Red", Color::html("#FF0000"));
+  set_pallete_color(TSM_COLOR_LIGHT_RED, "bright_red", Color::html("#FF0000"));
   /* ANSI 10 */
-  set_pallete_color(TSM_COLOR_LIGHT_GREEN, "Light Green",
+  set_pallete_color(TSM_COLOR_LIGHT_GREEN, "bright_green",
                     Color::html("#00FF00"));
   /* ANSI 11 */
-  set_pallete_color(TSM_COLOR_LIGHT_YELLOW, "Light Yellow",
+  set_pallete_color(TSM_COLOR_LIGHT_YELLOW, "bright_yellow",
                     Color::html("#FFFF00"));
   /* ANSI 12 */
-  set_pallete_color(TSM_COLOR_LIGHT_BLUE, "Light Blue", Color::html("#0000FC"));
+  set_pallete_color(TSM_COLOR_LIGHT_BLUE, "bright_blue",
+                    Color::html("#0000FC"));
   /* ANSI 13 */
-  set_pallete_color(TSM_COLOR_LIGHT_MAGENTA, "Light Magenta",
+  set_pallete_color(TSM_COLOR_LIGHT_MAGENTA, "bright_magenta",
                     Color::html("#FF00FF"));
   /* ANSI 14 */
-  set_pallete_color(TSM_COLOR_LIGHT_CYAN, "Light Cyan", Color::html("#00FFFF"));
+  set_pallete_color(TSM_COLOR_LIGHT_CYAN, "bright_cyan",
+                    Color::html("#00FFFF"));
   /* ANSI 15 (Bright White) */
-  set_pallete_color(TSM_COLOR_WHITE, "White", Color::html("#FFFFFF"));
+  set_pallete_color(TSM_COLOR_WHITE, "bright_white", Color::html("#FFFFFF"));
 
-  set_pallete_color(TSM_COLOR_FOREGROUND, "Foreground", Color::html("#000000"));
-  set_pallete_color(TSM_COLOR_BACKGROUND, "Background", Color::html("#FFFFFF"));
+  set_pallete_color(TSM_COLOR_FOREGROUND, "foreground", Color::html("#000000"));
+  set_pallete_color(TSM_COLOR_BACKGROUND, "background", Color::html("#FFFFFF"));
 
   if (tsm_vte_set_custom_palette(vte, color_palette)) {
     ERR_PRINT("Error setting custom palette");
@@ -489,11 +492,11 @@ void Terminal::update_theme() {
       fontref = get_font(font_style, "Terminal");
     } else if (has_font_override(font_style)) {
       fontref = get_font(font_style, "");
-    } else if (has_font("Regular", "Terminal")) {
-      fontref = get_font("Regular", "Terminal");
+    } else if (has_font("regular", "Terminal")) {
+      fontref = get_font("regular", "Terminal");
     } else if (default_theme != nullptr &&
-               default_theme->has_font("Regular", "Terminal")) {
-      fontref = default_theme->get_font("Regular", "Terminal");
+               default_theme->has_font("regular", "Terminal")) {
+      fontref = default_theme->get_font("regular", "Terminal");
     } else {
       fontref = get_font("");
     }
@@ -501,10 +504,10 @@ void Terminal::update_theme() {
     fontmap.insert(std::pair<String, Ref<Font>>(font_style, fontref));
   };
 
-  load_font("Bold Italic");
-  load_font("Bold");
-  load_font("Italic");
-  load_font("Regular");
+  load_font("bold_italic");
+  load_font("bold");
+  load_font("italic");
+  load_font("regular");
 
   // update_size();
 }
@@ -523,13 +526,13 @@ void Terminal::draw_foreground(int row, int col, char *ch,
   Ref<Font> fontref = get_font("");
 
   if (attr->bold && attr->italic) {
-    fontref = fontmap["Bold Italic"];
+    fontref = fontmap["bold_italic"];
   } else if (attr->bold) {
-    fontref = fontmap["Bold"];
+    fontref = fontmap["bold"];
   } else if (attr->italic) {
-    fontref = fontmap["Italic"];
+    fontref = fontmap["italic"];
   } else {
-    fontref = fontmap["Regular"];
+    fontref = fontmap["regular"];
   }
 
   /* Draw the foreground */
@@ -591,10 +594,10 @@ void Terminal::update_size() {
   // the Control's rect_size.
 
   Ref<Font> fontref;
-  if (fontmap.count("Regular"))
-    fontref = fontmap["Regular"];
-  else if (has_font("Regular", "Terminal"))
-    fontref = get_font("Regular", "Terminal");
+  if (fontmap.count("regular"))
+    fontref = fontmap["regular"];
+  else if (has_font("regular", "Terminal"))
+    fontref = get_font("regular", "Terminal");
   else
     fontref = get_font("");
 

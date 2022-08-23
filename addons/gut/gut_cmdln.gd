@@ -229,7 +229,7 @@ func setup_options(options, font_names):
 	opts.add(
 		"-gbackground_color",
 		options.background_color,
-		'Background color as an html color, default "[default]"'
+		'background color as an html color, default "[default]"'
 	)
 	opts.add("-gfont_color", options.font_color, 'Font color as an html color, default "[default]"')
 
