@@ -7,17 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.1.1...HEAD)
 ### Changed
+- Changed theme item names to be compatible with Godot version 3.5 (no spaces),
+  consistent with other theme item names (snake_case), and to match the ANSI
+  color names listed on the [ANSI escape code Wikipedia page](https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit).
+
+### Deprecated
 - Deprecated the `cols` and `rows` properties of Terminal.
   These properties will be removed in a future version.
   Please use `get_cols()` and `get_rows()` instead.
 - Deprecated the undocumented `get_master()` method of PTY that returned its Pipe.
   This method will be removed in a future version.
   The Pipe class is for internal use only and may be changed at any time.
-- Changed theme item names to be compatible with Godot version 3.5 (no spaces),
-  consistent with other theme item names (snake_case), and to match the ANSI
-  color names listed on the [ANSI escape code Wikipedia page](https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit).
-  Old names are deprecated and will be removed in a future version.
-  Please update theme item names as follows (paying particular attention to `Light Grey`, `Dark Grey`, `White`, `Bold Italic`, and the `Light *` variants):
+- Deprecated old theme item names.
+  Support for these names will be removed in a future version.
+  Please update the names as follows (paying particular attention to `Light Grey`, `Dark Grey`, `White`, `Bold Italic`, and the `Light *` variants):
   - Colors:
     - `Black` -> `black`
     - `Red` -> `red`
@@ -46,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - Removed support for Godot version 3.3.x. GodotXterm *might* still work with this
-  version of Godot if compiled with the correct version of godot-cpp, but compatibility 
+  version of Godot if compiled with the correct version of godot-cpp, but compatibility
   is no longer officially supported.
 
 ### Fixed
