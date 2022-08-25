@@ -5,7 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.1.1...HEAD)
+## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.2.0...HEAD)
+
+
+## [v2.2.0](https://github.com/lihop/godot-xterm/compare/v2.1.1...v2.2.0) - 2022-08-26
 ### Changed
 - Changed theme item names to be compatible with Godot version 3.5 (no spaces),
   consistent with other theme item names (snake_case), and to match the ANSI
