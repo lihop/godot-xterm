@@ -91,7 +91,7 @@ Are you using GodotXterm in your project and want it listed here? Please [open a
 ## Supported Godot Versions
 
 GodotXterm aims to support the current stable release of Godot, but may lag slightly.
-Currently, Godot versions 3.4.x are supported with support for 3.5 coming soon.
+Currently, Godot versions 3.5.x and 3.4.x are supported.
 Versions 3.3.x are no longer officially supported but *may* work if the GDNative libraries are
 compiled using an older version of godot-cpp.
 
