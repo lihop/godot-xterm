@@ -185,11 +185,7 @@ jobs:
         path: addons/godot_xterm/native/bin
     - name: Import assets
       shell: bash
-      # The GodotXterm plugin will be disabled the first time we run the editor as resources that it depends
-      # (e.g. icons) will not have been imported yet so the plugin will fail to load. Without the plugin
-      # enabled resources imported by GodotXterm import plugins (e.g. .cast) will not be imported. Therefore,
-      # we need to re-enable the plugin by checking out project.godot and running the editor again.
-      run: godot --editor .github/import_assets.tscn && git checkout project.godot && godot --editor .github/import_assets.tscn
+      run: godot --editor .github/import_assets.tscn
     - name: Export HTML5
       run: godot --no-window --export HTML5
     - name: NPM cache

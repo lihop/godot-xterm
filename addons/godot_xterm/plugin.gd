@@ -18,7 +18,9 @@ func _enter_tree():
 	add_custom_type("Asciicast", "Animation", asciicast_script, null)
 
 	var terminal_script = preload("./terminal.gd")
-	var terminal_icon = preload("./nodes/terminal/terminal_icon.svg")
+	var terminal_icon = load(
+		"%s/nodes/terminal/terminal_icon.svg" % get_script().resource_path.get_base_dir()
+	)
 	add_custom_type("Terminal", "Control", terminal_script, terminal_icon)
 
 	if pty_supported:
