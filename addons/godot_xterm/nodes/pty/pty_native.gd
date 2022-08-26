@@ -13,10 +13,6 @@ func resize(cols: int, rows: int):
 	return _not_implemented()
 
 
-func get_master():
-	return _not_implemented()
-
-
 func _not_implemented() -> int:
 	var method := ""
 

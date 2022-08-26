@@ -166,12 +166,6 @@ func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
 	return PTYUnix.new().open(cols, rows)
 
 
-func get_master():
-	if _pipe:
-		return _pipe
-	return null
-
-
 func _exit_tree():
 	_exit_cb = null
 	if _pid > 1:
