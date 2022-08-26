@@ -161,7 +161,7 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 				scene.queue_free()
 			"Exit":
 				if OS.has_feature("JavaScript"):
-					JavaScript.eval("window.location.reload()")
+					JavaScript.eval("window.history.back() || window.close()")
 				get_tree().quit()
 
 
