@@ -47,8 +47,6 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 |--------------|--------------------------------------|---------|
 | [bool]       | [bell_muted](#prop-bell_muted)       | `false` |
 | [float]      | [bell_cooldown](#prop-bell_cooldown) | `0.1`   |
-| [int]        | [cols](#prop-cols) *(deprecated)*    | `2`     |
-| [int]        | [rows](#prop-rows) *(deprecated)*    | `2`     |
 | [UpdateMode] | [update_mode](#prop-update_mode)     | `AUTO`  |
 
 
@@ -107,32 +105,6 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 
 ## Property Descriptions
 
-
-- <a name="prop-cols" /> [int] **cols**
-
-  |           |            |
-  |-----------|------------|
-  | *Default* | `2`        |
-  | *Setter*  | None       |
-  | *Getter*  | get_cols() |
-
-  *Deprecated*. This property is deprecated and will be removed in a future version.
-  Please use [get_cols](#mthd-get_cols) instead.
-
----
-
-- <a name="prop-rows" /> [int] **rows** ***Deprecated***
-
-  |           |            |
-  |-----------|------------|
-  | *Default* | `2`        |
-  | *Setter*  | None       |
-  | *Getter*  | get_rows() |
-  
-  *Deprecated*. This property is deprecated and will be removed in a future version.
-  Please use the [get_rows](#mthd-get_rows) instead.
-
----
 
 - <a name="prop-bell_muted" /> [bool] **bell_muted**
 

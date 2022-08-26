@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Removed support for deprecated theme item names.
 - Removed deprecated get_master() method of PTY.
+- Removed deprecated cols/rows properties of Terminal.
 
 
 ## [v2.2.0](https://github.com/lihop/godot-xterm/compare/v2.1.1...v2.2.0) - 2022-08-26

@@ -26,9 +26,6 @@ enum SelectionMode {
 
 export(UpdateMode) var update_mode = UpdateMode.AUTO setget set_update_mode
 
-var cols = 2 setget _set_cols, _get_cols  # Deprecated.
-var rows = 2 setget _set_rows, _get_rows  # Deprecated.
-
 # If true, text in the terminal will be copied to the clipboard when selected.
 export(bool) var copy_on_selection
 
@@ -70,34 +67,8 @@ func get_cols() -> int:
 	return _cols
 
 
-func _get_cols() -> int:
-	push_warning(
-		"The 'cols' property of Terminal is deprecated and will be removed in a future version. Please use the `get_cols()` method instead."
-	)
-	return get_cols()
-
-
-func _set_cols(_value) -> void:
-	push_error(
-		"The 'cols' property of Terminal is read-only and determined by rect_size and the theme's font size."
-	)
-
-
 func get_rows() -> int:
 	return _rows
-
-
-func _get_rows() -> int:
-	push_warning(
-		"The 'rows' property of Terminal is deprecated and will be removed in a future version. Please use the `get_rows()` method instead."
-	)
-	return get_rows()
-
-
-func _set_rows(_value) -> void:
-	push_error(
-		"The 'rows' property of Terminal is read-only and determined by rect_size and the theme's font size."
-	)
 
 
 func write(data) -> void:
