@@ -267,7 +267,7 @@ jobs:
           command: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
           retry_on: error
           timeout_minutes: 5
-          max_attempts: 3
+          max_attempts: 6
       - name: Run unix tests
         if: ${{ matrix.os != 'windows-latest' }}
         uses: nick-fields/retry@v2
@@ -275,7 +275,7 @@ jobs:
           command: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
           retry_on: error
           timeout_minutes: 5
-          max_attempts: 3
+          max_attempts: 6
 
 
   # Git archive should only include addons/godot_xterm directory.
