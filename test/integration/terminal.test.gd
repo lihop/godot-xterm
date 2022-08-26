@@ -69,11 +69,6 @@ class TestTheme:
 
 	var terminal: Terminal
 
-	# Current themes don't work with Godot 3.5. So skip tests on this version.
-	static func _version_gt_3_4() -> bool:
-		var version := Engine.get_version_info()
-		return version.major > 3 or (version.major == 3 and version.minor > 4)
-
 	func _get_pixelv(src: Vector2) -> Color:
 		var screen := get_tree().root.get_texture().get_data()
 		screen.lock()
@@ -159,17 +154,3 @@ class TestTheme:
 		terminal.theme = default_theme
 		yield(yield_to(terminal, "theme_changed", 5), YIELD)
 		_check_colors(default_theme)
-
-	func test_deprecated_theme_item_names_continue_to_work_until_removed():
-		# This test can be removed after support for deperacted theme item names is removed.
-		# Not applicable to version 3.5 as deprecated theme can't be imported in that version.
-		var version := Engine.get_version_info()
-		if version.major > 3 or (version.major == 3 and version.minor >= 5):
-			return
-
-		var deprecated_theme := preload("../files/deprecated_theme.tres")
-		terminal.theme = deprecated_theme
-		yield(yield_to(terminal, "theme_changed", 5), YIELD)
-		add_child(terminal)
-		yield(yield_to(terminal, "theme_changed", 5), YIELD)
-		_check_colors(alt_theme)

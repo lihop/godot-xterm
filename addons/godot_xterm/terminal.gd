@@ -175,43 +175,15 @@ func _update_theme():
 	# inheritance to work we can pass through the theme variables manually.
 	for color in _default_theme.get_color_list("Terminal"):
 		var c: Color
-
-		var deprecated_color: String = color.replace("bright", "light").replace("_", " ").capitalize()
-		match deprecated_color:
-			"White":
-				deprecated_color = "Light Grey"
-			"Light Black":
-				deprecated_color = "Dark Grey"
-			"Light White":
-				deprecated_color = "White"
-
 		if has_color(color, "Terminal"):
 			c = get_color(color, "Terminal")
-		elif has_color(deprecated_color, "Terminal"):
-			push_warning(
-				(
-					"Color name '%s' is deprecated and will be removed it a future version. Use the name '%s' instead."
-					% [deprecated_color, color]
-				)
-			)
-			c = get_color(deprecated_color, "Terminal")
 		else:
 			c = _default_theme.get_color(color, "Terminal")
 		_native_terminal.add_color_override(color, c)
 	for font in _default_theme.get_font_list("Terminal"):
 		var f: Font
-		var deprecated_font: String = font.replace("_", " ").capitalize()
-
 		if has_font(font, "Terminal"):
 			f = get_font(font, "Terminal")
-		elif has_font(deprecated_font, "Terminal"):
-			push_warning(
-				(
-					"Font name '%s' is deprecated and will be removed in a future version. Use the name '%s' instead."
-					% [deprecated_font, font]
-				)
-			)
-			f = get_font(deprecated_font, "Terminal")
 		elif has_font("regular", "Terminal"):
 			f = get_font("regular", "Terminal")
 		else:
