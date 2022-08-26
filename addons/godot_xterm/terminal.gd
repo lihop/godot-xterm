@@ -183,7 +183,7 @@ func _update_theme():
 			"Light Black":
 				deprecated_color = "Dark Grey"
 			"Light White":
-				deprecated_color = "Wahite"
+				deprecated_color = "White"
 
 		if has_color(color, "Terminal"):
 			c = get_color(color, "Terminal")
