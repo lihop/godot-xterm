@@ -94,7 +94,7 @@ if env['platform'] == 'linux':
     env['LIBSUFFIX'] = '.a'
 
     env.Append(CCFLAGS=['-fPIC', '-Wwrite-strings'])
-    env.Append(LINKFLAGS=["-Wl,-R'$$ORIGIN'"])
+    env.Append(LINKFLAGS=["-Wl,-R'$$ORIGIN'", '-static-libstdc++'])
 
     if env['target'] == 'debug':
         env.Append(CCFLAGS=['-Og', '-g'])
