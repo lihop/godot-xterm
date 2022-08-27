@@ -184,10 +184,19 @@ jobs:
         name: libgodot-xterm-release
         path: addons/godot_xterm/native/bin
     - name: Import assets
-      shell: bash
-      run: godot --editor .github/import_assets.tscn
+      uses: nick-fields/retry@v2
+      with:
+        command: godot --editor .github/import_assets.tscn
+        retry_on: error
+        timeout_minutes: 5
+        max_attempts: 6
     - name: Export HTML5
-      run: godot --no-window --export HTML5
+      uses: nick-fields/retry@v2
+      with:
+        command: godot --no-window --export HTML5
+        retry_on: error
+        timeout_minutes: 5
+        max_attempts: 6
     - name: NPM cache
       uses: c-hive/gha-npm-cache@v1
       with:
