@@ -15,7 +15,7 @@ env:
 jobs:
   build_docker:
     name: 'Build Docker (linux, ${{ matrix.target }}, ${{ matrix.bits }})'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -69,11 +69,11 @@ jobs:
         bits: [ 64, 32 ]
         include:
           - platform: javascript
-            os: ubuntu-latest
+            os: ubuntu-22.04
           - platform: osx
-            os: macos-latest
+            os: macos-12
           - platform: windows
-            os: windows-latest
+            os: windows-2022
         exclude:
           - platform: javascript
             bits: 64 # Currently only wasm32 is supported.
@@ -108,14 +108,14 @@ jobs:
         if: ${{ matrix.platform == 'javascript' }}
         run: sudo apt-get update && sudo apt-get install -y scons gcc-multilib g++-multilib
       - name: Install additional macos build dependencies
-        if: ${{ matrix.os == 'macos-latest' }}
+        if: ${{ matrix.os == 'macos-12' }}
         run: brew install scons
       - name: Install additional windows build dependencies
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-2022' }}
         run: python -m pip install scons
       - name: Setup MSVC command prompt
         uses: ilammy/msvc-dev-cmd@v1
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-2022' }}
         with:
           arch: win${{ matrix.bits }}
       - name: Build godot-cpp bindings
@@ -128,7 +128,7 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v1
         with:
           cmake-version: '3.23.2'
-          use-32bit: ${{ matrix.bits == 32 && matrix.os == 'windows-latest' }}
+          use-32bit: ${{ matrix.bits == 32 && matrix.os == 'windows-2022' }}
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         shell: bash
@@ -145,7 +145,7 @@ jobs:
           else
             args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"
           fi
-          if [ "$BITS" -eq 32 -a "$OS" == "windows-latest" ]; then
+          if [ "$BITS" -eq 32 -a "$OS" == "windows-2022" ]; then
             cmake -G "Visual Studio 17 2022" -A Win32 -S $(pwd) -B "build" $args
           else
             mkdir build || true
@@ -171,7 +171,7 @@ jobs:
   html5_export:
     name: 'HTML5 Export'
     needs: [ build_docker, build_native ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - name: Setup Godot
@@ -229,11 +229,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-latest, macos-latest, ubuntu-latest ]
+        os: [ windows-2022, macos-12, ubuntu-22.04 ]
         bits: [ 64, 32 ]
         godot_version: [ 'v3.4.5-stable', 'v3.5-stable' ]
         exclude:
-          - os: macos-latest
+          - os: macos-12
             bits: 32
     steps:
       - uses: actions/checkout@v2
@@ -256,7 +256,7 @@ jobs:
           timeout_minutes: 5
           max_attempts: 6
       - name: Run unix tests
-        if: ${{ matrix.os != 'windows-latest' }}
+        if: ${{ matrix.os != 'windows-2022' }}
         uses: nick-fields/retry@v2
         with:
           command: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
@@ -268,7 +268,7 @@ jobs:
   # Git archive should only include addons/godot_xterm directory.
   check-archive:
     name: 'Check Archive'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
       with:
@@ -302,7 +302,7 @@ jobs:
 
   check-code-format:
     name: 'Check Code Format'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
