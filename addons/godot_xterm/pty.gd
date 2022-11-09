@@ -23,11 +23,12 @@ const Signal = _PTYUnix.Signal
 signal data_received(data)
 signal exited(exit_code, signum)
 
-@export var terminal_path: NodePath := NodePath() :
+@export var terminal_path: NodePath = NodePath() :
 	get:
-		return terminal_path # TODOConverter40 Non existent get function
-	set(mod_value):
-		mod_value  # TODOConverter40 Copy here content of set_terminal_path
+		return terminal_path
+	set(value):
+		terminal_path = value
+		_set_terminal(get_node_or_null(terminal_path))
 
 var _terminal: _Terminal = null :
 	get:
@@ -36,26 +37,26 @@ var _terminal: _Terminal = null :
 		mod_value  # TODOConverter40 Copy here content of _set_terminal
 
 # The column size in characters.
-@export var cols: int: int = DEFAULT_COLS :
+@export var cols: int = DEFAULT_COLS :
 	get:
 		return cols # TODOConverter40 Copy here content of get_cols
 	set(mod_value):
 		mod_value  # TODOConverter40 Copy here content of set_cols
 
 # The row size in characters.
-@export var rows: int: int = DEFAULT_ROWS :
+@export var rows: int = DEFAULT_ROWS :
 	get:
 		return rows # TODOConverter40 Copy here content of get_rows
 	set(mod_value):
 		mod_value  # TODOConverter40 Copy here content of set_rows
 
 # Environment to be set for the child program.
-@export var env: Dictionary := DEFAULT_ENV
+@export var env: Dictionary = DEFAULT_ENV
 
 # If true the environment variables in the env Dictionary will be merged with
 # the environment variables of the operating system (e.g. printenv), with the
 # former taking precedence in the case of conflicts.
-@export var use_os_env: bool := true
+@export var use_os_env: bool = true
 
 var _cols := DEFAULT_COLS
 var _rows := DEFAULT_ROWS
@@ -95,12 +96,7 @@ func set_rows(value: int):
 
 func get_rows() -> int:
 	return _rows
-
-
-func set_terminal_path(value := NodePath()):
-	terminal_path = value
-	_set_terminal(get_node_or_null(terminal_path))
-
+	
 
 func _set_terminal(value: _Terminal):
 	if _terminal == value:

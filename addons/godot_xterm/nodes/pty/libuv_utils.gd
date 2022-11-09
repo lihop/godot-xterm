@@ -6,7 +6,7 @@ extends Object
 # GDNative does not currently support registering static functions so we fake it.
 # Only the static functions of this class should be called.
 
-const LibuvUtils := preload("./libuv_utils.gdns")
+const LibuvUtils = preload("./libuv_utils.gdns")
 
 
 static func get_os_environ() -> Dictionary:

@@ -60,10 +60,12 @@ func _on_Terminal_key_pressed(_data, event: InputEventKey):
 				_tput.sgr0()
 				prompt("\r\n>> ")
 			else:
-				var json = JavaScript.eval("JSON.stringify(%s)" % line, true)
-				_tput.setaf(TPut.ANSIColor.magenta)
-				terminal.write(str(json))
-				_tput.sgr0()
+				# TODO: godot4
+				pass
+#				var json = JavaScript.eval("JSON.stringify(%s)" % line, true)
+#				_tput.setaf(TPut.ANSIColor.magenta)
+#				terminal.write(str(json))
+#				_tput.sgr0()
 
 			line = ""
 			#_tput.srg0()

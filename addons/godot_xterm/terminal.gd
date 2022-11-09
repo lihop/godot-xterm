@@ -76,17 +76,15 @@ func get_rows() -> int:
 
 
 func write(data) -> void:
-	assert(
-		data is PackedByteArray or data is String,
-		"Invalid type for argument 'data'. Should be of type PackedByteArray or String."
-	)
+	# "Invalid type for argument 'data'. Should be of type PackedByteArray or String."
+	assert(data is PackedByteArray or data is String)
 
 	# Will be cleared when _flush() is called after RenderingServer emits the "frame_pre_draw" signal.
 	_buffer.push_back(data)
 
 	# Ensure redraw is requested if terminal is visible.
 	if visible:
-		update()
+		queue_redraw()
 
 
 func _flush():
@@ -122,7 +120,7 @@ func _ready():
 	_viewport.size = size
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 
-	_screen.set_anchors_preset(PRESET_WIDE)
+	_screen.set_anchors_preset(PRESET_VCENTER_WIDE)
 	_screen.texture = _viewport.get_texture()
 
 	_native_terminal.connect("bell",Callable(self,"_on_bell"))
@@ -151,16 +149,16 @@ func _update_theme():
 	for color in _default_theme.get_color_list("Terminal"):
 		var c: Color
 		if has_theme_color(color, "Terminal"):
-			c = get_color(color, "Terminal")
+			c = get_theme_color(color, "Terminal")
 		else:
 			c = _default_theme.get_color(color, "Terminal")
 		_native_terminal.add_theme_color_override(color, c)
 	for font in _default_theme.get_font_list("Terminal"):
 		var f: Font
 		if has_theme_font(font, "Terminal"):
-			f = get_font(font, "Terminal")
+			f = get_theme_font(font, "Terminal")
 		elif has_theme_font("regular", "Terminal"):
-			f = get_font("regular", "Terminal")
+			f = get_theme_font("regular", "Terminal")
 		else:
 			if _default_theme.has_theme_font(font, "Terminal"):
 				f = _default_theme.get_font(font, "Terminal")
@@ -184,7 +182,7 @@ func _gui_input(event):
 		# Return to bottom of scrollback buffer if we scrolled up. Ignore modifier
 		# keys pressed in isolation or if Ctrl+Shift modifier keys are pressed.
 		if (
-			not event.scancode in [KEY_ALT, KEY_SHIFT, KEY_CTRL, KEY_META, KEY_MASK_CMD]
+			not event.scancode in [KEY_ALT, KEY_SHIFT, KEY_CTRL, KEY_META, KEY_MASK_CMD_OR_CTRL]
 			and not (event.control and event.shift)
 		):
 			_native_terminal.sb_reset()
@@ -247,7 +245,8 @@ func _on_selection_held() -> void:
 	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or _selecting_mode == SelectionMode.NONE:
 		if copy_on_selection:
 			var selection = _native_terminal.copy_selection()
-			OS.set_clipboard(selection)
+			# TODO:godot4
+			# OS.set_clipboard(selection)
 		_selection_timer.stop()
 		return
 

@@ -37,11 +37,9 @@ class ANSIColor:
 	const bright_white = {fg = 97, panel = 107}
 
 	func _init():
-		assert(
-			false,
-			"ANSIColor is an abstract class. You should only use the color constants (e.g. ANSIColor.black)."
-		)
-
+		# "ANSIColor is an abstract class. You should only use the color constants (e.g. ANSIColor.black)."
+		assert(false)
+		
 
 var terminal
 
