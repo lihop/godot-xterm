@@ -3,7 +3,7 @@
 # Copyright (c) 2016, Daniel Imms (MIT License).
 # Copyright (c) 2018, Microsoft Corporation (MIT License).
 # Copyright (c) 2021-2022, Leroy Hopson (MIT License).
-tool
+@tool
 extends "../pty_native.gd"
 
 const LibuvUtils := preload("../libuv_utils.gd")
@@ -18,7 +18,7 @@ const DEFAULT_ENV := {TERM = DEFAULT_NAME, COLORTERM = "truecolor"}
 const FALLBACK_FILE = "sh"
 
 ## Default messages to indicate PAUSE/RESUME for automatic flow control.
-## To avoid conflicts with rebound XON/XOFF control codes (such as on-my-zsh),
+## To avoid conflicts with rebound XON/XOFF control codes (such as checked-my-zsh),
 ## the sequences can be customized in IPtyForkOptions.
 #const FLOW_CONTROL_PAUSE = char(0x13) # defaults to XOFF
 #const FLOW_CONTROL_RESUME = char(0x11) # defaults to XON
@@ -35,7 +35,7 @@ enum Signal {
 	SIGFPE = 8,  # Erroneous arithmetic operation
 	SIGKILL = 9,  # Kill (cannot be caught or ignored)
 	SIGSEGV = 11,  # Invalid memory reference
-	SIGPIPE = 13,  # Write on a pipe with no one to read it
+	SIGPIPE = 13,  # Write checked a pipe with no one to read it
 	SIGALRM = 14,  # Alarm clock
 	SIGTERM = 15,  # Termination signal
 }
@@ -62,18 +62,18 @@ var uid: int
 var gid: int
 
 var _fd: int = -1
-var _exit_cb: FuncRef
+var _exit_cb: Callable
 
 
 # Writes data to the socket.
 # data: The data to write.
 func write(data) -> void:
 	assert(
-		data is PoolByteArray or data is String,
-		"Invalid type for argument 'data'. Should be of type PoolByteArray or String"
+		data is PackedByteArray or data is String,
+		"Invalid type for argument 'data'. Should be of type PackedByteArray or String"
 	)
 	if _pipe:
-		_pipe.write(data if data is PoolByteArray else data.to_utf8())
+		_pipe.write(data if data is PackedByteArray else data.to_utf8_buffer())
 
 
 func resize(cols: int, rows: int) -> void:
@@ -88,14 +88,14 @@ func kill(signum: int = Signal.SIGHUP) -> void:
 		LibuvUtils.kill(_pid, signum)
 
 
-func _parse_env(env: Dictionary = {}) -> PoolStringArray:
+func _parse_env(env: Dictionary = {}) -> PackedStringArray:
 	var keys := env.keys()
-	var pairs := PoolStringArray()
+	var pairs := PackedStringArray()
 
 	for key in keys:
 		var value = env[key]
 		var valid = key is String and value is String
-		assert(valid, "Env key/value pairs must be of type String/String.")
+		assert(valid) #,"Env key/value pairs must be of type String/String.")
 
 		if not valid:
 			push_warning("Skipping invalid env key/value pair.")
@@ -113,7 +113,7 @@ func _process(_delta):
 
 func fork(
 	file: String = OS.get_environment("SHELL"),
-	args: PoolStringArray = PoolStringArray(),
+	args: PackedStringArray = PackedStringArray(),
 	cwd = LibuvUtils.get_cwd(),
 	cols: int = DEFAULT_COLS,
 	rows: int = DEFAULT_ROWS,
@@ -122,18 +122,18 @@ func fork(
 	utf8 = true
 ) -> int:
 	# File.
-	if file.empty():
+	if file.is_empty():
 		file = FALLBACK_FILE
 
 	# Environment variables.
-	# If we are using OS env vars, sanitize them to remove variables that might confuse our terminal.
+	# If we are using OS env vars, sanitize them to remove_at variables that might confuse our terminal.
 	var final_env := _sanitize_env(LibuvUtils.get_os_environ()) if use_os_env else {}
 	for key in env.keys():
 		final_env[key] = env[key]
-	var parsed_env: PoolStringArray = _parse_env(final_env)
+	var parsed_env: PackedStringArray = _parse_env(final_env)
 
 	# Exit callback.
-	_exit_cb = FuncRef.new()
+	_exit_cb = Callable.new()
 	_exit_cb.set_instance(self)
 	_exit_cb.set_function("_on_exit")
 
@@ -157,7 +157,7 @@ func fork(
 	_pipe.open(_fd)
 
 	# Must connect to signal AFTER opening, otherwise we will get error ENOTSOCK.
-	_pipe.connect("data_received", self, "_on_pipe_data_received")
+	_pipe.connect("data_received",Callable(self,"_on_pipe_data_received"))
 
 	return OK
 

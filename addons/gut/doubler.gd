@@ -120,7 +120,7 @@ class ObjectInfo:
 	var _singleton_instance = null
 	var _singleton_name = null
 
-	func _init(path, subpath = null):
+	func _init(path,subpath = null):
 		_path = path
 		if subpath != null:
 			_subpaths = Array(subpath.split("/"))
@@ -154,7 +154,7 @@ class ObjectInfo:
 		return _path
 
 	func get_subpath():
-		return PoolStringArray(_subpaths).join("/")
+		return "/".join(PackedStringArray(_subpaths))
 
 	func has_subpath():
 		return _subpaths.size() != 0
@@ -173,7 +173,7 @@ class ObjectInfo:
 		var inst = native_class.new()
 		_native_class_name = inst.get_class()
 		_path = _native_class_name
-		if !inst is Reference:
+		if !inst is RefCounted:
 			inst.free()
 
 	func get_native_class_name():
@@ -195,7 +195,7 @@ class ObjectInfo:
 	func get_extends_text():
 		var extend = null
 		if is_singleton():
-			extend = str("# Double of singleton ", _singleton_name, ", base class is Reference")
+			extend = str("# Double of singleton ", _singleton_name, ", base class is RefCounted")
 		elif is_native():
 			var native = get_native_class_name()
 			if native.begins_with("_"):
@@ -214,8 +214,8 @@ class ObjectInfo:
 			return ""
 
 		# do not include constants defined in the super class which for
-		# singletons stubs is Reference.
-		var exclude_constants = Array(ClassDB.class_get_integer_constant_list("Reference"))
+		# singletons stubs is RefCounted.
+		var exclude_constants = Array(ClassDB.class_get_integer_constant_list("RefCounted"))
 		var text = str("# -----\n# ", _singleton_name, " Constants\n# -----\n")
 		var constants = ClassDB.class_get_integer_constant_list(_singleton_name)
 		for c in constants:
@@ -283,17 +283,17 @@ class FileOrString:
 	func open(path, mode):
 		_path = path
 		if _do_file:
-			return .open(path, mode)
+			return super.open(path, mode)
 		else:
 			return OK
 
 	func close():
 		if _do_file:
-			return .close()
+			return super.close()
 
 	func store_string(s):
 		if _do_file:
-			.store_string(s)
+			super.store_string(s)
 		_contents += s
 
 	func get_contents():
@@ -326,7 +326,7 @@ class PackedSceneDouble:
 		_script = obj
 
 	func instance(edit_state = 0):
-		var inst = _scene.instance(edit_state)
+		var inst = _scene.instantiate(edit_state)
 		if _script != null:
 			inst.set_script(_script)
 		return inst
@@ -462,7 +462,7 @@ func _double_scene_and_script(scene_info):
 	var to_return = PackedSceneDouble.new()
 	to_return.load_scene(scene_info.get_path())
 
-	var inst = load(scene_info.get_path()).instance()
+	var inst = load(scene_info.get_path()).instantiate()
 	var script_path = null
 	if inst.get_script():
 		script_path = inst.get_script().get_path()
@@ -484,7 +484,7 @@ func _get_methods(object_info):
 	var script_methods = ScriptMethods.new()
 	var methods = obj.get_method_list()
 
-	if !object_info.is_singleton() and !(obj is Reference):
+	if !object_info.is_singleton() and !(obj is RefCounted):
 		obj.free()
 
 	# first pass is for local methods only
@@ -723,13 +723,13 @@ func clear_output_directory():
 		var d = Directory.new()
 		var result = d.open(_output_dir)
 		# BIG GOTCHA HERE.  If it cannot open the dir w/ erro 31, then the
-		# directory becomes res:// and things go on normally and gut clears out
+		# directory becomes res:// and things go checked normally and gut clears out
 		# out res:// which is SUPER BAD.
 		if result == OK:
-			d.list_dir_begin(true)
+			d.list_dir_begin() # TODOGODOT4 fill missing arguments https://github.com/godotengine/godot/pull/40547
 			var f = d.get_next()
 			while f != "":
-				d.remove(f)
+				d.remove_at(f)
 				f = d.get_next()
 				did = true
 	return did
@@ -739,7 +739,7 @@ func delete_output_directory():
 	var did = clear_output_directory()
 	if did:
 		var d = Directory.new()
-		d.remove(_output_dir)
+		d.remove_at(_output_dir)
 
 
 func add_ignored_method(path, method_name):

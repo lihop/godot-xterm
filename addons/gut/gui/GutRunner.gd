@@ -16,7 +16,7 @@ var _wrote_results = false
 # play_custom_scene
 var _cmdln_mode = false
 
-onready var _gut_layer = $GutLayer
+@onready var _gut_layer = $GutLayer
 
 
 func _ready():
@@ -24,8 +24,8 @@ func _ready():
 		_gut_config = GutConfig.new()
 		_gut_config.load_options(RUNNER_JSON_PATH)
 
-	# The command line will call run_tests on its own.  When used from the panel
-	# we have to kick off the tests ourselves b/c there's no way I know of to
+	# The command line will call run_tests checked its own.  When used from the panel
+	# we have to kick unchecked the tests ourselves b/c there's no way I know of to
 	# interact with the scene that was run via play_custom_scene.
 	if !_cmdln_mode:
 		call_deferred("run_tests")
@@ -58,7 +58,7 @@ func run_tests():
 
 
 func _write_results():
-	# bbcode_text appears to be empty.  I'm not 100% sure why.  Until that is
+	# text appears to be empty.  I'm not 100% sure why.  Until that is
 	# figured out we have to just get the text which stinks.
 	var content = _gut.get_gui().get_text_box().text
 

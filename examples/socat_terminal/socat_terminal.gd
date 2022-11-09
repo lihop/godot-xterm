@@ -1,9 +1,9 @@
 extends "res://addons/godot_xterm/terminal.gd"
 
-export(String) var exec_path := "bash"
-export(String) var socat_path := "socat"  # E.g. /usr/bin/socat
-export(int) var port := 2023
-export(bool) var verbose := false
+@export var exec_path: String := "bash"
+@export var socat_path: String := "socat"  # E.g. /usr/bin/socat
+@export var port: int := 2023
+@export var verbose: bool := false
 
 var _timeout = 30
 var _pid: int
@@ -31,7 +31,7 @@ func _process(delta):
 
 		StreamPeerTCP.STATUS_CONNECTED:
 			var avail = _stream.get_available_bytes()
-			var data = PoolByteArray()
+			var data = PackedByteArray()
 			for i in range(avail):
 				data.append(_stream.get_u8())
 			call_deferred("write", data)

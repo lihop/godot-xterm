@@ -6,4 +6,4 @@ func get_class() -> String:
 
 
 func is_class(name) -> bool:
-	return name == get_class() or .is_class(name)
+	return name == get_class() or super.is_class(name)

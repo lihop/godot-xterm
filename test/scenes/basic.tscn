@@ -4,16 +4,16 @@
 [ext_resource path="res://test/scenes/basic.gd" type="Script" id=3]
 
 [node name="BasicNewTerm" type="Control"]
-margin_right = 43.0
-margin_bottom = 43.0
+offset_right = 43.0
+offset_bottom = 43.0
 script = ExtResource( 3 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ColorRect" type="ColorRect" parent="."]
-margin_right = 40.0
-margin_bottom = 40.0
+offset_right = 40.0
+offset_bottom = 40.0
 color = Color( 0, 1, 0, 1 )
 __meta__ = {
 "_edit_use_anchors_": false

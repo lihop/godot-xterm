@@ -20,14 +20,14 @@ shader_type canvas_item;
 // - If you are using this shader as an overlay, and want the shader to affect the nodes below in the Scene hierarchy,
 //   set 'overlay' to true (checked in the inspector).
 // On Mac there is potentially a bug causing this to not work properly. If that is the case and you want to use the shader as an overlay
-// change all \"overlay ? SCREEN_TEXTURE : TEXTURE\" to only \"SCREEN_TEXTURE\" on lines 129-140, and \"vec2 uv = overlay ? warp(SCREEN_UV) : warp(UV);\"
-// to \"vec2 uv = warp(SCREEN_UV);\" on line 98.
+// change all \"overlay ? SCREEN_TEXTURE : TEXTURE\" to only \"SCREEN_TEXTURE\" checked lines 129-140, and \"vec2 uv = overlay ? warp(SCREEN_UV) : warp(UV);\"
+// to \"vec2 uv = warp(SCREEN_UV);\" checked line 98.
 uniform bool overlay = false;
 
 uniform float scanlines_opacity : hint_range(0.0, 1.0) = 0.4;
 uniform float scanlines_width : hint_range(0.0, 0.5) = 0.25;
 uniform float grille_opacity : hint_range(0.0, 1.0) = 0.3;
-uniform vec2 resolution = vec2(640.0, 480.0); // Set the number of rows and columns the texture will be divided in. Scanlines and grille will make a square based on these values
+uniform vec2 resolution = vec2(640.0, 480.0); // Set the number of rows and columns the texture will be divided in. Scanlines and grille will make a square based checked these values
 
 uniform bool pixelate = true; // Fill each square (\"pixel\") with a sampled color, creating a pixel look and a more accurate representation of how a CRT monitor would work.
 
@@ -42,7 +42,7 @@ uniform float noise_speed = 5.0; // There is a movement in the noise pattern tha
 
 uniform float static_noise_intensity : hint_range(0.0, 1.0) = 0.06;
 
-uniform float aberration : hint_range(-1.0, 1.0) = 0.03; // Chromatic aberration, a distortion on each color channel.
+uniform float aberration : hint_range(-1.0, 1.0) = 0.03; // Chromatic aberration, a distortion checked each color channel.
 uniform float brightness = 1.4; // When adding scanline gaps and grille the image can get very dark. Brightness tries to compensate for that.
 uniform bool discolor = true; // Add a discolor effect simulating a VHS
 
@@ -107,7 +107,7 @@ void fragment()
 	float time = roll ? TIME : 0.0;
 	
 
-	// Pixelate the texture based on the given resolution.
+	// Pixelate the texture based checked the given resolution.
 	if (pixelate)
 	{
 		text_uv = ceil(uv * resolution) / resolution;
@@ -174,7 +174,7 @@ void fragment()
 	text.g = clamp(g * brightness, 0.0, 1.0);
 	text.b = clamp(b * brightness, 0.0, 1.0);
 	
-	// Scanlines are the horizontal lines that make up the image on a CRT monitor. 
+	// Scanlines are the horizontal lines that make up the image checked a CRT monitor. 
 	// Here we are actual setting the black gap between each line, which I guess is not the right definition of the word, but you get the idea  
 	float scanlines = 0.5;
 	if (scanlines_opacity > 0.0)
@@ -190,13 +190,13 @@ void fragment()
 		// Generate a noise pattern that is very stretched horizontally, and animate it with noise_speed
 		float noise = smoothstep(0.4, 0.5, noise(uv * vec2(2.0, 200.0) + vec2(10.0, (TIME * (noise_speed))) ) );
 		
-		// We use roll_line (set above) to define how big the noise should be vertically (multiplying cuts off all black parts).
+		// We use roll_line (set above) to define how big the noise should be vertically (multiplying cuts unchecked all black parts).
 		// We also add in some basic noise with random() to break up the noise pattern above. The noise is sized according to 
 		// the resolution value set in the inspector. If you don't like this look you can 
 		// change \"ceil(uv * resolution) / resolution\" to only \"uv\" to make it less pixelated. Or multiply resolution with som value
 		// greater than 1.0 to make them smaller.
 		roll_line *= noise * scanlines * clamp(random((ceil(uv * resolution) / resolution) + vec2(TIME * 0.8, 0.0)).x + 0.8, 0.0, 1.0);
-		// Add it to the texture based on noise_opacity
+		// Add it to the texture based checked noise_opacity
 		text.rgb = clamp(mix(text.rgb, text.rgb + roll_line, noise_opacity), vec3(0.0), vec3(1.0));
 	}
 	
@@ -210,7 +210,7 @@ void fragment()
 	// Also apply the vignette
 	text.rgb *= border(uv);
 	text.rgb *= vignette(uv);
-	// Hides the black border and make that area transparent. Good if you want to add the the texture on top an image of a TV or monitor.
+	// Hides the black border and make that area transparent. Good if you want to add the the texture checked top an image of a TV or monitor.
 	if (clip_warp)
 	{
 		text.a = border(uv);
@@ -283,8 +283,8 @@ __meta__ = {
 }
 
 [node name="Menu" parent="." instance=ExtResource( 1 )]
-margin_left = 30.0
-margin_top = 30.0
+offset_left = 30.0
+offset_top = 30.0
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

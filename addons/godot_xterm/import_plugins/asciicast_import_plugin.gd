@@ -1,34 +1,34 @@
-tool
+@tool
 extends EditorImportPlugin
 
 const Asciicast = preload("../resources/asciicast.gd")
 
 
-func get_importer_name():
+func _get_importer_name():
 	return "godot_xterm"
 
 
-func get_visible_name():
+func _get_visible_name():
 	return "asciicast"
 
 
-func get_recognized_extensions():
+func _get_recognized_extensions():
 	return ["cast"]
 
 
-func get_save_extension():
+func _get_save_extension():
 	return "res"
 
 
-func get_resource_type():
+func _get_resource_type():
 	return "Animation"
 
 
-func get_import_options(preset):
+func _get_import_options(preset):
 	return []
 
 
-func get_preset_count():
+func _get_preset_count():
 	return 0
 
 
@@ -45,29 +45,31 @@ func import(source_file, save_path, options, r_platform_variant, r_gen_files):
 	asciicast.add_track(Animation.TYPE_METHOD, 0)
 	asciicast.track_set_path(0, ".")
 
-	var frame = {"time": 0.0, "data": {"method": "write", "args": [PoolByteArray()]}}
+	var frame = {"time": 0.0, "data": {"method": "write", "args": [PackedByteArray()]}}
 
 	while not file.eof_reached():
 		var line = file.get_line()
 		if line == "":
 			continue
 
-		var p = JSON.parse(line)
+		var test_json_conv = JSON.new()
+		test_json_conv.parse(line)
+		var p = test_json_conv.get_data()
 		if typeof(p.result) != TYPE_ARRAY:
 			continue
 
 		var event_type: String = p.result[1]
-		var event_data: PoolByteArray = p.result[2].to_utf8()
+		var event_data: PackedByteArray = p.result[2].to_utf8_buffer()
 
 		# Asciicast recordings have a resolution of 0.000001, however animation
 		# track keys only have a resolution of 0.01, therefore we must combine
 		# events that would occur in the same keyframe, otherwise only the last
 		# event is inserted and the previous events are overwritten.
-		var time = stepify(p.result[0], 0.01)
+		var time = snapped(p.result[0], 0.01)
 
 		if event_type == "o":
 			if time == frame.time:
-				asciicast.track_remove_key_at_position(0, time)
+				asciicast.track_remove_key_at_time(0, time)
 				frame.data.args[0] = frame.data.args[0] + event_data
 			else:
 				frame.time = time
@@ -77,4 +79,4 @@ func import(source_file, save_path, options, r_platform_variant, r_gen_files):
 
 	asciicast.length = frame.time
 
-	return ResourceSaver.save("%s.%s" % [save_path, get_save_extension()], asciicast)
+	return ResourceSaver.save("%s.%s" % [save_path, _get_save_extension()], asciicast)

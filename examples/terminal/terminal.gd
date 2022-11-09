@@ -1,6 +1,6 @@
 extends "res://addons/godot_xterm/terminal.gd"
 
-onready var pty = $PTY
+@onready var pty = $PTY
 
 
 func _ready():

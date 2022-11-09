@@ -1,4 +1,4 @@
-tool
+@tool
 extends "res://addons/godot_xterm/terminal.gd"
 
 signal theme_changed
@@ -27,7 +27,7 @@ func _ready():
 
 
 func _notification(what):
-	._notification(what)
+	super._notification(what)
 	match what:
 		NOTIFICATION_THEME_CHANGED:
 			call_deferred("emit_signal", "theme_changed")

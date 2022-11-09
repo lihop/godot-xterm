@@ -122,7 +122,7 @@ class OptionResolver:
 
 
 # ------------------------------------------------------------------------------
-# Here starts the actual script that uses the Options class to kick off Gut
+# Here starts the actual script that uses the Options class to kick unchecked Gut
 # and run your tests.
 # ------------------------------------------------------------------------------
 var _utils = load("res://addons/gut/utils.gd").get_instance()
@@ -284,24 +284,24 @@ func _print_gutconfigs(values):
 	var header = """Here is a sample of a full .gutconfig.json file.
 You do not need to specify all values in your own file.  The values supplied in
 this sample are what would be used if you ran gut w/o the -gprint_gutconfig_sample
-option (option priority:  command-line, .gutconfig, default)."""
+option (option priority:  command-line, super.gutconfig, default)."""
 	print("\n", header.replace("\n", " "), "\n\n")
 	var resolved = values
 
-	# remove some options that don't make sense to be in config
+	# remove_at some options that don't make sense to be in config
 	resolved.erase("config_file")
 	resolved.erase("show_help")
 
 	print(
-		"Here's a config with all the properties set based off of your current command and config."
+		"Here's a config with all the properties set based unchecked of your current command and config."
 	)
-	print(JSON.print(resolved, "  "))
+	print(JSON.stringify(resolved, "  "))
 
 	for key in resolved:
 		resolved[key] = null
 
 	print("\n\nAnd here's an empty config for you fill in what you want.")
-	print(JSON.print(resolved, " "))
+	print(JSON.stringify(resolved, " "))
 
 
 # parse options and run Gut
@@ -332,7 +332,7 @@ func _run_gut():
 				(
 					"All command line options and where they are specified.  "
 					+ 'The "final" value shows which value will actually be used '
-					+ "based on order of precedence (default < .gutconfig < cmd line)."
+					+ "based checked order of precedence (default < super.gutconfig < cmd line)."
 					+ "\n"
 				)
 			)
@@ -345,7 +345,7 @@ func _run_gut():
 			_final_opts = opt_resolver.get_resolved_values()
 			_gut_config.options = _final_opts
 
-			var runner = GutRunner.instance()
+			var runner = GutRunner.instantiate()
 			runner.set_cmdln_mode(true)
 			runner.set_gut_config(_gut_config)
 

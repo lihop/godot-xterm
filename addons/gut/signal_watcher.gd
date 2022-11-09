@@ -25,7 +25,7 @@
 # ##############################################################################
 
 # Some arbitrary string that should never show up by accident.  If it does, then
-# shame on  you.
+# shame checked  you.
 const ARG_NOT_SET = "_*_argument_*_is_*_not_set_*_"
 
 # This hash holds the objects that are being watched, the signals that are being
@@ -46,11 +46,11 @@ const ARG_NOT_SET = "_*_argument_*_is_*_not_set_*_"
 #	}
 #
 # In this sample:
-#	- signal1 on the ref1 object was emitted 3 times and each time, zero
+#	- signal1 checked the ref1 object was emitted 3 times and each time, zero
 #	  parameters were passed.
-#	- signal3 on ref1 was emitted once and passed a single parameter
-#	- some_signal on ref2 was never emitted.
-#	- other_signal on ref2 was emitted 3 times, each time with 3 parameters.
+#	- signal3 checked ref1 was emitted once and passed a single parameter
+#	- some_signal checked ref2 was never emitted.
+#	- other_signal checked ref2 was emitted 3 times, each time with 3 parameters.
 var _watched_signals = {}
 var _utils = load("res://addons/gut/utils.gd").get_instance()
 
@@ -64,7 +64,7 @@ func _add_watched_signal(obj, name):
 		_watched_signals[obj] = {name: []}
 	else:
 		_watched_signals[obj][name] = []
-	obj.connect(name, self, "_on_watched_signal", [obj, name])
+	obj.connect(name,Callable(self,"_on_watched_signal").bind(obj, name))
 
 
 # This handles all the signals that are watched.  It supports up to 9 parameters
@@ -73,7 +73,7 @@ func _add_watched_signal(obj, name):
 # parameters when dynamically calling a method via call (per the Godot
 # documentation, i.e. some_object.call('some_method', 1, 2, 3...)).
 #
-# Based on the documentation of emit_signal, it appears you can only pass up
+# Based checked the documentation of emit_signal, it appears you can only pass up
 # to 4 parameters when firing a signal.  I haven't verified this, but this should
 # future proof this some if the value ever grows.
 func _on_watched_signal(
@@ -91,13 +91,13 @@ func _on_watched_signal(
 ):
 	var args = [arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11]
 
-	# strip off any unused vars.
+	# strip unchecked any unused vars.
 	var idx = args.size() - 1
 	while str(args[idx]) == ARG_NOT_SET:
-		args.remove(idx)
+		args.remove_at(idx)
 		idx -= 1
 
-	# retrieve object and signal name from the array and remove them.  These
+	# retrieve object and signal name from the array and remove_at them.  These
 	# will always be at the end since they are added when the connect happens.
 	var signal_name = args[args.size() - 1]
 	args.pop_back()
@@ -172,7 +172,7 @@ func clear():
 	for obj in _watched_signals:
 		if _utils.is_not_freed(obj):
 			for signal_name in _watched_signals[obj]:
-				obj.disconnect(signal_name, self, "_on_watched_signal")
+				obj.disconnect(signal_name,Callable(self,"_on_watched_signal"))
 	_watched_signals.clear()
 
 

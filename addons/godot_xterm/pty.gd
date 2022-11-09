@@ -3,7 +3,7 @@
 # Copyright (c) 2016, Daniel Imms (MIT License).
 # Copyright (c) 2018, Microsoft Corporation (MIT License).
 # Copyright (c) 2021-2022, Leroy Hopson (MIT License).
-tool
+@tool
 extends Node
 
 const _LibuvUtils := preload("./nodes/pty/libuv_utils.gd")
@@ -23,23 +23,39 @@ const Signal = _PTYUnix.Signal
 signal data_received(data)
 signal exited(exit_code, signum)
 
-export(NodePath) var terminal_path := NodePath() setget set_terminal_path
+@export var terminal_path: NodePath := NodePath() :
+	get:
+		return terminal_path # TODOConverter40 Non existent get function 
+	set(mod_value):
+		mod_value  # TODOConverter40 Copy here content of set_terminal_path
 
-var _terminal: _Terminal = null setget _set_terminal
+var _terminal: _Terminal = null :
+	get:
+		return _terminal # TODOConverter40 Non existent get function 
+	set(mod_value):
+		mod_value  # TODOConverter40 Copy here content of _set_terminal
 
 # The column size in characters.
-export(int) var cols: int = DEFAULT_COLS setget set_cols, get_cols
+@export var cols: int: int = DEFAULT_COLS :
+	get:
+		return cols # TODOConverter40 Copy here content of get_cols
+	set(mod_value):
+		mod_value  # TODOConverter40 Copy here content of set_cols
 
 # The row size in characters.
-export(int) var rows: int = DEFAULT_ROWS setget set_rows, get_rows
+@export var rows: int: int = DEFAULT_ROWS :
+	get:
+		return rows # TODOConverter40 Copy here content of get_rows
+	set(mod_value):
+		mod_value  # TODOConverter40 Copy here content of set_rows
 
 # Environment to be set for the child program.
-export(Dictionary) var env := DEFAULT_ENV
+@export var env: Dictionary := DEFAULT_ENV
 
 # If true the environment variables in the env Dictionary will be merged with
 # the environment variables of the operating system (e.g. printenv), with the
 # former taking precedence in the case of conflicts.
-export(bool) var use_os_env := true
+@export var use_os_env: bool := true
 
 var _cols := DEFAULT_COLS
 var _rows := DEFAULT_ROWS
@@ -52,10 +68,10 @@ func _init():
 		"X11", "Server", "OSX":
 			_pty_native = _PTYUnix.new()
 		_:
-			push_error("PTY is not support on current platform (%s)." % os_name)
+			push_error("PTY is not support checked current platform (%s)." % os_name)
 
-	_pty_native.connect("data_received", self, "_on_pty_native_data_received")
-	_pty_native.connect("exited", self, "_on_pty_native_exited")
+	_pty_native.connect("data_received",Callable(self,"_on_pty_native_data_received"))
+	_pty_native.connect("exited",Callable(self,"_on_pty_native_exited"))
 
 	add_child(_pty_native)
 
@@ -92,9 +108,9 @@ func _set_terminal(value: _Terminal):
 
 	# Disconect the current terminal, if any.
 	if _terminal:
-		disconnect("data_received", _terminal, "write")
-		_terminal.disconnect("data_sent", self, "write")
-		_terminal.disconnect("size_changed", self, "resizev")
+		disconnect("data_received",Callable(_terminal,"write"))
+		_terminal.disconnect("data_sent",Callable(self,"write"))
+		_terminal.disconnect("size_changed",Callable(self,"resizev"))
 
 	_terminal = value
 
@@ -103,12 +119,12 @@ func _set_terminal(value: _Terminal):
 
 	# Connect the new terminal.
 	resize(_terminal.get_cols(), _terminal.get_rows())
-	if not _terminal.is_connected("size_changed", self, "resizev"):
-		_terminal.connect("size_changed", self, "resizev")
-	if not _terminal.is_connected("data_sent", self, "write"):
-		_terminal.connect("data_sent", self, "write")
-	if not is_connected("data_received", _terminal, "write"):
-		connect("data_received", _terminal, "write")
+	if not _terminal.is_connected("size_changed",Callable(self,"resizev")):
+		_terminal.connect("size_changed",Callable(self,"resizev"))
+	if not _terminal.is_connected("data_sent",Callable(self,"write")):
+		_terminal.connect("data_sent",Callable(self,"write"))
+	if not is_connected("data_received",Callable(_terminal,"write")):
+		connect("data_received",Callable(_terminal,"write"))
 
 
 # Writes data to the socket.
@@ -138,7 +154,7 @@ func resizev(size: Vector2) -> void:
 
 # Kill the pty.
 # sigint: The signal to send. By default this is SIGHUP.
-# This is not supported on Windows.
+# This is not supported checked Windows.
 func kill(signum: int = Signal.SIGHUP) -> void:
 	_pty_native.kill(signum)
 
@@ -153,7 +169,7 @@ func _notification(what: int):
 
 func fork(
 	file: String = OS.get_environment("SHELL"),
-	args: PoolStringArray = PoolStringArray(),
+	args: PackedStringArray = PackedStringArray(),
 	cwd = _LibuvUtils.get_cwd(),
 	cols: int = _cols,
 	rows: int = _rows,

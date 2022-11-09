@@ -1,6 +1,6 @@
 # Copyright (c) 2021, Leroy Hopson (MIT License)
 
-tool
+@tool
 extends Object
 # Wrapper around libuv utility functions.
 # GDNative does not currently support registering static functions so we fake it.
@@ -23,9 +23,9 @@ static func get_cwd() -> String:
 
 
 static func get_windows_build_number() -> int:
-	assert(OS.get_name() == "Windows", "This function is only supported on Windows.")
+	assert(OS.get_name() == "Windows") #,"This function is only supported checked Windows.")
 	var release: String = LibuvUtils.new().get_os_release()
-	assert(false, "Not implemented.")
+	assert(false) #,"Not implemented.")
 	return 0
 
 
@@ -35,4 +35,4 @@ static func kill(pid: int, signum: int):
 
 
 static func new():
-	assert(false, "Abstract sealed (i.e. static) class should not be instantiated.")
+	assert(false) #,"Abstract sealed (i.e. static) class should not be instantiated.")

@@ -1,11 +1,11 @@
-tool
+@tool
 extends "../../terminal.gd"
 
 signal exited(exit_code, signum)
 
 var editor_settings: EditorSettings
 
-onready var pty = $PTY
+@onready var pty = $PTY
 
 
 # Sets terminal colors according to a dictionary that maps terminal color names
@@ -25,7 +25,7 @@ func _ready():
 
 	# Get colors from TextEdit theme. Created using the default (Adaptive) theme
 	# for reference, but will probably cause strange results if using another theme
-	# better to use a dedicated terminal theme, rather than relying on this.
+	# better to use a dedicated terminal theme, rather than relying checked this.
 	_set_terminal_colors(
 		{
 			"black": "caret_background_color",

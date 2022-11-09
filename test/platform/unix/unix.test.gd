@@ -26,8 +26,8 @@ func test_fork_succeeds():
 
 func test_fork_has_output():
 	pty.call_deferred("fork", "exit")
-	yield(yield_to(pty, "data_received", 1), YIELD)
-	var expected := PoolByteArray(
+	await yield_to(pty, "data_received", 1).YIELD
+	var expected := PackedByteArray(
 		[
 			101,
 			120,
@@ -124,20 +124,20 @@ func test_closes_pty_on_exit():
 	pty.fork("sleep", ["1000"])
 	remove_child(pty)
 	pty.free()
-	yield(yield_for(1), YIELD)
+	await yield_for(1).YIELD
 	var new_num_pts = helper._get_pts().size()
 	assert_eq(new_num_pts, num_pts)
 
 
 func test_emits_exited_signal_when_child_process_exits():
 	pty.call_deferred("fork", "exit")
-	yield(yield_to(pty, "exited", 1), YIELD)
+	await yield_to(pty, "exited", 1).YIELD
 	assert_signal_emitted(pty, "exited")
 
 
 class Helper:
 	static func _get_pts() -> Array:
-		assert(false, "Abstract method")
+		assert(false) #,"Abstract method")
 		return []
 
 	static func _get_winsize(fd: int) -> Dictionary:
@@ -161,9 +161,9 @@ class Helper:
 			true,
 			output
 		)
-		assert(exit_code == 0, "Failed to run python command for this test.")
+		assert(exit_code == 0) #,"Failed to run python command for this test.")
 
-		var size = str2var("Vector2" + output[0].strip_edges())
+		var size = str_to_var("Vector2" + output[0].strip_edges())
 		return {rows = int(size.x), cols = int(size.y)}
 
 
@@ -186,7 +186,7 @@ class TestPTYSize:
 		regex.compile(".*rows (?<rows>[0-9]+).*columns (?<columns>[0-9]+).*")
 
 	func before_each():
-		scene = add_child_autofree(preload("res://test/scenes/pty_and_terminal.tscn").instance())
+		scene = add_child_autofree(preload("res://test/scenes/pty_and_terminal.tscn").instantiate())
 
 	func test_correct_stty_reports_correct_size():
 		for s in [
@@ -198,14 +198,14 @@ class TestPTYSize:
 			"PTYCousinAbove2",
 			"PTYCousinBelow2"
 		]:
-			pty = scene.get_node(s).find_node("PTY")
-			terminal = scene.get_node(s).find_node("Terminal")
+			pty = scene.get_node(s).find_child("PTY")
+			terminal = scene.get_node(s).find_child("Terminal")
 
 			pty.call_deferred("fork", OS.get_environment("SHELL"))
 			pty.call_deferred("write", "stty -a | head -n1\n")
 			var output := ""
 			while not "rows" in output and not "columns" in output:
-				output = (yield(pty, "data_received")).get_string_from_utf8()
+				output = (await pty.data_received).get_string_from_utf8()
 			var regex_match = regex.search(output)
 			var stty_rows = int(regex_match.get_string("rows"))
 			var stty_cols = int(regex_match.get_string("columns"))
@@ -228,14 +228,14 @@ class LinuxHelper:
 	static func _get_pts() -> Array:
 		var dir := Directory.new()
 
-		if dir.open("/dev/pts") != OK or dir.list_dir_begin(true, true) != OK:
-			assert(false, "Could not open /dev/pts.")
+		if dir.open("/dev/pts") != OK or dir.list_dir_begin()  != OK:# TODOGODOT4 fill missing arguments https://github.com/godotengine/godot/pull/40547
+			assert(false) #,"Could not open /dev/pts.")
 
 		var pts := []
 		var file_name: String = dir.get_next()
 
 		while file_name != "":
-			if file_name.is_valid_integer():
+			if file_name.is_valid_int():
 				pts.append("/dev/pts/%s" % file_name)
 			file_name = dir.get_next()
 
@@ -249,5 +249,5 @@ class MacOSHelper:
 		# TODO: Implement for macOS.
 		# On macOS there is no /dev/pts directory, rather new ptys are created
 		# under /dev/ttysXYZ.
-		assert(false, "Not implemented")
+		assert(false) #,"Not implemented")
 		return []

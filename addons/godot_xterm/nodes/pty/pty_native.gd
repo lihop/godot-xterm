@@ -1,4 +1,4 @@
-tool
+@tool
 extends Node
 
 signal data_received(data)
@@ -20,5 +20,5 @@ func _not_implemented() -> int:
 	if stack.size() >= 2 and "function" in stack[1]:
 		method = "%s()" % stack[1].function
 
-	push_error("Method %s not implemented on the current platform (%s)." % [method, OS.get_name()])
+	push_error("Method %s not implemented checked the current platform (%s)." % [method, OS.get_name()])
 	return ERR_METHOD_NOT_FOUND

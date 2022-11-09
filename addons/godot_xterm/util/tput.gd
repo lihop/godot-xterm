@@ -1,4 +1,4 @@
-extends Reference
+extends RefCounted
 
 # Control Sequence Introducer
 const CSI = "\u001b["
@@ -17,24 +17,24 @@ class ANSIColor:
 	# colors of the selected terminal theme. Whereas Color will set
 	# the exact color specified regardless of theme.
 
-	const black = {fg = 30, bg = 40}
-	const red = {fg = 31, bg = 41}
-	const green = {fg = 32, bg = 42}
-	const yellow = {fg = 33, bg = 43}
-	const blue = {fg = 34, bg = 44}
-	const magenta = {fg = 35, bg = 45}
-	const cyan = {fg = 36, bg = 46}
-	const white = {fg = 37, bg = 47}
-	const bright_black = {fg = 90, bg = 100}
+	const black = {fg = 30, panel = 40}
+	const red = {fg = 31, panel = 41}
+	const green = {fg = 32, panel = 42}
+	const yellow = {fg = 33, panel = 43}
+	const blue = {fg = 34, panel = 44}
+	const magenta = {fg = 35, panel = 45}
+	const cyan = {fg = 36, panel = 46}
+	const white = {fg = 37, panel = 47}
+	const bright_black = {fg = 90, panel = 100}
 	const gray = bright_black
 	const grey = bright_black
-	const bright_red = {fg = 91, bg = 101}
-	const bright_green = {fg = 92, bg = 102}
-	const bright_yellow = {fg = 93, bg = 103}
-	const bright_blue = {fg = 94, bg = 104}
-	const bright_magenta = {fg = 95, bg = 105}
-	const bright_cyan = {fg = 96, bg = 106}
-	const bright_white = {fg = 97, bg = 107}
+	const bright_red = {fg = 91, panel = 101}
+	const bright_green = {fg = 92, panel = 102}
+	const bright_yellow = {fg = 93, panel = 103}
+	const bright_blue = {fg = 94, panel = 104}
+	const bright_magenta = {fg = 95, panel = 105}
+	const bright_cyan = {fg = 96, panel = 106}
+	const bright_white = {fg = 97, panel = 107}
 
 	func _init():
 		assert(
@@ -46,23 +46,23 @@ class ANSIColor:
 var terminal
 
 
-func _init(p_terminal: Control) -> void:
+func _init(p_terminal: Control):
 	if p_terminal:
 		terminal = p_terminal
 
 
-func write_string(string: String, color: Color = Color.white) -> void:
+func write_string(string: String, color: Color = Color.WHITE) -> void:
 	if color:
 		var fg = "\u001b[38;2;%d;%d;%dm" % [color.r8, color.g8, color.b8]
-		terminal.write(fg.to_utf8())
+		terminal.write(fg.to_utf8_buffer())
 
-	terminal.write(string.to_utf8())
+	terminal.write(string.to_utf8_buffer())
 
 	# Reset color back to default.
-	terminal.write("\u001b[0m".to_utf8())
+	terminal.write("\u001b[0m".to_utf8_buffer())
 
 
-# tput_* functions based on the tput command.
+# tput_* functions based checked the tput command.
 # See: https://man7.org/linux/man-pages/man1/tput.1.html for more info.
 
 
@@ -88,8 +88,8 @@ func setaf(color) -> void:
 func setab(color) -> void:
 	if color is Color:
 		terminal.write("\u001b[48;2;%d;%d;%dm" % [color.r8, color.g8, color.b8])
-	elif "bg" in color and color.bg is int:
-		terminal.write("\u001b[%dm" % color.bg)
+	elif "panel" in color and color.panel is int:
+		terminal.write("\u001b[%dm" % color.panel)
 	else:
 		push_error("Invalid color: %s" % color)
 

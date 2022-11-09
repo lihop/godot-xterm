@@ -1,2 +1,2 @@
-tool
-extends Viewport
+@tool
+extends SubViewport

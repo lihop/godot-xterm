@@ -1,9 +1,9 @@
 [gd_resource type="Theme" load_steps=4 format=2]
 
 [ext_resource path="res://addons/godot_xterm/resources/xrdb_theme.gd" type="Script" id=1]
-[ext_resource path="res://addons/godot_xterm/themes/fonts/hack/hack_regular-3.003.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://addons/godot_xterm/themes/fonts/hack/hack_regular-3.003.ttf" type="FontFile" id=2]
 
-[sub_resource type="DynamicFont" id=1]
+[sub_resource type="FontFile" id=1]
 size = 39
 extra_spacing_bottom = 1
 font_data = ExtResource( 2 )

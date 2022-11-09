@@ -1,6 +1,6 @@
 [gd_resource type="Theme" load_steps=2 format=2]
 
-[sub_resource type="DynamicFont" id=1]
+[sub_resource type="FontFile" id=1]
 size = 14
 extra_spacing_bottom = 1
 

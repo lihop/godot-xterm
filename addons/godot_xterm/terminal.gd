@@ -4,7 +4,7 @@
 # These snippets are copyright of their authors and released under the MIT license:
 # - Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur (MIT License).
 # - Copyright (c) 2014-2021 Godot Engine contributors (MIT License).
-tool
+@tool
 extends Control
 
 signal data_sent(data)
@@ -24,28 +24,32 @@ enum SelectionMode {
 	POINTER,
 }
 
-export(UpdateMode) var update_mode = UpdateMode.AUTO setget set_update_mode
+@export var update_mode: UpdateMode = UpdateMode.AUTO :
+	get:
+		return update_mode # TODOConverter40 Non existent get function 
+	set(mod_value):
+		mod_value  # TODOConverter40 Copy here content of set_update_mode
 
 # If true, text in the terminal will be copied to the clipboard when selected.
-export(bool) var copy_on_selection
+@export var copy_on_selection: bool
 
 # Bell
 # If muted, the "bell" signal will not be emitted when the bell "\u0007" character
 # is written to the terminal.
-export var bell_muted := false
+@export var bell_muted := false
 # Amount of time in seconds that must pass before emitting a new "bell" signal.
 # This can be useful in cases where the bell character is being written too
 # frequently such as `while true; do echo -e "\a"; done`.
-export var bell_cooldown: float = 0.1
+@export var bell_cooldown: float = 0.1
 
-export var blink_on_time: float = 0.6
-export var blink_off_time: float = 0.3
+@export var blink_on_time: float = 0.6
+@export var blink_off_time: float = 0.3
 
 var _cols := 2
 var _rows := 2
 
 var _default_theme: Theme = preload("./themes/default.tres")
-var _viewport: Viewport = preload("./nodes/terminal/viewport.tscn").instance()
+var _viewport: SubViewport = preload("./nodes/terminal/viewport.tscn").instantiate()
 var _native_terminal: Control = _viewport.get_node("Terminal")
 var _screen := TextureRect.new()
 
@@ -73,11 +77,11 @@ func get_rows() -> int:
 
 func write(data) -> void:
 	assert(
-		data is PoolByteArray or data is String,
-		"Invalid type for argument 'data'. Should be of type PoolByteArray or String."
+		data is PackedByteArray or data is String,
+		"Invalid type for argument 'data'. Should be of type PackedByteArray or String."
 	)
 
-	# Will be cleared when _flush() is called after VisualServer emits the "frame_pre_draw" signal.
+	# Will be cleared when _flush() is called after RenderingServer emits the "frame_pre_draw" signal.
 	_buffer.push_back(data)
 
 	# Ensure redraw is requested if terminal is visible.
@@ -87,16 +91,16 @@ func write(data) -> void:
 
 func _flush():
 	for data in _buffer:
-		_native_terminal.write(data if data is PoolByteArray else data.to_utf8())
+		_native_terminal.write(data if data is PackedByteArray else data.to_utf8_buffer())
 		_native_terminal.update()
 	_buffer.clear()
 
 
 func clear() -> void:
-	var initial_size = _native_terminal.rect_size
-	_native_terminal.rect_size.y = _native_terminal.cell_size.y
+	var initial_size = _native_terminal.size
+	_native_terminal.size.y = _native_terminal.cell_size.y
 	_native_terminal.clear_sb()
-	_native_terminal.rect_size = initial_size
+	_native_terminal.size = initial_size
 
 
 func copy_selection() -> String:
@@ -111,22 +115,22 @@ func _ready():
 	_update_theme()
 
 	_native_terminal.update_mode = update_mode
-	_native_terminal.connect("data_sent", self, "_on_data_sent")
-	_native_terminal.connect("key_pressed", self, "_on_key_pressed")
-	_native_terminal.connect("size_changed", self, "_on_size_changed")
+	_native_terminal.connect("data_sent",Callable(self,"_on_data_sent"))
+	_native_terminal.connect("key_pressed",Callable(self,"_on_key_pressed"))
+	_native_terminal.connect("size_changed",Callable(self,"_on_size_changed"))
 
-	_viewport.size = rect_size
-	_viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
+	_viewport.size = size
+	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 
 	_screen.set_anchors_preset(PRESET_WIDE)
 	_screen.texture = _viewport.get_texture()
 
-	_native_terminal.connect("bell", self, "_on_bell")
+	_native_terminal.connect("bell",Callable(self,"_on_bell"))
 	_bell_timer.one_shot = true
 	add_child(_bell_timer)
 
 	_selection_timer.wait_time = 0.05
-	_selection_timer.connect("timeout", self, "_on_selection_held")
+	_selection_timer.connect("timeout",Callable(self,"_on_selection_held"))
 
 	add_child(_viewport)
 	add_child(_screen)
@@ -138,31 +142,31 @@ func _ready():
 	# we make all the draw_* calls caused by writing. We need to use signals
 	# here rather than yield otherwise we will sometimes get a "Resumed
 	# function after yield but class instance is gone" error.
-	VisualServer.connect("frame_pre_draw", self, "_flush")
+	RenderingServer.connect("frame_pre_draw",Callable(self,"_flush"))
 
 
 func _update_theme():
-	# Themes are not propagated through the Viewport, so in order for theme
+	# Themes are not propagated through the SubViewport, so in order for theme
 	# inheritance to work we can pass through the theme variables manually.
 	for color in _default_theme.get_color_list("Terminal"):
 		var c: Color
-		if has_color(color, "Terminal"):
+		if has_theme_color(color, "Terminal"):
 			c = get_color(color, "Terminal")
 		else:
 			c = _default_theme.get_color(color, "Terminal")
-		_native_terminal.add_color_override(color, c)
+		_native_terminal.add_theme_color_override(color, c)
 	for font in _default_theme.get_font_list("Terminal"):
 		var f: Font
-		if has_font(font, "Terminal"):
+		if has_theme_font(font, "Terminal"):
 			f = get_font(font, "Terminal")
-		elif has_font("regular", "Terminal"):
+		elif has_theme_font("regular", "Terminal"):
 			f = get_font("regular", "Terminal")
 		else:
-			if _default_theme.has_font(font, "Terminal"):
+			if _default_theme.has_theme_font(font, "Terminal"):
 				f = _default_theme.get_font(font, "Terminal")
 			else:
 				f = _default_theme.get_font(font, "regular")
-		_native_terminal.add_font_override(font, f)
+		_native_terminal.add_theme_font_override(font, f)
 	_native_terminal._update_theme()
 	_native_terminal._update_size()
 
@@ -180,7 +184,7 @@ func _gui_input(event):
 		# Return to bottom of scrollback buffer if we scrolled up. Ignore modifier
 		# keys pressed in isolation or if Ctrl+Shift modifier keys are pressed.
 		if (
-			not event.scancode in [KEY_ALT, KEY_SHIFT, KEY_CONTROL, KEY_META, KEY_MASK_CMD]
+			not event.scancode in [KEY_ALT, KEY_SHIFT, KEY_CTRL, KEY_META, KEY_MASK_CMD]
 			and not (event.control and event.shift)
 		):
 			_native_terminal.sb_reset()
@@ -197,7 +201,7 @@ func _handle_mouse_wheel(event: InputEventMouseButton):
 	if not event or not event.is_pressed():
 		return
 
-	if event.button_index == BUTTON_WHEEL_UP:
+	if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 		if event.alt:
 			# Scroll 5 times as fast as normal (like TextEdit).
 			_native_terminal.sb_up(15 * event.factor)
@@ -205,7 +209,7 @@ func _handle_mouse_wheel(event: InputEventMouseButton):
 			# Scroll 3 lines.
 			_native_terminal.sb_up(3 * event.factor)
 
-	if event.button_index == BUTTON_WHEEL_DOWN:
+	if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 		if event.alt:
 			# Scroll 5 times as fast as normal (like TextEdit).
 			_native_terminal.sb_down(15 * event.factor)
@@ -216,7 +220,7 @@ func _handle_mouse_wheel(event: InputEventMouseButton):
 
 func _handle_selection(event: InputEventMouse):
 	if event is InputEventMouseButton:
-		if not event or not event.is_pressed() or not event.button_index == BUTTON_LEFT:
+		if not event or not event.is_pressed() or not event.button_index == MOUSE_BUTTON_LEFT:
 			return
 
 		if _selecting:
@@ -230,7 +234,7 @@ func _handle_selection(event: InputEventMouse):
 
 	elif event is InputEventMouseMotion:
 		if (
-			event.button_mask & BUTTON_MASK_LEFT
+			event.button_mask & MOUSE_BUTTON_MASK_LEFT
 			and _selecting_mode != SelectionMode.NONE
 			and not _selecting
 		):
@@ -240,7 +244,7 @@ func _handle_selection(event: InputEventMouse):
 
 
 func _on_selection_held() -> void:
-	if not Input.is_mouse_button_pressed(BUTTON_LEFT) or _selecting_mode == SelectionMode.NONE:
+	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or _selecting_mode == SelectionMode.NONE:
 		if copy_on_selection:
 			var selection = _native_terminal.copy_selection()
 			OS.set_clipboard(selection)
@@ -255,18 +259,18 @@ func _on_selection_held() -> void:
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_RESIZED:
-			_viewport.size = rect_size
+			_viewport.size = size
 			_refresh()
 		NOTIFICATION_THEME_CHANGED:
 			_update_theme()
 			_refresh()
 
 
-func _on_data_sent(data: PoolByteArray):
+func _on_data_sent(data: PackedByteArray):
 	emit_signal("data_sent", data)
 
 
-func _on_key_pressed(data: PoolByteArray, event: InputEventKey):
+func _on_key_pressed(data: PackedByteArray, event: InputEventKey):
 	emit_signal("key_pressed", data.get_string_from_utf8(), event)
 
 

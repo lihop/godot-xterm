@@ -1,9 +1,9 @@
 [gd_resource type="Theme" load_steps=5 format=2]
 
-[ext_resource path="res://themes/fonts/bold_italic.tres" type="DynamicFont" id=2]
-[ext_resource path="res://themes/fonts/italic.tres" type="DynamicFont" id=3]
-[ext_resource path="res://themes/fonts/bold.tres" type="DynamicFont" id=4]
-[ext_resource path="res://themes/fonts/regular.tres" type="DynamicFont" id=5]
+[ext_resource path="res://themes/fonts/bold_italic.tres" type="FontFile" id=2]
+[ext_resource path="res://themes/fonts/italic.tres" type="FontFile" id=3]
+[ext_resource path="res://themes/fonts/bold.tres" type="FontFile" id=4]
+[ext_resource path="res://themes/fonts/regular.tres" type="FontFile" id=5]
 
 [resource]
 Terminal/colors/background = Color( 0.12549, 0.145098, 0.192157, 1 )
