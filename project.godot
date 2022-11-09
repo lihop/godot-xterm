@@ -1,25 +1,28 @@
-; Project was converted by built-in tool to Godot 4.0
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
 config_version=5
+
 _global_script_classes=[{
-"base": "Reference",
-"class": "GutHookScript",
-"language": "GDScript",
+"base": "RefCounted",
+"class": &"GutHookScript",
+"language": &"GDScript",
 "path": "res://addons/gut/hook_script.gd"
-}, {
-"base": "Node",
-"class": "GutTest",
-"language": "GDScript",
-"path": "res://addons/gut/test.gd"
 }]
 _global_script_class_icons={
-"GutHookScript": "",
-"GutTest": ""
+"GutHookScript": ""
 }
 
 [application]
 
 config/name="GodotXterm"
 run/main_scene="res://examples/menu/menu.tscn"
+config/features=PackedStringArray("4.0")
 config/icon="res://docs/media/icon.png"
 
 [display]
@@ -28,7 +31,7 @@ window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot_xterm/plugin.cfg")
+enabled=PackedStringArray()
 
 [rendering]
 
