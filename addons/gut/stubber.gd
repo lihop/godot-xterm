@@ -28,7 +28,7 @@ func _make_key_from_metadata(doubled):
 	return to_return
 
 
-# Creates they key for the returns hash based checked the type of object passed in
+# Creates they key for the returns hash based on the type of object passed in
 # obj could be a string of a path to a script with an optional subpath or
 # it could be an instance of a doubled object.
 func _make_key_from_variant(obj, subpath = null):

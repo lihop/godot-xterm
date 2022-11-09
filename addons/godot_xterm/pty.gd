@@ -25,13 +25,13 @@ signal exited(exit_code, signum)
 
 @export var terminal_path: NodePath := NodePath() :
 	get:
-		return terminal_path # TODOConverter40 Non existent get function 
+		return terminal_path # TODOConverter40 Non existent get function
 	set(mod_value):
 		mod_value  # TODOConverter40 Copy here content of set_terminal_path
 
 var _terminal: _Terminal = null :
 	get:
-		return _terminal # TODOConverter40 Non existent get function 
+		return _terminal # TODOConverter40 Non existent get function
 	set(mod_value):
 		mod_value  # TODOConverter40 Copy here content of _set_terminal
 
@@ -68,7 +68,7 @@ func _init():
 		"X11", "Server", "OSX":
 			_pty_native = _PTYUnix.new()
 		_:
-			push_error("PTY is not support checked current platform (%s)." % os_name)
+			push_error("PTY is not support on current platform (%s)." % os_name)
 
 	_pty_native.connect("data_received",Callable(self,"_on_pty_native_data_received"))
 	_pty_native.connect("exited",Callable(self,"_on_pty_native_exited"))
@@ -154,7 +154,7 @@ func resizev(size: Vector2) -> void:
 
 # Kill the pty.
 # sigint: The signal to send. By default this is SIGHUP.
-# This is not supported checked Windows.
+# This is not supported on Windows.
 func kill(signum: int = Signal.SIGHUP) -> void:
 	_pty_native.kill(signum)
 

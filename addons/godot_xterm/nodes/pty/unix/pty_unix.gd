@@ -18,7 +18,7 @@ const DEFAULT_ENV := {TERM = DEFAULT_NAME, COLORTERM = "truecolor"}
 const FALLBACK_FILE = "sh"
 
 ## Default messages to indicate PAUSE/RESUME for automatic flow control.
-## To avoid conflicts with rebound XON/XOFF control codes (such as checked-my-zsh),
+## To avoid conflicts with rebound XON/XOFF control codes (such as on-my-zsh),
 ## the sequences can be customized in IPtyForkOptions.
 #const FLOW_CONTROL_PAUSE = char(0x13) # defaults to XOFF
 #const FLOW_CONTROL_RESUME = char(0x11) # defaults to XON
@@ -35,7 +35,7 @@ enum Signal {
 	SIGFPE = 8,  # Erroneous arithmetic operation
 	SIGKILL = 9,  # Kill (cannot be caught or ignored)
 	SIGSEGV = 11,  # Invalid memory reference
-	SIGPIPE = 13,  # Write checked a pipe with no one to read it
+	SIGPIPE = 13,  # Write on a pipe with no one to read it
 	SIGALRM = 14,  # Alarm clock
 	SIGTERM = 15,  # Termination signal
 }
@@ -126,7 +126,7 @@ func fork(
 		file = FALLBACK_FILE
 
 	# Environment variables.
-	# If we are using OS env vars, sanitize them to remove_at variables that might confuse our terminal.
+	# If we are using OS env vars, sanitize them to remove variables that might confuse our terminal.
 	var final_env := _sanitize_env(LibuvUtils.get_os_environ()) if use_os_env else {}
 	for key in env.keys():
 		final_env[key] = env[key]

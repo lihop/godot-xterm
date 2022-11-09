@@ -62,7 +62,7 @@ class DoubleInfo:
 	#   (object_to_double, subpath)
 	#   (object_to_double, strategy)
 	#   (object_to_double, subpath, strategy)
-	func _init(thing,p2 = null,p3 = null):
+	func _init(thing, p2 = null, p3 = null):
 		strategy = p2
 
 		# short-circuit and ensure that is_valid
@@ -218,7 +218,7 @@ func _do_datatypes_match__fail_if_not(got, expected, text):
 
 
 # ------------------------------------------------------------------------------
-# Create a string that lists all the methods that were called checked an spied
+# Create a string that lists all the methods that were called on an spied
 # instance.
 # ------------------------------------------------------------------------------
 func _get_desc_of_calls_to_instance(inst):
@@ -228,7 +228,7 @@ func _get_desc_of_calls_to_instance(inst):
 	calls = BULLET + calls.replace("\n", "\n" + BULLET)
 	# remove_at trailing newline and bullet
 	calls = calls.substr(0, calls.length() - BULLET.length() - 1)
-	return "Calls made checked " + str(inst) + "\n" + calls
+	return "Calls made on " + str(inst) + "\n" + calls
 
 
 # ------------------------------------------------------------------------------
@@ -747,7 +747,7 @@ func _can_make_signal_assertions(object, signal_name):
 
 
 # ------------------------------------------------------------------------------
-# Check if an object is connected to a signal checked another object. Returns True
+# Check if an object is connected to a signal on another object. Returns True
 # if it is and false otherwise
 # ------------------------------------------------------------------------------
 func _is_connected(signaler_obj, connect_to_obj, signal_name, method_name = ""):
@@ -770,10 +770,10 @@ func watch_signals(object):
 
 
 # ------------------------------------------------------------------------------
-# Asserts that an object is connected to a signal checked another object
+# Asserts that an object is connected to a signal on another object
 #
 # This will fail with specific messages if the target object is not connected
-# to the specified signal checked the source object.
+# to the specified signal on the source object.
 # ------------------------------------------------------------------------------
 func assert_connected(signaler_obj, connect_to_obj, signal_name, method_name = ""):
 	pass
@@ -785,7 +785,7 @@ func assert_connected(signaler_obj, connect_to_obj, signal_name, method_name = "
 		_str(signaler_obj),
 		" to be connected to signal: [",
 		signal_name,
-		"] checked ",
+		"] on ",
 		_str(connect_to_obj),
 		method_disp
 	)
@@ -796,10 +796,10 @@ func assert_connected(signaler_obj, connect_to_obj, signal_name, method_name = "
 
 
 # ------------------------------------------------------------------------------
-# Asserts that an object is not connected to a signal checked another object
+# Asserts that an object is not connected to a signal on another object
 #
 # This will fail with specific messages if the target object is connected
-# to the specified signal checked the source object.
+# to the specified signal on the source object.
 # ------------------------------------------------------------------------------
 func assert_not_connected(signaler_obj, connect_to_obj, signal_name, method_name = ""):
 	var method_disp = ""
@@ -810,7 +810,7 @@ func assert_not_connected(signaler_obj, connect_to_obj, signal_name, method_name
 		_str(signaler_obj),
 		" to not be connected to signal: [",
 		signal_name,
-		"] checked ",
+		"] on ",
 		_str(connect_to_obj),
 		method_disp
 	)
@@ -1116,21 +1116,21 @@ func assert_string_ends_with(text, search, match_case = true):
 
 
 # ------------------------------------------------------------------------------
-# Assert that a method was called checked an instance of a doubled class.  If
+# Assert that a method was called on an instance of a doubled class.  If
 # parameters are supplied then the params passed in when called must match.
 # TODO make 3rd parameter "param_or_text" and add fourth parameter of "text" and
 #      then work some magic so this can have a "text" parameter without being
 #      annoying.
 # ------------------------------------------------------------------------------
 func assert_called(inst, method_name, parameters = null):
-	var disp = str("Expected [", method_name, "] to have been called checked ", _str(inst))
+	var disp = str("Expected [", method_name, "] to have been called on ", _str(inst))
 
 	if _fail_if_parameters_not_array(parameters):
 		return
 
 	if !_utils.is_double(inst):
 		_fail(
-			"You must pass a doubled instance to assert_called.  Check the wiki for info checked using double."
+			"You must pass a doubled instance to assert_called.  Check the wiki for info on using double."
 		)
 	else:
 		if gut.get_spy().was_called(inst, method_name, parameters):
@@ -1142,19 +1142,19 @@ func assert_called(inst, method_name, parameters = null):
 
 
 # ------------------------------------------------------------------------------
-# Assert that a method was not called checked an instance of a doubled class.  If
+# Assert that a method was not called on an instance of a doubled class.  If
 # parameters are specified then this will only fail if it finds a call that was
 # sent matching parameters.
 # ------------------------------------------------------------------------------
 func assert_not_called(inst, method_name, parameters = null):
-	var disp = str("Expected [", method_name, "] to NOT have been called checked ", _str(inst))
+	var disp = str("Expected [", method_name, "] to NOT have been called on ", _str(inst))
 
 	if _fail_if_parameters_not_array(parameters):
 		return
 
 	if !_utils.is_double(inst):
 		_fail(
-			"You must pass a doubled instance to assert_not_called.  Check the wiki for info checked using double."
+			"You must pass a doubled instance to assert_not_called.  Check the wiki for info on using double."
 		)
 	else:
 		if gut.get_spy().was_called(inst, method_name, parameters):
@@ -1166,7 +1166,7 @@ func assert_not_called(inst, method_name, parameters = null):
 
 
 # ------------------------------------------------------------------------------
-# Assert that a method checked an instance of a doubled class was called a number
+# Assert that a method on an instance of a doubled class was called a number
 # of times.  If parameters are specified then only calls with matching
 # parameter values will be counted.
 # ------------------------------------------------------------------------------
@@ -1179,12 +1179,12 @@ func assert_call_count(inst, method_name, expected_count, parameters = null):
 	var param_text = ""
 	if parameters:
 		param_text = " with parameters " + str(parameters)
-	var disp = "Expected [%s] checked %s to be called [%s] times%s.  It was called [%s] times."
+	var disp = "Expected [%s] on %s to be called [%s] times%s.  It was called [%s] times."
 	disp = disp % [method_name, _str(inst), expected_count, param_text, count]
 
 	if !_utils.is_double(inst):
 		_fail(
-			"You must pass a doubled instance to assert_call_count.  Check the wiki for info checked using double."
+			"You must pass a doubled instance to assert_call_count.  Check the wiki for info on using double."
 		)
 	else:
 		if count == expected_count:
@@ -1698,7 +1698,7 @@ func ignore_method_when_doubling(thing, method_name):
 # ------------------------------------------------------------------------------
 func stub(thing, p2, p3 = null):
 	if _utils.is_instance(thing) and !_utils.is_double(thing):
-		_lgr.error(str("You cannot use stub checked ", _str(thing), " because it is not a double."))
+		_lgr.error(str("You cannot use stub on ", _str(thing), " because it is not a double."))
 		return _utils.StubParams.new()
 
 	var method_name = p2
@@ -1791,7 +1791,7 @@ func autofree(thing):
 
 
 # ------------------------------------------------------------------------------
-# Works the same as autofree except queue_free will be called checked the object
+# Works the same as autofree except queue_free will be called on the object
 # instead.  This also imparts a brief pause after the test finishes so that
 # the queued object has time to free.
 # ------------------------------------------------------------------------------
@@ -1869,7 +1869,7 @@ func fail_test(text):
 
 
 # ------------------------------------------------------------------------------
-# Peforms a deep compare checked both values, a CompareResult instnace is returned.
+# Peforms a deep compare on both values, a CompareResult instnace is returned.
 # The optional max_differences paramter sets the max_differences to be displayed.
 # ------------------------------------------------------------------------------
 func compare_deep(v1, v2, max_differences = null):
@@ -1880,7 +1880,7 @@ func compare_deep(v1, v2, max_differences = null):
 
 
 # ------------------------------------------------------------------------------
-# Peforms a shallow compare checked both values, a CompareResult instnace is returned.
+# Peforms a shallow compare on both values, a CompareResult instnace is returned.
 # The optional max_differences paramter sets the max_differences to be displayed.
 # ------------------------------------------------------------------------------
 func compare_shallow(v1, v2, max_differences = null):

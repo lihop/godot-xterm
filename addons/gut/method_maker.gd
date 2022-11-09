@@ -2,13 +2,13 @@ class CallParameters:
 	var p_name = null
 	var default = null
 
-	func _init(n,d):
+	func _init(n, d):
 		p_name = n
 		default = d
 
 
 # ------------------------------------------------------------------------------
-# This class will generate method declaration lines based checked method meta
+# This class will generate method declaration lines based on method meta
 # data.  It will create defaults that match the method data.
 #
 # --------------------
@@ -253,7 +253,7 @@ func _get_spy_call_parameters_text(args):
 # ###############
 
 
-# Creates a delceration for a function based unchecked of function metadata.  All
+# Creates a delceration for a function based off of function metadata.  All
 # types whose defaults are supported will have their values.  If a datatype
 # is not supported and the parameter has a default, a warning message will be
 # printed and the declaration will return null.

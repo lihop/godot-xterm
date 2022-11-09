@@ -122,7 +122,7 @@ class OptionResolver:
 
 
 # ------------------------------------------------------------------------------
-# Here starts the actual script that uses the Options class to kick unchecked Gut
+# Here starts the actual script that uses the Options class to kick off Gut
 # and run your tests.
 # ------------------------------------------------------------------------------
 var _utils = load("res://addons/gut/utils.gd").get_instance()
@@ -293,7 +293,7 @@ option (option priority:  command-line, super.gutconfig, default)."""
 	resolved.erase("show_help")
 
 	print(
-		"Here's a config with all the properties set based unchecked of your current command and config."
+		"Here's a config with all the properties set based off of your current command and config."
 	)
 	print(JSON.stringify(resolved, "  "))
 
@@ -332,7 +332,7 @@ func _run_gut():
 				(
 					"All command line options and where they are specified.  "
 					+ 'The "final" value shows which value will actually be used '
-					+ "based checked order of precedence (default < super.gutconfig < cmd line)."
+					+ "based on order of precedence (default < super.gutconfig < cmd line)."
 					+ "\n"
 				)
 			)

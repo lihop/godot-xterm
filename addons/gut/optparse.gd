@@ -40,7 +40,7 @@
 
 #-------------------------------------------------------------------------------
 # Parses the command line arguments supplied into an array that can then be
-# examined and parsed based checked how the gut options work.
+# examined and parsed based on how the gut options work.
 #-------------------------------------------------------------------------------
 class CmdLineParser:
 	var _used_options = []
@@ -149,7 +149,7 @@ class Option:
 	var default = null
 	var description = ""
 
-	func _init(name,default_value,desc = ""):
+	func _init(name, default_value, desc = ""):
 		option_name = name
 		default = default_value
 		description = desc

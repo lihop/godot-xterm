@@ -23,7 +23,7 @@ enum TerminalPopupMenuOptions {
 }
 
 # Has access to the EditorSettings singleton so it can dynamically generate the
-# terminal color scheme based checked editor theme settings.
+# terminal color scheme based on editor theme settings.
 var editor_plugin: EditorPlugin
 var editor_interface: EditorInterface
 
@@ -108,7 +108,7 @@ func _update_terminal_tabs():
 	await get_tree().idle_frame
 
 	if tabs.get_offset_buttons_visible():
-		# Move add button to fixed position checked the tabbar.
+		# Move add button to fixed position on the tabbar.
 		if add_button.get_parent() == tabs:
 			add_button.position = Vector2.ZERO
 			tabs.remove_child(add_button)

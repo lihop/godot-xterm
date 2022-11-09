@@ -148,9 +148,9 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 						(
 							"Psuedoterminal node currently"
 							+ " uses pty.h but needs to use either winpty or conpty"
-							+ " to work checked Windows."
+							+ " to work on Windows."
 						),
-						"Terminal not Supported checked Windows"
+						"Terminal not Supported on Windows"
 					)
 				var scene = item.scene.instantiate()
 				var pty = scene if OS.has_feature("JavaScript") else scene.get_node("PTY")

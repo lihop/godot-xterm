@@ -1,7 +1,7 @@
 var return_val = null
 var stub_target = null
 var target_subpath = null
-# the parameter values to match method call checked.
+# the parameter values to match method call on.
 var parameters = null
 var stub_method = null
 var call_super = false

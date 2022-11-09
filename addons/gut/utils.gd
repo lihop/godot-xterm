@@ -108,7 +108,7 @@ var req_godot = [3, 2, 0]
 # Used for doing file manipulation stuff so as to not keep making File instances.
 # could be a bit of overkill but who cares.
 var _file_checker = File.new()
-# Online fetch of the latest version available checked github
+# Online fetch of the latest version available on github
 var latest_version = null
 var should_display_latest_version = false
 
@@ -280,7 +280,7 @@ func is_gdscript(obj):
 
 
 # ------------------------------------------------------------------------------
-# Returns an array of values by calling get(property) checked each element in source
+# Returns an array of values by calling get(property) on each element in source
 # ------------------------------------------------------------------------------
 func extract_property_from_array(source, property):
 	var to_return = []
@@ -354,7 +354,7 @@ func get_file_as_text(path):
 
 
 # ------------------------------------------------------------------------------
-# Loops through an array of things and calls a method or checks a property checked
+# Loops through an array of things and calls a method or checks a property on
 # each element until it finds the returned value.  The item in the array is
 # returned or null if it is not found.
 # ------------------------------------------------------------------------------

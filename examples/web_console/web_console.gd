@@ -42,7 +42,7 @@ func _on_Terminal_key_pressed(_data, event: InputEventKey):
 	if not event:
 		return
 
-	# For some reason, data String is malformed checked HTML5, so only use event.unicode.
+	# For some reason, data String is malformed on HTML5, so only use event.unicode.
 	var data = char(event.unicode)
 
 	match event.scancode:

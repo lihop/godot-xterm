@@ -120,7 +120,7 @@ class ObjectInfo:
 	var _singleton_instance = null
 	var _singleton_name = null
 
-	func _init(path,subpath = null):
+	func _init(path, subpath = null):
 		_path = path
 		if subpath != null:
 			_subpaths = Array(subpath.split("/"))
@@ -723,7 +723,7 @@ func clear_output_directory():
 		var d = Directory.new()
 		var result = d.open(_output_dir)
 		# BIG GOTCHA HERE.  If it cannot open the dir w/ erro 31, then the
-		# directory becomes res:// and things go checked normally and gut clears out
+		# directory becomes res:// and things go on normally and gut clears out
 		# out res:// which is SUPER BAD.
 		if result == OK:
 			d.list_dir_begin() # TODOGODOT4 fill missing arguments https://github.com/godotengine/godot/pull/40547

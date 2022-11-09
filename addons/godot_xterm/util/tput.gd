@@ -62,7 +62,7 @@ func write_string(string: String, color: Color = Color.WHITE) -> void:
 	terminal.write("\u001b[0m".to_utf8_buffer())
 
 
-# tput_* functions based checked the tput command.
+# tput_* functions based on the tput command.
 # See: https://man7.org/linux/man-pages/man1/tput.1.html for more info.
 
 

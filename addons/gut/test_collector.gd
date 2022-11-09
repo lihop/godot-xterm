@@ -31,7 +31,7 @@ class TestScript:
 	var _utils = null
 	var _lgr = null
 
-	func _init(utils = null,logger = null):
+	func _init(utils = null, logger = null):
 		_utils = utils
 		_lgr = logger
 

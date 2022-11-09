@@ -52,7 +52,7 @@ extends Control
 @export var _inner_class_name: String = ""
 # Start running tests when the scene finishes loading
 @export var _run_on_load = false
-# Maximize the GUT control checked startup
+# Maximize the GUT control on startup
 @export var _should_maximize = false
 # Print output to the consol as well
 @export var _should_print_to_console = true
@@ -244,7 +244,7 @@ func _is_ready_to_go(action):
 			str(
 				"GUT is not ready for ",
 				action,
-				" yet.  Perform actions checked GUT in/after the gut_ready signal."
+				" yet.  Perform actions on GUT in/after the gut_ready signal."
 			)
 		)
 	return _gut != null

@@ -2,7 +2,7 @@ var Gut = load("res://addons/gut/gut.gd")
 
 # Do not want a ref to _utils here due to use by editor plugin.
 # _utils needs to be split so that constants and what not do not
-# have to rely checked the weird singleton thing I made.
+# have to rely on the weird singleton thing I made.
 enum DOUBLE_STRATEGY { FULL, PARTIAL }
 
 var valid_fonts = ["AnonymousPro", "CourierPro", "LobsterTwo", "Default"]

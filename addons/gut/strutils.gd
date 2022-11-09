@@ -82,7 +82,7 @@ func _get_obj_filename(thing):
 			pass
 	elif NativeScriptClass != null and thing.get_script() is NativeScriptClass:
 		# Work with GDNative scripts:
-		# inst_to_dict fails with "Not a script with an instance" checked GDNative script instances
+		# inst_to_dict fails with "Not a script with an instance" on GDNative script instances
 		filename = _get_filename(thing.get_script().resource_path)
 	elif !_utils.is_native_class(thing):
 		var dict = inst_to_dict(thing)

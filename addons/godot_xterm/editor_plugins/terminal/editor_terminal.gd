@@ -25,7 +25,7 @@ func _ready():
 
 	# Get colors from TextEdit theme. Created using the default (Adaptive) theme
 	# for reference, but will probably cause strange results if using another theme
-	# better to use a dedicated terminal theme, rather than relying checked this.
+	# better to use a dedicated terminal theme, rather than relying on this.
 	_set_terminal_colors(
 		{
 			"black": "caret_background_color",

@@ -183,14 +183,14 @@ const SIGNAL_STOP_YIELD_BEFORE_TEARDOWN = "stop_yield_before_teardown"
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-var _should_print_versions = true  # used to cut down checked output in tests.
+var _should_print_versions = true  # used to cut down on output in tests.
 
 
 func _init():
 	_before_all_test_obj.name = "before_all"
 	_after_all_test_obj.name = "after_all"
 	# When running tests for GUT itself, _utils has been setup to always return
-	# a new logger so this does not set the gut instance checked the base logger
+	# a new logger so this does not set the gut instance on the base logger
 	# when creating test instances of GUT.
 	_lgr.set_gut(self)
 
@@ -204,7 +204,7 @@ func _init():
 	_doubler.set_spy(_spy)
 	_doubler.set_gut(self)
 
-	# TODO remove_at these, universal logger should fix this.
+	# TODO remove these, universal logger should fix this.
 	_doubler.set_logger(_lgr)
 	_spy.set_logger(_lgr)
 	_stubber.set_logger(_lgr)
@@ -369,8 +369,8 @@ func _on_log_level_changed(value):
 # with set_yield_time()
 #
 # signal_watcher._on_watched_signal supports up to 9 additional arguments.
-# This is the most number of parameters GUT supports checked signals.  The comment
-# checked _on_watched_signal explains reasoning.
+# This is the most number of parameters GUT supports on signals.  The comment
+# on _on_watched_signal explains reasoning.
 # ------------------------------------------------------------------------------
 func _yielding_callback(
 	from_obj = false,
@@ -640,7 +640,7 @@ func _print_script_heading(script):
 
 # ------------------------------------------------------------------------------
 # Just gets more logic out of _test_the_scripts.  Decides if we should yield after
-# this test based checked flags and counters.
+# this test based on flags and counters.
 # ------------------------------------------------------------------------------
 func _should_yield_now():
 	var should = (
@@ -762,7 +762,7 @@ func _run_parameterized_test(test_script, test_name):
 		_lgr.warn("Test did not assert")
 
 	if _is_function_state(script_result):
-		# _run_tests does _wait_for_done so just wait checked it to  complete
+		# _run_tests does _wait_for_done so just wait on it to  complete
 		await script_result.COMPLETED
 
 	if _parameter_handler == null:
@@ -785,7 +785,7 @@ func _run_parameterized_test(test_script, test_name):
 			var cur_assert_count = _current_test.assert_count
 			script_result = _run_test(test_script, test_name)
 			if _is_function_state(script_result):
-				# _run_tests does _wait_for_done so just wait checked it to  complete
+				# _run_tests does _wait_for_done so just wait on it to  complete
 				await script_result.COMPLETED
 
 			if _current_test.assert_count == cur_assert_count and !_current_test.pending:
@@ -850,7 +850,7 @@ func _run_test(script_inst, test_name):
 
 
 # ------------------------------------------------------------------------------
-# Calls after_all checked the passed in test script and takes care of settings so all
+# Calls after_all on the passed in test script and takes care of settings so all
 # logger output appears indented and with a proper heading
 #
 # Calls both pre-all-tests methods until prerun_setup is removed
@@ -874,7 +874,7 @@ func _call_before_all(test_script):
 
 
 # ------------------------------------------------------------------------------
-# Calls after_all checked the passed in test script and takes care of settings so all
+# Calls after_all on the passed in test script and takes care of settings so all
 # logger output appears indented and with a proper heading
 #
 # Calls both post-all-tests methods until postrun_teardown is removed.
@@ -1146,7 +1146,7 @@ func _get_files(path, prefix, suffix):
 
 
 # ------------------------------------------------------------------------------
-# Conditionally prints the text to the console/results variable based checked the
+# Conditionally prints the text to the console/results variable based on the
 # current log level and what level is passed in.  Whenever currently in a test,
 # the text will be indented under the test.  It can be further indented if
 # desired.
@@ -1461,7 +1461,7 @@ func get_yield_between_tests():
 
 
 # ------------------------------------------------------------------------------
-# Call _process or _fixed_process, if they exist, checked obj and all it's children
+# Call _process or _fixed_process, if they exist, on obj and all it's children
 # and their children and so and so forth.  Delta will be passed through to all
 # the _process or _fixed_process methods.
 # ------------------------------------------------------------------------------
@@ -1479,7 +1479,7 @@ func simulate(obj, times, delta):
 # ------------------------------------------------------------------------------
 # Starts an internal timer with a timeout of the passed in time.  A 'timeout'
 # signal will be sent when the timer ends.  Returns itself so that it can be
-# used in a call to yield...cutting down checked lines of code.
+# used in a call to yield...cutting down on lines of code.
 #
 # Example, yield to the Gut object for 10 seconds:
 #  await gut.set_yield_time(10).timeout

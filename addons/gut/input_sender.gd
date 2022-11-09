@@ -71,7 +71,7 @@ class InputQueueItem:
 			if _waited_frames >= frame_delay:
 				emit_signal("event_ready")
 
-	func _init(t_delay,f_delay):
+	func _init(t_delay, f_delay):
 		time_delay = t_delay
 		frame_delay = f_delay
 		_is_ready = time_delay == 0 and frame_delay == 0
