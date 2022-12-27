@@ -24,7 +24,7 @@ func _get_resource_type():
 	return "Theme"
 
 
-func _get_import_options(preset):
+func _get_import_options(preset, _i):
 	return []
 
 
@@ -32,9 +32,9 @@ func _get_preset_count():
 	return 0
 
 
-func import(source_file, save_path, options, r_platform_variant, r_gen_files):
-	var file = File.new()
-	var err = file.open(source_file, File.READ)
+func _import(source_file, save_path, options, r_platform_variant, r_gen_files):
+	var file = FileAccess.open(source_file, FileAccess.READ)
+	var err = FileAccess.get_open_error()
 	if err != OK:
 		return err
 
@@ -72,7 +72,7 @@ func import(source_file, save_path, options, r_platform_variant, r_gen_files):
 			name = words[1].get_string().to_lower()
 			color = Color(words[2].get_string())
 
-		if not name or not color:
+		if name == null or color == null:
 			continue
 
 		match name:
@@ -121,4 +121,4 @@ func import(source_file, save_path, options, r_platform_variant, r_gen_files):
 			"cursor_text_color":
 				theme.set_color("cursor_text", "Terminal", color)
 
-	return ResourceSaver.save("%s.%s" % [save_path, _get_save_extension()], theme)
+	return ResourceSaver.save(theme, "%s.%s" % [save_path, _get_save_extension()])

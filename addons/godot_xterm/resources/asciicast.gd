@@ -3,11 +3,11 @@ extends Animation
 signal data_written(data)
 signal data_read(data)
 
-@export var version: int: int = 2
+@export var version: int = 2
 # Initial terminal width (number of columns).
-@export var width: int: int
+@export var width: int
 # Initial terminal height (number of rows).
-@export var height: int: int
+@export var height: int
 
 
 func get_class() -> String:
