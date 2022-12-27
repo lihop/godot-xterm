@@ -2,12 +2,13 @@
 
 importer="godot_xterm"
 type="Animation"
-path="res://.import/example.cast-9299cc6d12357f676344c3d48e3179e0.res"
+uid="uid://dcgqvylq0648u"
+path="res://.godot/imported/example.cast-9299cc6d12357f676344c3d48e3179e0.res"
 
 [deps]
 
 source_file="res://examples/asciicast/example.cast"
-dest_files=[ "res://.import/example.cast-9299cc6d12357f676344c3d48e3179e0.res" ]
+dest_files=["res://.godot/imported/example.cast-9299cc6d12357f676344c3d48e3179e0.res"]
 
 [params]
 
