@@ -18,7 +18,7 @@ const DEFAULT_ENV := {TERM = DEFAULT_NAME, COLORTERM = "truecolor"}
 
 # Any signal_number can be sent to the pty's process using the kill() function,
 # these are just the signals with numbers specified in the POSIX standard.
-const Signal = _PTYUnix.Signal
+const IPCSignal = _PTYUnix.IPCSignal
 
 signal data_received(data)
 signal exited(exit_code, signum)
@@ -78,8 +78,8 @@ func _init():
 
 
 func _ready():
-	if terminal_path and not _terminal:
-		set_terminal_path(terminal_path)
+	if not (terminal_path.is_empty()) and not _terminal:
+		self.terminal_path = terminal_path
 
 
 func set_cols(value: int):
@@ -151,7 +151,7 @@ func resizev(size: Vector2) -> void:
 # Kill the pty.
 # sigint: The signal to send. By default this is SIGHUP.
 # This is not supported on Windows.
-func kill(signum: int = Signal.SIGHUP) -> void:
+func kill(signum: int = IPCSignal.SIGHUP) -> void:
 	_pty_native.kill(signum)
 
 
@@ -160,7 +160,7 @@ func _notification(what: int):
 		NOTIFICATION_PARENTED:
 			var parent = get_parent()
 			if parent is _Terminal:
-				set_terminal_path(get_path_to(parent))
+				self.terminal_path = get_path_to(parent)
 
 
 func fork(

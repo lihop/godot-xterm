@@ -1,7 +1,7 @@
 #ifndef GODOT_XTERM_UV_UTILS_H
 #define GODOT_XTERM_UV_UTILS_H
 
-#include <Godot.hpp>
+#include <godot_cpp/classes/ref_counted.hpp>
 #include <uv.h>
 
 #define UV_ERR_PRINT(uv_err)                                                   \
@@ -21,25 +21,24 @@
 
 namespace godot {
 
-class LibuvUtils : public Reference {
-  GODOT_CLASS(LibuvUtils, Reference)
+class LibuvUtils : public RefCounted {
+  GDCLASS(LibuvUtils, RefCounted)
 
 public:
-  static void _register_methods();
-
   LibuvUtils();
   ~LibuvUtils();
 
-  void _init();
+  static Dictionary get_os_environ();
+  static String get_os_release();
+  static String get_cwd();
 
-  Dictionary get_os_environ();
-  String get_os_release();
-  String get_cwd();
-
-  godot_error kill(int pid, int signum);
+  static Error kill(int pid, int signum);
 
 public:
-  static godot_error translate_uv_errno(int uv_err);
+  static Error translate_uv_errno(int uv_err);
+
+protected:
+  static void _bind_methods();
 };
 
 } // namespace godot

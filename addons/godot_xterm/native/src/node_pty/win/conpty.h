@@ -1,15 +1,16 @@
-// Copyright (c) 2021, Leroy Hopson (MIT License).
+// SPDX-FileCopyrightText: 2021 Leroy Hopson <godot-xterm@leroy.geek.nz>
+// SPDX-License-Identifier: MIT
 
 #ifndef GODOT_XTERM_CONPTY_H
 #define GODOT_XTERM_CONPTY_H
 
-#include <FuncRef.hpp>
-#include <Godot.hpp>
+#include <godot_cpp/classes/ref_counted.hpp>
+#include <godot_cpp/variant/callable.hpp>
 
 namespace godot {
 
-class ConPTY : public Reference {
-  GODOT_CLASS(ConPTY, Reference)
+class ConPTY : public RefCounted {
+  GDCLASS(ConPTY, RefCounted)
 
 public:
   //   Array fork(String file,
@@ -25,7 +26,9 @@ public:
   //   String process(int fd, String tty);
 
   void _init();
-  static void _register_methods();
+
+protected:
+  static void _bind_methods();
 };
 
 } // namespace godot

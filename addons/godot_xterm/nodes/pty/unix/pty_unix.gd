@@ -6,10 +6,6 @@
 @tool
 extends "../pty_native.gd"
 
-const LibuvUtils := preload("../libuv_utils.gd")
-const Pipe := preload("../pipe.gdns")
-const PTYUnix = preload("./pty_unix.gdns")
-
 const DEFAULT_NAME := "xterm-256color"
 const DEFAULT_COLS := 80
 const DEFAULT_ROWS := 24
@@ -25,7 +21,7 @@ const FALLBACK_FILE = "sh"
 
 # Any signal_number can be sent to the pty's process using the kill() function,
 # these are just the signals with numbers specified in the POSIX standard.
-enum Signal {
+enum IPCSignal {
 	SIGHUP = 1,  # Hangup
 	SIGINT = 2,  # Terminal interrupt signal
 	SIGQUIT = 3,  # Terminal quit signal
@@ -68,10 +64,7 @@ var _exit_cb: Callable
 # Writes data to the socket.
 # data: The data to write.
 func write(data) -> void:
-	assert(
-		data is PackedByteArray or data is String,
-		"Invalid type for argument 'data'. Should be of type PackedByteArray or String"
-	)
+	assert(data is PackedByteArray or data is String, "Invalid type for argument 'data'. Should be of type PackedByteArray or String")
 	if _pipe:
 		_pipe.write(data if data is PackedByteArray else data.to_utf8_buffer())
 
@@ -81,7 +74,7 @@ func resize(cols: int, rows: int) -> void:
 		PTYUnix.new().resize(_fd, cols, rows)
 
 
-func kill(signum: int = Signal.SIGHUP) -> void:
+func kill(signum: int = IPCSignal.SIGHUP) -> void:
 	if _pipe:
 		_pipe.close()
 	if _pid > 0:
@@ -133,13 +126,12 @@ func fork(
 	var parsed_env: PackedStringArray = _parse_env(final_env)
 
 	# Exit callback.
-	_exit_cb = Callable.new()
-	_exit_cb.set_instance(self)
-	_exit_cb.set_function("_on_exit")
+	_exit_cb = Callable(self, "on_exit")
 
 	# Actual fork.
-	var result = PTYUnix.new().fork(  # VERY IMPORTANT: The must be set null or 0, otherwise will get an ENOTSOCK error after connecting our pipe to the fd.
-		file, null, args, parsed_env, cwd, cols, rows, uid, gid, utf8, _exit_cb
+	var result = PTYUnix.new().fork(
+		# VERY IMPORTANT: The second argument must be 0, otherwise will get an ENOTSOCK error after connecting our pipe to the fd.
+		file, 0, args, parsed_env, cwd, cols, rows, uid, gid, utf8, _exit_cb
 	)
 
 	if result[0] != OK:
@@ -154,7 +146,7 @@ func fork(
 	_pid = result[1].pid
 
 	_pipe = Pipe.new()
-	_pipe.open(_fd)
+	_pipe.open(_fd, true) # FIXME: _pipe.open(_fd) should be sufficient but requires two args.
 
 	# Must connect to signal AFTER opening, otherwise we will get error ENOTSOCK.
 	_pipe.connect("data_received",Callable(self,"_on_pipe_data_received"))
@@ -169,7 +161,7 @@ func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
 func _exit_tree():
 	_exit_cb = null
 	if _pid > 1:
-		LibuvUtils.kill(_pid, Signal.SIGHUP)
+		LibuvUtils.kill(_pid, IPCSignal.SIGHUP)
 		if _pipe:
 			while _pipe.get_status() != 0:
 				continue

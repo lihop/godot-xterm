@@ -14,6 +14,8 @@ import os
 import sys
 import subprocess
 
+EnsureSConsVersion(4, 0)
+
 # Try to detect the host platform automatically. 
 # This is used if no `platform` argument is passed.
 if sys.platform.startswith('linux'):
@@ -58,8 +60,8 @@ opts.Add(EnumVariable(
 opts.Add(EnumVariable(
     'target',
     'Compilation target',
-    'debug',
-    allowed_values=('debug', 'release'),
+    'editor',
+    allowed_values=('editor', 'release'),
     ignorecase=2
 ))
 opts.Add(EnumVariable("macos_arch", "Target macOS architecture",
@@ -72,6 +74,15 @@ opts.Add(BoolVariable(
 
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
+
+# Cache if SCONS_CACHE env var set.
+scons_cache_path = os.environ.get("SCONS_CACHE")
+if scons_cache_path is not None:
+    CacheDir(scons_cache_path)
+    Decider("MD5")
+print("caching to " + scons_cache_path)
+exit
+
 
 # Allows 32bit builds on windows 64bit. 
 if env['platform'] == 'windows':
@@ -96,7 +107,7 @@ if env['platform'] == 'linux':
     env.Append(CCFLAGS=['-fPIC', '-Wwrite-strings'])
     env.Append(LINKFLAGS=["-Wl,-R'$$ORIGIN'", '-static-libstdc++'])
 
-    if env['target'] == 'debug':
+    if env['target'] == 'editor':
         env.Append(CCFLAGS=['-Og', '-g'])
     elif env['target'] == 'release':
         env.Append(CCFLAGS=['-O3'])
@@ -153,7 +164,7 @@ elif env['platform'] == 'osx':
 
     env.Append(LINKFLAGS=['-Wl,-undefined,dynamic_lookup'])
 
-    if env['target'] == 'debug':
+    if env['target'] == 'editor':
         env.Append(CCFLAGS=['-Og', '-g'])
     elif env['target'] == 'release':
         env.Append(CCFLAGS=['-O3'])
@@ -166,14 +177,14 @@ elif env['platform'] == 'windows':
 
     # On Windows using MSVC.
     if host_platform == 'windows':
-        if env['target'] == 'debug':
+        if env['target'] == 'editor':
             env.Append(CCFLAGS=['/Z7', '/Od', '/EHsc', '/D_DEBUG', '/MDd'])
         elif env['target'] == 'release':
             env.Append(CCFLAGS=['/O2', '/EHsc', '/DNDEBUG', '/MD'])
 
     # On Windows, Linux, or MacOS using MinGW.
     elif host_platform == 'linux' or host_platform == 'osx':
-        env.Append(CCFLAGS=['-std=c++14', '-Wwrite-strings'])
+        env.Append(CCFLAGS=['-std=c++17', '-Wwrite-strings'])
         env.Append(LINKFLAGS=[
             '--static',
             '-Wl,--no-undefined',
@@ -181,7 +192,7 @@ elif env['platform'] == 'windows':
             '-static-libstdc++',
         ])
 
-        if env['target'] == 'debug':
+        if env['target'] == 'editor':
             env.Append(CCFLAGS=['-Og', '-g'])
         elif env['target'] == 'release':
             env.Append(CCFLAGS=['-O3'])
@@ -231,16 +242,15 @@ Default(libtsm)
 
 # Build libgodot-xterm.
 if env['platform'] != 'windows':
-    env.Append(CXXFLAGS=['-std=c++14'])
+    env.Append(CXXFLAGS=['-std=c++17'])
 
 env.Append(CPPPATH=[
     'src/',
     'thirdparty/libtsm/build/src/tsm',
     'thirdparty/libtsm/build/src/shared',
-    'thirdparty/godot-cpp/include/',
-    'thirdparty/godot-cpp/include/core/',
-    'thirdparty/godot-cpp/include/gen/',
-    'thirdparty/godot-cpp/godot-headers/',
+    'thirdparty/godot-cpp/gdextension',
+    'thirdparty/godot-cpp/include',
+    'thirdparty/godot-cpp/gen/include',
     'thirdparty/libuv/src',
     'thirdparty/libuv/include'
 ])
@@ -254,7 +264,7 @@ env.Append(LIBS=[
         env['platform'],
         env['target'],
         'wasm' if env['platform'] == 'javascript' else env['macos_arch'] if (
-            env['macos_arch'] != 'universal' and env['platform'] == 'osx') else env['bits'],
+            env['macos_arch'] != 'universal' and env['platform'] == 'osx') else 'x86_64', # FIXME use correct arch.
         env['LIBSUFFIX'],
     )),
     env.File('thirdparty/libtsm/build/bin/libtsm.{}.{}.{}{}'.format(
@@ -266,7 +276,7 @@ env.Append(LIBS=[
 ])
 
 sources = []
-sources.append('src/libgodotxtermnative.cpp')
+sources.append('src/register_types.cpp')
 sources.append('src/terminal.cpp')
 
 
@@ -280,7 +290,7 @@ else:
         sources.append('src/node_pty/unix/pty.cc')
         env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
     else:
-        #sources.append('src/node_pty/win/conpty.cc')
+        sources.append('src/node_pty/win/conpty.cc')
         env.Append(LIBS=[
             env.File('thirdparty/libuv/build/{}/uv_a.lib'.format(env["target"].capitalize())),
             'Advapi32.lib',

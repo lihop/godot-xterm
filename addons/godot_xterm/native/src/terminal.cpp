@@ -1,19 +1,19 @@
 // Copyright (c) 2021, Leroy Hopson (MIT License).
 
 #include "terminal.h"
-#include <Dictionary.hpp>
-#include <InputEventKey.hpp>
-#include <InputEventMouseButton.hpp>
-#include <OS.hpp>
-#include <ResourceLoader.hpp>
-#include <Theme.hpp>
+#include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/classes/input_event_key.hpp>
+#include <godot_cpp/classes/input_event_mouse_button.hpp>
+#include <godot_cpp/classes/os.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
+#include <godot_cpp/classes/theme.hpp>
 #include <algorithm>
 #include <string>
 #include <xkbcommon/xkbcommon-keysyms.h>
 
 // For _populate_key_list(), see below.
 #if !defined(__EMSCRIPTEN__) && !defined(__APPLE__)
-#include <GlobalConstants.hpp>
+#include <godot_cpp/classes/global_constants.hpp>
 #endif
 
 using namespace godot;
@@ -23,22 +23,8 @@ void Terminal::_populate_key_list() {
   if (!_key_list.empty())
     return;
 
-// The following error is thrown on the javascript platform when using
-// GlobalConstants from the header: abort(Assertion failed: bad export type for
-// `_ZN5godot15GlobalConstants8KEY_KP_0E`: undefined). Build with -s
-// ASSERTIONS=1 for more info.
-#if !defined(__EMSCRIPTEN__) && !defined(__APPLE__)
-#define GLOBAL_CONSTANT(VAR) GlobalConstants::VAR
-#else
-#define GLOBAL_CONSTANT(VAR) get_constant(#VAR)
-  const godot_dictionary _constants = godot::api->godot_get_global_constants();
-  const Dictionary *constants = (Dictionary *)&_constants;
-
-  auto get_constant = [constants](std::string name) -> int64_t {
-    godot::Variant key = (godot::Variant)(godot::String(name.c_str()));
-    return constants->operator[](key);
-  };
-#endif
+// TODO: Remove GLOBAL_CONSTANT macro.
+#define GLOBAL_CONSTANT(VAR) VAR
 
   // Godot does not have seperate scancodes for keypad keys when NumLock is off.
   // We can check the unicode value to determine whether it is off and set the
@@ -226,9 +212,9 @@ static void write_cb(struct tsm_vte *vte, const char *u8, size_t len,
                      void *data) {
   Terminal *term = static_cast<Terminal *>(data);
 
-  PoolByteArray bytes = PoolByteArray();
+  PackedByteArray bytes;
   bytes.resize(len);
-  { memcpy(bytes.write().ptr(), u8, len); }
+  { memcpy(bytes.ptrw(), u8, len); }
 
   if (len > 0) {
     if (term->input_event_key.is_valid()) {
@@ -276,51 +262,53 @@ static void bell_cb(tsm_vte *_vte, void *data) {
   terminal->emit_signal("bell");
 }
 
-void Terminal::_register_methods() {
-  register_method("_init", &Terminal::_init);
-  register_method("_ready", &Terminal::_ready);
-  register_method("_notification", &Terminal::_notification);
-  register_method("_gui_input", &Terminal::_gui_input);
-  register_method("_draw", &Terminal::_draw);
+void Terminal::_bind_methods() {
+  //ClassDB::bind_method(D_METHOD("_ready"), &Terminal::_ready);
+  ClassDB::bind_method(D_METHOD("_notification"), &Terminal::_notification);
+  ClassDB::bind_method(D_METHOD("__gui_input"), &Terminal::_gui_input);
+  //ClassDB::bind_method(D_METHOD("_draw"), &Terminal::_draw);
 
-  register_method("write", &Terminal::write);
+  ClassDB::bind_method(D_METHOD("write"), &Terminal::write);
 
-  register_method("sb_up", &Terminal::sb_up);
-  register_method("sb_down", &Terminal::sb_down);
-  register_method("sb_reset", &Terminal::sb_reset);
-  register_method("clear_sb", &Terminal::clear_sb);
+  ClassDB::bind_method(D_METHOD("sb_up"), &Terminal::sb_up);
+  ClassDB::bind_method(D_METHOD("sb_down"), &Terminal::sb_down);
+  ClassDB::bind_method(D_METHOD("sb_reset"), &Terminal::sb_reset);
+  ClassDB::bind_method(D_METHOD("clear_sb"), &Terminal::clear_sb);
 
-  register_method("start_selection", &Terminal::start_selection);
-  register_method("select_to_pointer", &Terminal::select_to_pointer);
-  register_method("reset_selection", &Terminal::reset_selection);
-  register_method("copy_selection", &Terminal::copy_selection);
-  register_method("copy_all", &Terminal::copy_all);
+  ClassDB::bind_method(D_METHOD("start_selection"), &Terminal::start_selection);
+  ClassDB::bind_method(D_METHOD("select_to_pointer"), &Terminal::select_to_pointer);
+  ClassDB::bind_method(D_METHOD("reset_selection"), &Terminal::reset_selection);
+  ClassDB::bind_method(D_METHOD("copy_selection"), &Terminal::copy_selection);
+  ClassDB::bind_method(D_METHOD("copy_all"), &Terminal::copy_all);
 
-  register_method("_update_theme", &Terminal::update_theme);
-  register_method("_update_size", &Terminal::update_theme);
+  ClassDB::bind_method(D_METHOD("_update_theme"), &Terminal::update_theme);
+  ClassDB::bind_method(D_METHOD("_update_size"), &Terminal::update_theme);
 
-  register_property<Terminal, Vector2>("cell_size", &Terminal::cell_size,
-                                       Vector2(0, 0));
-  register_property<Terminal, int>("rows", &Terminal::rows, 24);
-  register_property<Terminal, int>("cols", &Terminal::cols, 80);
-  register_property<Terminal, int>("update_mode", &Terminal::update_mode,
-                                   UpdateMode::AUTO);
+  ClassDB::bind_method(D_METHOD("get_cell_size"), &Terminal::get_cell_size);
+  ClassDB::bind_method(D_METHOD("get_rows"), &Terminal::get_rows);
+  ClassDB::bind_method(D_METHOD("get_cols"), &Terminal::get_cols);
+  ClassDB::bind_method(D_METHOD("get_update_mode"), &Terminal::get_update_mode);
+  ClassDB::bind_method(D_METHOD("set_update_mode", "update_mode"), &Terminal::set_update_mode);
+  ADD_PROPERTY(PropertyInfo(Variant::INT, "update_mode"), "set_update_mode", "get_update_mode");
 
-  register_signal<Terminal>("data_sent", "data",
-                            GODOT_VARIANT_TYPE_POOL_BYTE_ARRAY);
-  register_signal<Terminal>("key_pressed", "data",
-                            GODOT_VARIANT_TYPE_POOL_BYTE_ARRAY, "event",
-                            GODOT_VARIANT_TYPE_OBJECT);
-  register_signal<Terminal>("size_changed", "new_size",
-                            GODOT_VARIANT_TYPE_VECTOR2);
-  register_signal<Terminal>("bell", Dictionary());
+  ADD_SIGNAL(MethodInfo("data_sent", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
+  ADD_SIGNAL(MethodInfo("key_pressed", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data"),
+		  PropertyInfo(Variant::OBJECT, "event")));
+  ADD_SIGNAL(MethodInfo("size_changed", PropertyInfo(Variant::VECTOR2, "new_size")));
+  ADD_SIGNAL(MethodInfo("bell"));
 }
-
-Terminal::Terminal() {}
 
 Terminal::~Terminal() {}
 
-void Terminal::_init() {
+// TODO: Investigate using UPDATE_MODE enum instead of int.
+int Terminal::get_update_mode() { return update_mode; }
+void Terminal::set_update_mode(int p_update_mode) { update_mode = p_update_mode; };
+
+Vector2 Terminal::get_cell_size() { return cell_size; }
+int Terminal::get_rows() { return rows; }
+int Terminal::get_cols() { return cols; }
+
+Terminal::Terminal() {
   framebuffer_age = 0;
   update_mode = UpdateMode::AUTO;
 
@@ -358,16 +346,16 @@ void Terminal::_gui_input(Variant event) {
       return;
     }
 
-    int64_t scancode = k->get_scancode();
+    int64_t scancode = k->get_keycode();
     int64_t unicode = k->get_unicode();
     uint32_t ascii = unicode <= 127 ? unicode : 0;
 
     unsigned int mods = 0;
-    if (k->get_alt())
+    if (k->is_alt_pressed())
       mods |= TSM_ALT_MASK;
-    if (k->get_control())
+    if (k->is_ctrl_pressed())
       mods |= TSM_CONTROL_MASK;
-    if (k->get_shift())
+    if (k->is_shift_pressed())
       mods |= TSM_SHIFT_MASK;
 
     uint32_t keysym = mapkey({unicode, scancode});
@@ -418,8 +406,8 @@ void Terminal::update_theme() {
                                                  Color default_color) -> void {
     Color c;
 
-    c = has_color(theme_color, "Terminal") ? get_color(theme_color, "Terminal")
-        : has_color_override(theme_color)  ? get_color(theme_color, "")
+    c = has_theme_color(theme_color, "Terminal") ? get_theme_color(theme_color, "Terminal")
+        : has_theme_color_override(theme_color)  ? get_theme_color(theme_color, "")
         : (default_theme != nullptr &&
            default_theme->has_color(theme_color, "Terminal"))
             ? default_theme->get_color(theme_color, "Terminal")
@@ -488,17 +476,17 @@ void Terminal::update_theme() {
   auto load_font = [this, default_theme](String font_style) -> void {
     Ref<Font> fontref;
 
-    if (has_font(font_style, "Terminal")) {
-      fontref = get_font(font_style, "Terminal");
-    } else if (has_font_override(font_style)) {
-      fontref = get_font(font_style, "");
-    } else if (has_font("regular", "Terminal")) {
-      fontref = get_font("regular", "Terminal");
+    if (has_theme_font(font_style, "Terminal")) {
+      fontref = get_theme_font(font_style, "Terminal");
+    } else if (has_theme_font_override(font_style)) {
+      fontref = get_theme_font(font_style, "");
+    } else if (has_theme_font("regular", "Terminal")) {
+      fontref = get_theme_font("regular", "Terminal");
     } else if (default_theme != nullptr &&
                default_theme->has_font("regular", "Terminal")) {
       fontref = default_theme->get_font("regular", "Terminal");
     } else {
-      fontref = get_font("");
+      fontref = get_theme_font("");
     }
 
     fontmap.insert(std::pair<String, Ref<Font>>(font_style, fontref));
@@ -523,7 +511,7 @@ void Terminal::draw_foreground(int row, int col, char *ch,
                                const tsm_screen_attr *attr, Color fgcolor) {
   /* Set the font */
 
-  Ref<Font> fontref = get_font("");
+  Ref<Font> fontref = get_theme_font("");
 
   if (attr->bold && attr->italic) {
     fontref = fontmap["bold_italic"];
@@ -543,10 +531,10 @@ void Terminal::draw_foreground(int row, int col, char *ch,
   int font_height = fontref.ptr()->get_height();
   Vector2 foreground_pos =
       Vector2(col * cell_size.x, row * cell_size.y + font_height / 1.25);
-  draw_string(fontref, foreground_pos, ch, fgcolor);
+  draw_string(fontref, foreground_pos, ch, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, fgcolor); // FIXME
 
   if (attr->underline)
-    draw_string(fontref, foreground_pos, "_", fgcolor);
+    draw_string(fontref, foreground_pos, "_", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, fgcolor); // FIXME
 }
 
 std::pair<Color, Color> Terminal::get_cell_colors(const tsm_screen_attr *attr) {
@@ -596,10 +584,10 @@ void Terminal::update_size() {
   Ref<Font> fontref;
   if (fontmap.count("regular"))
     fontref = fontmap["regular"];
-  else if (has_font("regular", "Terminal"))
-    fontref = get_font("regular", "Terminal");
+  else if (has_theme_font("regular", "Terminal"))
+    fontref = get_theme_font("regular", "Terminal");
   else
-    fontref = get_font("");
+    fontref = get_theme_font("");
 
   cell_size = fontref->get_string_size("W");
 
@@ -611,43 +599,43 @@ void Terminal::update_size() {
   emit_signal("size_changed", Vector2(cols, rows));
 }
 
-void Terminal::write(PoolByteArray data) {
-  tsm_vte_input(vte, (char *)data.read().ptr(), data.size());
+void Terminal::write(PackedByteArray data) {
+  tsm_vte_input(vte, (char *)data.ptr(), data.size());
 }
 
 void Terminal::sb_up(int num) {
   tsm_screen_sb_up(screen, num);
-  update();
+  queue_redraw();
 }
 
 void Terminal::sb_down(int num) {
   tsm_screen_sb_down(screen, num);
-  update();
+  queue_redraw();
 }
 
 void Terminal::sb_reset() {
   tsm_screen_sb_reset(screen);
-  update();
+  queue_redraw();
 }
 
 void Terminal::clear_sb() {
   tsm_screen_clear_sb(screen);
-  update();
+  queue_redraw();
 }
 
 void Terminal::start_selection(Vector2 position) {
   tsm_screen_selection_start(screen, position.x, position.y);
-  update();
+  queue_redraw();
 }
 
 void Terminal::select_to_pointer(Vector2 position) {
   tsm_screen_selection_target(screen, position.x, position.y);
-  update();
+  queue_redraw();
 }
 
 void Terminal::reset_selection() {
   tsm_screen_selection_reset(screen);
-  update();
+  queue_redraw();
 }
 
 String Terminal::copy_selection() {

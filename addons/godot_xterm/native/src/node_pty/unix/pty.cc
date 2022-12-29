@@ -20,7 +20,7 @@
 
 #include "pty.h"
 #include "libuv_utils.h"
-#include <FuncRef.hpp>
+#include <godot_cpp/variant/callable.hpp>
 #include <uv.h>
 
 #include <errno.h>
@@ -89,7 +89,7 @@ using namespace godot;
  */
 
 struct pty_baton {
-  Ref<FuncRef> cb;
+  Callable cb;
   int exit_code;
   int signal_code;
   pid_t pid;
@@ -119,11 +119,11 @@ static void pty_after_waitpid(uv_async_t *);
 
 static void pty_after_close(uv_handle_t *);
 
-Array PTYUnix::fork(String p_file, int _ignored, PoolStringArray p_args,
-                    PoolStringArray p_env, String p_cwd, int p_cols, int p_rows,
-                    int p_uid, int p_gid, bool p_utf8, Ref<FuncRef> p_on_exit) {
+Array PTYUnix::fork(String p_file, int _ignored, PackedStringArray p_args,
+                    PackedStringArray p_env, String p_cwd, int p_cols, int p_rows,
+                    int p_uid, int p_gid, bool p_utf8, Callable p_on_exit) {
   // file
-  char *file = p_file.alloc_c_string();
+  char *file = strdup(p_file.utf8().get_data());
 
   // args
   int i = 0;
@@ -133,7 +133,7 @@ Array PTYUnix::fork(String p_file, int _ignored, PoolStringArray p_args,
   argv[0] = strdup(file);
   argv[argl - 1] = NULL;
   for (; i < argc; i++) {
-    char *arg = p_args[i].alloc_c_string();
+    char *arg = strdup(p_args[i].utf8().get_data());
     argv[i + 1] = strdup(arg);
   }
 
@@ -143,12 +143,12 @@ Array PTYUnix::fork(String p_file, int _ignored, PoolStringArray p_args,
   char **env = new char *[envc + 1];
   env[envc] = NULL;
   for (; i < envc; i++) {
-    char *pairs = p_env[i].alloc_c_string();
+    char *pairs = strdup(p_env[i].utf8().get_data());
     env[i] = strdup(pairs);
   }
 
   // cwd
-  char *cwd = strdup(p_cwd.alloc_c_string());
+  char *cwd = strdup(p_cwd.utf8().get_data());
 
   // size
   struct winsize winp;
@@ -240,7 +240,7 @@ Array PTYUnix::fork(String p_file, int _ignored, PoolStringArray p_args,
   switch (pid) {
   case -1:
     ERR_PRINT("forkpty(3) failed.");
-    return Array::make(GODOT_FAILED);
+    return Array::make(FAILED);
   case 0:
     if (strlen(cwd)) {
       if (chdir(cwd) == -1) {
@@ -267,10 +267,10 @@ Array PTYUnix::fork(String p_file, int _ignored, PoolStringArray p_args,
   default:
     if (pty_nonblock(master) == -1) {
       ERR_PRINT("Could not set master fd to nonblocking.");
-      return Array::make(GODOT_FAILED);
+      return Array::make(FAILED);
     }
 
-    Dictionary result = Dictionary::make();
+    Dictionary result;
     result["fd"] = (int)master;
     result["pid"] = (int)pid;
     result["pty"] = ptsname(master);
@@ -286,10 +286,10 @@ Array PTYUnix::fork(String p_file, int _ignored, PoolStringArray p_args,
 
     uv_thread_create(&baton->tid, pty_waitpid, static_cast<void *>(baton));
 
-    return Array::make(GODOT_OK, result);
+    return Array::make(OK, result);
   }
 
-  return Array::make(GODOT_FAILED);
+  return Array::make(FAILED);
 }
 
 Array PTYUnix::open(int p_cols, int p_rows) {
@@ -306,28 +306,28 @@ Array PTYUnix::open(int p_cols, int p_rows) {
 
   if (ret == -1) {
     ERR_PRINT("openpty(3) failed.");
-    return Array::make(GODOT_FAILED);
+    return Array::make(FAILED);
   }
 
   if (pty_nonblock(master) == -1) {
     ERR_PRINT("Could not set master fd to nonblocking.");
-    return Array::make(GODOT_FAILED);
+    return Array::make(FAILED);
   }
 
   if (pty_nonblock(slave) == -1) {
     ERR_PRINT("Could not set slave fd to nonblocking.");
-    return Array::make(GODOT_FAILED);
+    return Array::make(FAILED);
   }
 
-  Dictionary dict = Dictionary::make();
+  Dictionary dict;
   dict["master"] = master;
   dict["slave"] = slave;
   dict["pty"] = ptsname(master);
 
-  return Array::make(GODOT_OK, dict);
+  return Array::make(OK, dict);
 }
 
-godot_error PTYUnix::resize(int p_fd, int p_cols, int p_rows) {
+Error PTYUnix::resize(int p_fd, int p_cols, int p_rows) {
   int fd = p_fd;
 
   struct winsize winp;
@@ -348,10 +348,10 @@ godot_error PTYUnix::resize(int p_fd, int p_cols, int p_rows) {
       RETURN_UV_ERR(UV_ENOTTY);
     }
     ERR_PRINT("ioctl(2) failed");
-    return GODOT_FAILED;
+    return FAILED;
   }
 
-  return GODOT_OK;
+  return OK;
 }
 
 /**
@@ -360,7 +360,7 @@ godot_error PTYUnix::resize(int p_fd, int p_cols, int p_rows) {
 String PTYUnix::process(int p_fd, String p_tty) {
   int fd = p_fd;
 
-  char *tty = p_tty.alloc_c_string();
+  char *tty = strdup(p_tty.utf8().get_data());
   char *name = pty_getproc(fd, tty);
   std::free(tty);
 
@@ -445,9 +445,9 @@ static void pty_after_waitpid(uv_async_t *async) {
 
   Array argv = Array::make(baton->exit_code, baton->signal_code);
 
-  if (baton->cb != nullptr && baton->cb->is_valid()) {
-    baton->cb->call_funcv(argv);
-    baton->cb = (Ref<FuncRef>)nullptr;
+  if (baton->cb != nullptr && baton->cb.is_valid()) {
+    baton->cb.callv(argv);
+    baton->cb = (Variant)nullptr;
   }
 
   uv_close((uv_handle_t *)async, pty_after_close);
@@ -663,12 +663,12 @@ static pid_t pty_forkpty(int *amaster, char *name, const struct termios *termp,
  * Init
  */
 
-void PTYUnix::_register_methods() {
-  register_method("_init", &PTYUnix::_init);
-  register_method("fork", &PTYUnix::fork);
-  register_method("open", &PTYUnix::open);
-  register_method("resize", &PTYUnix::resize);
-  register_method("process", &PTYUnix::process);
+void PTYUnix::_bind_methods() {
+  ClassDB::bind_method(D_METHOD("_init"), &PTYUnix::_init);
+  ClassDB::bind_method(D_METHOD("fork"), &PTYUnix::fork);
+  ClassDB::bind_method(D_METHOD("open"), &PTYUnix::open);
+  ClassDB::bind_method(D_METHOD("resize"), &PTYUnix::resize);
+  ClassDB::bind_method(D_METHOD("process"), &PTYUnix::process);
 }
 
 void PTYUnix::_init() {}

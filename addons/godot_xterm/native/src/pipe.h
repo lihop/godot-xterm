@@ -1,32 +1,31 @@
-// Copyright (c) 2021, Leroy Hopson (MIT License).
+// SPDX-FileCopyrightText: 2021-2022 Leroy Hopson <godot-xterm@leroy.geek.nz>
+// SPDX-License-Identifier: MIT
 
 #ifndef GODOT_XTERM_PIPE_H
 #define GODOT_XTERM_PIPE_H
 
-#include <Godot.hpp>
-#include <Reference.hpp>
+#include <godot_cpp/classes/ref_counted.hpp>
+#include <godot_cpp/variant/packed_byte_array.hpp>
 #include <uv.h>
 
 namespace godot {
 
-class Pipe : public Reference {
-  GODOT_CLASS(Pipe, Reference)
+class Pipe : public RefCounted {
+  GDCLASS(Pipe, RefCounted)
 
 public:
   uv_pipe_t handle;
-
-  static void _register_methods();
 
   Pipe();
   ~Pipe();
 
   void _init();
 
-  godot_error open(int fd, bool ipc);
+  Error open(int fd, bool ipc);
   void close();
   int get_status();
 
-  godot_error write(PoolByteArray data);
+  Error write(PackedByteArray data);
 
   void pause();
   void resume();
@@ -34,10 +33,13 @@ public:
 public:
   int status;
 
+protected:
+  static void _bind_methods();
+
 private:
   void _poll_connection();
 
-  static godot_error _translate_error(int err);
+  static Error _translate_error(int err);
 };
 
 } // namespace godot

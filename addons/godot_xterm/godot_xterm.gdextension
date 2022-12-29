@@ -1,0 +1,6 @@
+[configuration]
+
+entry_symbol = "godot_xterm_library_init"
+
+[libraries]
+linux.debug.x86_64 = "res://addons/godot_xterm/native/bin/libgodot-xterm.linux.64.so"

@@ -1,22 +1,22 @@
+// SPDX-FileCopyrightText: 2021-2022 Leroy Hopson <godot-xterm@leroy.geek.nz>
+// SPDX-License-Identifier: MIT
+
 #include "libuv_utils.h"
+#include <godot_cpp/classes/global_constants.hpp>
 #include <uv.h>
 
 using namespace godot;
 
-void LibuvUtils::_register_methods() {
-  register_method("_init", &LibuvUtils::_init);
+void LibuvUtils::_bind_methods() {
+  ClassDB::bind_static_method("LibuvUtils", D_METHOD("get_os_environ"), &LibuvUtils::get_os_environ);
+  ClassDB::bind_static_method("LibuvUtils", D_METHOD("get_os_release"), &LibuvUtils::get_os_release);
+  ClassDB::bind_static_method("LibuvUtils", D_METHOD("get_cwd"), &LibuvUtils::get_cwd);
 
-  register_method("get_os_environ", &LibuvUtils::get_os_environ);
-  register_method("get_os_release", &LibuvUtils::get_os_release);
-  register_method("get_cwd", &LibuvUtils::get_cwd);
-
-  register_method("kill", &LibuvUtils::kill);
+  ClassDB::bind_static_method("LibuvUtils", D_METHOD("kill", "pid", "signum"), &LibuvUtils::kill);
 }
 
 LibuvUtils::LibuvUtils() {}
 LibuvUtils::~LibuvUtils() {}
-
-void LibuvUtils::_init() {}
 
 Dictionary LibuvUtils::get_os_environ() {
   Dictionary result;
@@ -63,50 +63,50 @@ String LibuvUtils::get_cwd() {
   return result;
 }
 
-godot_error LibuvUtils::kill(int pid, int signum) {
+Error LibuvUtils::kill(int pid, int signum) {
   RETURN_UV_ERR(uv_kill(pid, signum));
 }
 
-godot_error LibuvUtils::translate_uv_errno(int uv_err) {
+Error LibuvUtils::translate_uv_errno(int uv_err) {
   if (uv_err >= 0)
-    return GODOT_OK;
+    return OK;
 
   // Rough translation of libuv error to godot error.
   // Not necessarily accurate.
 
   switch (uv_err) {
   case UV_EEXIST: // file already exists
-    return GODOT_ERR_ALREADY_EXISTS;
+    return ERR_ALREADY_EXISTS;
 
   case UV_EADDRINUSE: // address already in use
-    return GODOT_ERR_ALREADY_IN_USE;
+    return ERR_ALREADY_IN_USE;
 
   case UV_EBUSY:   // resource busy or locked
   case UV_ETXTBSY: // text file is busy
-    return GODOT_ERR_BUSY;
+    return ERR_BUSY;
 
   case UV_ECONNREFUSED: // connection refused
-    return GODOT_ERR_CANT_CONNECT;
+    return ERR_CANT_CONNECT;
 
   case UV_ECONNABORTED: // software caused connection abort
   case UV_ECONNRESET:   // connection reset by peer
   case UV_EISCONN:      // socket is already connected
   case UV_ENOTCONN:     // socket is not connected
-    return GODOT_ERR_CONNECTION_ERROR;
+    return ERR_CONNECTION_ERROR;
 
   case UV_ENODEV: // no such device
   case UV_ENXIO:  // no such device or address
   case UV_ESRCH:  // no such process
-    return GODOT_ERR_DOES_NOT_EXIST;
+    return ERR_DOES_NOT_EXIST;
 
   case UV_EROFS: // read-only file system
-    return GODOT_ERR_FILE_CANT_WRITE;
+    return ERR_FILE_CANT_WRITE;
 
   case UV_EOF: // end of file
-    return GODOT_ERR_FILE_EOF;
+    return ERR_FILE_EOF;
 
   case UV_ENOENT: // no such file or directory
-    return GODOT_ERR_FILE_NOT_FOUND;
+    return ERR_FILE_NOT_FOUND;
 
   case UV_EAI_BADFLAGS:                 // bad ai_flags value
   case UV_EAI_BADHINTS:                 // invalid value for hints
@@ -115,13 +115,13 @@ godot_error LibuvUtils::translate_uv_errno(int uv_err) {
   case UV_EINVAL:                       // invalid argument
   case UV_ENOTTY:                       // inappropriate ioctl for device
   case UV_EPROTOTYPE:                   // protocol wrong type for socket
-    return GODOT_ERR_INVALID_PARAMETER; // Parameter passed is invalid
+    return ERR_INVALID_PARAMETER;       // Parameter passed is invalid
 
   case UV_ENOSYS: // function not implemented
-    return GODOT_ERR_METHOD_NOT_FOUND;
+    return ERR_METHOD_NOT_FOUND;
 
   case UV_EAI_MEMORY: // out of memory
-    return GODOT_ERR_OUT_OF_MEMORY;
+    return ERR_OUT_OF_MEMORY;
 
   case UV_E2BIG:        // argument list too long
   case UV_EFBIG:        // file too large
@@ -129,15 +129,15 @@ godot_error LibuvUtils::translate_uv_errno(int uv_err) {
   case UV_ENAMETOOLONG: // name too long
   case UV_EOVERFLOW:    // value too large for defined data type
   case UV_ERANGE:       // result too large
-    return GODOT_ERR_PARAMETER_RANGE_ERROR; // Parameter given out of range
+    return ERR_PARAMETER_RANGE_ERROR; // Parameter given out of range
 
   case UV_ETIMEDOUT:
-    return GODOT_ERR_TIMEOUT; // connection timed out
+    return ERR_TIMEOUT; // connection timed out
 
   case UV_EACCES: // permission denied
   case UV_EPERM:  // operation not permitted
   case UV_EXDEV:  // cross-device link not permitted
-    return GODOT_ERR_UNAUTHORIZED;
+    return ERR_UNAUTHORIZED;
 
   case UV_EADDRNOTAVAIL:          // address not available
   case UV_EAFNOSUPPORT:           // address family not supported
@@ -150,12 +150,12 @@ godot_error LibuvUtils::translate_uv_errno(int uv_err) {
   case UV_ENOTSUP:                // operation not supported on socket
   case UV_EPROTONOSUPPORT:        // protocol not supported
   case UV_ESOCKTNOSUPPORT:        // socket type not supported
-    return GODOT_ERR_UNAVAILABLE; // What is requested is
+    return ERR_UNAVAILABLE;       // What is requested is
                                   // unsupported/unavailable
 
   case UV_EAI_NODATA:   // no address
   case UV_EDESTADDRREQ: // destination address required
-    return GODOT_ERR_UNCONFIGURED;
+    return ERR_UNCONFIGURED;
 
   case UV_EAI_AGAIN:    // temporary failure
   case UV_EAI_CANCELED: // request canceled
@@ -191,6 +191,6 @@ godot_error LibuvUtils::translate_uv_errno(int uv_err) {
   case UV_ESPIPE:       // invalid seek
   case UV_UNKNOWN:      // unknown error
   default:
-    return GODOT_FAILED; // Generic fail error
+    return FAILED;      // Generic fail error
   }
 }

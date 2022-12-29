@@ -2,12 +2,14 @@
 
 #include "pipe.h"
 #include "libuv_utils.h"
-#include <Dictionary.hpp>
-#include <InputEventKey.hpp>
-#include <OS.hpp>
-#include <ResourceLoader.hpp>
-#include <Theme.hpp>
-#include <Timer.hpp>
+#include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/variant/packed_byte_array.hpp>
+#include <godot_cpp/classes/global_constants.hpp>
+#include <godot_cpp/classes/input_event_key.hpp>
+#include <godot_cpp/classes/os.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
+#include <godot_cpp/classes/theme.hpp>
+#include <godot_cpp/classes/timer.hpp>
 #include <algorithm>
 #include <thread>
 #include <vector>
@@ -19,17 +21,16 @@
 
 using namespace godot;
 
-void Pipe::_register_methods() {
-  register_method("_init", &Pipe::_init);
+void Pipe::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("_init"), &Pipe::_init);
 
-  register_method("poll", &Pipe::_poll_connection);
-  register_method("open", &Pipe::open);
-  register_method("write", &Pipe::write);
-  register_method("get_status", &Pipe::get_status);
-  register_method("close", &Pipe::close);
+  ClassDB::bind_method(D_METHOD("poll"), &Pipe::_poll_connection);
+  ClassDB::bind_method(D_METHOD("open"), &Pipe::open);
+  ClassDB::bind_method(D_METHOD("write"), &Pipe::write);
+  ClassDB::bind_method(D_METHOD("get_status"), &Pipe::get_status);
+  ClassDB::bind_method(D_METHOD("close"), &Pipe::close);
 
-  register_signal<Pipe>("data_received", "data",
-                        GODOT_VARIANT_TYPE_POOL_BYTE_ARRAY);
+ 	ADD_SIGNAL(MethodInfo("data_received", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
 }
 
 Pipe::Pipe() {}
@@ -47,7 +48,7 @@ void _write_cb(uv_write_t *req, int status);
 
 void _alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf);
 
-godot_error Pipe::open(int fd, bool ipc = false) {
+Error Pipe::open(int fd, bool ipc = false) {
   RETURN_IF_UV_ERR(uv_pipe_init(uv_default_loop(), &handle, ipc));
 
   handle.data = this;
@@ -58,7 +59,7 @@ godot_error Pipe::open(int fd, bool ipc = false) {
       uv_read_start((uv_stream_t *)&handle, _alloc_buffer, _read_cb));
 
   status = 1;
-  return GODOT_OK;
+  return OK;
 }
 
 void Pipe::close() {
@@ -66,8 +67,8 @@ void Pipe::close() {
   uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 }
 
-godot_error Pipe::write(PoolByteArray data) {
-  char *s = (char *)data.read().ptr();
+Error Pipe::write(PackedByteArray data) {
+  char *s = (char *)data.ptr();
   ULONG len = data.size();
 
   uv_buf_t buf;
@@ -80,7 +81,7 @@ godot_error Pipe::write(PoolByteArray data) {
   uv_write(req, (uv_stream_t *)&handle, &buf, 1, _write_cb);
   uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 
-  return GODOT_OK;
+  return OK;
 }
 
 int Pipe::get_status() {
@@ -116,9 +117,9 @@ void _read_cb(uv_stream_t *handle, ssize_t nread, const uv_buf_t *buf) {
     return;
   }
 
-  PoolByteArray data;
+  PackedByteArray data;
   data.resize(nread);
-  { memcpy(data.write().ptr(), buf->base, nread); }
+  { memcpy(data.ptrw(), buf->base, nread); }
   std::free((char *)buf->base);
 
   pipe->emit_signal("data_received", data);

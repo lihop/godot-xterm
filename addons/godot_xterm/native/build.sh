@@ -16,20 +16,23 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     *)
-      echo "Usage: ./build.sh [-t|--target <release|debug>] [--disable_pty]";
+      echo "Usage: ./build.sh [-t|--target <release|editor>] [--disable_pty]";
       exit 128
       shift
       ;;
   esac
 done
 # Set defaults.
-target=${target:-debug}
+target=${target:-editor}
 disable_pty=${disable_pty:-no}
 nproc=$(nproc || sysctl -n hw.ncpu)
 
 
 #GODOT_DIR Get the absolute path to the directory this script is in.
 NATIVE_DIR="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+# Cache built files.
+export SCONS_CACHE=${NATIVE_DIR}/.cache
 
 
 # Run script inside a nix shell if it is available.
@@ -56,9 +59,10 @@ updateSubmodules GODOT_CPP_DIR ${NATIVE_DIR}/thirdparty/godot-cpp
 
 
 # Build godot-cpp bindings.
-cd ${GODOT_CPP_DIR}
-echo "scons generate_bindings=yes target=$target -j$nproc"
-scons generate_bindings=yes macos_arch=$(uname -m) target=$target -j$nproc
+# FIXME: Commented out to improve build time, but needs to be uncommented and run for initial build of godot-cpp.
+#cd ${GODOT_CPP_DIR}
+#echo "scons generate_bindings=yes target=$target -j$nproc"
+#scons generate_bindings=yes macos_arch=$(uname -m) target=$target -j$nproc
 
 # Build libuv as a static library.
 cd ${LIBUV_DIR}
@@ -80,7 +84,7 @@ cd ${NATIVE_DIR}
 scons target=$target macos_arch=$(uname -m) disable_pty=$disable_pty -j$nproc
 
 # Use Docker to build libgodot-xterm javascript.
-if [ -x "$(command -v docker-compose)" ]; then
-	UID_GID="0:0" TARGET=$target docker-compose build javascript
-	UID_GID="$(id -u):$(id -g)" TARGET=$target docker-compose run --rm javascript
-fi
+#if [ -x "$(command -v docker-compose)" ]; then
+#	UID_GID="0:0" TARGET=$target docker-compose build javascript
+#	UID_GID="$(id -u):$(id -g)" TARGET=$target docker-compose run --rm javascript
+#fi

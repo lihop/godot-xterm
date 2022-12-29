@@ -27,8 +27,8 @@ enum SelectionMode {
 @export var update_mode: UpdateMode = UpdateMode.AUTO :
 	get:
 		return update_mode # TODOConverter40 Non existent get function 
-	set(mod_value):
-		mod_value  # TODOConverter40 Copy here content of set_update_mode
+	set(p_update_mode):
+		set_update_mode(p_update_mode)
 
 # If true, text in the terminal will be copied to the clipboard when selected.
 @export var copy_on_selection: bool
@@ -90,7 +90,7 @@ func write(data) -> void:
 func _flush():
 	for data in _buffer:
 		_native_terminal.write(data if data is PackedByteArray else data.to_utf8_buffer())
-		_native_terminal.update()
+		_native_terminal.queue_redraw()
 	_buffer.clear()
 
 
@@ -170,29 +170,30 @@ func _update_theme():
 
 
 func _refresh():
-	_screen.update()
+	_screen.queue_redraw()
 	if update_mode == UpdateMode.AUTO:
 		_native_terminal.update_mode = UpdateMode.ALL_NEXT_FRAME
 
 
 func _gui_input(event):
-	_native_terminal._gui_input(event)
+	_native_terminal.__gui_input(event) # FIXME: use _gui_input rather than __gui_input.
 
 	if event is InputEventKey and event.pressed:
 		# Return to bottom of scrollback buffer if we scrolled up. Ignore modifier
 		# keys pressed in isolation or if Ctrl+Shift modifier keys are pressed.
 		if (
-			not event.scancode in [KEY_ALT, KEY_SHIFT, KEY_CTRL, KEY_META, KEY_MASK_CMD_OR_CTRL]
-			and not (event.control and event.shift)
+			not event.keycode in [KEY_ALT, KEY_SHIFT, KEY_CTRL, KEY_META, KEY_MASK_CMD_OR_CTRL]
+			and not (event.ctrl_pressed and event.shift_pressed)
 		):
 			_native_terminal.sb_reset()
 
 		# Prevent focus changing to other inputs when pressing Tab or Arrow keys.
-		if event.scancode in [KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_TAB]:
+		if event.keycode in [KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_TAB]:
 			accept_event()
 
-	_handle_mouse_wheel(event)
-	_handle_selection(event)
+	# FIXME
+	#_handle_mouse_wheel(event)
+	#_handle_selection(event)
 
 
 func _handle_mouse_wheel(event: InputEventMouseButton):

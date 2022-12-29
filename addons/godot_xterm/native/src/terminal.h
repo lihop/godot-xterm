@@ -1,11 +1,13 @@
-// Copyright (c) 2021, Leroy Hopson (MIT License).
+// SPDX-FileCopyrightText: 2021-2022 Leroy Hopson <godot-xterm@leroy.geek.nz>
+// SPDX-License-Identifier: MIT
 
 #ifndef TERMINAL_H
 #define TERMINAL_H
 
-#include <Control.hpp>
-#include <Font.hpp>
-#include <Godot.hpp>
+#include <godot_cpp/classes/control.hpp>
+#include <godot_cpp/classes/font.hpp>
+#include <godot_cpp/classes/input_event_key.hpp>
+#include <godot_cpp/variant/packed_byte_array.hpp>
 #include <libtsm.h>
 #include <map>
 #include <vector>
@@ -13,12 +15,14 @@
 namespace godot {
 
 class Terminal : public Control {
-  GODOT_CLASS(Terminal, Control)
+  GDCLASS(Terminal, Control)
 
 public:
   Ref<InputEventKey> input_event_key;
 
 protected:
+  static void _bind_methods();
+
   tsm_screen *screen;
   tsm_vte *vte;
 
@@ -42,18 +46,15 @@ public:
                        Color fgcol);
 
 public:
-  static void _register_methods();
-
   Terminal();
   ~Terminal();
 
-  void _init();
   void _ready();
   void _notification(int what);
   void _gui_input(Variant event);
   void _draw();
 
-  void write(PoolByteArray data);
+  void write(PackedByteArray data);
 
   void sb_up(int num);
   void sb_down(int num);
@@ -72,11 +73,16 @@ public:
     ALL,
     ALL_NEXT_FRAME,
   };
+  int update_mode = UpdateMode::AUTO;
+  int get_update_mode();
+  void set_update_mode(int update_mode);
 
-  Vector2 cell_size;
-  int rows;
-  int cols;
-  int update_mode;
+  Vector2 cell_size = Vector2(0, 0);
+  Vector2 get_cell_size();
+  int rows = 24;
+  int get_rows();
+  int cols = 80;
+  int get_cols();
 
   uint8_t color_palette[TSM_COLOR_NUM][3];
 

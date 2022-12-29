@@ -29,10 +29,6 @@ config/icon="res://docs/media/icon.png"
 
 window/vsync/use_vsync=false
 
-[editor_plugins]
-
-enabled=PackedStringArray()
-
 [rendering]
 
 quality/driver/driver_name="GLES2"

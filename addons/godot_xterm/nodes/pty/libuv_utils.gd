@@ -6,14 +6,12 @@ extends Object
 # GDNative does not currently support registering static functions so we fake it.
 # Only the static functions of this class should be called.
 
-const LibuvUtils = preload("./libuv_utils.gdns")
-
 
 static func get_os_environ() -> Dictionary:
 	# While Godot has OS.get_environment(), I could see a way to get all environent
 	# variables, other than by OS.execute() which would require to much platform
 	# specific code. Easier to use libuv's utility function.
-	return LibuvUtils.new().get_os_environ()
+	return LibuvUtils.get_os_environ()
 
 
 static func get_cwd() -> String:

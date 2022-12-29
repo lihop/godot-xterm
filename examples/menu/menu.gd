@@ -110,10 +110,10 @@ func draw_menu():
 
 func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 	match data:
-		tput.CURSOR_UP:  # Up arrow key
+		TPut.CURSOR_UP:  # Up arrow key
 			selected_index = int(clamp(selected_index - 1, 0, menu_items.size() - 1))
 			draw_menu()
-		tput.CURSOR_DOWN:  # Down arrow key
+		TPut.CURSOR_DOWN:  # Down arrow key
 			selected_index = int(clamp(selected_index + 1, 0, menu_items.size() - 1))
 			draw_menu()
 		"1":
@@ -127,7 +127,7 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 			draw_menu()
 
 	# We can also match against the raw InputEventKey.
-	if event.scancode == KEY_ENTER:
+	if event.keycode == KEY_ENTER:
 		var item = menu_items[selected_index]
 
 		match item.name:
@@ -160,9 +160,11 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 				$Terminal.grab_focus()
 				scene.queue_free()
 			"Exit":
-				if OS.has_feature("JavaScript"):
-					JavaScript.eval("window.history.back() || window.close()")
-				get_tree().quit()
+				pass
+				# FIXME
+				#if OS.has_feature("JavaScript"):
+					#JavaScript.eval("window.history.back() || window.close()")
+				#get_tree().quit()
 
 
 func _on_Asciicast_key_pressed(
