@@ -4,8 +4,8 @@
 class Printer:
 	var _format_enabled = true
 	var _disabled = false
-	var _printer_name = "NOT SET"
-	var _show_name = false  # used for debugging, set manually
+	var _printer_name = 'NOT SET'
+	var _show_name = false # used for debugging, set manually
 
 	func get_format_enabled():
 		return _format_enabled
@@ -13,16 +13,16 @@ class Printer:
 	func set_format_enabled(format_enabled):
 		_format_enabled = format_enabled
 
-	func send(text, fmt = null):
-		if _disabled:
+	func send(text, fmt=null):
+		if(_disabled):
 			return
 
 		var formatted = text
-		if fmt != null and _format_enabled:
+		if(fmt != null and _format_enabled):
 			formatted = format_text(text, fmt)
 
-		if _show_name:
-			formatted = str("(", _printer_name, ")") + formatted
+		if(_show_name):
+			formatted = str('(', _printer_name, ')') + formatted
 
 		_output(formatted)
 
@@ -41,58 +41,85 @@ class Printer:
 	func format_text(text, fmt):
 		return text
 
-
 # ------------------------------------------------------------------------------
 # Responsible for sending text to a GUT gui.
 # ------------------------------------------------------------------------------
 class GutGuiPrinter:
 	extends Printer
-	var _gut = null
+	var _textbox = null
 
-	var _colors = {red = Color.RED, yellow = Color.YELLOW, green = Color.GREEN}
+	var _colors = {
+			red = Color.RED,
+			yellow = Color.YELLOW,
+			green = Color.GREEN
+	}
 
 	func _init():
-		_printer_name = "gui"
+		_printer_name = 'gui'
 
 	func _wrap_with_tag(text, tag):
-		return str("[", tag, "]", text, "[/", tag, "]")
+		return str('[', tag, ']', text, '[/', tag, ']')
 
 	func _color_text(text, c_word):
-		return "[color=" + c_word + "]" + text + "[/color]"
+		return '[color=' + c_word + ']' + text + '[/color]'
 
+	# Remember, we have to use push and pop because the output from the tests
+	# can contain [] in it which can mess up the formatting.  There is no way
+	# as of 3.4 that you can get the bbcode out of RTL when using push and pop.
+	#
+	# The only way we could get around this is by adding in non-printable
+	# whitespace after each "[" that is in the text.  Then we could maybe do
+	# this another way and still be able to get the bbcode out, or generate it
+	# at the same time in a buffer (like we tried that one time).
+	#
+	# Since RTL doesn't have good search and selection methods, and those are
+	# really handy in the editor, it isn't worth making bbcode that can be used
+	# there as well.
+	#
+	# You'll try to get it so the colors can be the same in the editor as they
+	# are in the output.  Good luck, and I hope I typed enough to not go too
+	# far that rabbit hole before finding out it's not worth it.
 	func format_text(text, fmt):
-		var box = _gut.get_gui().get_text_box()
+		if(_textbox == null):
+			return
 
-		if fmt == "bold":
-			box.push_bold()
-		elif fmt == "underline":
-			box.push_underline()
-		elif _colors.has(fmt):
-			box.push_color(_colors[fmt])
+		if(fmt == 'bold'):
+			_textbox.push_bold()
+		elif(fmt == 'underline'):
+			_textbox.push_underline()
+		elif(_colors.has(fmt)):
+			_textbox.push_color(_colors[fmt])
 		else:
 			# just pushing something to pop.
-			box.push_normal()
+			_textbox.push_normal()
 
-		box.add_text(text)
-		box.pop()
+		_textbox.add_text(text)
+		_textbox.pop()
 
-		return ""
+		return ''
 
 	func _output(text):
-		_gut.get_gui().get_text_box().add_text(text)
+		if(_textbox == null):
+			return
 
-	func get_gut():
-		return _gut
+		_textbox.add_text(text)
 
-	func set_gut(gut):
-		_gut = gut
+	func get_textbox():
+		return _textbox
+
+	func set_textbox(textbox):
+		_textbox = textbox
 
 	# This can be very very slow when the box has a lot of text.
 	func clear_line():
-		var box = _gut.get_gui().get_text_box()
-		box.remove_line(box.get_line_count() - 1)
-		box.update()
+		_textbox.remove_line(_textbox.get_line_count() - 1)
+		_textbox.queue_redraw()
 
+	func get_bbcode():
+		return _textbox.text
+
+	func get_disabled():
+		return _disabled and _textbox != null
 
 # ------------------------------------------------------------------------------
 # This AND TerminalPrinter should not be enabled at the same time since it will
@@ -101,20 +128,19 @@ class GutGuiPrinter:
 # ------------------------------------------------------------------------------
 class ConsolePrinter:
 	extends Printer
-	var _buffer = ""
+	var _buffer = ''
 
 	func _init():
-		_printer_name = "console"
+		_printer_name = 'console'
 
 	# suppresses output until it encounters a newline to keep things
 	# inline as much as possible.
 	func _output(text):
-		if text.ends_with("\n"):
-			print(_buffer + text.left(text.length() - 1))
-			_buffer = ""
+		if(text.ends_with("\n")):
+			print(_buffer + text.left(text.length() -1))
+			_buffer = ''
 		else:
 			_buffer += text
-
 
 # ------------------------------------------------------------------------------
 # Prints text to terminal, formats some words.
@@ -123,18 +149,21 @@ class TerminalPrinter:
 	extends Printer
 
 	var escape = PackedByteArray([0x1b]).get_string_from_ascii()
-	var cmd_colors = {
-		red = escape + "[31m",
-		yellow = escape + "[33m",
-		green = escape + "[32m",
-		underline = escape + "[4m",
-		bold = escape + "[1m",
-		default = escape + "[0m",
-		clear_line = escape + "[2K"
+	var cmd_colors  = {
+		red = escape + '[31m',
+		yellow = escape + '[33m',
+		green = escape + '[32m',
+
+		underline = escape + '[4m',
+		bold = escape + '[1m',
+
+		default = escape + '[0m',
+
+		clear_line = escape + '[2K'
 	}
 
 	func _init():
-		_printer_name = "terminal"
+		_printer_name = 'terminal'
 
 	func _output(text):
 		# Note, printraw does not print to the console.
@@ -147,7 +176,7 @@ class TerminalPrinter:
 		send(cmd_colors.clear_line)
 
 	func back(n):
-		send(escape + str("[", n, "D"))
+		send(escape + str('[', n, 'D'))
 
 	func forward(n):
-		send(escape + str("[", n, "C"))
+		send(escape + str('[', n, 'C'))

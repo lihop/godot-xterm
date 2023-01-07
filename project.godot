@@ -13,9 +13,21 @@ _global_script_classes=[{
 "class": &"GutHookScript",
 "language": &"GDScript",
 "path": "res://addons/gut/hook_script.gd"
+}, {
+"base": "RefCounted",
+"class": &"GutStringUtils",
+"language": &"GDScript",
+"path": "res://addons/gut/strutils.gd"
+}, {
+"base": "Node",
+"class": &"GutTest",
+"language": &"GDScript",
+"path": "res://addons/gut/test.gd"
 }]
 _global_script_class_icons={
-"GutHookScript": ""
+"GutHookScript": "",
+"GutStringUtils": "",
+"GutTest": ""
 }
 
 [application]
