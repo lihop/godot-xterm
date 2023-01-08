@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021-2022 Leroy Hopson <godot-xterm@leroy.geek.nz>
+// SPDX-FileCopyrightText: 2021-2023 Leroy Hopson <godot-xterm@leroy.geek.nz>
 // SPDX-License-Identifier: MIT
 
 #include "libuv_utils.h"
@@ -8,11 +8,15 @@
 using namespace godot;
 
 void LibuvUtils::_bind_methods() {
-  ClassDB::bind_static_method("LibuvUtils", D_METHOD("get_os_environ"), &LibuvUtils::get_os_environ);
-  ClassDB::bind_static_method("LibuvUtils", D_METHOD("get_os_release"), &LibuvUtils::get_os_release);
-  ClassDB::bind_static_method("LibuvUtils", D_METHOD("get_cwd"), &LibuvUtils::get_cwd);
+  ClassDB::bind_static_method("LibuvUtils", D_METHOD("get_os_environ"),
+                              &LibuvUtils::get_os_environ);
+  ClassDB::bind_static_method("LibuvUtils", D_METHOD("get_os_release"),
+                              &LibuvUtils::get_os_release);
+  ClassDB::bind_static_method("LibuvUtils", D_METHOD("get_cwd"),
+                              &LibuvUtils::get_cwd);
 
-  ClassDB::bind_static_method("LibuvUtils", D_METHOD("kill", "pid", "signum"), &LibuvUtils::kill);
+  ClassDB::bind_static_method("LibuvUtils", D_METHOD("kill", "pid", "signum"),
+                              &LibuvUtils::kill);
 }
 
 LibuvUtils::LibuvUtils() {}
@@ -108,14 +112,14 @@ Error LibuvUtils::translate_uv_errno(int uv_err) {
   case UV_ENOENT: // no such file or directory
     return ERR_FILE_NOT_FOUND;
 
-  case UV_EAI_BADFLAGS:                 // bad ai_flags value
-  case UV_EAI_BADHINTS:                 // invalid value for hints
-  case UV_EFAULT:                       // bad address in system call argument
-  case UV_EFTYPE:                       // inappropriate file type or format
-  case UV_EINVAL:                       // invalid argument
-  case UV_ENOTTY:                       // inappropriate ioctl for device
-  case UV_EPROTOTYPE:                   // protocol wrong type for socket
-    return ERR_INVALID_PARAMETER;       // Parameter passed is invalid
+  case UV_EAI_BADFLAGS:           // bad ai_flags value
+  case UV_EAI_BADHINTS:           // invalid value for hints
+  case UV_EFAULT:                 // bad address in system call argument
+  case UV_EFTYPE:                 // inappropriate file type or format
+  case UV_EINVAL:                 // invalid argument
+  case UV_ENOTTY:                 // inappropriate ioctl for device
+  case UV_EPROTOTYPE:             // protocol wrong type for socket
+    return ERR_INVALID_PARAMETER; // Parameter passed is invalid
 
   case UV_ENOSYS: // function not implemented
     return ERR_METHOD_NOT_FOUND;
@@ -123,12 +127,12 @@ Error LibuvUtils::translate_uv_errno(int uv_err) {
   case UV_EAI_MEMORY: // out of memory
     return ERR_OUT_OF_MEMORY;
 
-  case UV_E2BIG:        // argument list too long
-  case UV_EFBIG:        // file too large
-  case UV_EMSGSIZE:     // message too long
-  case UV_ENAMETOOLONG: // name too long
-  case UV_EOVERFLOW:    // value too large for defined data type
-  case UV_ERANGE:       // result too large
+  case UV_E2BIG:                      // argument list too long
+  case UV_EFBIG:                      // file too large
+  case UV_EMSGSIZE:                   // message too long
+  case UV_ENAMETOOLONG:               // name too long
+  case UV_EOVERFLOW:                  // value too large for defined data type
+  case UV_ERANGE:                     // result too large
     return ERR_PARAMETER_RANGE_ERROR; // Parameter given out of range
 
   case UV_ETIMEDOUT:
@@ -139,19 +143,19 @@ Error LibuvUtils::translate_uv_errno(int uv_err) {
   case UV_EXDEV:  // cross-device link not permitted
     return ERR_UNAUTHORIZED;
 
-  case UV_EADDRNOTAVAIL:          // address not available
-  case UV_EAFNOSUPPORT:           // address family not supported
-  case UV_EAGAIN:                 // resource temporarily unavailable
-  case UV_EAI_ADDRFAMILY:         // address family not supported
-  case UV_EAI_FAMILY:             // ai_family not supported
-  case UV_EAI_SERVICE:            // service not available for socket type
-  case UV_EAI_SOCKTYPE:           // socket type not supported
-  case UV_ENOPROTOOPT:            // protocol not available
-  case UV_ENOTSUP:                // operation not supported on socket
-  case UV_EPROTONOSUPPORT:        // protocol not supported
-  case UV_ESOCKTNOSUPPORT:        // socket type not supported
-    return ERR_UNAVAILABLE;       // What is requested is
-                                  // unsupported/unavailable
+  case UV_EADDRNOTAVAIL:    // address not available
+  case UV_EAFNOSUPPORT:     // address family not supported
+  case UV_EAGAIN:           // resource temporarily unavailable
+  case UV_EAI_ADDRFAMILY:   // address family not supported
+  case UV_EAI_FAMILY:       // ai_family not supported
+  case UV_EAI_SERVICE:      // service not available for socket type
+  case UV_EAI_SOCKTYPE:     // socket type not supported
+  case UV_ENOPROTOOPT:      // protocol not available
+  case UV_ENOTSUP:          // operation not supported on socket
+  case UV_EPROTONOSUPPORT:  // protocol not supported
+  case UV_ESOCKTNOSUPPORT:  // socket type not supported
+    return ERR_UNAVAILABLE; // What is requested is
+                            // unsupported/unavailable
 
   case UV_EAI_NODATA:   // no address
   case UV_EDESTADDRREQ: // destination address required
@@ -191,6 +195,6 @@ Error LibuvUtils::translate_uv_errno(int uv_err) {
   case UV_ESPIPE:       // invalid seek
   case UV_UNKNOWN:      // unknown error
   default:
-    return FAILED;      // Generic fail error
+    return FAILED; // Generic fail error
   }
 }

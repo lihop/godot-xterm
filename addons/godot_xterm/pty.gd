@@ -6,10 +6,9 @@
 @tool
 extends Node
 
-const _LibuvUtils := preload("./nodes/pty/libuv_utils.gd")
+var _LibuvUtils := LibuvUtils
 const _PTYNative := preload("./nodes/pty/pty_native.gd")
 const _PTYUnix := preload("./nodes/pty/unix/pty_unix.gd")
-const _Terminal := preload("./terminal.gd")
 
 const DEFAULT_NAME := "xterm-256color"
 const DEFAULT_COLS := 80
@@ -23,30 +22,26 @@ const IPCSignal = _PTYUnix.IPCSignal
 signal data_received(data)
 signal exited(exit_code, signum)
 
-@export var terminal_path: NodePath = NodePath() :
+@export var terminal_path: NodePath = NodePath():
 	get:
 		return terminal_path
 	set(value):
 		terminal_path = value
 		_set_terminal(get_node_or_null(terminal_path))
 
-var _terminal: _Terminal = null :
-	get:
-		return _terminal # TODOConverter40 Non existent get function
-	set(mod_value):
-		mod_value  # TODOConverter40 Copy here content of _set_terminal
+var _terminal
 
 # The column size in characters.
-@export var cols: int = DEFAULT_COLS :
+@export var cols: int = DEFAULT_COLS:
 	get:
-		return cols # TODOConverter40 Copy here content of get_cols
+		return cols  # TODOConverter40 Copy here content of get_cols
 	set(mod_value):
 		mod_value  # TODOConverter40 Copy here content of set_cols
 
 # The row size in characters.
-@export var rows: int = DEFAULT_ROWS :
+@export var rows: int = DEFAULT_ROWS:
 	get:
-		return rows # TODOConverter40 Copy here content of get_rows
+		return rows  # TODOConverter40 Copy here content of get_rows
 	set(mod_value):
 		mod_value  # TODOConverter40 Copy here content of set_rows
 
@@ -66,13 +61,13 @@ var _pty_native: _PTYNative
 func _init():
 	var os_name := OS.get_name()
 	match os_name:
-		"X11", "Server", "OSX":
+		"Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD", "macOS":
 			_pty_native = _PTYUnix.new()
 		_:
-			push_error("PTY is not support on current platform (%s)." % os_name)
+			push_error("PTY is not supported on the current platform (%s)." % os_name)
 
-	_pty_native.connect("data_received",Callable(self,"_on_pty_native_data_received"))
-	_pty_native.connect("exited",Callable(self,"_on_pty_native_exited"))
+	_pty_native.connect("data_received", Callable(self, "_on_pty_native_data_received"))
+	_pty_native.connect("exited", Callable(self, "_on_pty_native_exited"))
 
 	add_child(_pty_native)
 
@@ -96,31 +91,31 @@ func set_rows(value: int):
 
 func get_rows() -> int:
 	return _rows
-	
 
-func _set_terminal(value: _Terminal):
+
+func _set_terminal(value):
 	if _terminal == value:
 		return
 
 	# Disconect the current terminal, if any.
-	if _terminal:
-		disconnect("data_received",Callable(_terminal,"write"))
-		_terminal.disconnect("data_sent",Callable(self,"write"))
-		_terminal.disconnect("size_changed",Callable(self,"resizev"))
+	if _terminal != null:
+		disconnect("data_received", Callable(_terminal, "write"))
+		_terminal.disconnect("data_sent", Callable(self, "write"))
+		_terminal.disconnect("size_changed", Callable(self, "resizev"))
 
 	_terminal = value
 
-	if not _terminal:
+	if _terminal == null:
 		return
 
 	# Connect the new terminal.
 	resize(_terminal.get_cols(), _terminal.get_rows())
-	if not _terminal.is_connected("size_changed",Callable(self,"resizev")):
-		_terminal.connect("size_changed",Callable(self,"resizev"))
-	if not _terminal.is_connected("data_sent",Callable(self,"write")):
-		_terminal.connect("data_sent",Callable(self,"write"))
-	if not is_connected("data_received",Callable(_terminal,"write")):
-		connect("data_received",Callable(_terminal,"write"))
+	if not _terminal.is_connected("size_changed", Callable(self, "resizev")):
+		_terminal.connect("size_changed", Callable(self, "resizev"))
+	if not _terminal.is_connected("data_sent", Callable(self, "write")):
+		_terminal.connect("data_sent", Callable(self, "write"))
+	if not is_connected("data_received", Callable(_terminal, "write")):
+		connect("data_received", Callable(_terminal, "write"))
 
 
 # Writes data to the socket.
@@ -159,7 +154,7 @@ func _notification(what: int):
 	match what:
 		NOTIFICATION_PARENTED:
 			var parent = get_parent()
-			if parent is _Terminal:
+			if parent is Terminal:
 				self.terminal_path = get_path_to(parent)
 
 

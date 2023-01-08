@@ -1,5 +1,5 @@
 @tool
-extends "../../terminal.gd"
+extends Terminal
 
 signal exited(exit_code, signum)
 
@@ -14,46 +14,43 @@ func _set_terminal_colors(color_map: Dictionary) -> void:
 	for key in color_map.keys():
 		var val: String = color_map[key]
 		var color: Color = editor_settings.get_setting("text_editor/highlighting/%s" % val)
-		theme.set_color(key, "Terminal", color)
+		add_theme_color_override(key, color)
 
 
 func _ready():
 	if not editor_settings:
 		return
 
-	theme = Theme.new()
-
 	# Get colors from TextEdit theme. Created using the default (Adaptive) theme
 	# for reference, but will probably cause strange results if using another theme
 	# better to use a dedicated terminal theme, rather than relying on this.
 	_set_terminal_colors(
 		{
-			"black": "caret_background_color",
-			"red": "keyword_color",
-			"green": "gdscript/node_path_color",
-			"yellow": "string_color",
-			"blue": "function_color",
-			"magenta": "symbol_color",
-			"cyan": "gdscript/function_definition_color",
-			"white": "text_color",
-			"bright_black": "comment_color",
-			"bright_red": "breakpoint_color",
-			"bright_green": "base_type_color",
-			"bright_yellow": "search_result_color",
-			"bright_blue": "member_variable_color",
-			"bright_magenta": "code_folding_color",
-			"bright_cyan": "user_type_color",
-			"bright_white": "text_selected_color",
-			"background": "background_color",
-			"foreground": "caret_color",
+			"ansi_0_color": "completion_background_color",
+			"ansi_1_color": "keyword_color",
+			"ansi_2_color": "gdscript/node_path_color",
+			"ansi_3_color": "string_color",
+			"ansi_4_color": "function_color",
+			"ansi_5_color": "symbol_color",
+			"ansi_6_color": "gdscript/function_definition_color",
+			"ansi_7_color": "text_color",
+			"ansi_8_color": "comment_color",
+			"ansi_9_color": "breakpoint_color",
+			"ansi_10_color": "base_type_color",
+			"ansi_11_color": "search_result_color",
+			"ansi_12_color": "member_variable_color",
+			"ansi_13_color": "code_folding_color",
+			"ansi_14_color": "user_type_color",
+			"ansi_15_color": "text_selected_color",
+			"background_color": "background_color",
+			"foreground_color": "caret_color",
 		}
 	)
-	_native_terminal._update_theme()
 
 
 func _input(event):
 	if has_focus() and event is InputEventKey and event.is_pressed():
-		if event.control and event.scancode in [KEY_PAGEUP, KEY_PAGEDOWN]:
+		if event.ctrl_pressed and event.scancode in [KEY_PAGEUP, KEY_PAGEDOWN]:
 			# Handled by switch tabs shortcut.
 			return
 

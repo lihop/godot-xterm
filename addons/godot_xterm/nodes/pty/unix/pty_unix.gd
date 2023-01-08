@@ -64,7 +64,10 @@ var _exit_cb: Callable
 # Writes data to the socket.
 # data: The data to write.
 func write(data) -> void:
-	assert(data is PackedByteArray or data is String, "Invalid type for argument 'data'. Should be of type PackedByteArray or String")
+	var correct_type: bool = data is PackedByteArray or data is String
+	var err_message := "Invalid type for argument 'data'. Should be of type PackedByteArray or String"
+	assert(correct_type, err_message)
+
 	if _pipe:
 		_pipe.write(data if data is PackedByteArray else data.to_utf8_buffer())
 
@@ -88,7 +91,7 @@ func _parse_env(env: Dictionary = {}) -> PackedStringArray:
 	for key in keys:
 		var value = env[key]
 		var valid = key is String and value is String
-		assert(valid) #,"Env key/value pairs must be of type String/String.")
+		assert(valid)  #,"Env key/value pairs must be of type String/String.")
 
 		if not valid:
 			push_warning("Skipping invalid env key/value pair.")
@@ -129,9 +132,23 @@ func fork(
 	_exit_cb = Callable(self, "on_exit")
 
 	# Actual fork.
-	var result = PTYUnix.new().fork(
-		# VERY IMPORTANT: The second argument must be 0, otherwise will get an ENOTSOCK error after connecting our pipe to the fd.
-		file, 0, args, parsed_env, cwd, cols, rows, uid, gid, utf8, _exit_cb
+	var result = (
+		PTYUnix
+		. new()
+		. fork(
+			# VERY IMPORTANT: The second argument must be 0, otherwise will get an ENOTSOCK error after connecting our pipe to the fd.
+			file,
+			0,
+			args,
+			parsed_env,
+			cwd,
+			cols,
+			rows,
+			uid,
+			gid,
+			utf8,
+			_exit_cb
+		)
 	)
 
 	if result[0] != OK:
@@ -146,10 +163,10 @@ func fork(
 	_pid = result[1].pid
 
 	_pipe = Pipe.new()
-	_pipe.open(_fd, true) # FIXME: _pipe.open(_fd) should be sufficient but requires two args.
+	_pipe.open(_fd, false)
 
 	# Must connect to signal AFTER opening, otherwise we will get error ENOTSOCK.
-	_pipe.connect("data_received",Callable(self,"_on_pipe_data_received"))
+	_pipe.connect("data_received", Callable(self, "_on_pipe_data_received"))
 
 	return OK
 
@@ -159,7 +176,7 @@ func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
 
 
 func _exit_tree():
-	_exit_cb = null
+	_exit_cb = Callable()
 	if _pid > 1:
 		LibuvUtils.kill(_pid, IPCSignal.SIGHUP)
 		if _pipe:

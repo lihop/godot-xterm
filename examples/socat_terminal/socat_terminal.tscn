@@ -1,14 +1,11 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=2 format=3 uid="uid://bc5o6m6ty0ejn"]
 
-[ext_resource path="res://examples/socat_terminal/socat_terminal.gd" type="Script" id=1]
+[ext_resource type="Script" path="res://examples/socat_terminal/socat_terminal.gd" id="1"]
 
-[node name="Terminal" type="Control"]
+[node name="Terminal" type="Terminal"]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-focus_mode = 2
-script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[connection signal="data_sent" from="." to="." method="_on_Terminal_data_sent"]
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")

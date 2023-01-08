@@ -42,11 +42,11 @@ var offset: int
 
 
 func _ready():
-	if not $Terminal.is_connected("key_pressed",Callable(self,"_on_Terminal_key_pressed")):
+	if not $Terminal.is_connected("key_pressed", Callable(self, "_on_Terminal_key_pressed")):
 		# warning-ignore:return_value_discarded
-		$Terminal.connect("key_pressed",Callable(self,"_on_Terminal_key_pressed"))
+		$Terminal.connect("key_pressed", Callable(self, "_on_Terminal_key_pressed"))
 	# warning-ignore:return_value_discarded
-	$Terminal.connect("size_changed",Callable(self,"draw_all"))
+	$Terminal.connect("size_changed", Callable(self, "draw_all"))
 	$Terminal.grab_focus()
 	draw_all()
 
@@ -134,7 +134,10 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 			"Asciicast":
 				var scene = item.scene.instantiate()
 				var animation_player: AnimationPlayer = scene.get_node("AnimationPlayer")
-				scene.connect("key_pressed",Callable(self,"_on_Asciicast_key_pressed").bind(animation_player))
+				scene.connect(
+					"key_pressed",
+					Callable(self, "_on_Asciicast_key_pressed").bind(animation_player)
+				)
 				add_child(scene)
 				scene.grab_focus()
 				await animation_player.animation_finished
@@ -163,7 +166,7 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 				pass
 				# FIXME
 				#if OS.has_feature("JavaScript"):
-					#JavaScript.eval("window.history.back() || window.close()")
+				#JavaScript.eval("window.history.back() || window.close()")
 				#get_tree().quit()
 
 

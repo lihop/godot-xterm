@@ -1,4 +1,4 @@
-extends "res://addons/godot_xterm/terminal.gd"
+extends Terminal
 
 @onready var pty = $PTY
 

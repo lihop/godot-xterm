@@ -28,9 +28,9 @@ var editor_plugin: EditorPlugin
 var editor_interface: EditorInterface
 
 @onready var editor_settings: EditorSettings = editor_interface.get_editor_settings()
-@onready var tabs: TabBar = $VBoxContainer/TabbarContainer/TabBar
+@onready var tabs: TabBar = $VBoxContainer/TabbarContainer/Tabs
 @onready var tabbar_container: HBoxContainer = $VBoxContainer/TabbarContainer
-@onready var add_button: Button = $VBoxContainer/TabbarContainer/TabBar/AddButton
+@onready var add_button: Button = $VBoxContainer/TabbarContainer/AddButton
 @onready var tab_container: TabContainer = $VBoxContainer/TabContainer
 @onready var terminal_popup_menu: PopupMenu = $VBoxContainer/TerminalPopupMenu
 
@@ -39,7 +39,7 @@ var editor_interface: EditorInterface
 @onready var size_label: Label = $SizeLabel
 @onready var size_label_timer: Timer = $SizeLabel/SizeLabelTimer
 
-@onready var ready := true
+@onready var is_ready := true
 
 var _theme := Theme.new()
 var _settings: TerminalSettings
@@ -47,7 +47,9 @@ var _tab_container_min_size
 
 
 func _ready():
-	tab_container.add_theme_stylebox_override("panel", get_stylebox("background", "EditorStyles"))
+	tab_container.add_theme_stylebox_override(
+		"panel", get_theme_stylebox("background", "EditorStyles")
+	)
 	_update_settings()
 
 
@@ -55,18 +57,6 @@ func _load_or_create_settings() -> void:
 	# Use only default settings for now, until settings are properly defined
 	# and documented.
 	_settings = TerminalSettings.new()
-	return
-
-	var dir := Directory.new()
-
-	if not dir.dir_exists(SETTINGS_FILE_PATH.get_base_dir()):
-		dir.make_dir(SETTINGS_FILE_PATH.get_base_dir())
-
-	if not dir.file_exists(SETTINGS_FILE_PATH):
-		var settings := TerminalSettings.new()
-		ResourceSaver.save(SETTINGS_FILE_PATH, settings)
-
-	_settings = load(SETTINGS_FILE_PATH)
 
 
 func _update_settings() -> void:
@@ -76,36 +66,37 @@ func _update_settings() -> void:
 	if editor_interface.has_method("get_editor_scale"):
 		editor_scale = editor_interface.get_editor_scale()
 
-	minimum_size = Vector2(0, tabbar_container.size.y + 182) * editor_scale
+	custom_minimum_size = Vector2(0, tabbar_container.size.y + 182) * editor_scale
 	size.y = 415
 
 	tabs.tab_close_display_policy = TabBar.CLOSE_BUTTON_SHOW_ALWAYS
 
-	# Update shortcuts.
-	if _settings.new_terminal_shortcut:
-		terminal_popup_menu.set_item_shortcut(
-			TerminalPopupMenuOptions.NEW_TERMINAL, _settings.new_terminal_shortcut, true
-		)
-	if _settings.kill_terminal_shortcut:
-		terminal_popup_menu.set_item_shortcut(
-			TerminalPopupMenuOptions.KILL_TERMINAL, _settings.kill_terminal_shortcut, false
-		)
-	if _settings.copy_shortcut:
-		terminal_popup_menu.set_item_shortcut(
-			TerminalPopupMenuOptions.COPY, _settings.copy_shortcut, false
-		)
-	if _settings.paste_shortcut:
-		terminal_popup_menu.set_item_shortcut(
-			TerminalPopupMenuOptions.PASTE, _settings.paste_shortcut, false
-		)
+#FIXME
+#	# Update shortcuts.
+#	if _settings.new_terminal_shortcut:
+#		terminal_popup_menu.set_item_shortcut(
+#			TerminalPopupMenuOptions.NEW_TERMINAL, _settings.new_terminal_shortcut, true
+#		)
+#	if _settings.kill_terminal_shortcut:
+#		terminal_popup_menu.set_item_shortcut(
+#			TerminalPopupMenuOptions.KILL_TERMINAL, _settings.kill_terminal_shortcut, false
+#		)
+#	if _settings.copy_shortcut:
+#		terminal_popup_menu.set_item_shortcut(
+#			TerminalPopupMenuOptions.COPY, _settings.copy_shortcut, false
+#		)
+#	if _settings.paste_shortcut:
+#		terminal_popup_menu.set_item_shortcut(
+#			TerminalPopupMenuOptions.PASTE, _settings.paste_shortcut, false
+#		)
 
 	_update_terminal_tabs()
 
 
 func _update_terminal_tabs():
 	# Wait a couple of frames to allow everything to resize before updating.
-	await get_tree().idle_frame
-	await get_tree().idle_frame
+	await get_tree().process_frame
+	await get_tree().process_frame
 
 	if tabs.get_offset_buttons_visible():
 		# Move add button to fixed position on the tabbar.
@@ -116,7 +107,7 @@ func _update_terminal_tabs():
 			tabbar_container.move_child(add_button, 0)
 	else:
 		# Move add button after last tab.
-		if add_button.get_parent() == tabbar_container:
+		if tabs.tab_count > 0 and add_button.get_parent() == tabbar_container:
 			tabbar_container.remove_child(add_button)
 			tabs.add_child(add_button)
 		var last_tab := Rect2()
@@ -125,6 +116,9 @@ func _update_terminal_tabs():
 		add_button.position = Vector2(
 			last_tab.position.x + last_tab.size.x + 3, last_tab.position.y
 		)
+	if tabs.tab_count == 0 and add_button.get_parent() == tabs:
+		tabs.remove_child(add_button)
+		tabbar_container.add_child(add_button)
 
 	# Make sure we still own the button, so it gets saved with our scene.
 	add_button.owner = self
@@ -135,9 +129,9 @@ func _on_AddButton_pressed():
 	var terminal := EditorTerminal.instantiate()
 	tabs.add_tab(shell.get_file())
 	terminal.editor_settings = editor_settings
-	terminal.set_anchors_preset(PRESET_WIDE)
-	terminal.connect("gui_input",Callable(self,"_on_TabContainer_gui_input"))
-	terminal.connect("exited",Callable(self,"_on_Terminal_exited").bind(terminal))
+	terminal.set_anchors_preset(PRESET_BOTTOM_WIDE)
+	terminal.connect("gui_input", Callable(self, "_on_TabContainer_gui_input"))
+	terminal.connect("exited", Callable(self, "_on_Terminal_exited").bind(terminal))
 	tab_container.add_child(terminal)
 	terminal.pty.fork(shell)
 	terminal.grab_focus()
@@ -163,7 +157,7 @@ func _on_Tabs_tab_close(tab_index):
 
 
 func _notification(what):
-	if not ready:
+	if not is_ready:
 		return
 
 	match what:
@@ -181,46 +175,53 @@ func _input(event: InputEvent) -> void:
 		return
 
 	# Global shortcut to open new terminal and make terminal panel visible.
-	if _settings.new_terminal_shortcut and _settings.new_terminal_shortcut.shortcut:
-		if event.is_match(_settings.new_terminal_shortcut.shortcut):
-			get_tree().set_input_as_handled()
-			editor_plugin.make_bottom_panel_item_visible(self)
-			_on_AddButton_pressed()
+	# FIXME
+#	if _settings.new_terminal_shortcut and _settings.new_terminal_shortcut.shortcut:
+#		if event.is_match(_settings.new_terminal_shortcut.shortcut):
+#			get_tree().set_input_as_handled()
+#			editor_plugin.make_bottom_panel_item_visible(self)
+#			_on_AddButton_pressed()
 
 	# Non-global shortcuts, only applied if terminal is active and focused.
 	if (
 		tabs.get_tab_count() > 0 and tab_container.get_child(tabs.current_tab).has_focus()
 		or terminal_popup_menu.has_focus()
 	):
+		pass
 		# Kill terminal.
-		if _settings.kill_terminal_shortcut and _settings.kill_terminal_shortcut.shortcut:
-			if event.is_match(_settings.kill_terminal_shortcut.shortcut):
-				get_tree().set_input_as_handled()
-				_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.KILL_TERMINAL)
+		# FIXME shortcut
 
-		# Copy.
-		if _settings.copy_shortcut and _settings.copy_shortcut.shortcut:
-			if event.is_match(_settings.copy_shortcut.shortcut):
-				get_tree().set_input_as_handled()
-				_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.COPY)
 
-		# Paste.
-		if _settings.paste_shortcut and _settings.paste_shortcut.shortcut:
-			if event.is_match(_settings.paste_shortcut.shortcut):
-				get_tree().set_input_as_handled()
-				_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.PASTE)
+#		if _settings.kill_terminal_shortcut and _settings.kill_terminal_shortcut.shortcut:
+#			if event.is_match(_settings.kill_terminal_shortcut.shortcut):
+#				get_tree().set_input_as_handled()
+#				_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.KILL_TERMINAL)
 
-		# Next tab.
-		if _settings.next_tab_shortcut and _settings.next_tab_shortcut.shortcut:
-			if event.is_match(_settings.next_tab_shortcut.shortcut):
-				get_tree().set_input_as_handled()
-				tabs.current_tab = min(tabs.current_tab + 1, tabs.get_tab_count() - 1)
+# Copy.
+#FIXME
+#		if _settings.copy_shortcut and _settings.copy_shortcut.shortcut:
+#			if event.is_match(_settings.copy_shortcut.shortcut):
+#				get_tree().set_input_as_handled()
+#				_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.COPY)
 
-		# Previous tab.
-		if _settings.previous_tab_shortcut and _settings.previous_tab_shortcut.shortcut:
-			if event.is_match(_settings.previous_tab_shortcut.shortcut):
-				get_tree().set_input_as_handled()
-				tabs.current_tab = max(tabs.current_tab - 1, 0)
+# Paste.
+#FIXME
+#		if _settings.paste_shortcut and _settings.paste_shortcut.shortcut:
+#			if event.is_match(_settings.paste_shortcut.shortcut):
+#				get_tree().set_input_as_handled()
+#				_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.PASTE)
+#
+#		# Next tab.
+#		if _settings.next_tab_shortcut and _settings.next_tab_shortcut.shortcut:
+#			if event.is_match(_settings.next_tab_shortcut.shortcut):
+#				get_tree().set_input_as_handled()
+#				tabs.current_tab = min(tabs.current_tab + 1, tabs.get_tab_count() - 1)
+#
+#		# Previous tab.
+#		if _settings.previous_tab_shortcut and _settings.previous_tab_shortcut.shortcut:
+#			if event.is_match(_settings.previous_tab_shortcut.shortcut):
+#				get_tree().set_input_as_handled()
+#				tabs.current_tab = max(tabs.current_tab - 1, 0)
 
 
 func _on_TabContainer_gui_input(event):
@@ -238,15 +239,15 @@ func _on_TerminalPopupMenu_id_pressed(id):
 		var terminal = tab_container.get_child(tab_container.current_tab)
 		match id:
 			TerminalPopupMenuOptions.COPY:
-				OS.clipboard = terminal.copy_selection()
+				DisplayServer.clipboard_set(terminal.copy_selection())
 			TerminalPopupMenuOptions.PASTE:
-				for i in OS.clipboard.length():
+				for i in DisplayServer.clipboard_get().length():
 					var event = InputEventKey.new()
-					event.unicode = ord(OS.clipboard[i])
+					event.unicode = DisplayServer.clipboard_get().unicode_at(i)
 					event.button_pressed = true
 					terminal._gui_input(event)
 			TerminalPopupMenuOptions.COPY_ALL:
-				OS.clipboard = terminal.copy_all()
+				DisplayServer.clipboard_set(terminal.copy_all())
 			TerminalPopupMenuOptions.CLEAR:
 				terminal.clear()
 			TerminalPopupMenuOptions.KILL_TERMINAL:

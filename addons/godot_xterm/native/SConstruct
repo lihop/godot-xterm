@@ -277,6 +277,7 @@ env.Append(LIBS=[
 
 sources = []
 sources.append('src/register_types.cpp')
+sources.append('src/constants.cpp')
 sources.append('src/terminal.cpp')
 
 

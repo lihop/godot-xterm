@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-var pty_supported := OS.get_name() in ["X11", "Server", "OSX"]
+var pty_supported := OS.get_name() in ["Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD", "macOS"]
 var asciicast_import_plugin
 var xrdb_import_plugin
 var terminal_panel: Control
@@ -17,18 +17,16 @@ func _enter_tree():
 	var asciicast_script = preload("./resources/asciicast.gd")
 	add_custom_type("Asciicast", "Animation", asciicast_script, null)
 
-	var terminal_script = preload("./terminal.gd")
 	var terminal_icon = load(
 		"%s/nodes/terminal/terminal_icon.svg" % get_script().resource_path.get_base_dir()
 	)
-	add_custom_type("Terminal", "Control", terminal_script, terminal_icon)
 
 	if pty_supported:
 		var base_dir = get_script().resource_path.get_base_dir()
 		var pty_icon = load("%s/nodes/pty/pty_icon.svg" % base_dir)
 		var pty_script
 		match OS.get_name():
-			"X11", "Server", "OSX":
+			"Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD", "macOS":
 				pty_script = load("%s/pty.gd" % base_dir)
 		add_custom_type("PTY", "Node", pty_script, pty_icon)
 		terminal_panel = preload("./editor_plugins/terminal/terminal_panel.tscn").instantiate()
@@ -45,7 +43,6 @@ func _exit_tree():
 	xrdb_import_plugin = null
 
 	remove_custom_type("Asciicast")
-	remove_custom_type("Terminal")
 
 	if pty_supported:
 		remove_custom_type("PTY")

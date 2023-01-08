@@ -41,6 +41,10 @@ config/icon="res://docs/media/icon.png"
 
 window/vsync/use_vsync=false
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_xterm/plugin.cfg")
+
 [rendering]
 
 quality/driver/driver_name="GLES2"

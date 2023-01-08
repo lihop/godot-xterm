@@ -1,8 +1,23 @@
-[gd_resource type="FontFile" load_steps=2 format=2]
+[gd_resource type="FontFile" load_steps=2 format=3 uid="uid://dhmyegcx24dpo"]
 
-[ext_resource path="res://addons/godot_xterm/themes/fonts/hack/hack_regular-3.003.ttf" type="FontFile" id=4]
+[ext_resource type="FontFile" uid="uid://edo5q2qxos3u" path="res://addons/godot_xterm/themes/fonts/hack/hack_regular-3.003.ttf" id="4"]
 
 [resource]
-size = 14
-extra_spacing_bottom = 1
-font_data = ExtResource( 4 )
+fallbacks = [ExtResource("4")]
+face_index = null
+embolden = null
+transform = null
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/16/0/kerning_overrides/14/0 = Vector2(0, 0)
+cache/0/14/0/ascent = 0.0
+cache/0/14/0/descent = 0.0
+cache/0/14/0/underline_position = 0.0
+cache/0/14/0/underline_thickness = 0.0
+cache/0/14/0/scale = 1.0
+cache/0/14/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/14/0/kerning_overrides/14/0 = Vector2(0, 0)

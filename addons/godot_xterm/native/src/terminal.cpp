@@ -1,641 +1,90 @@
-// Copyright (c) 2021, Leroy Hopson (MIT License).
+// SPDX-FileCopyrightText: 2021-2023 Leroy Hopson <godot-xterm@leroy.geek.nz>
+// SPDX-License-Identifier: MIT
 
 #include "terminal.h"
-#include <godot_cpp/variant/dictionary.hpp>
-#include <godot_cpp/classes/input_event_key.hpp>
-#include <godot_cpp/classes/input_event_mouse_button.hpp>
-#include <godot_cpp/classes/os.hpp>
+#include <algorithm>
+#include <godot_cpp/classes/display_server.hpp>
+#include <godot_cpp/classes/input.hpp>
+#include <godot_cpp/classes/input_event_mouse_motion.hpp>
+#include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/theme.hpp>
-#include <algorithm>
+#include <godot_cpp/classes/theme_db.hpp>
+#include <godot_cpp/classes/viewport_texture.hpp>
+#include <godot_cpp/core/object.hpp>
+#include <godot_cpp/variant/color.hpp>
+#include <godot_cpp/variant/dictionary.hpp>
 #include <string>
 #include <xkbcommon/xkbcommon-keysyms.h>
 
-// For _populate_key_list(), see below.
-#if !defined(__EMSCRIPTEN__) && !defined(__APPLE__)
-#include <godot_cpp/classes/global_constants.hpp>
-#endif
+#define UNICODE_MAX 0x10FFFF
 
 using namespace godot;
 
-std::map<std::pair<int64_t, int64_t>, int> Terminal::_key_list = {};
-void Terminal::_populate_key_list() {
-  if (!_key_list.empty())
-    return;
+void Terminal::set_copy_on_selection(bool value) { copy_on_selection = value; }
 
-// TODO: Remove GLOBAL_CONSTANT macro.
-#define GLOBAL_CONSTANT(VAR) VAR
+bool Terminal::get_copy_on_selection() { return copy_on_selection; }
 
-  // Godot does not have seperate scancodes for keypad keys when NumLock is off.
-  // We can check the unicode value to determine whether it is off and set the
-  // appropriate scancode.
-  // Based on the patch which adds support for this to TextEdit/LineEdit:
-  // https://github.com/godotengine/godot/pull/3269/files
-  _key_list.insert({{'0', GLOBAL_CONSTANT(KEY_KP_0)}, XKB_KEY_KP_0});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_0)}, XKB_KEY_KP_Insert});
-  _key_list.insert({{'1', GLOBAL_CONSTANT(KEY_KP_1)}, XKB_KEY_KP_1});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_1)}, XKB_KEY_KP_End});
-  _key_list.insert({{'2', GLOBAL_CONSTANT(KEY_KP_2)}, XKB_KEY_KP_2});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_2)}, XKB_KEY_KP_Down});
-  _key_list.insert({{'3', GLOBAL_CONSTANT(KEY_KP_3)}, XKB_KEY_KP_3});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_3)}, XKB_KEY_KP_Page_Down});
-  _key_list.insert({{'4', GLOBAL_CONSTANT(KEY_KP_4)}, XKB_KEY_KP_4});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_4)}, XKB_KEY_KP_Left});
-  _key_list.insert({{'5', GLOBAL_CONSTANT(KEY_KP_5)}, XKB_KEY_KP_5});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_5)}, XKB_KEY_KP_Begin});
-  _key_list.insert({{'6', GLOBAL_CONSTANT(KEY_KP_6)}, XKB_KEY_KP_6});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_6)}, XKB_KEY_KP_Right});
-  _key_list.insert({{'7', GLOBAL_CONSTANT(KEY_KP_7)}, XKB_KEY_KP_7});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_7)}, XKB_KEY_KP_Home});
-  _key_list.insert({{'8', GLOBAL_CONSTANT(KEY_KP_8)}, XKB_KEY_KP_8});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_8)}, XKB_KEY_KP_Up});
-  _key_list.insert({{'9', GLOBAL_CONSTANT(KEY_KP_9)}, XKB_KEY_KP_9});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_9)}, XKB_KEY_KP_Page_Up});
-  _key_list.insert({{'.', GLOBAL_CONSTANT(KEY_KP_PERIOD)}, XKB_KEY_KP_Decimal});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_PERIOD)}, XKB_KEY_KP_Delete});
-  _key_list.insert({{'/', GLOBAL_CONSTANT(KEY_KP_DIVIDE)}, XKB_KEY_KP_Divide});
-  _key_list.insert(
-      {{'*', GLOBAL_CONSTANT(KEY_KP_MULTIPLY)}, XKB_KEY_KP_Multiply});
-  _key_list.insert(
-      {{'-', GLOBAL_CONSTANT(KEY_KP_SUBTRACT)}, XKB_KEY_KP_Subtract});
-  _key_list.insert({{'+', GLOBAL_CONSTANT(KEY_KP_ADD)}, XKB_KEY_KP_Add});
-  _key_list.insert({{0b0, GLOBAL_CONSTANT(KEY_KP_ENTER)}, XKB_KEY_KP_Enter});
-  //_key_list.insert({{ , }, XKB_KEY_KP_Equal});
-  //_key_list.insert({{ , }, XKB_KEY_KP_Separator});
-  //_key_list.insert({{ , }, XKB_KEY_KP_Tab});
-  //_key_list.insert({{ , }, XKB_KEY_KP_F1});
-  //_key_list.insert({{ , }, XKB_KEY_KP_F2});
-  //_key_list.insert({{ , }, XKB_KEY_KP_F3});
-  //_key_list.insert({{ , }, XKB_KEY_KP_F4});
-
-  // Godot scancodes do not distinguish between uppercase and lowercase
-  // letters, so we can check the unicode value to determine this.
-  _key_list.insert({{'a', GLOBAL_CONSTANT(KEY_A)}, XKB_KEY_a});
-  _key_list.insert({{'A', GLOBAL_CONSTANT(KEY_A)}, XKB_KEY_A});
-  _key_list.insert({{'b', GLOBAL_CONSTANT(KEY_B)}, XKB_KEY_b});
-  _key_list.insert({{'B', GLOBAL_CONSTANT(KEY_B)}, XKB_KEY_B});
-  _key_list.insert({{'c', GLOBAL_CONSTANT(KEY_C)}, XKB_KEY_c});
-  _key_list.insert({{'C', GLOBAL_CONSTANT(KEY_C)}, XKB_KEY_C});
-  _key_list.insert({{'d', GLOBAL_CONSTANT(KEY_D)}, XKB_KEY_d});
-  _key_list.insert({{'D', GLOBAL_CONSTANT(KEY_D)}, XKB_KEY_D});
-  _key_list.insert({{'e', GLOBAL_CONSTANT(KEY_E)}, XKB_KEY_e});
-  _key_list.insert({{'E', GLOBAL_CONSTANT(KEY_E)}, XKB_KEY_E});
-  _key_list.insert({{'f', GLOBAL_CONSTANT(KEY_F)}, XKB_KEY_f});
-  _key_list.insert({{'F', GLOBAL_CONSTANT(KEY_F)}, XKB_KEY_F});
-  _key_list.insert({{'g', GLOBAL_CONSTANT(KEY_G)}, XKB_KEY_g});
-  _key_list.insert({{'G', GLOBAL_CONSTANT(KEY_G)}, XKB_KEY_G});
-  _key_list.insert({{'h', GLOBAL_CONSTANT(KEY_H)}, XKB_KEY_h});
-  _key_list.insert({{'H', GLOBAL_CONSTANT(KEY_H)}, XKB_KEY_H});
-  _key_list.insert({{'i', GLOBAL_CONSTANT(KEY_I)}, XKB_KEY_i});
-  _key_list.insert({{'I', GLOBAL_CONSTANT(KEY_I)}, XKB_KEY_I});
-  _key_list.insert({{'j', GLOBAL_CONSTANT(KEY_J)}, XKB_KEY_j});
-  _key_list.insert({{'J', GLOBAL_CONSTANT(KEY_J)}, XKB_KEY_J});
-  _key_list.insert({{'k', GLOBAL_CONSTANT(KEY_K)}, XKB_KEY_k});
-  _key_list.insert({{'K', GLOBAL_CONSTANT(KEY_K)}, XKB_KEY_K});
-  _key_list.insert({{'l', GLOBAL_CONSTANT(KEY_L)}, XKB_KEY_l});
-  _key_list.insert({{'L', GLOBAL_CONSTANT(KEY_L)}, XKB_KEY_L});
-  _key_list.insert({{'m', GLOBAL_CONSTANT(KEY_M)}, XKB_KEY_m});
-  _key_list.insert({{'M', GLOBAL_CONSTANT(KEY_M)}, XKB_KEY_M});
-  _key_list.insert({{'n', GLOBAL_CONSTANT(KEY_N)}, XKB_KEY_n});
-  _key_list.insert({{'N', GLOBAL_CONSTANT(KEY_N)}, XKB_KEY_N});
-  _key_list.insert({{'o', GLOBAL_CONSTANT(KEY_O)}, XKB_KEY_o});
-  _key_list.insert({{'O', GLOBAL_CONSTANT(KEY_O)}, XKB_KEY_O});
-  _key_list.insert({{'p', GLOBAL_CONSTANT(KEY_P)}, XKB_KEY_p});
-  _key_list.insert({{'P', GLOBAL_CONSTANT(KEY_P)}, XKB_KEY_P});
-  _key_list.insert({{'q', GLOBAL_CONSTANT(KEY_Q)}, XKB_KEY_q});
-  _key_list.insert({{'Q', GLOBAL_CONSTANT(KEY_Q)}, XKB_KEY_Q});
-  _key_list.insert({{'r', GLOBAL_CONSTANT(KEY_R)}, XKB_KEY_r});
-  _key_list.insert({{'R', GLOBAL_CONSTANT(KEY_R)}, XKB_KEY_R});
-  _key_list.insert({{'s', GLOBAL_CONSTANT(KEY_S)}, XKB_KEY_s});
-  _key_list.insert({{'S', GLOBAL_CONSTANT(KEY_S)}, XKB_KEY_S});
-  _key_list.insert({{'t', GLOBAL_CONSTANT(KEY_T)}, XKB_KEY_t});
-  _key_list.insert({{'T', GLOBAL_CONSTANT(KEY_T)}, XKB_KEY_T});
-  _key_list.insert({{'u', GLOBAL_CONSTANT(KEY_U)}, XKB_KEY_u});
-  _key_list.insert({{'U', GLOBAL_CONSTANT(KEY_U)}, XKB_KEY_U});
-  _key_list.insert({{'v', GLOBAL_CONSTANT(KEY_V)}, XKB_KEY_v});
-  _key_list.insert({{'V', GLOBAL_CONSTANT(KEY_V)}, XKB_KEY_V});
-  _key_list.insert({{'w', GLOBAL_CONSTANT(KEY_W)}, XKB_KEY_w});
-  _key_list.insert({{'W', GLOBAL_CONSTANT(KEY_W)}, XKB_KEY_W});
-  _key_list.insert({{'x', GLOBAL_CONSTANT(KEY_X)}, XKB_KEY_x});
-  _key_list.insert({{'X', GLOBAL_CONSTANT(KEY_X)}, XKB_KEY_X});
-  _key_list.insert({{'y', GLOBAL_CONSTANT(KEY_Y)}, XKB_KEY_y});
-  _key_list.insert({{'Y', GLOBAL_CONSTANT(KEY_Y)}, XKB_KEY_Y});
-  _key_list.insert({{'z', GLOBAL_CONSTANT(KEY_Z)}, XKB_KEY_z});
-  _key_list.insert({{'Z', GLOBAL_CONSTANT(KEY_Z)}, XKB_KEY_Z});
-
-  _key_list.insert({{'0', GLOBAL_CONSTANT(KEY_0)}, XKB_KEY_0});
-  _key_list.insert({{'1', GLOBAL_CONSTANT(KEY_1)}, XKB_KEY_1});
-  _key_list.insert({{'2', GLOBAL_CONSTANT(KEY_2)}, XKB_KEY_2});
-  _key_list.insert({{'3', GLOBAL_CONSTANT(KEY_3)}, XKB_KEY_3});
-  _key_list.insert({{'4', GLOBAL_CONSTANT(KEY_4)}, XKB_KEY_4});
-  _key_list.insert({{'5', GLOBAL_CONSTANT(KEY_5)}, XKB_KEY_5});
-  _key_list.insert({{'6', GLOBAL_CONSTANT(KEY_6)}, XKB_KEY_6});
-  _key_list.insert({{'7', GLOBAL_CONSTANT(KEY_7)}, XKB_KEY_7});
-  _key_list.insert({{'8', GLOBAL_CONSTANT(KEY_8)}, XKB_KEY_8});
-  _key_list.insert({{'9', GLOBAL_CONSTANT(KEY_9)}, XKB_KEY_9});
-
-  _key_list.insert(
-      {{'[', GLOBAL_CONSTANT(KEY_BRACKETLEFT)}, XKB_KEY_bracketleft});
-  _key_list.insert(
-      {{'[', GLOBAL_CONSTANT(KEY_BRACKETLEFT)}, XKB_KEY_bracketright});
-  _key_list.insert({{'{', GLOBAL_CONSTANT(KEY_BRACELEFT)}, XKB_KEY_braceleft});
-  _key_list.insert(
-      {{'}', GLOBAL_CONSTANT(KEY_BRACERIGHT)}, XKB_KEY_braceright});
-
-  _key_list.insert({{'\\', GLOBAL_CONSTANT(KEY_BACKSLASH)}, XKB_KEY_backslash});
-  _key_list.insert({{'|', GLOBAL_CONSTANT(KEY_BAR)}, XKB_KEY_bar});
-  _key_list.insert({{'`', GLOBAL_CONSTANT(KEY_QUOTELEFT)}, XKB_KEY_grave});
-  _key_list.insert(
-      {{'~', GLOBAL_CONSTANT(KEY_ASCIITILDE)}, XKB_KEY_asciitilde});
-  _key_list.insert({{'/', GLOBAL_CONSTANT(KEY_SLASH)}, XKB_KEY_slash});
-  _key_list.insert({{'?', GLOBAL_CONSTANT(KEY_QUESTION)}, XKB_KEY_question});
-
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_HOME)}, XKB_KEY_Home});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_BACKSPACE)}, XKB_KEY_BackSpace});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_BACKTAB)}, XKB_KEY_ISO_Left_Tab});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_CLEAR)}, XKB_KEY_Clear});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_PAUSE)}, XKB_KEY_Pause});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_SCROLLLOCK)}, XKB_KEY_Scroll_Lock});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_SYSREQ)}, XKB_KEY_Sys_Req});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_ESCAPE)}, XKB_KEY_Escape});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_ENTER)}, XKB_KEY_Return});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_INSERT)}, XKB_KEY_Insert});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_DELETE)}, XKB_KEY_Delete});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_PAGEUP)}, XKB_KEY_Page_Up});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_PAGEDOWN)}, XKB_KEY_Page_Down});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_UP)}, XKB_KEY_Up});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_DOWN)}, XKB_KEY_Down});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_RIGHT)}, XKB_KEY_Right});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_LEFT)}, XKB_KEY_Left});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_TAB)}, XKB_KEY_Tab});
-  //_key_list.insert({{ , }, XKB_KEY_Linefeed},
-  //_key_list.insert({{ , }, XKB_KEY_Find},
-  //_key_list.insert({{ , }, XKB_KEY_Select},
-
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F1)}, XKB_KEY_F1});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F2)}, XKB_KEY_F2});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F3)}, XKB_KEY_F3});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F4)}, XKB_KEY_F4});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F5)}, XKB_KEY_F5});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F6)}, XKB_KEY_F6});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F7)}, XKB_KEY_F7});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F8)}, XKB_KEY_F8});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F9)}, XKB_KEY_F9});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F10)}, XKB_KEY_F10});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F11)}, XKB_KEY_F11});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F12)}, XKB_KEY_F12});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F13)}, XKB_KEY_F13});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F14)}, XKB_KEY_F14});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F15)}, XKB_KEY_F15});
-  _key_list.insert({{0, GLOBAL_CONSTANT(KEY_F16)}, XKB_KEY_F16});
-  //_key_list.insert({{0, GLOBAL_CONSTANT(KEY_F17)}, XKB_KEY_F17});
-  //_key_list.insert({{0, GLOBAL_CONSTANT(KEY_F18)}, XKB_KEY_F18});
-  //_key_list.insert({{0, GLOBAL_CONSTANT(KEY_F19)}, XKB_KEY_F19});
-  //_key_list.insert({{0, GLOBAL_CONSTANT(KEY_F20)}, XKB_KEY_F20});
+void Terminal::set_update_mode(Terminal::UpdateMode value) {
+  update_mode = value;
 };
+Terminal::UpdateMode Terminal::get_update_mode() { return update_mode; }
 
-uint32_t Terminal::mapkey(std::pair<int64_t, int64_t> key) {
-  if (Terminal::_key_list.empty())
-    Terminal::_populate_key_list();
-  auto iter = _key_list.find(key);
-  return (iter != _key_list.end() ? iter->second : XKB_KEY_NoSymbol);
+void Terminal::set_bell_cooldown(double value) { bell_cooldown = value; }
+
+double Terminal::get_bell_cooldown() { return bell_cooldown; }
+
+void Terminal::set_bell_muted(bool value) { bell_muted = value; }
+
+bool Terminal::get_bell_muted() { return bell_muted; }
+
+void Terminal::set_blink_enabled(bool value) {
+  blink_enabled = value;
+
+  if (!blink_enabled)
+    blink_timer->stop();
+
+  _refresh();
 }
 
-static struct {
-  Color col;
-  bool is_set;
-} colours[16];
+bool Terminal::get_blink_enabled() { return blink_enabled; }
 
-static void term_output(const char *s, size_t len, void *user) {}
+void Terminal::set_blink_time_off(double value) {
+  blink_time_off = value;
 
-static void write_cb(struct tsm_vte *vte, const char *u8, size_t len,
-                     void *data) {
-  Terminal *term = static_cast<Terminal *>(data);
-
-  PackedByteArray bytes;
-  bytes.resize(len);
-  { memcpy(bytes.ptrw(), u8, len); }
-
-  if (len > 0) {
-    if (term->input_event_key.is_valid()) {
-      // The callback was fired from a key press event so emit the "key_pressed"
-      // signal.
-      term->emit_signal("key_pressed", bytes, term->input_event_key);
-      term->input_event_key.unref();
-    }
-
-    term->emit_signal("data_sent", bytes);
+  if (!blink_on && !blink_timer->is_stopped()) {
+    double time_left = blink_timer->get_time_left();
+    blink_timer->start(std::min(blink_time_off, time_left));
   }
 }
 
-static int text_draw_cb(struct tsm_screen *con, uint64_t id, const uint32_t *ch,
-                        size_t len, unsigned int width, unsigned int col,
-                        unsigned int row, const struct tsm_screen_attr *attr,
-                        tsm_age_t age, void *data) {
-  Terminal *terminal = static_cast<Terminal *>(data);
+double Terminal::get_blink_time_off() { return blink_time_off; }
 
-  if (terminal->update_mode == Terminal::UpdateMode::AUTO && age != 0 &&
-      age <= terminal->framebuffer_age)
-    return 0;
+void Terminal::set_blink_time_on(double value) {
+  blink_time_on = value;
 
-  if (width < 1) // No foreground or background to draw.
-    return 0;
-
-  std::pair<Color, Color> color_pair = terminal->get_cell_colors(attr);
-  terminal->draw_background(row, col, color_pair.first, width);
-
-  if (len < 1) // No foreground to draw.
-    return 0;
-
-  size_t ulen = 0;
-  char buf[5] = {0};
-
-  char *utf8 = tsm_ucs4_to_utf8_alloc(ch, len, &ulen);
-  memcpy(buf, utf8, ulen);
-  terminal->draw_foreground(row, col, buf, attr, color_pair.second);
-
-  return 0;
-}
-
-static void bell_cb(tsm_vte *_vte, void *data) {
-  Terminal *terminal = static_cast<Terminal *>(data);
-  terminal->emit_signal("bell");
-}
-
-void Terminal::_bind_methods() {
-  //ClassDB::bind_method(D_METHOD("_ready"), &Terminal::_ready);
-  ClassDB::bind_method(D_METHOD("_notification"), &Terminal::_notification);
-  ClassDB::bind_method(D_METHOD("__gui_input"), &Terminal::_gui_input);
-  //ClassDB::bind_method(D_METHOD("_draw"), &Terminal::_draw);
-
-  ClassDB::bind_method(D_METHOD("write"), &Terminal::write);
-
-  ClassDB::bind_method(D_METHOD("sb_up"), &Terminal::sb_up);
-  ClassDB::bind_method(D_METHOD("sb_down"), &Terminal::sb_down);
-  ClassDB::bind_method(D_METHOD("sb_reset"), &Terminal::sb_reset);
-  ClassDB::bind_method(D_METHOD("clear_sb"), &Terminal::clear_sb);
-
-  ClassDB::bind_method(D_METHOD("start_selection"), &Terminal::start_selection);
-  ClassDB::bind_method(D_METHOD("select_to_pointer"), &Terminal::select_to_pointer);
-  ClassDB::bind_method(D_METHOD("reset_selection"), &Terminal::reset_selection);
-  ClassDB::bind_method(D_METHOD("copy_selection"), &Terminal::copy_selection);
-  ClassDB::bind_method(D_METHOD("copy_all"), &Terminal::copy_all);
-
-  ClassDB::bind_method(D_METHOD("_update_theme"), &Terminal::update_theme);
-  ClassDB::bind_method(D_METHOD("_update_size"), &Terminal::update_theme);
-
-  ClassDB::bind_method(D_METHOD("get_cell_size"), &Terminal::get_cell_size);
-  ClassDB::bind_method(D_METHOD("get_rows"), &Terminal::get_rows);
-  ClassDB::bind_method(D_METHOD("get_cols"), &Terminal::get_cols);
-  ClassDB::bind_method(D_METHOD("get_update_mode"), &Terminal::get_update_mode);
-  ClassDB::bind_method(D_METHOD("set_update_mode", "update_mode"), &Terminal::set_update_mode);
-  ADD_PROPERTY(PropertyInfo(Variant::INT, "update_mode"), "set_update_mode", "get_update_mode");
-
-  ADD_SIGNAL(MethodInfo("data_sent", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
-  ADD_SIGNAL(MethodInfo("key_pressed", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data"),
-		  PropertyInfo(Variant::OBJECT, "event")));
-  ADD_SIGNAL(MethodInfo("size_changed", PropertyInfo(Variant::VECTOR2, "new_size")));
-  ADD_SIGNAL(MethodInfo("bell"));
-}
-
-Terminal::~Terminal() {}
-
-// TODO: Investigate using UPDATE_MODE enum instead of int.
-int Terminal::get_update_mode() { return update_mode; }
-void Terminal::set_update_mode(int p_update_mode) { update_mode = p_update_mode; };
-
-Vector2 Terminal::get_cell_size() { return cell_size; }
-int Terminal::get_rows() { return rows; }
-int Terminal::get_cols() { return cols; }
-
-Terminal::Terminal() {
-  framebuffer_age = 0;
-  update_mode = UpdateMode::AUTO;
-
-  if (tsm_screen_new(&screen, NULL, NULL)) {
-    ERR_PRINT("Error creating new tsm screen");
-  }
-  tsm_screen_set_max_sb(screen,
-                        1000); // TODO: Use config var for scrollback size.
-
-  if (tsm_vte_new(&vte, screen, write_cb, this, NULL, NULL)) {
-    ERR_PRINT("Error creating new tsm vte");
-  }
-
-  tsm_vte_set_bell_cb(vte, bell_cb, this);
-}
-
-void Terminal::_ready() { update_theme(); }
-
-void Terminal::_notification(int what) {
-  switch (what) {
-  case NOTIFICATION_RESIZED:
-    update_size();
-    break;
-  case NOTIFICATION_THEME_CHANGED:
-    // update_theme();
-    break;
+  if (blink_on && !blink_timer->is_stopped()) {
+    double time_left = blink_timer->get_time_left();
+    blink_timer->start(std::min(blink_time_on, time_left));
   }
 }
 
-void Terminal::_gui_input(Variant event) {
-  Ref<InputEventKey> k = event;
+double Terminal::get_blink_time_on() { return blink_time_on; }
 
-  if (k.is_valid()) {
-    if (!k->is_pressed()) {
-      return;
-    }
-
-    int64_t scancode = k->get_keycode();
-    int64_t unicode = k->get_unicode();
-    uint32_t ascii = unicode <= 127 ? unicode : 0;
-
-    unsigned int mods = 0;
-    if (k->is_alt_pressed())
-      mods |= TSM_ALT_MASK;
-    if (k->is_ctrl_pressed())
-      mods |= TSM_CONTROL_MASK;
-    if (k->is_shift_pressed())
-      mods |= TSM_SHIFT_MASK;
-
-    uint32_t keysym = mapkey({unicode, scancode});
-
-    input_event_key = k;
-    tsm_vte_handle_keyboard(vte, keysym, ascii, mods,
-                            unicode ? unicode : TSM_VTE_INVALID);
-  }
-}
-
-void Terminal::_draw() {
-  if (update_mode == UpdateMode::DISABLED)
-    return;
-
-  if ((update_mode > UpdateMode::AUTO) || framebuffer_age == 0) {
-    /* Draw the full terminal rect background */
-    // Draw the rectangle slightly larger, so it fills the entire viewport.
-    Color background_color = palette[TSM_COLOR_BACKGROUND];
-    draw_rect(Rect2(Vector2(-4, -4), get_rect().size + Vector2(8, 8)),
-              background_color);
-  }
-
-  framebuffer_age = tsm_screen_draw(screen, text_draw_cb, this);
-
-  if (update_mode == UpdateMode::ALL_NEXT_FRAME)
-    update_mode = UpdateMode::AUTO;
-}
-
-void Terminal::update_theme() {
-  ResourceLoader *rl = ResourceLoader::get_singleton();
-  Ref<Theme> default_theme;
-
-  /* Load the default theme if it exists and no theme is set */
-  // Don't actually set the theme to default (to allow inheritence of themes),
-  // but do load default values from it.
-
-  const char *default_theme_path =
-      "res://addons/godot_xterm/themes/default.tres";
-
-  if (!get_theme().is_valid() && rl->exists(default_theme_path)) {
-    default_theme = rl->load(default_theme_path);
-  }
-
-  /* Generate color palette based on theme */
-
-  auto set_pallete_color = [this, default_theme](tsm_vte_color color,
-                                                 String theme_color,
-                                                 Color default_color) -> void {
-    Color c;
-
-    c = has_theme_color(theme_color, "Terminal") ? get_theme_color(theme_color, "Terminal")
-        : has_theme_color_override(theme_color)  ? get_theme_color(theme_color, "")
-        : (default_theme != nullptr &&
-           default_theme->has_color(theme_color, "Terminal"))
-            ? default_theme->get_color(theme_color, "Terminal")
-            : default_color;
-
-    color_palette[color][0] = c.get_r8();
-    color_palette[color][1] = c.get_g8();
-    color_palette[color][2] = c.get_b8();
-
-    palette[color] = c;
-  };
-
-  /* Default to Xterm colors */
-
-  /* ANSI 0 */
-  set_pallete_color(TSM_COLOR_BLACK, "black", Color::html("#000000"));
-  /* ANSI 1 */
-  set_pallete_color(TSM_COLOR_RED, "red", Color::html("#CD0000"));
-  /* ANSI 2 */
-  set_pallete_color(TSM_COLOR_GREEN, "green", Color::html("#00CD00"));
-  /* ANSI 3 */
-  set_pallete_color(TSM_COLOR_YELLOW, "yellow", Color::html("#CDCD00"));
-  /* ANSI 4 */
-  set_pallete_color(TSM_COLOR_BLUE, "blue", Color::html("#0000EE"));
-  /* ANSI 5 */
-  set_pallete_color(TSM_COLOR_MAGENTA, "magenta", Color::html("#CD00CD"));
-  /* ANSI 6 */
-  set_pallete_color(TSM_COLOR_CYAN, "cyan", Color::html("#00CDCD"));
-  /* ANSI 7 (White) */
-  set_pallete_color(TSM_COLOR_LIGHT_GREY, "white", Color::html("#E5E5E5"));
-  /* ANSI 8 (Bright Black) */
-  set_pallete_color(TSM_COLOR_DARK_GREY, "bright_black",
-                    Color::html("#7F7F7F"));
-  /* ANSI 9 */
-  set_pallete_color(TSM_COLOR_LIGHT_RED, "bright_red", Color::html("#FF0000"));
-  /* ANSI 10 */
-  set_pallete_color(TSM_COLOR_LIGHT_GREEN, "bright_green",
-                    Color::html("#00FF00"));
-  /* ANSI 11 */
-  set_pallete_color(TSM_COLOR_LIGHT_YELLOW, "bright_yellow",
-                    Color::html("#FFFF00"));
-  /* ANSI 12 */
-  set_pallete_color(TSM_COLOR_LIGHT_BLUE, "bright_blue",
-                    Color::html("#0000FC"));
-  /* ANSI 13 */
-  set_pallete_color(TSM_COLOR_LIGHT_MAGENTA, "bright_magenta",
-                    Color::html("#FF00FF"));
-  /* ANSI 14 */
-  set_pallete_color(TSM_COLOR_LIGHT_CYAN, "bright_cyan",
-                    Color::html("#00FFFF"));
-  /* ANSI 15 (Bright White) */
-  set_pallete_color(TSM_COLOR_WHITE, "bright_white", Color::html("#FFFFFF"));
-
-  set_pallete_color(TSM_COLOR_FOREGROUND, "foreground", Color::html("#000000"));
-  set_pallete_color(TSM_COLOR_BACKGROUND, "background", Color::html("#FFFFFF"));
-
-  if (tsm_vte_set_custom_palette(vte, color_palette)) {
-    ERR_PRINT("Error setting custom palette");
-  }
-  if (tsm_vte_set_palette(vte, "custom")) {
-    ERR_PRINT("Error setting palette");
-  }
-
-  /* Load fonts into the fontmap from theme */
-
-  auto load_font = [this, default_theme](String font_style) -> void {
-    Ref<Font> fontref;
-
-    if (has_theme_font(font_style, "Terminal")) {
-      fontref = get_theme_font(font_style, "Terminal");
-    } else if (has_theme_font_override(font_style)) {
-      fontref = get_theme_font(font_style, "");
-    } else if (has_theme_font("regular", "Terminal")) {
-      fontref = get_theme_font("regular", "Terminal");
-    } else if (default_theme != nullptr &&
-               default_theme->has_font("regular", "Terminal")) {
-      fontref = default_theme->get_font("regular", "Terminal");
-    } else {
-      fontref = get_theme_font("");
-    }
-
-    fontmap.insert(std::pair<String, Ref<Font>>(font_style, fontref));
-  };
-
-  load_font("bold_italic");
-  load_font("bold");
-  load_font("italic");
-  load_font("regular");
-
-  // update_size();
-}
-
-void Terminal::draw_background(int row, int col, Color bgcolor, int width = 1) {
-  /* Draw the background */
-  Vector2 background_pos = Vector2(col * cell_size.x, row * cell_size.y);
-  Rect2 background_rect = Rect2(background_pos, cell_size * Vector2(width, 1));
-  draw_rect(background_rect, bgcolor);
-}
-
-void Terminal::draw_foreground(int row, int col, char *ch,
-                               const tsm_screen_attr *attr, Color fgcolor) {
-  /* Set the font */
-
-  Ref<Font> fontref = get_theme_font("");
-
-  if (attr->bold && attr->italic) {
-    fontref = fontmap["bold_italic"];
-  } else if (attr->bold) {
-    fontref = fontmap["bold"];
-  } else if (attr->italic) {
-    fontref = fontmap["italic"];
-  } else {
-    fontref = fontmap["regular"];
-  }
-
-  /* Draw the foreground */
-
-  if (attr->blink)
-    ; // TODO: Handle blink
-
-  int font_height = fontref.ptr()->get_height();
-  Vector2 foreground_pos =
-      Vector2(col * cell_size.x, row * cell_size.y + font_height / 1.25);
-  draw_string(fontref, foreground_pos, ch, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, fgcolor); // FIXME
-
-  if (attr->underline)
-    draw_string(fontref, foreground_pos, "_", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, fgcolor); // FIXME
-}
-
-std::pair<Color, Color> Terminal::get_cell_colors(const tsm_screen_attr *attr) {
-  Color fgcol, bgcol;
-  float fr = 0, fg = 0, fb = 0, br = 1, bg = 1, bb = 1;
-
-  /* Get foreground color */
-
-  if (attr->fccode && palette.count(attr->fccode)) {
-    fgcol = palette[attr->fccode];
-  } else {
-    fr = (float)attr->fr / 255.0;
-    fg = (float)attr->fg / 255.0;
-    fb = (float)attr->fb / 255.0;
-    fgcol = Color(fr, fg, fb);
-
-    if (attr->fccode != -1) {
-      palette.insert(std::pair<int, Color>(attr->fccode, Color(fr, fg, fb)));
-    }
-  }
-
-  /* Get background color */
-
-  if (attr->bccode && palette.count(attr->bccode)) {
-    bgcol = palette[attr->bccode];
-  } else {
-    br = (float)attr->br / 255.0;
-    bg = (float)attr->bg / 255.0;
-    bb = (float)attr->bb / 255.0;
-    bgcol = Color(br, bg, bb);
-
-    if (attr->bccode != -1) {
-      palette.insert(std::pair<int, Color>(attr->bccode, Color(br, bg, bb)));
-    }
-  }
-
-  if (attr->inverse)
-    std::swap(bgcol, fgcol);
-
-  return std::make_pair(bgcol, fgcol);
-}
-
-void Terminal::update_size() {
-  // Recalculates the cell_size and number of cols/rows based on font size and
-  // the Control's rect_size.
-
-  Ref<Font> fontref;
-  if (fontmap.count("regular"))
-    fontref = fontmap["regular"];
-  else if (has_theme_font("regular", "Terminal"))
-    fontref = get_theme_font("regular", "Terminal");
-  else
-    fontref = get_theme_font("");
-
-  cell_size = fontref->get_string_size("W");
-
-  rows = std::max(1, (int)floor(get_rect().size.y / cell_size.y));
-  cols = std::max(1, (int)floor(get_rect().size.x / cell_size.x));
-
-  tsm_screen_resize(screen, cols, rows);
-
-  emit_signal("size_changed", Vector2(cols, rows));
-}
-
-void Terminal::write(PackedByteArray data) {
-  tsm_vte_input(vte, (char *)data.ptr(), data.size());
-}
-
-void Terminal::sb_up(int num) {
-  tsm_screen_sb_up(screen, num);
-  queue_redraw();
-}
-
-void Terminal::sb_down(int num) {
-  tsm_screen_sb_down(screen, num);
-  queue_redraw();
-}
-
-void Terminal::sb_reset() {
-  tsm_screen_sb_reset(screen);
-  queue_redraw();
-}
-
-void Terminal::clear_sb() {
+void Terminal::clear() {
+  Vector2 initial_size = get_size();
+  set_size(Vector2(initial_size.x, cell_size.y));
   tsm_screen_clear_sb(screen);
-  queue_redraw();
+  set_size(initial_size);
+  back_buffer->queue_redraw();
 }
 
-void Terminal::start_selection(Vector2 position) {
-  tsm_screen_selection_start(screen, position.x, position.y);
-  queue_redraw();
-}
-
-void Terminal::select_to_pointer(Vector2 position) {
-  tsm_screen_selection_target(screen, position.x, position.y);
-  queue_redraw();
-}
-
-void Terminal::reset_selection() {
-  tsm_screen_selection_reset(screen);
-  queue_redraw();
+String Terminal::copy_all() {
+  char *out = nullptr;
+  int len = tsm_screen_copy_all(screen, &out);
+  String result = String(out);
+  std::free(out);
+  return result;
 }
 
 String Terminal::copy_selection() {
@@ -646,10 +95,559 @@ String Terminal::copy_selection() {
   return result;
 }
 
-String Terminal::copy_all() {
-  char *out = nullptr;
-  int len = tsm_screen_copy_all(screen, &out);
-  String result = String(out);
-  std::free(out);
-  return result;
+int Terminal::get_cols() { return cols; }
+int Terminal::get_rows() { return rows; }
+
+void Terminal::write(Variant data) {
+  switch (data.get_type()) {
+  case Variant::PACKED_BYTE_ARRAY:
+    break;
+  case Variant::STRING:
+    data = ((String)data).to_utf8_buffer();
+    break;
+  default:
+    ERR_PRINT("Expected data to be a String or PackedByteArray.");
+  }
+
+  write_buffer.push_back(data);
+
+  queue_redraw();
+}
+
+void Terminal::_bind_methods() {
+  // Properties.
+  ClassDB::bind_method(D_METHOD("set_copy_on_selection", "value"),
+                       &Terminal::set_copy_on_selection);
+  ClassDB::bind_method(D_METHOD("get_copy_on_selection"),
+                       &Terminal::get_copy_on_selection);
+  ADD_PROPERTY(PropertyInfo(Variant::BOOL, "copy_on_selection"),
+               "set_copy_on_selection", "get_copy_on_selection");
+  ClassDB::bind_method(D_METHOD("set_update_mode", "value"),
+                       &Terminal::set_update_mode);
+  ClassDB::bind_method(D_METHOD("get_update_mode"), &Terminal::get_update_mode);
+  ADD_PROPERTY(PropertyInfo(Variant::INT, "update_mode"), "set_update_mode",
+               "get_update_mode");
+
+  ADD_GROUP("Bell", "bell_");
+  ClassDB::bind_method(D_METHOD("set_bell_cooldown", "value"),
+                       &Terminal::set_bell_cooldown);
+  ClassDB::bind_method(D_METHOD("get_bell_cooldown"),
+                       &Terminal::get_bell_cooldown);
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bell_cooldown"),
+               "set_bell_cooldown", "get_bell_cooldown");
+  ClassDB::bind_method(D_METHOD("set_bell_muted", "value"),
+                       &Terminal::set_bell_muted);
+  ClassDB::bind_method(D_METHOD("get_bell_muted"), &Terminal::get_bell_muted);
+  ADD_PROPERTY(PropertyInfo(Variant::BOOL, "bell_muted"), "set_bell_muted",
+               "get_bell_muted");
+
+  ADD_GROUP("Blink", "blink_");
+  ClassDB::bind_method(D_METHOD("set_blink_enabled", "value"),
+                       &Terminal::set_blink_enabled);
+  ClassDB::bind_method(D_METHOD("get_blink_enabled"),
+                       &Terminal::get_blink_enabled);
+  ADD_PROPERTY(PropertyInfo(Variant::BOOL, "blink_enabled"),
+               "set_blink_enabled", "get_blink_enabled");
+  ClassDB::bind_method(D_METHOD("get_blink_time_off"),
+                       &Terminal::get_blink_time_off);
+  ClassDB::bind_method(D_METHOD("set_blink_time_off", "value"),
+                       &Terminal::set_blink_time_off);
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "blink_time_off"),
+               "set_blink_time_off", "get_blink_time_off");
+  ClassDB::bind_method(D_METHOD("set_blink_time_on", "value"),
+                       &Terminal::set_blink_time_on);
+  ClassDB::bind_method(D_METHOD("get_blink_time_on"),
+                       &Terminal::get_blink_time_on);
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "blink_time_on"),
+               "set_blink_time_on", "get_blink_time_on");
+
+  // Methods.
+  ClassDB::bind_method(D_METHOD("clear"), &Terminal::clear);
+  ClassDB::bind_method(D_METHOD("copy_all"), &Terminal::copy_all);
+  ClassDB::bind_method(D_METHOD("copy_selection"), &Terminal::copy_selection);
+  ClassDB::bind_method(D_METHOD("get_cols"), &Terminal::get_cols);
+  ClassDB::bind_method(D_METHOD("get_rows"), &Terminal::get_rows);
+  ClassDB::bind_method(D_METHOD("write", "data"), &Terminal::write);
+
+  // Signals.
+  ADD_SIGNAL(MethodInfo("bell"));
+  ADD_SIGNAL(MethodInfo("data_sent",
+                        PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
+  ADD_SIGNAL(MethodInfo("key_pressed",
+                        PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data"),
+                        PropertyInfo(Variant::OBJECT, "event")));
+  ADD_SIGNAL(
+      MethodInfo("size_changed", PropertyInfo(Variant::VECTOR2, "new_size")));
+
+  // Enumerations.
+  BIND_ENUM_CONSTANT(UPDATE_MODE_DISABLED);
+  BIND_ENUM_CONSTANT(UPDATE_MODE_AUTO);
+  BIND_ENUM_CONSTANT(UPDATE_MODE_ALL);
+  BIND_ENUM_CONSTANT(UPDATE_MODE_ALL_NEXT_FRAME);
+
+  // Private methods (must be exposed as they are connected to signals).
+  ClassDB::bind_method(D_METHOD("_flush"), &Terminal::_flush);
+  ClassDB::bind_method(D_METHOD("_on_back_buffer_draw"),
+                       &Terminal::_on_back_buffer_draw);
+  ClassDB::bind_method(D_METHOD("_on_selection_held"),
+                       &Terminal::_on_selection_held);
+  ClassDB::bind_method(D_METHOD("_toggle_blink"), &Terminal::_toggle_blink);
+}
+
+void Terminal::_write_cb(tsm_vte *vte, const char *u8, size_t len, void *data) {
+  Terminal *term = static_cast<Terminal *>(data);
+
+  PackedByteArray bytes;
+  bytes.resize(len);
+  { memcpy(bytes.ptrw(), u8, len); }
+
+  if (len > 0) {
+    if (term->last_input_event_key.is_valid()) {
+      // The callback was fired from a key press event so emit the "key_pressed"
+      // signal.
+      term->emit_signal("key_pressed", bytes.get_string_from_utf8(),
+                        term->last_input_event_key);
+      term->last_input_event_key.unref();
+    }
+
+    term->emit_signal("data_sent", bytes);
+  }
+}
+
+int Terminal::_text_draw_cb(tsm_screen *con, uint64_t id, const uint32_t *ch,
+                            size_t len, unsigned int width, unsigned int col,
+                            unsigned int row, const tsm_screen_attr *attr,
+                            tsm_age_t age, void *data) {
+  Terminal *term = static_cast<Terminal *>(data);
+  if (term->update_mode == Terminal::UpdateMode::AUTO && age != 0 &&
+      age <= term->framebuffer_age) {
+    return 0;
+  }
+
+  if (width < 1) { // No foreground or background to draw.
+    return 0;
+  }
+
+  ColorPair color_pair = term->_get_cell_colors(attr);
+  term->_draw_background(row, col, color_pair.first, width);
+
+  if (len < 1) // No foreground to draw.
+    return 0;
+
+  size_t ulen = 0;
+  char buf[5] = {0};
+
+  char *utf8 = tsm_ucs4_to_utf8_alloc(ch, len, &ulen);
+  memcpy(buf, utf8, ulen);
+  term->_draw_foreground(row, col, buf, attr, color_pair.second);
+
+  return 0;
+}
+
+Terminal::Terminal() {
+  // Ensure we write to terminal before the frame is drawn. Otherwise, the
+  // terminal state may be updated but not drawn until it is updated again,
+  // which may not happen for some time.
+  RenderingServer::get_singleton()->connect("frame_pre_draw",
+                                            Callable(this, "_flush"));
+
+  // Override default focus mode.
+  set_focus_mode(FOCUS_ALL);
+
+  // Name our nodes for easier debugging.
+  back_buffer->set_name("BackBuffer");
+  sub_viewport->set_name("SubViewport");
+  front_buffer->set_name("FrontBuffer");
+
+  // Ensure buffers always have correct size.
+  back_buffer->set_anchors_preset(LayoutPreset::PRESET_FULL_RECT);
+  front_buffer->set_anchors_preset(LayoutPreset::PRESET_FULL_RECT);
+
+  // Setup back buffer.
+  back_buffer->connect("draw", Callable(this, "_on_back_buffer_draw"));
+
+  // Setup sub viewport.
+  sub_viewport->set_handle_input_locally(false);
+  sub_viewport->set_transparent_background(true);
+  sub_viewport->set_snap_controls_to_pixels(false);
+  sub_viewport->set_update_mode(SubViewport::UPDATE_WHEN_PARENT_VISIBLE);
+  sub_viewport->set_clear_mode(SubViewport::CLEAR_MODE_NEVER);
+  sub_viewport->add_child(back_buffer);
+  add_child(sub_viewport);
+
+  // Setup bell timer.
+  bell_timer->set_name("BellTimer");
+  bell_timer->set_one_shot(true);
+  add_child(bell_timer);
+
+  // Setup blink timer.
+  blink_timer->set_name("BlinkTimer");
+  blink_timer->set_one_shot(true);
+  blink_timer->connect("timeout", Callable(this, "_toggle_blink"));
+  add_child(blink_timer);
+
+  // Setup selection timer.
+  selection_timer->set_name("SelectionTimer");
+  selection_timer->set_wait_time(0.05);
+  selection_timer->connect("timeout", Callable(this, "_on_selection_held"));
+  add_child(selection_timer);
+
+  // Setup front buffer.
+  front_buffer->set_texture(sub_viewport->get_texture());
+  add_child(front_buffer);
+
+  framebuffer_age = 0;
+  update_mode = UpdateMode::AUTO;
+
+  if (tsm_screen_new(&screen, NULL, NULL)) {
+    ERR_PRINT("Error creating new tsm screen.");
+  }
+  tsm_screen_set_max_sb(screen, 1000);
+
+  if (tsm_vte_new(&vte, screen, &Terminal::_write_cb, this, NULL, NULL)) {
+    ERR_PRINT("Error creating new tsm vte.");
+  }
+
+  tsm_vte_set_bell_cb(vte, &Terminal::_bell_cb, this);
+
+  _update_theme_item_cache();
+}
+
+Terminal::~Terminal() {
+  back_buffer->queue_free();
+  sub_viewport->queue_free();
+  front_buffer->queue_free();
+}
+
+void Terminal::_refresh() {
+  back_buffer->queue_redraw();
+  front_buffer->queue_redraw();
+
+  if (update_mode == UpdateMode::AUTO)
+    update_mode = UpdateMode::ALL_NEXT_FRAME;
+}
+
+void Terminal::_notification(int what) {
+  switch (what) {
+  case NOTIFICATION_RESIZED:
+    _recalculate_size();
+    sub_viewport->set_size(get_size());
+    _refresh();
+    break;
+  case NOTIFICATION_THEME_CHANGED:
+    _update_theme_item_cache();
+    _refresh();
+    break;
+  }
+}
+
+#include <bitset>
+
+void Terminal::_gui_input(Ref<InputEvent> event) {
+  _handle_key_input(event);
+  _handle_selection(event);
+  _handle_mouse_wheel(event);
+}
+void Terminal::_draw_background(int row, int col, Color bgcolor,
+                                int width = 1) {
+  /* Draw the background */
+  Vector2 background_pos = Vector2(col * cell_size.x, row * cell_size.y);
+  Rect2 background_rect = Rect2(background_pos, cell_size * Vector2(width, 1));
+  back_buffer->draw_rect(background_rect, bgcolor);
+}
+
+void Terminal::_draw_foreground(int row, int col, char *ch,
+                                const tsm_screen_attr *attr, Color fgcolor) {
+  Ref<Font> font;
+
+  if (attr->bold && attr->italic) {
+    font = theme_cache.fonts["bold_italics_font"];
+  } else if (attr->bold) {
+    font = theme_cache.fonts["bold_font"];
+  } else if (attr->italic) {
+    font = theme_cache.fonts["italics_font"];
+  } else {
+    font = theme_cache.fonts["normal_font"];
+  }
+
+  if (attr->blink && blink_enabled) {
+    if (blink_timer->is_stopped())
+      blink_timer->start(blink_on ? blink_time_on : blink_time_off);
+
+    if (!blink_on)
+      return;
+  }
+
+  int font_height = font->get_height(theme_cache.font_size);
+  Vector2 foreground_pos =
+      Vector2(col * cell_size.x, row * cell_size.y + font_height / 1.25);
+  back_buffer->draw_string(font, foreground_pos, ch, HORIZONTAL_ALIGNMENT_LEFT,
+                           -1, theme_cache.font_size, fgcolor);
+
+  if (attr->underline)
+    back_buffer->draw_string(font, foreground_pos, "_",
+                             HORIZONTAL_ALIGNMENT_LEFT, -1,
+                             theme_cache.font_size, fgcolor);
+}
+
+Terminal::ColorPair Terminal::_get_cell_colors(const tsm_screen_attr *attr) {
+  Color fgcol, bgcol;
+  int8_t fccode = attr->fccode;
+  int8_t bccode = attr->bccode;
+
+  // Get foreground color.
+  if (fccode && palette.count(fccode)) {
+    fgcol = palette[fccode];
+  } else {
+    fgcol = Color(attr->fr / 255.0f, attr->fg / 255.0f, attr->fb / 255.0f);
+
+    if (fccode != -1)
+      palette.insert({fccode, fgcol});
+  }
+
+  // Get background color.
+  if (bccode && palette.count(bccode)) {
+    bgcol = palette[bccode];
+  } else {
+    bgcol = Color(attr->br / 255.0f, attr->bg / 255.0f, attr->bb / 255.0f);
+
+    if (bccode != -1)
+      palette.insert({bccode, bgcol});
+  }
+
+  if (attr->inverse)
+    std::swap(bgcol, fgcol);
+
+  return std::make_pair(bgcol, fgcol);
+}
+
+void Terminal::_update_theme_item_cache() {
+  // Fonts.
+  for (std::map<const char *, const char *>::const_iterator iter =
+           Terminal::FONTS.begin();
+       iter != Terminal::FONTS.end(); ++iter) {
+    String name = iter->first;
+
+    Ref<Font> font = has_theme_font_override(name) ? get_theme_font(name)
+                     : has_theme_font(name, "Terminal")
+                         ? get_theme_font(name, "Terminal")
+                         : ThemeDB::get_singleton()->get_fallback_font();
+
+    theme_cache.fonts[name] = font;
+  }
+
+  // Font size.
+  theme_cache.font_size =
+      has_theme_font_size_override("font_size")
+          ? get_theme_font_size("font_size")
+      : has_theme_font_size("font_size", "Terminal")
+          ? get_theme_font_size("font_size", "Terminal")
+          : ThemeDB::get_singleton()->get_fallback_font_size();
+
+  // Colors.
+  uint8_t custom_palette[TSM_COLOR_NUM][3];
+
+  for (ColorMap::const_iterator iter = Terminal::COLORS.begin();
+       iter != Terminal::COLORS.end(); ++iter) {
+    String name = iter->first;
+
+    Color color = has_theme_color_override(name) ? get_theme_color(name)
+                  : has_theme_color(name, "Terminal")
+                      ? get_theme_color(name, "Terminal")
+                      : color = Color::html(iter->second.default_color);
+
+    theme_cache.colors[name] = color;
+    palette[iter->second.tsm_color] = color;
+    custom_palette[iter->second.tsm_color][0] = color.get_r8();
+    custom_palette[iter->second.tsm_color][1] = color.get_g8();
+    custom_palette[iter->second.tsm_color][2] = color.get_b8();
+  }
+
+  if (tsm_vte_set_custom_palette(vte, custom_palette))
+    ERR_PRINT("Error setting custom palette.");
+  if (tsm_vte_set_palette(vte, "custom"))
+    ERR_PRINT("Error setting palette to custom palette.");
+
+  _recalculate_size();
+}
+
+void Terminal::_flush() {
+  if (write_buffer.is_empty())
+    return;
+
+  for (int i = 0; i < write_buffer.size(); i++) {
+    PackedByteArray data = static_cast<PackedByteArray>(write_buffer[i]);
+    tsm_vte_input(vte, (char *)data.ptr(), data.size());
+  }
+
+  write_buffer.clear();
+
+  back_buffer->queue_redraw();
+}
+
+void Terminal::_on_back_buffer_draw() {
+  if (update_mode == UpdateMode::DISABLED) {
+    return;
+  }
+
+  if ((update_mode > UpdateMode::AUTO) || framebuffer_age == 0) {
+    Color background_color = palette[TSM_COLOR_BACKGROUND];
+    back_buffer->draw_rect(back_buffer->get_rect(), background_color);
+  }
+
+  int prev_framebuffer_age = framebuffer_age;
+  framebuffer_age = tsm_screen_draw(screen, &Terminal::_text_draw_cb, this);
+
+  if (update_mode == UpdateMode::ALL_NEXT_FRAME && prev_framebuffer_age != 0)
+    update_mode = UpdateMode::AUTO;
+}
+
+void Terminal::_toggle_blink() {
+  if (blink_enabled) {
+    blink_on = !blink_on;
+    _refresh();
+  }
+}
+
+void Terminal::_on_selection_held() {
+  if (!(Input::get_singleton()->is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) ||
+      selection_mode == SelectionMode::NONE) {
+    if (copy_on_selection)
+      DisplayServer::get_singleton()->clipboard_set_primary(copy_selection());
+    selection_timer->stop();
+    return;
+  }
+
+  Vector2 target = get_local_mouse_position() / cell_size;
+  tsm_screen_selection_target(screen, target.x, target.y);
+  back_buffer->queue_redraw();
+  selection_timer->start();
+}
+
+void Terminal::_bell_cb(tsm_vte *vte, void *data) {
+  Terminal *term = static_cast<Terminal *>(data);
+
+  if (!term->bell_muted && term->bell_cooldown == 0 ||
+      term->bell_timer->get_time_left() == 0) {
+    term->emit_signal("bell");
+    if (term->bell_cooldown > 0)
+      term->bell_timer->start(term->bell_cooldown);
+  }
+}
+
+void Terminal::_handle_key_input(Ref<InputEventKey> event) {
+  if (!event.is_valid() || !event->is_pressed())
+    return;
+
+  const Key keycode = event->get_keycode();
+  char32_t unicode = event->get_unicode();
+  uint32_t ascii = unicode <= 127 ? unicode : 0;
+
+  unsigned int mods = 0;
+  if (event->is_alt_pressed())
+    mods |= TSM_ALT_MASK;
+  if (event->is_ctrl_pressed())
+    mods |= TSM_CONTROL_MASK;
+  if (event->is_shift_pressed())
+    mods |= TSM_SHIFT_MASK;
+
+  std::pair<Key, char32_t> key = {keycode, unicode};
+  uint32_t keysym =
+      (KEY_MAP.count(key) > 0) ? KEY_MAP.at(key) : XKB_KEY_NoSymbol;
+
+  last_input_event_key = event;
+  tsm_vte_handle_keyboard(vte, keysym, ascii, mods,
+                          unicode ? unicode : TSM_VTE_INVALID);
+
+  // Return to the bottom of the scrollback buffer if we scrolled up. Ignore
+  // modifier keys pressed in isolation or if Ctrl+Shift modifier keys are
+  // pressed.
+  std::set<Key> mod_keys = {KEY_ALT, KEY_SHIFT, KEY_CTRL, KEY_META};
+  if (mod_keys.find(keycode) == mod_keys.end() &&
+      !(event->is_ctrl_pressed() && event->is_shift_pressed())) {
+    tsm_screen_sb_reset(screen);
+    back_buffer->queue_redraw();
+  }
+
+  // Prevent focus changing to other inputs when pressing Tab or Arrow keys.
+  std::set<Key> tab_arrow_keys = {KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN,
+                                  KEY_TAB};
+  if (tab_arrow_keys.find(keycode) != tab_arrow_keys.end())
+    accept_event();
+}
+
+void Terminal::_handle_mouse_wheel(Ref<InputEventMouseButton> event) {
+  if (!event.is_valid() || !event->is_pressed())
+    return;
+
+  void (*scroll_func)(tsm_screen *, unsigned int) = nullptr;
+
+  switch (event->get_button_index()) {
+  case MOUSE_BUTTON_WHEEL_UP:
+    scroll_func = &tsm_screen_sb_up;
+    break;
+  case MOUSE_BUTTON_WHEEL_DOWN:
+    scroll_func = &tsm_screen_sb_down;
+    break;
+  };
+
+  if (scroll_func != nullptr) {
+    // Scroll 5 times as fast as normal if alt is pressed (like TextEdit).
+    // Otherwise, just scroll 3 lines.
+    int speed = event->is_alt_pressed() ? 15 : 3;
+    double factor = event->get_factor();
+    (*scroll_func)(screen, speed * factor);
+    back_buffer->queue_redraw();
+  }
+}
+
+void Terminal::_handle_selection(Ref<InputEventMouse> event) {
+  if (!event.is_valid())
+    return;
+
+  Ref<InputEventMouseButton> mb = event;
+  if (mb.is_valid()) {
+    if (!mb->is_pressed() || !mb->get_button_index() == MOUSE_BUTTON_LEFT)
+      return;
+
+    if (selecting) {
+      selecting = false;
+      selection_mode = SelectionMode::NONE;
+      tsm_screen_selection_reset(screen);
+      back_buffer->queue_redraw();
+    }
+
+    selecting = false;
+    selection_mode = SelectionMode::POINTER;
+
+    return;
+  }
+
+  Ref<InputEventMouseMotion> mm = event;
+  if (mm.is_valid()) {
+    if ((mm->get_button_mask() & MOUSE_BUTTON_MASK_LEFT) &&
+        selection_mode != SelectionMode::NONE && !selecting) {
+      selecting = true;
+      Vector2 start = event->get_position() / cell_size;
+      tsm_screen_selection_start(screen, start.x, start.y);
+      back_buffer->queue_redraw();
+      selection_timer->start();
+    }
+    return;
+  }
+}
+
+void Terminal::_recalculate_size() {
+  Vector2 size = get_size();
+
+  cell_size = theme_cache.fonts["normal_font"]->get_string_size(
+      "W", HORIZONTAL_ALIGNMENT_LEFT, -1, theme_cache.font_size);
+
+  rows = std::max(1, (int)floor(size.y / cell_size.y));
+  cols = std::max(1, (int)floor(size.x / cell_size.x));
+
+  tsm_screen_resize(screen, cols, rows);
+  sub_viewport->set_size(size);
+
+  emit_signal("size_changed", Vector2(cols, rows));
 }

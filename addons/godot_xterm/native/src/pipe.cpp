@@ -1,19 +1,8 @@
-// Copyright (c) 2021, Leroy Hopson (MIT License).
+// SPDX-FileCopyrightText: 2021-2023 Leroy Hopson <godot-xterm@leroy.geek.nz>
+// SDPX-License-Identifier: MIT
 
 #include "pipe.h"
 #include "libuv_utils.h"
-#include <godot_cpp/variant/dictionary.hpp>
-#include <godot_cpp/variant/packed_byte_array.hpp>
-#include <godot_cpp/classes/global_constants.hpp>
-#include <godot_cpp/classes/input_event_key.hpp>
-#include <godot_cpp/classes/os.hpp>
-#include <godot_cpp/classes/resource_loader.hpp>
-#include <godot_cpp/classes/theme.hpp>
-#include <godot_cpp/classes/timer.hpp>
-#include <algorithm>
-#include <thread>
-#include <vector>
-#include <xkbcommon/xkbcommon-keysyms.h>
 
 #ifndef ULONG
 #define ULONG size_t
@@ -22,15 +11,16 @@
 using namespace godot;
 
 void Pipe::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("_init"), &Pipe::_init);
+  ClassDB::bind_method(D_METHOD("_init"), &Pipe::_init);
 
   ClassDB::bind_method(D_METHOD("poll"), &Pipe::_poll_connection);
-  ClassDB::bind_method(D_METHOD("open"), &Pipe::open);
+  ClassDB::bind_method(D_METHOD("open", "fd", "ipc"), &Pipe::open);
   ClassDB::bind_method(D_METHOD("write"), &Pipe::write);
   ClassDB::bind_method(D_METHOD("get_status"), &Pipe::get_status);
   ClassDB::bind_method(D_METHOD("close"), &Pipe::close);
 
- 	ADD_SIGNAL(MethodInfo("data_received", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
+  ADD_SIGNAL(MethodInfo("data_received",
+                        PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
 }
 
 Pipe::Pipe() {}
