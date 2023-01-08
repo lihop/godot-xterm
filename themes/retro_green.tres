@@ -1,35 +1,43 @@
-[gd_resource type="Theme" load_steps=4 format=2]
+[gd_resource type="Theme" load_steps=4 format=3 uid="uid://blh56m1gdieyu"]
 
-[ext_resource path="res://addons/godot_xterm/resources/xrdb_theme.gd" type="Script" id=1]
-[ext_resource path="res://addons/godot_xterm/themes/fonts/hack/hack_regular-3.003.ttf" type="FontFile" id=2]
+[ext_resource type="Script" path="res://addons/godot_xterm/resources/xrdb_theme.gd" id="1"]
+[ext_resource type="FontFile" uid="uid://edo5q2qxos3u" path="res://addons/godot_xterm/themes/fonts/hack/hack_regular-3.003.ttf" id="2"]
 
-[sub_resource type="FontFile" id=1]
-size = 39
-extra_spacing_bottom = 1
-font_data = ExtResource( 2 )
+[sub_resource type="FontFile" id="1"]
+fallbacks = [ExtResource("2")]
+face_index = null
+embolden = null
+transform = null
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
 
 [resource]
-Terminal/colors/background = Color( 0.156863, 0.156863, 0.156863, 1 )
-Terminal/colors/black = Color( 0, 1, 0.4, 1 )
-Terminal/colors/blue = Color( 0, 1, 0.4, 1 )
-Terminal/colors/bright_black = Color( 0, 1, 0.4, 1 )
-Terminal/colors/bright_blue = Color( 0, 1, 0.4, 1 )
-Terminal/colors/bright_cyan = Color( 0, 1, 0.4, 1 )
-Terminal/colors/bright_green = Color( 0, 1, 0.4, 1 )
-Terminal/colors/bright_magenta = Color( 0, 1, 0.4, 1 )
-Terminal/colors/bright_red = Color( 0, 1, 0.4, 1 )
-Terminal/colors/bright_white = Color( 0, 1, 0.4, 1 )
-Terminal/colors/bright_yellow = Color( 0, 1, 0.4, 1 )
-Terminal/colors/cursor = Color( 0, 1, 0.4, 1 )
-Terminal/colors/cyan = Color( 0, 1, 0.4, 1 )
-Terminal/colors/foreground = Color( 0, 1, 0.4, 1 )
-Terminal/colors/green = Color( 0, 1, 0.4, 1 )
-Terminal/colors/magenta = Color( 0, 1, 0.4, 1 )
-Terminal/colors/red = Color( 0, 1, 0.4, 1 )
-Terminal/colors/white = Color( 0, 1, 0.4, 1 )
-Terminal/colors/yellow = Color( 0, 1, 0.4, 1 )
-Terminal/fonts/bold = null
-Terminal/fonts/bold_italic = null
-Terminal/fonts/italic = null
-Terminal/fonts/regular = SubResource( 1 )
-script = ExtResource( 1 )
+Terminal/colors/ansi_0_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_10_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_11_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_12_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_13_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_14_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_15_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_1_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_2_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_3_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_4_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_5_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_6_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_7_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_8_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_9_color = Color(0, 1, 0.4, 1)
+Terminal/colors/background_color = Color(0.156863, 0.156863, 0.156863, 1)
+Terminal/colors/cursor = Color(0, 1, 0.4, 1)
+Terminal/colors/foreground_color = Color(0, 1, 0.4, 1)
+Terminal/font_sizes/font_size = 14
+Terminal/fonts/bold_font = null
+Terminal/fonts/bold_italics_font = null
+Terminal/fonts/italics_font = null
+Terminal/fonts/normal_font = SubResource("1")
+script = ExtResource("1")

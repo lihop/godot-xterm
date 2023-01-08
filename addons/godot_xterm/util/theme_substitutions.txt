@@ -1,0 +1,25 @@
+/Terminal\/colors/ s/bright_black/ansi_8_color/
+/Terminal\/colors/ s/bright_red/ansi_9_color/
+/Terminal\/colors/ s/bright_green/ansi_10_color/
+/Terminal\/colors/ s/bright_yellow/ansi_11_color/
+/Terminal\/colors/ s/bright_blue/ansi_12_color/
+/Terminal\/colors/ s/bright_magenta/ansi_13_color/
+/Terminal\/colors/ s/bright_cyan/ansi_14_color/
+/Terminal\/colors/ s/bright_white/ansi_15_color/
+/Terminal\/colors/ s/black/ansi_0_color/
+/Terminal\/colors/ s/red/ansi_1_color/
+/Terminal\/colors/ s/green/ansi_2_color/
+/Terminal\/colors/ s/yellow/ansi_3_color/
+/Terminal\/colors/ s/blue/ansi_4_color/
+/Terminal\/colors/ s/magenta/ansi_5_color/
+/Terminal\/colors/ s/cyan/ansi_6_color/
+/Terminal\/colors/ s/white/ansi_7_color/
+/Terminal\/colors/ s/background/background_color/
+/Terminal\/colors/ s/foreground/foreground_color/
+
+/Terminal\/fonts/ s/regular/normal_font/
+/Terminal\/fonts/ s/bold/bold_font/
+/Terminal\/fonts/ s/italic/italics_font/
+/Terminal\/fonts/ s/bold_italic/bold_italics_font/
+
+$aTerminal\/font_sizes\/font_size = 14
