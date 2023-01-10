@@ -22,7 +22,7 @@ jobs:
         target: [ release, debug ]
         bits: [ 64, 32 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Cache submodules
@@ -36,7 +36,7 @@ jobs:
         run: docker-compose pull
         working-directory: addons/godot_xterm/native
       - name: Cache docker image layers
-        uses: satackey/action-docker-layer-caching@v0
+        uses: jpribyl/action-docker-layer-caching@v0.1.0
         continue-on-error: true
       - name: Build godot-cpp bindings
         if: steps.cache-submodules.outputs.cache-hit != 'true'
@@ -52,7 +52,7 @@ jobs:
         working-directory: addons/godot_xterm/native
         run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e BITS=${{ matrix.bits }} libgodot-xterm-linux
       - name: Upload binaries
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: libgodot-xterm-${{ matrix.target }}
           path: |
@@ -80,7 +80,7 @@ jobs:
           - platform: osx
             bits: 32 # Only 64-bit supported on macOS.
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Cache submodules
@@ -92,7 +92,7 @@ jobs:
           bits: ${{ matrix.bits }}
       - name: Cache emscripten
         if: ${{ matrix.platform == 'javascript' }}
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-emscripten
         with:
@@ -100,7 +100,9 @@ jobs:
           key: emsdk-cache-${{ matrix.target }}-v${{ env.EMSCRIPTEN_CACHE_VERSION }}
       - name: Install javascript build dependencies
         if: ${{ matrix.platform == 'javascript' }}
-        uses: mymindstorm/setup-emsdk@v11
+        # Previously mymindstorm/setup-emsdk@v11, but hasn't been updated to Node.js 16.
+        # Should be able to switch back once it has.
+        uses: jeetiss/setup-emsdk@fafd6dd1fc20488845d49b760fd143dfcd7f133c
         with:
           version: 3.1.14
           actions-cache-folder: emsdk-cache-${{ matrix.target }}
@@ -127,7 +129,7 @@ jobs:
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         uses: jwlawson/actions-setup-cmake@v1
         with:
-          cmake-version: '3.23.2'
+          cmake-version: "3.23.2${{ matrix.os == 'macos-12' && '-macos-universal.dmg' || '' }}"
           use-32bit: ${{ matrix.bits == 32 && matrix.os == 'windows-2022' }}
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
@@ -160,7 +162,7 @@ jobs:
           cd addons/godot_xterm/native
           scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} -j2
       - name: Upload binaries
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: libgodot-xterm-${{ matrix.target }}
           path: |
@@ -173,13 +175,13 @@ jobs:
     needs: [ build_docker, build_native ]
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Setup Godot
       uses: lihop/setup-godot@v2
       with:
         export-templates: true
     - name: Install binary build artifacts
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: libgodot-xterm-release
         path: addons/godot_xterm/native/bin
@@ -198,9 +200,10 @@ jobs:
         timeout_minutes: 5
         max_attempts: 6
     - name: NPM cache
-      uses: c-hive/gha-npm-cache@v1
+      uses: actions/setup-node@v3
       with:
-        directory: test/html5
+        cache: 'npm'
+        cache-dependency-path: test/html5/package-lock.json
     - name: Smoke test HTML5 export
       shell: bash
       working-directory: test/html5
@@ -209,7 +212,7 @@ jobs:
         npx serve ../../docs/demo -p 3000 &
         npx cypress run
     - name: Upload cypress artifacts (on failure)
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: ${{ failure() }}
       with:
         name: cypress-artifacts
@@ -217,7 +220,7 @@ jobs:
           test/html5/cypress/screenshots
           test/html5/cypress/videos
     - name: Upload export
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: html5-demo
         path: docs/demo
@@ -236,14 +239,14 @@ jobs:
           - os: macos-12
             bits: 32
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
           version: ${{ matrix.godot_version }}
           bits: ${{ matrix.bits }}
       - name: Install binary build artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: libgodot-xterm-release
           path: addons/godot_xterm/native/bin
@@ -270,7 +273,7 @@ jobs:
     name: 'Check Archive'
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Create git archive
@@ -304,8 +307,8 @@ jobs:
     name: 'Check Code Format'
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: 3.x
     - name: GDFormat Check

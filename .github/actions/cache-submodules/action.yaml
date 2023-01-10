@@ -23,7 +23,7 @@ runs:
         libtsm_rev=$(git ls-tree HEAD libtsm --object-only)
         hash_cmd=$([[ $RUNNER_OS == 'Windows' ]] && echo 'sha1sum' || echo 'shasum')
         hash_of_hashes=$(echo -n "$godot_cpp_rev$libuv_rev$libtsm_rev$cache_version" | $hash_cmd | head -c 40)
-        echo "::set-output name=hash::$hash_of_hashes"
+        echo "name=hash::$hash_of_hashes" >> $GITHUB_OUTPUT
     - name: Cache submodules
       uses: actions/cache@v3
       id: cache
