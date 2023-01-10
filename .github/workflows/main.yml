@@ -129,7 +129,7 @@ jobs:
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         uses: jwlawson/actions-setup-cmake@v1
         with:
-          cmake-version: "3.23.2${{ matrix.os == 'macos-12' && '-macos-universal.dmg' || '' }}"
+          cmake-version: '3.23.2'
           use-32bit: ${{ matrix.bits == 32 && matrix.os == 'windows-2022' }}
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
