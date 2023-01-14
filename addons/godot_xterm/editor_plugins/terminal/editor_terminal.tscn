@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://addons/godot_xterm/editor_plugins/terminal/editor_terminal.gd" id="1"]
 [ext_resource type="Script" path="res://addons/godot_xterm/pty.gd" id="2"]
-[ext_resource type="Theme" uid="uid://c3ep6rm56qjeb" path="res://addons/godot_xterm/themes/default.tres" id="3"]
+[ext_resource type="Theme" uid="uid://0gk8swmcldbg" path="res://addons/godot_xterm/themes/default.tres" id="3"]
 
 [node name="Terminal" type="Terminal"]
 anchors_preset = 15

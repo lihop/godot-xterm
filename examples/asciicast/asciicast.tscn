@@ -3,7 +3,7 @@
 [ext_resource type="Theme" uid="uid://b7vd50tw2g1nl" path="res://themes/default.tres" id="1_nsh8i"]
 [ext_resource type="Animation" uid="uid://dcgqvylq0648u" path="res://examples/asciicast/example.cast" id="2_3048a"]
 
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_02l7k"]
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_eb6bs"]
 _data = {
 "example": ExtResource("2_3048a")
 }
@@ -22,5 +22,5 @@ autoplay = "example"
 playback_speed = 2.0
 method_call_mode = 1
 libraries = {
-"": SubResource("AnimationLibrary_02l7k")
+"": SubResource("AnimationLibrary_eb6bs")
 }

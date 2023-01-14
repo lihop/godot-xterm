@@ -1,23 +1,20 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=3 format=3 uid="uid://d3xc4utggdchf"]
 
-[ext_resource path="res://addons/godot_xterm/terminal.gd" type="Script" id=2]
-[ext_resource path="res://examples/web_console/web_console.gd" type="Script" id=3]
+[ext_resource type="Script" path="res://addons/godot_xterm/terminal.gd" id="2"]
+[ext_resource type="Script" path="res://examples/web_console/web_console.gd" id="3"]
 
 [node name="WebConsole" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3")
 
 [node name="Terminal" type="Control" parent="."]
+anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 focus_mode = 2
-script = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[connection signal="key_pressed" from="Terminal" to="." method="_on_Terminal_key_pressed"]
+script = ExtResource("2")
