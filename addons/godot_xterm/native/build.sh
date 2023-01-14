@@ -59,10 +59,8 @@ updateSubmodules GODOT_CPP_DIR ${NATIVE_DIR}/thirdparty/godot-cpp
 
 
 # Build godot-cpp bindings.
-# FIXME: Commented out to improve build time, but needs to be uncommented and run for initial build of godot-cpp.
-#cd ${GODOT_CPP_DIR}
-#echo "scons generate_bindings=yes target=$target -j$nproc"
-#scons generate_bindings=yes macos_arch=$(uname -m) target=$target -j$nproc
+cd ${GODOT_CPP_DIR}
+scons generate_bindings=yes macos_arch=$(uname -m) target=$target -j$nproc
 
 # Build libuv as a static library.
 cd ${LIBUV_DIR}
