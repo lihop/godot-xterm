@@ -44,10 +44,10 @@ enum CWDType {
 @export var bell_sound: AudioStream
 
 # Exec args.
-@export var file_type: FileType := FileType.USE_SHELL_ENV
+@export var file_type := FileType.USE_SHELL_ENV
 @export var custom_file := "/bin/sh"
 
-@export var cwd_type: CWDType := CWDType.USE_PROJECT_DIRECTORY
+@export var cwd_type := CWDType.USE_PROJECT_DIRECTORY
 @export var custom_cwd := ""
 
 @export var args := PackedStringArray()

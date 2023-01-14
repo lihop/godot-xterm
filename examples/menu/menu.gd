@@ -146,7 +146,7 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 				scene.queue_free()
 			"Terminal":
 				if OS.get_name() == "Windows":
-					return OS.call_deferred(
+					OS.call_deferred(
 						"alert",
 						(
 							"Psuedoterminal node currently"
@@ -155,6 +155,7 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 						),
 						"Terminal not Supported on Windows"
 					)
+					return
 				var scene = item.scene.instantiate()
 				var pty = scene if OS.has_feature("JavaScript") else scene.get_node("PTY")
 				add_child(scene)
