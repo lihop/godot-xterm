@@ -60,13 +60,13 @@ public:
   void set_blink_enabled(bool value);
   bool get_blink_enabled();
 
-  double blink_time_on = 0.6;
-  void set_blink_time_on(double value);
-  double get_blink_time_on();
-
   double blink_time_off = 0.3;
   void set_blink_time_off(double value);
   double get_blink_time_off();
+
+  double blink_time_on = 0.6;
+  void set_blink_time_on(double value);
+  double get_blink_time_on();
 
   void clear();
   String copy_all();
@@ -151,7 +151,6 @@ private:
   void _draw_foreground(int row, int col, char *ch, const tsm_screen_attr *attr,
                         Color fgcol);
   ColorPair _get_cell_colors(const tsm_screen_attr *attr);
-
   void _handle_key_input(Ref<InputEventKey> event);
   void _handle_mouse_wheel(Ref<InputEventMouseButton> event);
   void _handle_selection(Ref<InputEventMouse> event);

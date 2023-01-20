@@ -21,6 +21,81 @@
 
 using namespace godot;
 
+Terminal::Terminal() {
+  // Ensure we write to terminal before the frame is drawn. Otherwise, the
+  // terminal state may be updated but not drawn until it is updated again,
+  // which may not happen for some time.
+  RenderingServer::get_singleton()->connect("frame_pre_draw",
+                                            Callable(this, "_flush"));
+
+  // Override default focus mode.
+  set_focus_mode(FOCUS_ALL);
+
+  // Name our nodes for easier debugging.
+  back_buffer->set_name("BackBuffer");
+  sub_viewport->set_name("SubViewport");
+  front_buffer->set_name("FrontBuffer");
+
+  // Ensure buffers always have correct size.
+  back_buffer->set_anchors_preset(LayoutPreset::PRESET_FULL_RECT);
+  front_buffer->set_anchors_preset(LayoutPreset::PRESET_FULL_RECT);
+
+  // Setup back buffer.
+  back_buffer->connect("draw", Callable(this, "_on_back_buffer_draw"));
+
+  // Setup sub viewport.
+  sub_viewport->set_handle_input_locally(false);
+  sub_viewport->set_transparent_background(true);
+  sub_viewport->set_snap_controls_to_pixels(false);
+  sub_viewport->set_update_mode(SubViewport::UPDATE_WHEN_PARENT_VISIBLE);
+  sub_viewport->set_clear_mode(SubViewport::CLEAR_MODE_NEVER);
+  sub_viewport->add_child(back_buffer);
+  add_child(sub_viewport);
+
+  // Setup bell timer.
+  bell_timer->set_name("BellTimer");
+  bell_timer->set_one_shot(true);
+  add_child(bell_timer);
+
+  // Setup blink timer.
+  blink_timer->set_name("BlinkTimer");
+  blink_timer->set_one_shot(true);
+  blink_timer->connect("timeout", Callable(this, "_toggle_blink"));
+  add_child(blink_timer);
+
+  // Setup selection timer.
+  selection_timer->set_name("SelectionTimer");
+  selection_timer->set_wait_time(0.05);
+  selection_timer->connect("timeout", Callable(this, "_on_selection_held"));
+  add_child(selection_timer);
+
+  // Setup front buffer.
+  front_buffer->set_texture(sub_viewport->get_texture());
+  add_child(front_buffer);
+
+  framebuffer_age = 0;
+  update_mode = UpdateMode::AUTO;
+
+  if (tsm_screen_new(&screen, NULL, NULL)) {
+    ERR_PRINT("Error creating new tsm screen.");
+  }
+  tsm_screen_set_max_sb(screen, 1000);
+
+  if (tsm_vte_new(&vte, screen, &Terminal::_write_cb, this, NULL, NULL)) {
+    ERR_PRINT("Error creating new tsm vte.");
+  }
+
+  tsm_vte_set_bell_cb(vte, &Terminal::_bell_cb, this);
+
+  _update_theme_item_cache();
+}
+
+Terminal::~Terminal() {
+  back_buffer->queue_free();
+  sub_viewport->queue_free();
+  front_buffer->queue_free();
+}
+
 void Terminal::set_copy_on_selection(bool value) { copy_on_selection = value; }
 
 bool Terminal::get_copy_on_selection() { return copy_on_selection; }
@@ -28,6 +103,7 @@ bool Terminal::get_copy_on_selection() { return copy_on_selection; }
 void Terminal::set_update_mode(Terminal::UpdateMode value) {
   update_mode = value;
 };
+
 Terminal::UpdateMode Terminal::get_update_mode() { return update_mode; }
 
 void Terminal::set_bell_cooldown(double value) { bell_cooldown = value; }
@@ -114,6 +190,79 @@ void Terminal::write(Variant data) {
   queue_redraw();
 }
 
+void Terminal::_gui_input(Ref<InputEvent> event) {
+  _handle_key_input(event);
+  _handle_selection(event);
+  _handle_mouse_wheel(event);
+}
+
+void Terminal::_notification(int what) {
+  switch (what) {
+  case NOTIFICATION_RESIZED:
+    _recalculate_size();
+    sub_viewport->set_size(get_size());
+    _refresh();
+    break;
+  case NOTIFICATION_THEME_CHANGED:
+    _update_theme_item_cache();
+    _refresh();
+    break;
+  }
+}
+
+void Terminal::_flush() {
+  if (write_buffer.is_empty())
+    return;
+
+  for (int i = 0; i < write_buffer.size(); i++) {
+    PackedByteArray data = static_cast<PackedByteArray>(write_buffer[i]);
+    tsm_vte_input(vte, (char *)data.ptr(), data.size());
+  }
+
+  write_buffer.clear();
+
+  back_buffer->queue_redraw();
+}
+
+void Terminal::_on_back_buffer_draw() {
+  if (update_mode == UpdateMode::DISABLED) {
+    return;
+  }
+
+  if ((update_mode > UpdateMode::AUTO) || framebuffer_age == 0) {
+    Color background_color = palette[TSM_COLOR_BACKGROUND];
+    back_buffer->draw_rect(back_buffer->get_rect(), background_color);
+  }
+
+  int prev_framebuffer_age = framebuffer_age;
+  framebuffer_age = tsm_screen_draw(screen, &Terminal::_text_draw_cb, this);
+
+  if (update_mode == UpdateMode::ALL_NEXT_FRAME && prev_framebuffer_age != 0)
+    update_mode = UpdateMode::AUTO;
+}
+
+void Terminal::_on_selection_held() {
+  if (!(Input::get_singleton()->is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) ||
+      selection_mode == SelectionMode::NONE) {
+    if (copy_on_selection)
+      DisplayServer::get_singleton()->clipboard_set_primary(copy_selection());
+    selection_timer->stop();
+    return;
+  }
+
+  Vector2 target = get_local_mouse_position() / cell_size;
+  tsm_screen_selection_target(screen, target.x, target.y);
+  back_buffer->queue_redraw();
+  selection_timer->start();
+}
+
+void Terminal::_toggle_blink() {
+  if (blink_enabled) {
+    blink_on = !blink_on;
+    _refresh();
+  }
+}
+
 void Terminal::_bind_methods() {
   // Properties.
   ClassDB::bind_method(D_METHOD("set_copy_on_selection", "value"),
@@ -194,23 +343,14 @@ void Terminal::_bind_methods() {
   ClassDB::bind_method(D_METHOD("_toggle_blink"), &Terminal::_toggle_blink);
 }
 
-void Terminal::_write_cb(tsm_vte *vte, const char *u8, size_t len, void *data) {
+void Terminal::_bell_cb(tsm_vte *vte, void *data) {
   Terminal *term = static_cast<Terminal *>(data);
 
-  PackedByteArray bytes;
-  bytes.resize(len);
-  { memcpy(bytes.ptrw(), u8, len); }
-
-  if (len > 0) {
-    if (term->last_input_event_key.is_valid()) {
-      // The callback was fired from a key press event so emit the "key_pressed"
-      // signal.
-      term->emit_signal("key_pressed", bytes.get_string_from_utf8(),
-                        term->last_input_event_key);
-      term->last_input_event_key.unref();
-    }
-
-    term->emit_signal("data_sent", bytes);
+  if (!term->bell_muted && term->bell_cooldown == 0 ||
+      term->bell_timer->get_time_left() == 0) {
+    term->emit_signal("bell");
+    if (term->bell_cooldown > 0)
+      term->bell_timer->start(term->bell_cooldown);
   }
 }
 
@@ -244,108 +384,26 @@ int Terminal::_text_draw_cb(tsm_screen *con, uint64_t id, const uint32_t *ch,
   return 0;
 }
 
-Terminal::Terminal() {
-  // Ensure we write to terminal before the frame is drawn. Otherwise, the
-  // terminal state may be updated but not drawn until it is updated again,
-  // which may not happen for some time.
-  RenderingServer::get_singleton()->connect("frame_pre_draw",
-                                            Callable(this, "_flush"));
+void Terminal::_write_cb(tsm_vte *vte, const char *u8, size_t len, void *data) {
+  Terminal *term = static_cast<Terminal *>(data);
 
-  // Override default focus mode.
-  set_focus_mode(FOCUS_ALL);
+  PackedByteArray bytes;
+  bytes.resize(len);
+  { memcpy(bytes.ptrw(), u8, len); }
 
-  // Name our nodes for easier debugging.
-  back_buffer->set_name("BackBuffer");
-  sub_viewport->set_name("SubViewport");
-  front_buffer->set_name("FrontBuffer");
+  if (len > 0) {
+    if (term->last_input_event_key.is_valid()) {
+      // The callback was fired from a key press event so emit the "key_pressed"
+      // signal.
+      term->emit_signal("key_pressed", bytes.get_string_from_utf8(),
+                        term->last_input_event_key);
+      term->last_input_event_key.unref();
+    }
 
-  // Ensure buffers always have correct size.
-  back_buffer->set_anchors_preset(LayoutPreset::PRESET_FULL_RECT);
-  front_buffer->set_anchors_preset(LayoutPreset::PRESET_FULL_RECT);
-
-  // Setup back buffer.
-  back_buffer->connect("draw", Callable(this, "_on_back_buffer_draw"));
-
-  // Setup sub viewport.
-  sub_viewport->set_handle_input_locally(false);
-  sub_viewport->set_transparent_background(true);
-  sub_viewport->set_snap_controls_to_pixels(false);
-  sub_viewport->set_update_mode(SubViewport::UPDATE_WHEN_PARENT_VISIBLE);
-  sub_viewport->set_clear_mode(SubViewport::CLEAR_MODE_NEVER);
-  sub_viewport->add_child(back_buffer);
-  add_child(sub_viewport);
-
-  // Setup bell timer.
-  bell_timer->set_name("BellTimer");
-  bell_timer->set_one_shot(true);
-  add_child(bell_timer);
-
-  // Setup blink timer.
-  blink_timer->set_name("BlinkTimer");
-  blink_timer->set_one_shot(true);
-  blink_timer->connect("timeout", Callable(this, "_toggle_blink"));
-  add_child(blink_timer);
-
-  // Setup selection timer.
-  selection_timer->set_name("SelectionTimer");
-  selection_timer->set_wait_time(0.05);
-  selection_timer->connect("timeout", Callable(this, "_on_selection_held"));
-  add_child(selection_timer);
-
-  // Setup front buffer.
-  front_buffer->set_texture(sub_viewport->get_texture());
-  add_child(front_buffer);
-
-  framebuffer_age = 0;
-  update_mode = UpdateMode::AUTO;
-
-  if (tsm_screen_new(&screen, NULL, NULL)) {
-    ERR_PRINT("Error creating new tsm screen.");
-  }
-  tsm_screen_set_max_sb(screen, 1000);
-
-  if (tsm_vte_new(&vte, screen, &Terminal::_write_cb, this, NULL, NULL)) {
-    ERR_PRINT("Error creating new tsm vte.");
-  }
-
-  tsm_vte_set_bell_cb(vte, &Terminal::_bell_cb, this);
-
-  _update_theme_item_cache();
-}
-
-Terminal::~Terminal() {
-  back_buffer->queue_free();
-  sub_viewport->queue_free();
-  front_buffer->queue_free();
-}
-
-void Terminal::_refresh() {
-  back_buffer->queue_redraw();
-  front_buffer->queue_redraw();
-
-  if (update_mode == UpdateMode::AUTO)
-    update_mode = UpdateMode::ALL_NEXT_FRAME;
-}
-
-void Terminal::_notification(int what) {
-  switch (what) {
-  case NOTIFICATION_RESIZED:
-    _recalculate_size();
-    sub_viewport->set_size(get_size());
-    _refresh();
-    break;
-  case NOTIFICATION_THEME_CHANGED:
-    _update_theme_item_cache();
-    _refresh();
-    break;
+    term->emit_signal("data_sent", bytes);
   }
 }
 
-void Terminal::_gui_input(Ref<InputEvent> event) {
-  _handle_key_input(event);
-  _handle_selection(event);
-  _handle_mouse_wheel(event);
-}
 void Terminal::_draw_background(int row, int col, Color bgcolor,
                                 int width = 1) {
   /* Draw the background */
@@ -417,120 +475,6 @@ Terminal::ColorPair Terminal::_get_cell_colors(const tsm_screen_attr *attr) {
     std::swap(bgcol, fgcol);
 
   return std::make_pair(bgcol, fgcol);
-}
-
-void Terminal::_update_theme_item_cache() {
-  // Fonts.
-  for (std::map<const char *, const char *>::const_iterator iter =
-           Terminal::FONTS.begin();
-       iter != Terminal::FONTS.end(); ++iter) {
-    String name = iter->first;
-
-    Ref<Font> font = has_theme_font_override(name) ? get_theme_font(name)
-                     : has_theme_font(name, "Terminal")
-                         ? get_theme_font(name, "Terminal")
-                         : ThemeDB::get_singleton()->get_fallback_font();
-
-    theme_cache.fonts[name] = font;
-  }
-
-  // Font size.
-  theme_cache.font_size =
-      has_theme_font_size_override("font_size")
-          ? get_theme_font_size("font_size")
-      : has_theme_font_size("font_size", "Terminal")
-          ? get_theme_font_size("font_size", "Terminal")
-          : ThemeDB::get_singleton()->get_fallback_font_size();
-
-  // Colors.
-  uint8_t custom_palette[TSM_COLOR_NUM][3];
-
-  for (ColorMap::const_iterator iter = Terminal::COLORS.begin();
-       iter != Terminal::COLORS.end(); ++iter) {
-    String name = iter->first;
-
-    Color color = has_theme_color_override(name) ? get_theme_color(name)
-                  : has_theme_color(name, "Terminal")
-                      ? get_theme_color(name, "Terminal")
-                      : color = Color::html(iter->second.default_color);
-
-    theme_cache.colors[name] = color;
-    palette[iter->second.tsm_color] = color;
-    custom_palette[iter->second.tsm_color][0] = color.get_r8();
-    custom_palette[iter->second.tsm_color][1] = color.get_g8();
-    custom_palette[iter->second.tsm_color][2] = color.get_b8();
-  }
-
-  if (tsm_vte_set_custom_palette(vte, custom_palette))
-    ERR_PRINT("Error setting custom palette.");
-  if (tsm_vte_set_palette(vte, "custom"))
-    ERR_PRINT("Error setting palette to custom palette.");
-
-  _recalculate_size();
-}
-
-void Terminal::_flush() {
-  if (write_buffer.is_empty())
-    return;
-
-  for (int i = 0; i < write_buffer.size(); i++) {
-    PackedByteArray data = static_cast<PackedByteArray>(write_buffer[i]);
-    tsm_vte_input(vte, (char *)data.ptr(), data.size());
-  }
-
-  write_buffer.clear();
-
-  back_buffer->queue_redraw();
-}
-
-void Terminal::_on_back_buffer_draw() {
-  if (update_mode == UpdateMode::DISABLED) {
-    return;
-  }
-
-  if ((update_mode > UpdateMode::AUTO) || framebuffer_age == 0) {
-    Color background_color = palette[TSM_COLOR_BACKGROUND];
-    back_buffer->draw_rect(back_buffer->get_rect(), background_color);
-  }
-
-  int prev_framebuffer_age = framebuffer_age;
-  framebuffer_age = tsm_screen_draw(screen, &Terminal::_text_draw_cb, this);
-
-  if (update_mode == UpdateMode::ALL_NEXT_FRAME && prev_framebuffer_age != 0)
-    update_mode = UpdateMode::AUTO;
-}
-
-void Terminal::_toggle_blink() {
-  if (blink_enabled) {
-    blink_on = !blink_on;
-    _refresh();
-  }
-}
-
-void Terminal::_on_selection_held() {
-  if (!(Input::get_singleton()->is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) ||
-      selection_mode == SelectionMode::NONE) {
-    if (copy_on_selection)
-      DisplayServer::get_singleton()->clipboard_set_primary(copy_selection());
-    selection_timer->stop();
-    return;
-  }
-
-  Vector2 target = get_local_mouse_position() / cell_size;
-  tsm_screen_selection_target(screen, target.x, target.y);
-  back_buffer->queue_redraw();
-  selection_timer->start();
-}
-
-void Terminal::_bell_cb(tsm_vte *vte, void *data) {
-  Terminal *term = static_cast<Terminal *>(data);
-
-  if (!term->bell_muted && term->bell_cooldown == 0 ||
-      term->bell_timer->get_time_left() == 0) {
-    term->emit_signal("bell");
-    if (term->bell_cooldown > 0)
-      term->bell_timer->start(term->bell_cooldown);
-  }
 }
 
 void Terminal::_handle_key_input(Ref<InputEventKey> event) {
@@ -648,4 +592,62 @@ void Terminal::_recalculate_size() {
   sub_viewport->set_size(size);
 
   emit_signal("size_changed", Vector2(cols, rows));
+}
+
+void Terminal::_refresh() {
+  back_buffer->queue_redraw();
+  front_buffer->queue_redraw();
+
+  if (update_mode == UpdateMode::AUTO)
+    update_mode = UpdateMode::ALL_NEXT_FRAME;
+}
+
+void Terminal::_update_theme_item_cache() {
+  // Fonts.
+  for (std::map<const char *, const char *>::const_iterator iter =
+           Terminal::FONTS.begin();
+       iter != Terminal::FONTS.end(); ++iter) {
+    String name = iter->first;
+
+    Ref<Font> font = has_theme_font_override(name) ? get_theme_font(name)
+                     : has_theme_font(name, "Terminal")
+                         ? get_theme_font(name, "Terminal")
+                         : ThemeDB::get_singleton()->get_fallback_font();
+
+    theme_cache.fonts[name] = font;
+  }
+
+  // Font size.
+  theme_cache.font_size =
+      has_theme_font_size_override("font_size")
+          ? get_theme_font_size("font_size")
+      : has_theme_font_size("font_size", "Terminal")
+          ? get_theme_font_size("font_size", "Terminal")
+          : ThemeDB::get_singleton()->get_fallback_font_size();
+
+  // Colors.
+  uint8_t custom_palette[TSM_COLOR_NUM][3];
+
+  for (ColorMap::const_iterator iter = Terminal::COLORS.begin();
+       iter != Terminal::COLORS.end(); ++iter) {
+    String name = iter->first;
+
+    Color color = has_theme_color_override(name) ? get_theme_color(name)
+                  : has_theme_color(name, "Terminal")
+                      ? get_theme_color(name, "Terminal")
+                      : color = Color::html(iter->second.default_color);
+
+    theme_cache.colors[name] = color;
+    palette[iter->second.tsm_color] = color;
+    custom_palette[iter->second.tsm_color][0] = color.get_r8();
+    custom_palette[iter->second.tsm_color][1] = color.get_g8();
+    custom_palette[iter->second.tsm_color][2] = color.get_b8();
+  }
+
+  if (tsm_vte_set_custom_palette(vte, custom_palette))
+    ERR_PRINT("Error setting custom palette.");
+  if (tsm_vte_set_palette(vte, "custom"))
+    ERR_PRINT("Error setting palette to custom palette.");
+
+  _recalculate_size();
 }
