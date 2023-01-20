@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bag1sfh8or3up"]
+[gd_scene format=2]
 
 [node name="Settings" type="VBoxContainer"]
 offset_right = 388.0
