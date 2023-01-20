@@ -137,7 +137,7 @@ func test_emits_exited_signal_when_child_process_exits():
 
 class Helper:
 	static func _get_pts() -> Array:
-		assert(false) #,"Abstract method")
+		assert(false)  #,"Abstract method")
 		return []
 
 	static func _get_winsize(fd: int) -> Dictionary:
@@ -161,7 +161,7 @@ class Helper:
 			true,
 			output
 		)
-		assert(exit_code == 0) #,"Failed to run python command for this test.")
+		assert(exit_code == 0)  #,"Failed to run python command for this test.")
 
 		var size = str_to_var("Vector2" + output[0].strip_edges())
 		return {rows = int(size.x), cols = int(size.y)}
@@ -228,8 +228,8 @@ class LinuxHelper:
 	static func _get_pts() -> Array:
 		var dir := Directory.new()
 
-		if dir.open("/dev/pts") != OK or dir.list_dir_begin()  != OK:# TODOGODOT4 fill missing arguments https://github.com/godotengine/godot/pull/40547
-			assert(false) #,"Could not open /dev/pts.")
+		if dir.open("/dev/pts") != OK or dir.list_dir_begin() != OK:  # TODOGODOT4 fill missing arguments https://github.com/godotengine/godot/pull/40547
+			assert(false)  #,"Could not open /dev/pts.")
 
 		var pts := []
 		var file_name: String = dir.get_next()
@@ -249,5 +249,5 @@ class MacOSHelper:
 		# TODO: Implement for macOS.
 		# On macOS there is no /dev/pts directory, rather new ptys are created
 		# under /dev/ttysXYZ.
-		assert(false) #,"Not implemented")
+		assert(false)  #,"Not implemented")
 		return []

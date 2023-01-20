@@ -71,16 +71,15 @@ class TestTheme:
 
 	func _get_pixelv(src: Vector2) -> Color:
 		var screen := get_tree().root.get_texture().get_data()
-		false # screen.lock() # TODOConverter40, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
+		false  # screen.lock() # TODOConverter40, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 		screen.flip_y()
 		var pixel := screen.get_pixelv(src)
-		false # screen.unlock() # TODOConverter40, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
+		false  # screen.unlock() # TODOConverter40, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 		return pixel
 
 	func _check_colors(theme: Theme):
 		var cell_size := Vector2(
-			int(terminal.size.x / terminal.get_cols()),
-			int(terminal.size.y / terminal.get_rows())
+			int(terminal.size.x / terminal.get_cols()), int(terminal.size.y / terminal.get_rows())
 		)
 		var src := cell_size / 2
 

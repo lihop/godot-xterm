@@ -39,7 +39,7 @@ class ANSIColor:
 	func _init():
 		# "ANSIColor is an abstract class. You should only use the color constants (e.g. ANSIColor.black)."
 		assert(false)
-		
+
 
 var terminal
 

@@ -52,7 +52,7 @@ class CmdLineParser:
 
 	func _init():
 		for i in range(OS.get_cmdline_args().size()):
-			var opt_val = OS.get_cmdline_args()[i].split('=')
+			var opt_val = OS.get_cmdline_args()[i].split("=")
 			_opts.append(opt_val)
 
 	# Parse out multiple comma delimited values from a command line
@@ -60,13 +60,13 @@ class CmdLineParser:
 	# additional values are comma separated.
 	func _parse_array_value(full_option):
 		var value = _parse_option_value(full_option)
-		var split = value.split(',')
+		var split = value.split(",")
 		return split
 
 	# Parse out the value of an option.  Values are separated from
 	# the option name with "="
 	func _parse_option_value(full_option):
-		if(full_option.size() > 1):
+		if full_option.size() > 1:
 			return full_option[1]
 		else:
 			return null
@@ -77,13 +77,13 @@ class CmdLineParser:
 		var found = false
 		var idx = 0
 
-		while(idx < _opts.size() and !found):
-			if(_opts[idx][0] == name):
+		while idx < _opts.size() and !found:
+			if _opts[idx][0] == name:
 				found = true
 			else:
 				idx += 1
 
-		if(found):
+		if found:
 			return idx
 		else:
 			return -1
@@ -92,7 +92,7 @@ class CmdLineParser:
 		_used_options.append(option)
 		var to_return = []
 		var opt_loc = find_option(option)
-		if(opt_loc != -1):
+		if opt_loc != -1:
 			to_return = _parse_array_value(_opts[opt_loc])
 			_opts.remove_at(opt_loc)
 
@@ -105,7 +105,7 @@ class CmdLineParser:
 		_used_options.append(option)
 		var to_return = null
 		var opt_loc = find_option(option)
-		if(opt_loc != -1):
+		if opt_loc != -1:
 			to_return = _parse_option_value(_opts[opt_loc])
 			_opts.remove_at(opt_loc)
 
@@ -133,41 +133,43 @@ class CmdLineParser:
 			to_return.remove_at(script_option + 1)
 			to_return.remove_at(script_option)
 
-		while(_used_options.size() > 0):
+		while _used_options.size() > 0:
 			var index = to_return.find(_used_options[0].split("=")[0])
-			if(index != -1):
+			if index != -1:
 				to_return.remove_at(index)
 			_used_options.remove_at(0)
 
 		return to_return
+
 
 #-------------------------------------------------------------------------------
 # Simple class to hold a command line option
 #-------------------------------------------------------------------------------
 class Option:
 	var value = null
-	var option_name = ''
+	var option_name = ""
 	var default = null
-	var description = ''
+	var description = ""
 
-	func _init(name,default_value,desc=''):
+	func _init(name, default_value, desc = ""):
 		option_name = name
 		default = default_value
 		description = desc
-		value = null#default_value
+		value = null  #default_value
 
-	func pad(to_pad, size, pad_with=' '):
+	func pad(to_pad, size, pad_with = " "):
 		var to_return = to_pad
 		for _i in range(to_pad.length(), size):
 			to_return += pad_with
 
 		return to_return
 
-	func to_s(min_space=0):
+	func to_s(min_space = 0):
 		var subbed_desc = description
-		if(subbed_desc.find('[default]') != -1):
-			subbed_desc = subbed_desc.replace('[default]', str(default))
+		if subbed_desc.find("[default]") != -1:
+			subbed_desc = subbed_desc.replace("[default]", str(default))
 		return pad(option_name, min_space) + subbed_desc
+
 
 #-------------------------------------------------------------------------------
 # The high level interface between this script and the command line options
@@ -176,47 +178,53 @@ class Option:
 #-------------------------------------------------------------------------------
 var options = []
 var _opts = []
-var _banner = ''
+var _banner = ""
+
 
 func add(name, default, desc):
 	options.append(Option.new(name, default, desc))
+
 
 func get_value(name):
 	var found = false
 	var idx = 0
 
-	while(idx < options.size() and !found):
-		if(options[idx].option_name == name):
+	while idx < options.size() and !found:
+		if options[idx].option_name == name:
 			found = true
 		else:
 			idx += 1
 
-	if(found):
+	if found:
 		return options[idx].value
 	else:
 		print("COULD NOT FIND OPTION " + name)
 		return null
 
+
 func set_banner(banner):
 	_banner = banner
+
 
 func print_help():
 	var longest = 0
 	for i in range(options.size()):
-		if(options[i].option_name.length() > longest):
+		if options[i].option_name.length() > longest:
 			longest = options[i].option_name.length()
 
-	print('---------------------------------------------------------')
+	print("---------------------------------------------------------")
 	print(_banner)
 
 	print("\nOptions\n-------")
 	for i in range(options.size()):
-		print('  ' + options[i].to_s(longest + 2))
-	print('---------------------------------------------------------')
+		print("  " + options[i].to_s(longest + 2))
+	print("---------------------------------------------------------")
+
 
 func print_options():
 	for i in range(options.size()):
-		print(options[i].option_name + '=' + str(options[i].value))
+		print(options[i].option_name + "=" + str(options[i].value))
+
 
 func parse():
 	var parser = CmdLineParser.new()
@@ -228,24 +236,30 @@ func parse():
 		# Without this check, you can't tell the difference between the
 		# defaults and what was specified, so you can't punch through
 		# higher level options.
-		if(parser.was_specified(options[i].option_name)):
-			if(t == TYPE_INT):
+		if parser.was_specified(options[i].option_name):
+			if t == TYPE_INT:
 				options[i].value = int(parser.get_value(options[i].option_name))
-			elif(t == TYPE_STRING):
+			elif t == TYPE_STRING:
 				options[i].value = parser.get_value(options[i].option_name)
-			elif(t == TYPE_ARRAY):
+			elif t == TYPE_ARRAY:
 				options[i].value = parser.get_array_value(options[i].option_name)
-			elif(t == TYPE_BOOL):
+			elif t == TYPE_BOOL:
 				options[i].value = parser.was_specified(options[i].option_name)
-			elif(t == TYPE_FLOAT):
+			elif t == TYPE_FLOAT:
 				options[i].value = parser.get_value(options[i].option_name)
-			elif(t == TYPE_NIL):
-				print(options[i].option_name + ' cannot be processed, it has a nil datatype')
+			elif t == TYPE_NIL:
+				print(options[i].option_name + " cannot be processed, it has a nil datatype")
 			else:
-				print(options[i].option_name + ' cannot be processed, it has unknown datatype:' + str(t))
+				print(
+					(
+						options[i].option_name
+						+ " cannot be processed, it has unknown datatype:"
+						+ str(t)
+					)
+				)
 
 	var unused = parser.get_unused_options()
-	if(unused.size() > 0):
+	if unused.size() > 0:
 		print("Unrecognized options:  ", unused)
 		return false
 
