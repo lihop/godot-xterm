@@ -341,8 +341,6 @@ void Terminal::_notification(int what) {
   }
 }
 
-#include <bitset>
-
 void Terminal::_gui_input(Ref<InputEvent> event) {
   _handle_key_input(event);
   _handle_selection(event);
