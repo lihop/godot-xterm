@@ -1,7 +1,7 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=2 format=3 uid="uid://y1f8mwiknqcm"]
 
-[sub_resource type="GDScript" id=1]
-script/source = "extends \"res://addons/godot_xterm/terminal.gd\"
+[sub_resource type="GDScript" id="GDScript_wc7yv"]
+script/source = "extends Terminal
 
 var rng := RandomNumberGenerator.new()
 
@@ -15,7 +15,8 @@ func _process(_delta):
 		write(PackedByteArray([rng.randi() % 256]))
 "
 
-[node name="Terminal" type="Control"]
+[node name="Terminal" type="Terminal"]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = SubResource( 1 )
+script = SubResource("GDScript_wc7yv")

@@ -1,7 +1,5 @@
 @tool
-extends "res://addons/godot_xterm/terminal.gd"
-
-signal theme_changed
+extends Terminal
 
 
 func _ready():
@@ -24,10 +22,3 @@ func _ready():
 	write("\u001b[1mL\u001b[0m")  # Bold.
 	write("\u001b[3mL\u001b[0m")  # Italic.
 	write("\u001b[1m\u001b[3mL\u001b[0m")  # Bold Italic.
-
-
-func _notification(what):
-	super._notification(what)
-	match what:
-		NOTIFICATION_THEME_CHANGED:
-			call_deferred("emit_signal", "theme_changed")

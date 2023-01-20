@@ -1,7 +1,5 @@
 extends "res://addons/gut/test.gd"
 
-const Terminal := preload("res://addons/godot_xterm/terminal.gd")
-
 var terminal: Terminal
 
 
@@ -42,7 +40,6 @@ func test_writing_random_data_to_terminal_does_not_crash_application():
 class TestTheme:
 	extends "res://addons/gut/test.gd"
 
-	const Terminal := preload("res://addons/godot_xterm/terminal.gd")
 	const TestScene := preload("../scenes/theme.tscn")
 
 	const default_theme := preload("res://addons/godot_xterm/themes/default.tres")

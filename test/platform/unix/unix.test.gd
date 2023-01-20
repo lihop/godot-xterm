@@ -175,7 +175,6 @@ class TestPTYSize:
 	# See: https://github.com/lihop/godot-xterm/issues/56
 
 	const PTY := preload("res://addons/godot_xterm/pty.gd")
-	const Terminal := preload("res://addons/godot_xterm/terminal.gd")
 
 	var pty: PTY
 	var terminal: Terminal
