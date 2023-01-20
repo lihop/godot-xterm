@@ -10,12 +10,12 @@ class MockPTY:
 
 class BaseTest:
 	extends "res://addons/gut/test.gd"
-	const PTY := preload("res://addons/godot_xterm/pty.gd")
 
-	var pty: PTY
+	var pty
 	var mock_pty_native: MockPTY
 
 	func before_each():
+		var PTY = load("res://addons/godot_xterm/pty.gd")
 		pty = add_child_autofree(PTY.new())
 		mock_pty_native = autofree(MockPTY.new())
 		pty._pty_native = mock_pty_native
@@ -71,9 +71,10 @@ class TestPTYInterfaceGodotXterm2_0_0:
 	func test_has_signal_exited():
 		assert_has_signal(pty, "exited")
 
+	# NOTE: This differs from the GodotXterm 2.x API which uses Signal rather than IPCSignal.
 	func test_has_enum_Signal():
-		assert_true("Signal" in pty, "Expected pty to have enum Signal.")
-		assert_typeof(pty.Signal, typeof(Dictionary()))
+		assert_true("IPCSignal" in pty, "Expected pty to have enum IPCSignal.")
+		assert_typeof(pty.IPCSignal, typeof(Dictionary()))
 		var signals = {
 			SIGHUP = 1,
 			SIGINT = 2,
@@ -89,14 +90,14 @@ class TestPTYInterfaceGodotXterm2_0_0:
 			SIGTERM = 15,
 		}
 		assert_gt(
-			pty.Signal.size(),
+			pty.IPCSignal.size(),
 			signals.size() - 1,
 			"Expected Signal enum to have at least %d members." % signals.size()
 		)
 		for signame in signals.keys():
-			assert_has(pty.Signal, signame, "Expected Signal enum to have member %s." % signame)
+			assert_has(pty.IPCSignal, signame, "Expected Signal enum to have member %s." % signame)
 			assert_eq(
-				pty.Signal[signame],
+				pty.IPCSignal[signame],
 				signals[signame],
 				"Expected Signal enum member %s to have value %d." % [signame, signals[signame]]
 			)

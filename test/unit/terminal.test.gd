@@ -18,15 +18,15 @@ class TestMultipleInputs:
 
 	var terminal: Control
 
-	func press_key(scancode: int, unicode := 0) -> void:
+	func press_key(keycode: int, unicode := 0) -> void:
 		var key_down = InputEventKey.new()
-		key_down.scancode = scancode
-		key_down.button_pressed = true
+		key_down.keycode = keycode
+		key_down.pressed = true
 		Input.parse_input_event(key_down)
 		await get_tree().create_timer(0.1).timeout
 		var key_up = InputEventKey.new()
-		key_up.scancode = scancode
-		key_up.button_pressed = false
+		key_up.keycode = keycode
+		key_up.pressed = false
 		Input.parse_input_event(key_up)
 
 	func before_each():
