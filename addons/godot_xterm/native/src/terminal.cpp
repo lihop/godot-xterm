@@ -274,8 +274,9 @@ void Terminal::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_update_mode", "value"),
                        &Terminal::set_update_mode);
   ClassDB::bind_method(D_METHOD("get_update_mode"), &Terminal::get_update_mode);
-  ADD_PROPERTY(PropertyInfo(Variant::INT, "update_mode"), "set_update_mode",
-               "get_update_mode");
+  ADD_PROPERTY(PropertyInfo(Variant::INT, "update_mode", PROPERTY_HINT_ENUM,
+                            "Disabled,Auto,All,All Next Frame"),
+               "set_update_mode", "get_update_mode");
 
   ADD_GROUP("Bell", "bell_");
   ClassDB::bind_method(D_METHOD("set_bell_cooldown", "value"),
