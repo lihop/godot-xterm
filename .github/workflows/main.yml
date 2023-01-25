@@ -231,7 +231,6 @@ jobs:
 
   test:
     name: 'Test'
-    needs: [ import_assets, build_docker ] #, build_native ]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -249,16 +248,23 @@ jobs:
         with:
           version: ${{ matrix.godot_version }}
           bits: ${{ matrix.bits }}
-      - name: Install release binary build artifacts
-        uses: actions/download-artifact@v3
+      - name: Wait for build
+        uses: fountainhead/action-wait-for-check@v1.1.0
         with:
-          name: libgodot-xterm-release
-          path: addons/godot_xterm/native/bin
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Build Docker (debug, x86_${{ matrix.bits }})
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Install debug binary build artifacts
         uses: actions/download-artifact@v3
         with:
           name: libgodot-xterm-debug
           path: addons/godot_xterm/native/bin
+      - name: Wait for asset import
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Import Assets (${{ matrix.os }})
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Download imports
         uses: actions/download-artifact@v3
         with:
