@@ -44,6 +44,7 @@ var Gut = load("res://addons/gut/gut.gd")
 var GutRunner = load("res://addons/gut/gui/GutRunner.tscn")
 
 var json = JSON.new()
+var exit_code = 0
 
 
 # ------------------------------------------------------------------------------
@@ -390,15 +391,13 @@ func _on_tests_finished(should_exit, should_exit_on_success):
 		set_exit_code(post_inst.get_exit_code())
 
 	if should_exit or (should_exit_on_success and _tester.get_fail_count() == 0):
-		quit()
+		quit(exit_code)
 	else:
 		print("Tests finished, exit manually")
 
 
 func set_exit_code(val):
-	pass
-	# OS.exit_code doesn't exist anymore, but when we find a solution it just
-	# goes here.
+	exit_code = val
 
 
 # ------------------------------------------------------------------------------
