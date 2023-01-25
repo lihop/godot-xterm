@@ -1,4 +1,8 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: 2020-2023 Leroy Hopson <godot-xterm@leroy.geek.nz>
+# SPDX-License-Identifier: MIT
+
 set -e
 
 # Parse args.
@@ -16,24 +20,20 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     *)
-      echo "Usage: ./build.sh [-t|--target <release|editor>] [--disable_pty]";
+      echo "Usage: ./build.sh [-t|--target <release|debug>] [--disable_pty]";
       exit 128
       shift
       ;;
   esac
 done
+
 # Set defaults.
-target=${target:-editor}
+target=${target:-debug}
 disable_pty=${disable_pty:-no}
 nproc=$(nproc || sysctl -n hw.ncpu)
 
-
-#GODOT_DIR Get the absolute path to the directory this script is in.
+# Get the absolute path to the directory this script is in.
 NATIVE_DIR="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-
-# Cache built files.
-export SCONS_CACHE=${NATIVE_DIR}/.cache
-
 
 # Run script inside a nix shell if it is available.
 if command -v nix-shell && [ $NIX_PATH ] && [ -z $IN_NIX_SHELL ]; then
@@ -41,7 +41,6 @@ if command -v nix-shell && [ $NIX_PATH ] && [ -z $IN_NIX_SHELL ]; then
 	nix-shell --pure --run "NIX_PATH=${NIX_PATH} ./build.sh $args"
 	exit
 fi
-
 
 # Update git submodules.
 updateSubmodules() {
@@ -56,11 +55,6 @@ updateSubmodules() {
 updateSubmodules LIBUV_DIR ${NATIVE_DIR}/thirdparty/libuv
 updateSubmodules LIBTSM_DIR ${NATIVE_DIR}/thirdparty/libtsm 
 updateSubmodules GODOT_CPP_DIR ${NATIVE_DIR}/thirdparty/godot-cpp
-
-
-# Build godot-cpp bindings.
-cd ${GODOT_CPP_DIR}
-scons generate_bindings=yes macos_arch=$(uname -m) target=$target -j$nproc
 
 # Build libuv as a static library.
 cd ${LIBUV_DIR}
@@ -79,7 +73,7 @@ cmake --build build --config $target -j$nproc
 
 # Build libgodot-xterm.
 cd ${NATIVE_DIR}
-scons target=$target macos_arch=$(uname -m) disable_pty=$disable_pty -j$nproc
+scons target=template_$target arch=$(uname -m) disable_pty=$disable_pty
 
 # Use Docker to build libgodot-xterm javascript.
 #if [ -x "$(command -v docker-compose)" ]; then

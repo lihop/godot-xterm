@@ -1,8 +1,8 @@
 colorama==0.4.5
 docopt==0.6.2
 future==0.18.2
-gdtoolkit==3.4.0
-lark-parser==0.8.0
+git+https://github.com/Scony/godot-gdscript-toolkit@5f4405e1d5f47e581860103106c96a0504bdf74a
+lark-parser==0.12.0
 mando==0.6.4
 PyYAML==6.0
 radon==5.1.0

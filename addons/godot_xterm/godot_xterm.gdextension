@@ -3,4 +3,7 @@
 entry_symbol = "godot_xterm_library_init"
 
 [libraries]
-linux.debug.x86_64 = "res://addons/godot_xterm/native/bin/libgodot-xterm.linux.64.so"
+linux.debug.x86_64 = "res://addons/godot_xterm/native/bin/libgodot-xterm.linux.template_debug.x86_64.so"
+linux.release.x86_64 = "res://addons/godot_xterm/native/bin/libgodot-xterm.linux.template_release.x86_64.so"
+linux.debug.x86_32 = "res://addons/godot_xterm/native/bin/libgodot-xterm.linux.template_debug.x86_32.so"
+linux.release.x86_32 = "res://addons/godot_xterm/native/bin/libgodot-xterm.linux.template_release.x86_32.so"

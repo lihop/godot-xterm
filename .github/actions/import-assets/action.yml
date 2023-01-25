@@ -1,0 +1,10 @@
+name: Import assets
+runs:
+  using: "composite"
+  steps:
+    - name: Import assets
+      shell: bash
+      run: |
+        # HACK: See https://github.com/godotengine/godot-proposals/issues/1362.
+        (for i in {1..4}; do godot --editor --headless & sleep 5 && .github/actions/import-assets/monitor_import.sh; done) || true
+

@@ -1,287 +1,40 @@
 #!/usr/bin/env python
-"""
-This file is modified version of the godot-cpp SConstruct file: https://github.com/godotengine/godot-cpp/blob/master/SConstruct
-which is published under the following license:
 
-MIT License
-Copyright (c) 2017-2020 GodotNativeTools
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-"""
+# SPDX-FileCopyrightText: 2020-2023 Leroy Hopson <godot-xterm@leroy.geek.nz>
+# SPDX-License-Identifier: MIT
 
 import os
 import sys
-import subprocess
 
-EnsureSConsVersion(4, 0)
-
-# Try to detect the host platform automatically. 
-# This is used if no `platform` argument is passed.
-if sys.platform.startswith('linux'):
-    host_platform = 'linux'
-elif sys.platform == 'darwin':
-    host_platform = 'osx'
-elif sys.platform == 'win32' or sys.platform == 'msys':
-    host_platform = 'windows'
-else:
-    raise ValueError(
-        'Could not detect platform automatically, please specify with '
-        'platform=<platform>'
-    )
-
-VariantDir('./thirdparty/libtsm/build', './thirdparty/libtsm/src', duplicate=0)
-env = Environment(ENV = os.environ)
-
-is64 = sys.maxsize > 2**32
-if (
-    env['TARGET_ARCH'] == 'amd64' or
-    env['TARGET_ARCH'] == 'emt64' or
-    env['TARGET_ARCH'] == 'x86_64' or
-    env['TARGET_ARCH'] == 'arm64-v8a'
-):
-    is64 = True
+env = SConscript("./thirdparty/godot-cpp/SConstruct")
+env['ENV'] = os.environ
 
 opts = Variables([], ARGUMENTS)
-
-opts.Add(EnumVariable(
-    'platform',
-    'Target platform',
-    host_platform,
-    allowed_values=('linux', 'javascript', 'osx', 'windows'),
-    ignorecase=2
-))
-opts.Add(EnumVariable(
-    'bits',
-    'Target platform bits',
-    '64' if is64 else '32',
-    ('32', '64')
-))
-opts.Add(EnumVariable(
-    'target',
-    'Compilation target',
-    'editor',
-    allowed_values=('editor', 'release'),
-    ignorecase=2
-))
-opts.Add(EnumVariable("macos_arch", "Target macOS architecture",
-         "universal", ["universal", "x86_64", "arm64"]))
 opts.Add(BoolVariable(
     'disable_pty',
     'Disables the PTY and its dependencies (LibuvUtils and Pipe). Has no effect on platforms where PTY is not supported',
     False
 ))
-
 opts.Update(env)
 Help(opts.GenerateHelpText(env))
 
-# Cache if SCONS_CACHE env var set.
-scons_cache_path = os.environ.get("SCONS_CACHE")
-if scons_cache_path is not None:
-    CacheDir(scons_cache_path)
-    Decider("MD5")
-print("caching to " + scons_cache_path)
-exit
-
-
-# Allows 32bit builds on windows 64bit. 
-if env['platform'] == 'windows':
-    if env['bits'] == '64':
-        env = Environment(TARGET_ARCH='amd64')
-    elif env['bits'] == '32':
-        env = Environment(TARGET_ARCH='x86')
-    opts.Update(env)
-
-# Add PATH to environment so scons can find commands such as g++, etc.
-env.AppendENVPath('PATH', os.getenv('PATH'))
-
-
-# Compile for Linux.
-if env['platform'] == 'linux':
-    env.Append(CPPDEFINES=['__linux__'])
-
-    env['CC'] = 'gcc'
-    env['CXX'] = 'g++'
-    env['LIBSUFFIX'] = '.a'
-
-    env.Append(CCFLAGS=['-fPIC', '-Wwrite-strings'])
-    env.Append(LINKFLAGS=["-Wl,-R'$$ORIGIN'", '-static-libstdc++'])
-
-    if env['target'] == 'editor':
-        env.Append(CCFLAGS=['-Og', '-g'])
-    elif env['target'] == 'release':
-        env.Append(CCFLAGS=['-O3'])
-
-    if env['bits'] == '64':
-        env.Append(CCFLAGS=['-m64'])
-        env.Append(LINKFLAGS=['-m64'])
-    elif env['bits'] == '32':
-        env.Append(CCFLAGS=['-m32'])
-        env.Append(LINKFLAGS=['-m32'])
-
-# Compile for HTML5.
-elif env['platform'] == 'javascript':
-    env.Append(CPPDEFINES=['__EMSCRIPTEN__'])
-
-    env['bits'] = '32'
-    env['CC'] = 'emcc'
-    env['CXX'] = 'em++'
-    env['AR'] = 'emar'
-    env['RANLIB'] = 'emranlib'
-    env.Append(CPPFLAGS=['-s', 'SIDE_MODULE=1'])
-    env.Append(LINKFLAGS=['-s', 'SIDE_MODULE=1'])
-    env['SHOBJSUFFIX'] = '.bc'
-    env['SHLIBSUFFIX'] = '.wasm'
-    env['OBJPREFIX'] = ''
-    env['OBJSUFFIX'] = '.bc'
-    env['PROGPREFIX'] = ''
-    env['PROGSUFFIX'] = ''
-    env['LIBSUFFIX'] = '.a'
-    env['LIBPREFIXES'] = ['$LIBPREFIX']
-    env['LIBSUFFIXES'] = ['$LIBSUFFIX']
-    env.Replace(SHLINKFLAGS='$LINKFLAGS')
-    env.Replace(SHLINKFLAGS='$LINKFLAGS')
-
-# Compile for OSX.
-elif env['platform'] == 'osx':
-    env.Append(CPPDEFINES=['__APPLE__'])
-
-    env['CC'] = 'clang'
-    env['CXX'] = 'clang++'
-    env['LIBSUFFIX'] = '.a'
-
-    if env['bits'] == '32':
-        raise ValueError(
-            'Only 64-bit builds are supported for the osx platform.'
-        )
-
-    if env["macos_arch"] == "universal":
-        env.Append(LINKFLAGS=["-arch", "x86_64", "-arch", "arm64"])
-        env.Append(CCFLAGS=["-arch", "x86_64", "-arch", "arm64"])
-    else:
-        env.Append(LINKFLAGS=["-arch", env["macos_arch"]])
-        env.Append(CCFLAGS=["-arch", env["macos_arch"]])
-
-    env.Append(LINKFLAGS=['-Wl,-undefined,dynamic_lookup'])
-
-    if env['target'] == 'editor':
-        env.Append(CCFLAGS=['-Og', '-g'])
-    elif env['target'] == 'release':
-        env.Append(CCFLAGS=['-O3'])
-
-
-# Compile for Windows.
-elif env['platform'] == 'windows':
-    env.Append(CPPDEFINES=['__WIN32'])
-    env['LIBSUFFIX'] = '.lib'
-
-    # On Windows using MSVC.
-    if host_platform == 'windows':
-        if env['target'] == 'editor':
-            env.Append(CCFLAGS=['/Z7', '/Od', '/EHsc', '/D_DEBUG', '/MDd'])
-        elif env['target'] == 'release':
-            env.Append(CCFLAGS=['/O2', '/EHsc', '/DNDEBUG', '/MD'])
-
-    # On Windows, Linux, or MacOS using MinGW.
-    elif host_platform == 'linux' or host_platform == 'osx':
-        env.Append(CCFLAGS=['-std=c++17', '-Wwrite-strings'])
-        env.Append(LINKFLAGS=[
-            '--static',
-            '-Wl,--no-undefined',
-            '-static-libgcc',
-            '-static-libstdc++',
-        ])
-
-        if env['target'] == 'editor':
-            env.Append(CCFLAGS=['-Og', '-g'])
-        elif env['target'] == 'release':
-            env.Append(CCFLAGS=['-O3'])
-
-        if env['bits'] == '64':
-            env['CC'] = 'x86_64-w64-mingw32-gcc'
-            env['CXX'] = 'x86_64-w64-mingw32-g++'
-            env['AR'] = "x86_64-w64-mingw32-ar"
-            env['RANLIB'] = "x86_64-w64-mingw32-ranlib"
-            env['LINK'] = "x86_64-w64-mingw32-g++"
-        elif env['bits'] == '32':
-            env['CC'] = 'i686-w64-mingw32-gcc'
-            env['CXX'] = 'i686-w64-mingw32-g++'
-            env['AR'] = "i686-w64-mingw32-ar"
-            env['RANLIB'] = "i686-w64-mingw32-ranlib"
-            env['LINK'] = "i686-w64-mingw32-g++"
-
-
-# Build libtsm as a static library.
-Execute([
-    Delete('thirdparty/libtsm/build/src'),
-    Delete('thirdparty/libtsm/build/external'),
-    Copy('thirdparty/libtsm/build/src', 'thirdparty/libtsm/src'),
-    Copy('thirdparty/libtsm/build/external', 'thirdparty/libtsm/external'),
-])
-
-env.Append(CPPPATH=[
-    'thirdparty/libtsm/src/shared',
-    'thirdparty/libtsm/external',
-])
-
-sources = []
-sources.append('thirdparty/libtsm/build/external/wcwidth/wcwidth.c')
-sources.append('thirdparty/libtsm/build/src/shared/shl-htable.c')
-sources.append(Glob('thirdparty/libtsm/build/src/tsm/*.c'))
-
-libtsm = env.StaticLibrary(
-    target='thirdparty/libtsm/build/bin/libtsm.{}.{}.{}{}'.format(
-        env['platform'],
-        env['target'],
-        env['bits'],
-        env['LIBSUFFIX']
-    ), source=sources
-)
-Default(libtsm)
-
-
-# Build libgodot-xterm.
-if env['platform'] != 'windows':
-    env.Append(CXXFLAGS=['-std=c++17'])
-
 env.Append(CPPPATH=[
     'src/',
-    'thirdparty/libtsm/build/src/tsm',
-    'thirdparty/libtsm/build/src/shared',
-    'thirdparty/godot-cpp/gdextension',
-    'thirdparty/godot-cpp/include',
-    'thirdparty/godot-cpp/gen/include',
-    'thirdparty/libuv/src',
-    'thirdparty/libuv/include'
-])
-env.Append(LIBPATH=[
-    'thirdparty/godot-cpp/bin/',
-    'thirdparty/libtsm/build/bin/',
+    'thirdparty/libtsm/src/tsm',
+    'thirdparty/libtsm/external',
+    'thirdparty/libtsm/src/shared',
+    'thirdparty/libuv/include',
 ])
 
-env.Append(LIBS=[
-    env.File('thirdparty/godot-cpp/bin/libgodot-cpp.{}.{}.{}{}'.format(
-        env['platform'],
-        env['target'],
-        'wasm' if env['platform'] == 'javascript' else env['macos_arch'] if (
-            env['macos_arch'] != 'universal' and env['platform'] == 'osx') else 'x86_64', # FIXME use correct arch.
-        env['LIBSUFFIX'],
-    )),
-    env.File('thirdparty/libtsm/build/bin/libtsm.{}.{}.{}{}'.format(
-        env['platform'],
-        env['target'],
-        env['bits'],
-        env['LIBSUFFIX'],
-    )),
+sources = Glob('thirdparty/libtsm/src/tsm/*.c')
+sources.append([
+    'thirdparty/libtsm/external/wcwidth/wcwidth.c',
+    'thirdparty/libtsm/src/shared/shl-htable.c',
+    'src/register_types.cpp',
+    'src/constants.cpp',
+    'src/terminal.cpp',
 ])
 
-sources = []
-sources.append('src/register_types.cpp')
-sources.append('src/constants.cpp')
-sources.append('src/terminal.cpp')
-
-
-# PTY not supported on HTML5.
 if env['disable_pty'] or env['platform'] == 'javascript':
     env.Append(CPPDEFINES=['_PTY_DISABLED'])
 else:
@@ -301,24 +54,13 @@ else:
             'Ws2_32.lib',
         ])
 
-if env['platform'] == 'linux':
-    libsuffix = "a"
-    suffix = "so"
-elif env['platform'] == 'javascript':
-    libsuffix = "a"
-    suffix = "wasm"
-elif env['platform'] == 'windows':
-    libsuffix = "lib"
-    suffix = "dll"
-elif env['platform'] == 'osx':
-    libsuffix = "a"
-    suffix = "dylib"
+env.Append(LINKFLAGS=['-static-libstdc++'])
 
 library = env.SharedLibrary(
-    target='bin/libgodot-xterm.{}.{}.{}'.format(
-        env['platform'],
-        env['bits'],
-        suffix,
+    target='bin/libgodot-xterm{}{}'.format(
+        env['suffix'],
+        env['SHLIBSUFFIX'],
     ), source=sources
 )
+
 Default(library)

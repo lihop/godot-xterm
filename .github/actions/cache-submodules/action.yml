@@ -1,0 +1,44 @@
+name: Cache dependencies
+inputs:
+  platform:
+    required: true
+  target:
+    required: true
+  arch:
+    required: true
+outputs:
+  cache-hit:
+    value: ${{ steps.cache.outputs.cache-hit }}
+runs:
+  using: "composite"
+  steps:
+    - name: Hash submodule revisions
+      id: hash
+      working-directory: addons/godot_xterm/native/thirdparty
+      shell: bash
+      run: |
+        godot_cpp_rev=$(git ls-tree HEAD godot-cpp --object-only)
+        libuv_rev=$(git ls-tree HEAD libuv --object-only)
+        libtsm_rev=$(git ls-tree HEAD libtsm --object-only)
+        hash_cmd=$([[ $RUNNER_OS == 'Windows' ]] && echo 'sha1sum' || echo 'shasum')
+        hash_of_hashes=$(echo -n "$godot_cpp_rev$libuv_rev$libtsm_rev" | $hash_cmd | head -c 40)
+        echo "hash=$hash_of_hashes" >> $GITHUB_OUTPUT
+        build_files_hash=${{ hashFiles('**/build.sh', '**/*.Dockerfile', '**/SConstruct', '**/*.yml') }}
+        echo "build-files-hash=$build_files_hash" >> $GITHUB_OUTPUT
+    - name: Cache submodules
+      uses: actions/cache@v3
+      id: cache
+      with:
+        path: addons/godot_xterm/native/thirdparty
+        key: thirdparty-${{ inputs.platform }}-${{ inputs.arch }}-${{ inputs.target }}-${{ steps.hash.outputs.hash }}-${{ steps.hash.outputs.build-files-hash }}
+        restore-keys: |
+          thirdparty-${{ inputs.platform }}-${{ inputs.arch }}-${{ inputs.target }}-${{ steps.hash.outputs.hash }}-
+          thirdparty-${{ inputs.platform }}-${{ inputs.arch }}-${{ inputs.target }}-
+    - name: Scons cache
+      uses: actions/cache@v3
+      with:
+        path: "${{github.workspace}}/.scons-cache/"
+        key: scons-${{ inputs.platform }}-${{ inputs.arch }}-${{ inputs.target }}-${{ steps.hash.outputs.hash }}-${{ steps.hash.outputs.build-files-hash }}
+        restore-keys: |
+          scons-${{ inputs.platform }}-${{ inputs.arch }}-${{ inputs.target }}-${{ steps.hash.outputs.hash }}-
+          scons-${{ inputs.platform }}-${{ inputs.arch }}-${{ inputs.target }}-
