@@ -6,6 +6,25 @@ on:
     - cron: 0 11 * * *
 
 jobs:
+  import_assets:
+    name: 'Import Assets'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-22.04 ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Import assets
+        uses: ./.github/actions/import-assets
+        with:
+          godot-version: v4.0-beta14
+      - name: Upload imports
+        uses: actions/upload-artifact@v3
+        with:
+          name: imports-${{ matrix.os }}
+          path: .godot/
+
   build_docker:
     name: 'Build Docker'
     runs-on: ubuntu-22.04
@@ -212,7 +231,7 @@ jobs:
 
   test:
     name: 'Test'
-    needs: [ build_docker ] #, build_native ]
+    needs: [ import_assets, build_docker ] #, build_native ]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -240,14 +259,25 @@ jobs:
         with:
           name: libgodot-xterm-debug
           path: addons/godot_xterm/native/bin
-      - name: Import assets
-        uses: ./.github/actions/import-assets
+      - name: Download imports
+        uses: actions/download-artifact@v3
+        with:
+          name: imports-${{ matrix.os }}
+          path: .godot
       - name: Run tests
         run: godot -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
       - name: Run unix tests
         if: ${{ matrix.os != 'windows-2022' }}
         run: godot -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
 
+  delete_imports:
+    name: 'Delete Imports'
+    needs: [ test ]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: geekyeggo/delete-artifact@v2
+        with:
+         name: imports-*
 
   # Git archive should only include addons/godot_xterm directory.
   check-archive:

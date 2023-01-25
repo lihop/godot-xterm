@@ -1,7 +1,14 @@
 name: Import assets
+inputs:
+  godot-version:
+    required: true
 runs:
   using: "composite"
   steps:
+    - name: Setup Godot
+      uses: lihop/setup-godot@4aad9daa7dd81c11329c4b54fdc26dbd39eea7d6
+      with:
+        version: ${{ inputs.godot-version }}
     - name: Import assets
       shell: bash
       run: |
