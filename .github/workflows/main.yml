@@ -248,17 +248,6 @@ jobs:
         with:
           version: ${{ matrix.godot_version }}
           bits: ${{ matrix.bits }}
-      - name: Wait for build
-        uses: fountainhead/action-wait-for-check@v1.1.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Build Docker (debug, x86_${{ matrix.bits }})
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Install debug binary build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: libgodot-xterm-debug
-          path: addons/godot_xterm/native/bin
       - name: Wait for asset import
         uses: fountainhead/action-wait-for-check@v1.1.0
         with:
@@ -270,6 +259,17 @@ jobs:
         with:
           name: imports-${{ matrix.os }}
           path: .godot
+      - name: Wait for build
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Build Docker (debug, x86_${{ matrix.bits }})
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install debug binary build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: libgodot-xterm-debug
+          path: addons/godot_xterm/native/bin
       - name: Run tests
         run: godot -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
       - name: Run unix tests
