@@ -159,6 +159,6 @@ private:
   void _update_theme_item_cache();
 };
 
-VARIANT_ENUM_CAST(Terminal, UpdateMode);
+VARIANT_ENUM_CAST(Terminal::UpdateMode);
 
 #endif // GODOT_XTERM_TERMINAL_H
