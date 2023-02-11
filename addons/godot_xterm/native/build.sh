@@ -38,7 +38,7 @@ NATIVE_DIR="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 # Run script inside a nix shell if it is available.
 if command -v nix-shell && [ $NIX_PATH ] && [ -z $IN_NIX_SHELL ]; then
 	cd ${NATIVE_DIR}
-	nix-shell --pure --run "NIX_PATH=${NIX_PATH} ./build.sh $args"
+	nix-shell --pure --keep SCONS_CACHE --run "NIX_PATH=${NIX_PATH} ./build.sh $args"
 	exit
 fi
 
