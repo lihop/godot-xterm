@@ -15,12 +15,8 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
-    --disable-pty)
-      disable_pty="yes"
-      shift
-      ;;
     *)
-      echo "Usage: ./build.sh [-t|--target <release|debug>] [--disable_pty]";
+      echo "Usage: ./build.sh [-t|--target <release|debug>]";
       exit 128
       shift
       ;;
@@ -29,7 +25,11 @@ done
 
 # Set defaults.
 target=${target:-debug}
-disable_pty=${disable_pty:-no}
+if [ "$target" == "debug" ]; then
+    debug_symbols="yes"
+else
+    debug_symbols="no"
+fi
 nproc=$(nproc || sysctl -n hw.ncpu)
 
 # Get the absolute path to the directory this script is in.
@@ -73,7 +73,7 @@ cmake --build build --config $target -j$nproc
 
 # Build libgodot-xterm.
 cd ${NATIVE_DIR}
-scons target=template_$target arch=$(uname -m) disable_pty=$disable_pty
+scons target=template_$target arch=$(uname -m) debug_symbols=$debug_symbols
 
 # Use Docker to build libgodot-xterm javascript.
 #if [ -x "$(command -v docker-compose)" ]; then
