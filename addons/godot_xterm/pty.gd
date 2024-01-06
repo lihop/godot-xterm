@@ -6,7 +6,10 @@
 @tool
 extends Node
 
-var _LibuvUtils := LibuvUtils
+var _LibuvUtils = (
+	ClassDB.instantiate("LibuvUtils").get_class() if ClassDB.class_exists("LibuvUtils") else null
+)
+
 const _PTYNative := preload("./nodes/pty/pty_native.gd")
 const _PTYUnix := preload("./nodes/pty/unix/pty_unix.gd")
 

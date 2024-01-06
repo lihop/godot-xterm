@@ -36,6 +36,14 @@ enum IPCSignal {
 	SIGTERM = 15,  # Termination signal
 }
 
+var _LibuvUtils = (
+	ClassDB.instantiate("LibuvUtils").get_class() if ClassDB.class_exists("LibuvUtils") else null
+)
+var _Pipe = ClassDB.instantiate("Pipe").get_class() if ClassDB.class_exists("Pipe") else null
+var _PTYUnix = (
+	ClassDB.instantiate("PTYUnix").get_class() if ClassDB.class_exists("PTYUnix") else null
+)
+
 # The name of the process.
 #var process: String
 
@@ -50,7 +58,7 @@ var env := DEFAULT_ENV
 # former taking precedence in the case of conflicts.
 var use_os_env := true
 
-var _pipe: Pipe
+var _pipe = _Pipe
 
 # Security warning: use this option with great caution, as opened file descriptors
 # with higher privileges might leak to the child program.
@@ -74,14 +82,14 @@ func write(data) -> void:
 
 func resize(cols: int, rows: int) -> void:
 	if _fd >= 0:
-		PTYUnix.new().resize(_fd, cols, rows)
+		_PTYUnix.new().resize(_fd, cols, rows)
 
 
 func kill(signum: int = IPCSignal.SIGHUP) -> void:
 	if _pipe:
 		_pipe.close()
 	if _pid > 0:
-		LibuvUtils.kill(_pid, signum)
+		_LibuvUtils.kill(_pid, signum)
 
 
 func _parse_env(env: Dictionary = {}) -> PackedStringArray:
@@ -110,7 +118,7 @@ func _process(_delta):
 func fork(
 	file: String = OS.get_environment("SHELL"),
 	args: PackedStringArray = PackedStringArray(),
-	cwd = LibuvUtils.get_cwd(),
+	cwd = _LibuvUtils.get_cwd(),
 	cols: int = DEFAULT_COLS,
 	rows: int = DEFAULT_ROWS,
 	uid: int = -1,
@@ -123,7 +131,7 @@ func fork(
 
 	# Environment variables.
 	# If we are using OS env vars, sanitize them to remove variables that might confuse our terminal.
-	var final_env := _sanitize_env(LibuvUtils.get_os_environ()) if use_os_env else {}
+	var final_env := _sanitize_env(_LibuvUtils.get_os_environ()) if use_os_env else {}
 	for key in env.keys():
 		final_env[key] = env[key]
 	var parsed_env: PackedStringArray = _parse_env(final_env)
@@ -133,7 +141,7 @@ func fork(
 
 	# Actual fork.
 	var result = (
-		PTYUnix
+		_PTYUnix
 		. new()
 		. fork(
 			# VERY IMPORTANT: The second argument must be 0, otherwise will get an ENOTSOCK error after connecting our pipe to the fd.
@@ -162,7 +170,7 @@ func fork(
 
 	_pid = result[1].pid
 
-	_pipe = Pipe.new()
+	_pipe = _Pipe.new()
 	_pipe.open(_fd, false)
 
 	# Must connect to signal AFTER opening, otherwise we will get error ENOTSOCK.
@@ -172,13 +180,13 @@ func fork(
 
 
 func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
-	return PTYUnix.new().open(cols, rows)
+	return _PTYUnix.new().open(cols, rows)
 
 
 func _exit_tree():
 	_exit_cb = Callable()
 	if _pid > 1:
-		LibuvUtils.kill(_pid, IPCSignal.SIGHUP)
+		_LibuvUtils.kill(_pid, IPCSignal.SIGHUP)
 		if _pipe:
 			while _pipe.get_status() != 0:
 				continue
