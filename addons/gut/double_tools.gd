@@ -10,6 +10,21 @@ var double = null
 const NO_DEFAULT_VALUE = "!__gut__no__default__value__!"
 
 
+func _init(values = null):
+	if values != null:
+		double = values.double
+		thepath = values.thepath
+		subpath = values.subpath
+		stubber = from_id(values.stubber)
+		spy = from_id(values.spy)
+		gut = from_id(values.gut)
+		from_singleton = values.from_singleton
+		is_partial = values.is_partial
+
+	if gut != null:
+		gut.get_autofree().add_free(double)
+
+
 func from_id(inst_id):
 	if inst_id == -1:
 		return null
@@ -43,16 +58,13 @@ func default_val(method_name, p_index, default_val = NO_DEFAULT_VALUE):
 		return null
 
 
-func _init(values = null):
-	if values != null:
-		double = values.double
-		thepath = values.thepath
-		subpath = values.subpath
-		stubber = from_id(values.stubber)
-		spy = from_id(values.spy)
-		gut = from_id(values.gut)
-		from_singleton = values.from_singleton
-		is_partial = values.is_partial
-
+func vararg_warning():
 	if gut != null:
-		gut.get_autofree().add_free(double)
+		gut.get_logger().warn(
+			(
+				"This method contains a vararg argument and the paramter count was not stubbed.  "
+				+ "GUT adds extra parameters to this method which should fill most needs.  "
+				+ "It is recommended that you stub param_count for this object's class to ensure "
+				+ "that there are not any parameter count mismatch errors."
+			)
+		)

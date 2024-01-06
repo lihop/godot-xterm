@@ -39,6 +39,7 @@ var types = {
 	orphan = "orphan",
 	passed = "passed",
 	pending = "pending",
+	risky = "risky",
 	warn = "warn",
 }
 
@@ -61,6 +62,7 @@ var _type_data = {
 	types.orphan: {disp = "Orphans", enabled = true, fmt = fmts.yellow},
 	types.passed: {disp = "Passed", enabled = true, fmt = fmts.green},
 	types.pending: {disp = "Pending", enabled = true, fmt = fmts.yellow},
+	types.risky: {disp = "Risky", enabled = true, fmt = fmts.yellow},
 	types.warn: {disp = "WARNING", enabled = true, fmt = fmts.yellow},
 }
 
@@ -77,6 +79,7 @@ var _printers = {terminal = null, gui = null, console = null}
 var _gut = null
 var _utils = null
 var _indent_level = 0
+var _min_indent_level = 0
 var _indent_string = "    "
 var _skip_test_name_for_testing = false
 var _less_test_names = false
@@ -130,7 +133,12 @@ func _print_test_name():
 		return false
 
 	if !cur_test.has_printed_name:
-		_output("* " + cur_test.name + "\n")
+		var param_text = ""
+		if cur_test.arg_count > 0:
+			# Just an FYI, parameter_handler in gut might not be set yet so can't
+			# use it here for cooler output.
+			param_text = "<parameterized>"
+		_output(str("* ", cur_test.name, param_text, "\n"))
 		cur_test.has_printed_name = true
 
 
@@ -223,6 +231,8 @@ func deprecated(text, alt_method = null):
 
 func error(text):
 	_output_type(types.error, text)
+	if _gut != null:
+		_gut._fail_for_error(text)
 
 
 func failed(text):
@@ -243,6 +253,10 @@ func passed(text):
 
 func pending(text):
 	_output_type(types.pending, text)
+
+
+func risky(text):
+	_output_type(types.risky, text)
 
 
 func warn(text):
@@ -292,7 +306,7 @@ func get_indent_level():
 
 
 func set_indent_level(indent_level):
-	_indent_level = indent_level
+	_indent_level = max(_min_indent_level, indent_level)
 
 
 func get_indent_string():
@@ -313,7 +327,7 @@ func inc_indent():
 
 
 func dec_indent():
-	_indent_level = max(0, _indent_level - 1)
+	_indent_level = max(_min_indent_level, _indent_level - 1)
 
 
 func is_type_enabled(type):

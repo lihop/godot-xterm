@@ -8,8 +8,8 @@ var env: Dictionary
 
 
 func before_each():
-	assert(OS.set_environment(EMPTY_VAR, ""))
-	assert(OS.set_environment(TEST_VAR, TEST_VAL))
+	OS.set_environment(EMPTY_VAR, "")
+	OS.set_environment(TEST_VAR, TEST_VAL)
 	env = LibuvUtils.get_os_environ()
 
 

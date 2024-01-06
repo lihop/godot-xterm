@@ -55,7 +55,8 @@ func _on_End_pressed():
 
 
 func _on_Copy_pressed():
-	OS.clipboard = rtl.text
+	return
+	# OS.clipboard = rtl.text
 
 
 func _on_file_dialog_visibility_changed():

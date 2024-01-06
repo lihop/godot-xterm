@@ -61,7 +61,7 @@ var _summary = {asserts = 0, passed = 0, failed = 0, tests = 0, pending = 0}
 var _signal_watcher = load("res://addons/gut/signal_watcher.gd").new()
 
 # Convenience copy of _utils.DOUBLE_STRATEGY
-var DOUBLE_STRATEGY = _utils.DOUBLE_STRATEGY
+var DOUBLE_STRATEGY = GutUtils.DOUBLE_STRATEGY
 
 var _lgr = _utils.get_logger()
 var _strutils = _utils.Strutils.new()
@@ -89,7 +89,7 @@ func _fail(text):
 	_summary.failed += 1
 	_fail_pass_text.append("failed:  " + text)
 	if gut:
-		_lgr.failed(text)
+		_lgr.failed(gut.get_call_count_text() + text)
 		gut._fail(text)
 
 
@@ -215,6 +215,58 @@ func _fail_if_parameters_not_array(parameters):
 	return invalid
 
 
+# ------------------------------------------------------------------------------
+# A bunch of common checkes used when validating a double/method pair.  If
+# everything is ok then an empty string is returned, otherwise the message
+# is returned.
+# ------------------------------------------------------------------------------
+func _get_bad_double_or_method_message(inst, method_name, what_you_cant_do):
+	var to_return = ""
+
+	if !_utils.is_double(inst):
+		to_return = str("An instance of a Double was expected, you passed:  ", _str(inst))
+	elif !inst.has_method(method_name):
+		to_return = str(
+			"You cannot ",
+			what_you_cant_do,
+			" [",
+			method_name,
+			"] because the method does not exist.  ",
+			"This can happen if the method is virtual and not overloaded (i.e. _ready) ",
+			"or you have mistyped the name of the method."
+		)
+	elif !inst.__gutdbl_values.doubled_methods.has(method_name):
+		to_return = str(
+			"You cannot ",
+			what_you_cant_do,
+			" [",
+			method_name,
+			"] because ",
+			_str(inst),
+			" does not overload it or it was ignored with ",
+			"ignore_method_when_doubling.  See Doubling ",
+			"Strategy in the wiki for details on including non-overloaded ",
+			"methods in a double."
+		)
+
+	return to_return
+
+
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+func _fail_if_not_double_or_does_not_have_method(inst, method_name):
+	var to_return = OK
+
+	var msg = _get_bad_double_or_method_message(inst, method_name, "spy on")
+	if msg != "":
+		_fail(msg)
+		to_return = ERR_INVALID_DATA
+
+	return to_return
+
+
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 func _create_obj_from_type(type):
 	var obj = null
 	if type.is_class("PackedScene"):
@@ -276,13 +328,16 @@ func assert_eq(got, expected, text = ""):
 		var disp = "[" + _str(got) + "] expected to equal [" + _str(expected) + "]:  " + text
 		var result = null
 
-		if typeof(got) == TYPE_ARRAY:
-			result = _compare.shallow(got, expected)
-		else:
-			result = _compare.simple(got, expected)
+		result = _compare.simple(got, expected)
 
 		if typeof(got) in [TYPE_ARRAY, TYPE_DICTIONARY]:
 			disp = str(result.summary, "  ", text)
+			(
+				_lgr
+				. info(
+					"Array/Dictionary compared by value.  Use assert_same to compare references.  Use assert_eq_deep to see diff when failing."
+				)
+			)
 
 		if result.are_equal:
 			_pass(disp)
@@ -300,13 +355,16 @@ func assert_ne(got, not_expected, text = ""):
 		)
 		var result = null
 
-		if typeof(got) == TYPE_ARRAY:
-			result = _compare.shallow(got, not_expected)
-		else:
-			result = _compare.simple(got, not_expected)
+		result = _compare.simple(got, not_expected)
 
 		if typeof(got) in [TYPE_ARRAY, TYPE_DICTIONARY]:
 			disp = str(result.summary, "  ", text)
+			(
+				_lgr
+				. info(
+					"Array/Dictionary compared by value.  Use assert_not_same to compare references.  Use assert_ne_deep to see diff."
+				)
+			)
 
 		if result.are_equal:
 			_fail(disp)
@@ -927,7 +985,7 @@ func assert_is(object, a_class, text = ""):
 		if !_utils.is_native_class(a_class) and !_utils.is_gdscript(a_class):
 			_fail(str(bad_param_2, a_str))
 		else:
-			if object is a_class:
+			if is_instance_of(object, a_class):
 				_pass(disp)
 			else:
 				_fail(disp)
@@ -1047,11 +1105,7 @@ func assert_called(inst, method_name, parameters = null):
 	if _fail_if_parameters_not_array(parameters):
 		return
 
-	if !_utils.is_double(inst):
-		_fail(
-			"You must pass a doubled instance to assert_called.  Check the wiki for info on using double."
-		)
-	else:
+	if _fail_if_not_double_or_does_not_have_method(inst, method_name) == OK:
 		if gut.get_spy().was_called(inst, method_name, parameters):
 			_pass(disp)
 		else:
@@ -1071,11 +1125,7 @@ func assert_not_called(inst, method_name, parameters = null):
 	if _fail_if_parameters_not_array(parameters):
 		return
 
-	if !_utils.is_double(inst):
-		_fail(
-			"You must pass a doubled instance to assert_not_called.  Check the wiki for info on using double."
-		)
-	else:
+	if _fail_if_not_double_or_does_not_have_method(inst, method_name) == OK:
 		if gut.get_spy().was_called(inst, method_name, parameters):
 			if parameters != null:
 				disp += str(" with parameters ", parameters)
@@ -1101,11 +1151,7 @@ func assert_call_count(inst, method_name, expected_count, parameters = null):
 	var disp = "Expected [%s] on %s to be called [%s] times%s.  It was called [%s] times."
 	disp = disp % [method_name, _str(inst), expected_count, param_text, count]
 
-	if !_utils.is_double(inst):
-		_fail(
-			"You must pass a doubled instance to assert_call_count.  Check the wiki for info on using double."
-		)
-	else:
+	if _fail_if_not_double_or_does_not_have_method(inst, method_name) == OK:
 		if count == expected_count:
 			_pass(disp)
 		else:
@@ -1254,7 +1300,7 @@ func assert_property_with_backing_variable(
 ):
 	var setter_name = str("@", property_name, "_setter")
 	var getter_name = str("@", property_name, "_getter")
-	var backing_name = _utils.nvl(backed_by_name, str("_", property_name))
+	var backing_name = GutUtils.nvl(backed_by_name, str("_", property_name))
 	var pre_fail_count = get_fail_count()
 
 	var props = obj.get_property_list()
@@ -1438,7 +1484,7 @@ func get_summary_text():
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 func _smart_double(thing, double_strat, partial):
-	var override_strat = _utils.nvl(double_strat, gut.get_doubler().get_strategy())
+	var override_strat = GutUtils.nvl(double_strat, gut.get_doubler().get_strategy())
 	var to_return = null
 
 	if thing is PackedScene:
@@ -1531,7 +1577,7 @@ func double_scene(path, strategy = null):
 	_lgr.deprecated("test.double_scene has been removed.", "double")
 	return null
 
-	# var override_strat = _utils.nvl(strategy, gut.get_doubler().get_strategy())
+	# var override_strat = GutUtils.nvl(strategy, gut.get_doubler().get_strategy())
 	# return gut.get_doubler().double_scene(path, override_strat)
 
 
@@ -1542,7 +1588,7 @@ func double_script(path, strategy = null):
 	_lgr.deprecated("test.double_script has been removed.", "double")
 	return null
 
-	# var override_strat = _utils.nvl(strategy, gut.get_doubler().get_strategy())
+	# var override_strat = GutUtils.nvl(strategy, gut.get_doubler().get_strategy())
 	# return gut.get_doubler().double(path, override_strat)
 
 
@@ -1555,7 +1601,7 @@ func double_inner(path, subpath, strategy = null):
 	)
 	return null
 
-	var override_strat = _utils.nvl(strategy, gut.get_doubler().get_strategy())
+	var override_strat = GutUtils.nvl(strategy, gut.get_doubler().get_strategy())
 	return gut.get_doubler().double_inner(path, subpath, override_strat)
 
 
@@ -1574,11 +1620,8 @@ func ignore_method_when_doubling(thing, method_name):
 		return
 
 	var r = thing
-
 	if thing is PackedScene:
-		var inst = thing.instantiate()
-		if inst.get_script():
-			r = inst.get_script()
+		r = GutUtils.get_scene_script_object(thing)
 
 	gut.get_doubler().add_ignored_method(r, method_name)
 
@@ -1595,15 +1638,17 @@ func ignore_method_when_doubling(thing, method_name):
 #        to leave it but not update the wiki.
 # ------------------------------------------------------------------------------
 func stub(thing, p2, p3 = null):
-	if _utils.is_instance(thing) and !_utils.is_double(thing):
-		_lgr.error(str("You cannot use stub on ", _str(thing), " because it is not a double."))
-		return _utils.StubParams.new()
-
 	var method_name = p2
 	var subpath = null
 	if p3 != null:
 		subpath = p2
 		method_name = p3
+
+	if _utils.is_instance(thing):
+		var msg = _get_bad_double_or_method_message(thing, method_name, "stub")
+		if msg != "":
+			_lgr.error(msg)
+			return _utils.StubParams.new()
 
 	var sp = _utils.StubParams.new(thing, method_name, subpath)
 	gut.get_stubber().add_stub(sp)
@@ -1613,8 +1658,8 @@ func stub(thing, p2, p3 = null):
 # ------------------------------------------------------------------------------
 # convenience wrapper.
 # ------------------------------------------------------------------------------
-func simulate(obj, times, delta):
-	gut.simulate(obj, times, delta)
+func simulate(obj, times, delta, check_is_processing: bool = false):
+	gut.simulate(obj, times, delta, check_is_processing)
 
 
 # ------------------------------------------------------------------------------
@@ -1670,11 +1715,12 @@ func use_parameters(params):
 		ph = _utils.ParameterHandler.new(params)
 		gut.parameter_handler = ph
 
-	var output = str(
-		"(call #", ph.get_call_count() + 1, ") with parameters:  ", ph.get_current_parameters()
-	)
-	_lgr.log(output)
-	_lgr.inc_indent()
+	# DO NOT use gut.gd's get_call_count_text here since it decrements the
+	# get_call_count value.  This method increments the call count in its
+	# return statement.
+	var output = str("- params[", ph.get_call_count(), "]", "(", ph.get_current_parameters(), ")")
+	gut.p(output, gut.LOG_LEVEL_TEST_AND_FAILURES)
+
 	return ph.next_parameters()
 
 
@@ -1729,7 +1775,8 @@ func is_passing():
 		and !["before_all", "after_all"].has(gut.get_current_test_object().name)
 	):
 		return (
-			gut.get_current_test_object().passed and gut.get_current_test_object().assert_count > 0
+			gut.get_current_test_object().is_passing()
+			and gut.get_current_test_object().assert_count > 0
 		)
 	else:
 		_lgr.error("No current test object found.  is_passing must be called inside a test.")
@@ -1744,7 +1791,7 @@ func is_failing():
 		gut.get_current_test_object() != null
 		and !["before_all", "after_all"].has(gut.get_current_test_object().name)
 	):
-		return !gut.get_current_test_object().passed
+		return gut.get_current_test_object().is_failing()
 	else:
 		_lgr.error("No current test object found.  is_failing must be called inside a test.")
 		return null
@@ -1777,14 +1824,14 @@ func compare_deep(v1, v2, max_differences = null):
 
 
 # ------------------------------------------------------------------------------
-# Peforms a shallow compare on both values, a CompareResult instnace is returned.
-# The optional max_differences paramter sets the max_differences to be displayed.
+# REMOVED
 # ------------------------------------------------------------------------------
 func compare_shallow(v1, v2, max_differences = null):
-	var result = _compare.shallow(v1, v2)
-	if max_differences != null:
-		result.max_differences = max_differences
-	return result
+	_fail("compare_shallow has been removed.  Use compare_deep or just compare using == instead.")
+	_lgr.error(
+		"compare_shallow has been removed.  Use compare_deep or just compare using == instead."
+	)
+	return null
 
 
 # ------------------------------------------------------------------------------
@@ -1810,25 +1857,36 @@ func assert_ne_deep(v1, v2):
 
 
 # ------------------------------------------------------------------------------
-# Performs a shallow compare and asserts the values are equal
+# REMOVED
 # ------------------------------------------------------------------------------
 func assert_eq_shallow(v1, v2):
-	var result = compare_shallow(v1, v2)
-	if result.are_equal:
-		_pass(result.get_short_summary())
-	else:
-		_fail(result.summary)
+	_fail("assert_eq_shallow has been removed.  Use assert_eq/assert_same/assert_eq_deep")
 
 
 # ------------------------------------------------------------------------------
-# Performs a shallow compare and asserts the values are not equal
+# REMOVED
 # ------------------------------------------------------------------------------
 func assert_ne_shallow(v1, v2):
-	var result = compare_shallow(v1, v2)
-	if !result.are_equal:
-		_pass(result.get_short_summary())
+	_fail("assert_eq_shallow has been removed.  Use assert_eq/assert_same/assert_eq_deep")
+
+
+# ------------------------------------------------------------------------------
+# Assert wrapper for is_same
+# ------------------------------------------------------------------------------
+func assert_same(v1, v2, text = ""):
+	var disp = "[" + _str(v1) + "] expected to be same as  [" + _str(v2) + "]:  " + text
+	if is_same(v1, v2):
+		_pass(disp)
 	else:
-		_fail(result.get_short_summary())
+		_fail(disp)
+
+
+func assert_not_same(v1, v2, text = ""):
+	var disp = "[" + _str(v1) + "] expected to not be same as  [" + _str(v2) + "]:  " + text
+	if is_same(v1, v2):
+		_fail(disp)
+	else:
+		_pass(disp)
 
 
 # ------------------------------------------------------------------------------
