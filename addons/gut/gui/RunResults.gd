@@ -81,17 +81,11 @@ func _ready():
 	_set_toolbutton_icon(_ctrls.toolbar.show_script, "Script", "ss")
 	_set_toolbutton_icon(_ctrls.toolbar.scroll_output, "Font", "so")
 
-	(
-		_ctrls
-		. toolbar
-		. hide_passing
-		. set("custom_icons/checked", get_theme_icon("GuiVisibilityHidden", "EditorIcons"))
+	_ctrls.toolbar.hide_passing.set(
+		"custom_icons/checked", get_theme_icon("GuiVisibilityHidden", "EditorIcons")
 	)
-	(
-		_ctrls
-		. toolbar
-		. hide_passing
-		. set("custom_icons/unchecked", get_theme_icon("GuiVisibilityVisible", "EditorIcons"))
+	_ctrls.toolbar.hide_passing.set(
+		"custom_icons/unchecked", get_theme_icon("GuiVisibilityVisible", "EditorIcons")
 	)
 
 	if get_parent() == get_tree().root:

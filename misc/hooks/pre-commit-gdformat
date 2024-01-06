@@ -6,7 +6,7 @@
 
 set -e 
 
-GDTOOLKIT_VERSION=5f4405e1d5f47e581860103106c96a0504bdf74a
+GDTOOLKIT_VERSION=4.2.2
 
 FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep '\.gd$' | grep -v '^addons/gd-plug' | grep -v '^addons/gut' | sed 's| |\\ |g')
 echo $FILES

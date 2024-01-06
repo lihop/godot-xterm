@@ -280,8 +280,11 @@ func _parse_script(obj):
 		if inner_class_registry.has(obj):
 			parsed = _script_collector.parse(inner_class_registry.get_base_resource(obj), obj)
 		else:
-			_lgr.error(
-				"Doubling Inner Classes requires you register them first.  Call register_inner_classes passing the script that contains the inner class."
+			(
+				_lgr
+				. error(
+					"Doubling Inner Classes requires you register them first.  Call register_inner_classes passing the script that contains the inner class."
+				)
 			)
 	else:
 		parsed = _script_collector.parse(obj)

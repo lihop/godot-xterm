@@ -63,22 +63,14 @@ func _ready():
 	_ctrls.output_button.icon = get_theme_icon("Font", "EditorIcons")
 
 	_ctrls.run_results.set_output_control(_ctrls.output_ctrl)
-	(
-		_ctrls
-		. run_results
-		. set_font(
-			_gut_config.options.panel_options.font_name, _gut_config.options.panel_options.font_size
-		)
+	_ctrls.run_results.set_font(
+		_gut_config.options.panel_options.font_name, _gut_config.options.panel_options.font_size
 	)
 
 	var check_import = load("res://addons/gut/images/red.png")
 	if check_import == null:
-		(
-			_ctrls
-			. run_results
-			. add_centered_text(
-				"GUT got some new images that are not imported yet.  Please restart Godot."
-			)
+		_ctrls.run_results.add_centered_text(
+			"GUT got some new images that are not imported yet.  Please restart Godot."
 		)
 		print("GUT got some new images that are not imported yet.  Please restart Godot.")
 	else:
@@ -94,12 +86,8 @@ func _apply_options_to_controls():
 	_ctrls.output_ctrl.set_all_fonts(_gut_config.options.panel_options.font_name)
 	_ctrls.output_ctrl.set_font_size(_gut_config.options.panel_options.font_size)
 
-	(
-		_ctrls
-		. run_results
-		. set_font(
-			_gut_config.options.panel_options.font_name, _gut_config.options.panel_options.font_size
-		)
+	_ctrls.run_results.set_font(
+		_gut_config.options.panel_options.font_name, _gut_config.options.panel_options.font_size
 	)
 	_ctrls.run_results.set_show_orphans(!_gut_config.options.hide_orphans)
 
@@ -178,10 +166,10 @@ func _apply_shortcuts():
 	_ctrls.run_button.shortcut = _ctrls.shortcut_dialog.get_run_all()
 
 	_ctrls.run_at_cursor.get_script_button().shortcut = (
-		_ctrls . shortcut_dialog . get_run_current_script()
+		_ctrls.shortcut_dialog.get_run_current_script()
 	)
 	_ctrls.run_at_cursor.get_inner_button().shortcut = (
-		_ctrls . shortcut_dialog . get_run_current_inner()
+		_ctrls.shortcut_dialog.get_run_current_inner()
 	)
 	_ctrls.run_at_cursor.get_test_button().shortcut = _ctrls.shortcut_dialog.get_run_current_test()
 
@@ -337,10 +325,8 @@ func set_current_script(script):
 
 func set_interface(value):
 	_interface = value
-	(
-		_interface
-		. get_script_editor()
-		. connect("editor_script_changed", Callable(self, "_on_editor_script_changed"))
+	_interface.get_script_editor().connect(
+		"editor_script_changed", Callable(self, "_on_editor_script_changed")
 	)
 
 	var ste = ScriptTextEditors.new(_interface.get_script_editor())

@@ -47,13 +47,9 @@ func run_tests(show_gui = true):
 		add_child(_gut)
 
 	if !_cmdln_mode:
-		(
-			_gut
-			. end_run
-			. connect(
-				_on_tests_finished.bind(
-					_gut_config.options.should_exit, _gut_config.options.should_exit_on_success
-				)
+		_gut.end_run.connect(
+			_on_tests_finished.bind(
+				_gut_config.options.should_exit, _gut_config.options.should_exit_on_success
 			)
 		)
 

@@ -1565,8 +1565,11 @@ func double_inner(path, subpath, strategy = null):
 # ------------------------------------------------------------------------------
 func ignore_method_when_doubling(thing, method_name):
 	if typeof(thing) == TYPE_STRING:
-		_lgr.error(
-			"ignore_method_when_doubling no longer supports paths to scripts or scenes.  Load them and pass them instead."
+		(
+			_lgr
+			. error(
+				"ignore_method_when_doubling no longer supports paths to scripts or scenes.  Load them and pass them instead."
+			)
 		)
 		return
 

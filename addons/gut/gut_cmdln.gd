@@ -210,10 +210,13 @@ func setup_options(options, font_names):
 	)
 	opts.add("-gpo", false, "Print option values from all sources and the value used, then quit.")
 	opts.add("-ginclude_subdirs", false, "Include subdirectories of -gdir.")
-	opts.add(
-		"-gdouble_strategy",
-		"partial",
-		'Default strategy to use when doubling.  Valid values are [partial, full].  Default "[default]"'
+	(
+		opts
+		. add(
+			"-gdouble_strategy",
+			"partial",
+			'Default strategy to use when doubling.  Valid values are [partial, full].  Default "[default]"'
+		)
 	)
 	opts.add("-gdisable_colors", false, "Disable command line colors.")
 	opts.add("-gpre_run_script", "", "pre-run hook script path")
@@ -364,9 +367,8 @@ func _run_gut():
 			_tester = runner.get_gut()
 			_tester.connect(
 				"end_run",
-				(
-					Callable(self, "_on_tests_finished")
-					. bind(_final_opts.should_exit, _final_opts.should_exit_on_success)
+				Callable(self, "_on_tests_finished").bind(
+					_final_opts.should_exit, _final_opts.should_exit_on_success
 				)
 			)
 
@@ -378,8 +380,11 @@ func _on_tests_finished(should_exit, should_exit_on_success):
 	if _final_opts.dirs.size() == 0:
 		if _tester.get_summary().get_totals().scripts == 0:
 			var lgr = _tester.get_logger()
-			lgr.error(
-				"No directories configured.  Add directories with options or a super.gutconfig.json file.  Use the -gh option for more information."
+			(
+				lgr
+				. error(
+					"No directories configured.  Add directories with options or a super.gutconfig.json file.  Use the -gh option for more information."
+				)
 			)
 
 	if _tester.get_fail_count():
