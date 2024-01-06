@@ -1,11 +1,5 @@
 #include "register_types.h"
 
-#include <gdextension_interface.h>
-
-#include <godot_cpp/core/class_db.hpp>
-#include <godot_cpp/core/defs.hpp>
-#include <godot_cpp/godot.hpp>
-
 #include "terminal.h"
 
 #if !defined(_PTY_DISABLED)
@@ -15,9 +9,13 @@
 #include "node_pty/unix/pty.h"
 #endif
 #if defined(__WIN32)
-//#include "node_pty/win/conpty.h"
+// #include "node_pty/win/conpty.h"
 #endif
 #endif
+
+#include <gdextension_interface.h>
+#include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/godot.hpp>
 
 using namespace godot;
 
@@ -45,13 +43,13 @@ void uninitialize_godot_xterm_module(ModuleInitializationLevel p_level) {
   }
 }
 
-extern "C"
-    // Initialization
-    GDExtensionBool GDE_EXPORT
-    godot_xterm_library_init(const GDExtensionInterface *p_interface,
-                             GDExtensionClassLibraryPtr p_library,
-                             GDExtensionInitialization *r_initialization) {
-  godot::GDExtensionBinding::InitObject init_obj(p_interface, p_library,
+extern "C" {
+// Initialization
+GDExtensionBool GDE_EXPORT
+godot_xterm_library_init(GDExtensionInterfaceGetProcAddress p_get_proc_address,
+                         const GDExtensionClassLibraryPtr p_library,
+                         GDExtensionInitialization *r_initialization) {
+  godot::GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library,
                                                  r_initialization);
 
   init_obj.register_initializer(initialize_godot_xterm_module);
@@ -60,4 +58,5 @@ extern "C"
       MODULE_INITIALIZATION_LEVEL_SCENE);
 
   return init_obj.init();
+}
 }

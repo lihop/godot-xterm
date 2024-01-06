@@ -12,16 +12,12 @@ config_version=5
 
 config/name="GodotXterm"
 run/main_scene="res://examples/menu/menu.tscn"
-config/features=PackedStringArray("4.0")
+config/features=PackedStringArray("4.2")
 config/icon="res://docs/media/icon.png"
 
 [display]
 
 window/vsync/use_vsync=false
-
-[editor]
-
-export/convert_text_resources_to_binary=true
 
 [editor_plugins]
 

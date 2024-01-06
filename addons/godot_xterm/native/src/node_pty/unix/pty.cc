@@ -120,8 +120,9 @@ static void pty_after_waitpid(uv_async_t *);
 static void pty_after_close(uv_handle_t *);
 
 Array PTYUnix::fork(String p_file, int _ignored, PackedStringArray p_args,
-                    PackedStringArray p_env, String p_cwd, int p_cols, int p_rows,
-                    int p_uid, int p_gid, bool p_utf8, Callable p_on_exit) {
+                    PackedStringArray p_env, String p_cwd, int p_cols,
+                    int p_rows, int p_uid, int p_gid, bool p_utf8,
+                    Callable p_on_exit) {
   // file
   char *file = strdup(p_file.utf8().get_data());
 
@@ -445,9 +446,9 @@ static void pty_after_waitpid(uv_async_t *async) {
 
   Array argv = Array::make(baton->exit_code, baton->signal_code);
 
-  if (baton->cb != nullptr && baton->cb.is_valid()) {
+  if (baton->cb.is_valid()) {
     baton->cb.callv(argv);
-    baton->cb = (Variant)nullptr;
+    baton->cb = (Variant) nullptr;
   }
 
   uv_close((uv_handle_t *)async, pty_after_close);

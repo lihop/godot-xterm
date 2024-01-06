@@ -18,7 +18,7 @@ jobs:
       - name: Import assets
         uses: ./.github/actions/import-assets
         with:
-          godot-version: v4.0-beta14
+          godot-version: v4.2.1-stable
       - name: Upload imports
         uses: actions/upload-artifact@v3
         with:
@@ -237,7 +237,7 @@ jobs:
       matrix:
         os: [ ubuntu-22.04 ] #, macos-12, windows-2022 ] Temporarily disabled.
         bits: [ 64, 32 ]
-        godot_version: [ 'v4.0-beta14' ]
+        godot_version: [ 'v4.2.1-stable' ]
         exclude:
           - os: macos-12
             bits: 32
