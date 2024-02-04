@@ -71,6 +71,10 @@ func get_rows() -> int:
 	return _rows
 
 
+func get_cursor_pos() -> Vector2:
+	return _native_terminal.get_cursor_pos()
+
+
 func write(data) -> void:
 	assert(
 		data is PoolByteArray or data is String,

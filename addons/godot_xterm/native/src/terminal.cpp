@@ -290,6 +290,8 @@ void Terminal::_register_methods() {
   register_method("sb_reset", &Terminal::sb_reset);
   register_method("clear_sb", &Terminal::clear_sb);
 
+  register_method("get_cursor_pos", &Terminal::get_cursor_pos);
+
   register_method("start_selection", &Terminal::start_selection);
   register_method("select_to_pointer", &Terminal::select_to_pointer);
   register_method("reset_selection", &Terminal::reset_selection);
@@ -633,6 +635,11 @@ void Terminal::sb_reset() {
 void Terminal::clear_sb() {
   tsm_screen_clear_sb(screen);
   update();
+}
+
+Vector2 Terminal::get_cursor_pos() {
+  return Vector2(tsm_screen_get_cursor_x(screen),
+                 tsm_screen_get_cursor_y(screen));
 }
 
 void Terminal::start_selection(Vector2 position) {
