@@ -1,59 +1,59 @@
 ---
 services:
   javascript:
-    build:
-      context: .
-      dockerfile: javascript.Dockerfile
-    user: ${UID_GID}
-    volumes:
-      - .:/src
-    command:
-      - /bin/bash
-      - -c
-      - |
-        cd /src/thirdparty/godot-cpp
-        scons platform=javascript target=$${TARGET:-debug} -j$$(nproc)
-        cd /src
-        scons platform=javascript target=$${TARGET:-debug} -j$$(nproc)
+	build:
+	  context: .
+	  dockerfile: javascript.Dockerfile
+	user: ${UID_GID}
+	volumes:
+	  - .:/src
+	command:
+	  - /bin/bash
+	  - -c
+	  - |
+		cd /src/thirdparty/godot-cpp
+		scons platform=javascript target=$${TARGET:-debug} -j$$(nproc)
+		cd /src
+		scons platform=javascript target=$${TARGET:-debug} -j$$(nproc)
   libuv-linux:
-    user: ${UID_GID}
-    build:
-      context: .
-      dockerfile: linux.Dockerfile
-    volumes:
-      - ./thirdparty/libuv:/libuv
-    working_dir: /libuv
-    command:
-      - /bin/bash
-      - -c
-      - |
-        target=$${TARGET:-release}
-        arch=$${ARCH:-x86_64}
-        mkdir build 2>/dev/null ;
-        args="-DCMAKE_BUILD_TYPE=$$target \
-          -DBUILD_SHARED_LIBS=OFF \
-          -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE"
-        if [[ $$arch == "x86_32" ]]; then
-          args="$$args -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32";
-        else
-          args="$$args -DCMAKE_SYSTEM_PROCESSOR=x86_64 -DCMAKE_C_FLAGS=";
-        fi
-        pushd build
-        cmake .. $$args
-        popd
-        cmake --build build
+	user: ${UID_GID}
+	build:
+	  context: .
+	  dockerfile: linux.Dockerfile
+	volumes:
+	  - ./thirdparty/libuv:/libuv
+	working_dir: /libuv
+	command:
+	  - /bin/bash
+	  - -c
+	  - |
+		target=$${TARGET:-release}
+		arch=$${ARCH:-x86_64}
+		mkdir build 2>/dev/null ;
+		args="-DCMAKE_BUILD_TYPE=$$target \
+		  -DBUILD_SHARED_LIBS=OFF \
+		  -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE"
+		if [[ $$arch == "x86_32" ]]; then
+		  args="$$args -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32";
+		else
+		  args="$$args -DCMAKE_SYSTEM_PROCESSOR=x86_64 -DCMAKE_C_FLAGS=";
+		fi
+		pushd build
+		cmake .. $$args
+		popd
+		cmake --build build
   libgodot-xterm-linux:
-    user: ${UID_GID}
-    build:
-      context: .
-      dockerfile: linux.Dockerfile
-    volumes:
-      - .:/godot-xterm
-    working_dir: /godot-xterm
-    environment:
-      - SCONS_CACHE=/scons-cache
-    command:
-      - /bin/bash
-      - -c
-      - |
-        scons target=template_$${TARGET:-debug} arch=$${ARCH:-x86_64}
+	user: ${UID_GID}
+	build:
+	  context: .
+	  dockerfile: linux.Dockerfile
+	volumes:
+	  - .:/godot-xterm
+	working_dir: /godot-xterm
+	environment:
+	  - SCONS_CACHE=/scons-cache
+	command:
+	  - /bin/bash
+	  - -c
+	  - |
+		scons target=template_$${TARGET:-debug} arch=$${ARCH:-x86_64}

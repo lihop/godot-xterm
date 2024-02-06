@@ -1,164 +1,110 @@
-// SPDX-FileCopyrightText: 2021-2023 Leroy Hopson <godot-xterm@leroy.geek.nz>
+// SPDX-FileCopyrightText: 2021-2024 Leroy Hopson <godot-xterm@leroy.nix.nz>
 // SPDX-License-Identifier: MIT
 
-#ifndef GODOT_XTERM_TERMINAL_H
-#define GODOT_XTERM_TERMINAL_H
+#pragma once
 
 #include <godot_cpp/classes/control.hpp>
-#include <godot_cpp/classes/font.hpp>
-#include <godot_cpp/classes/input_event.hpp>
-#include <godot_cpp/classes/input_event_key.hpp>
-#include <godot_cpp/classes/input_event_mouse.hpp>
-#include <godot_cpp/classes/input_event_mouse_button.hpp>
-#include <godot_cpp/classes/sub_viewport.hpp>
-#include <godot_cpp/classes/texture_rect.hpp>
-#include <godot_cpp/classes/timer.hpp>
-#include <godot_cpp/variant/packed_byte_array.hpp>
+#include <godot_cpp/classes/image_texture.hpp>
+#include <godot_cpp/classes/rendering_server.hpp>
+#include <godot_cpp/classes/shader_material.hpp>
 #include <libtsm.h>
-#include <map>
-#include <vector>
 
-using namespace godot;
+namespace godot
+{
 
-class Terminal : public Control {
-  GDCLASS(Terminal, Control)
+  class Terminal : public Control
+  {
+    GDCLASS(Terminal, Control)
 
-public:
-  Terminal();
-  ~Terminal();
+  private:
+    static constexpr const char *COLOR_NAMES[] = {
+        "ansi_0_color", "ansi_1_color", "ansi_2_color", "ansi_3_color", "ansi_4_color", "ansi_5_color", "ansi_6_color", "ansi_7_color",
+        "ansi_8_color", "ansi_9_color", "ansi_10_color", "ansi_11_color", "ansi_12_color", "ansi_13_color", "ansi_14_color", "ansi_15_color",
+        "foreground_color", "background_color",
+    };
 
-  enum UpdateMode {
-    DISABLED,
-    AUTO,
-    ALL,
-    ALL_NEXT_FRAME,
+    static constexpr const char *FONT_TYPES[] = {
+        "normal_font", "bold_font", "italics_font", "bold_italics_font",
+    };
+
+  public:
+    enum AttrFlags
+    {
+      INVERSE = 1 << 0,
+      BLINK = 1 << 1,
+    };
+
+    Terminal();
+    ~Terminal();
+
+    void set_cols(const int p_cols);
+    int get_cols() const;
+
+    void set_rows(const int p_rows);
+    int get_rows() const;
+
+    void set_max_scrollback(const int p_max_scrollback);
+    int get_max_scrollback() const;
+
+    void write(Variant data);
+
+  protected:
+    static void _bind_methods();
+
+  private:
+    unsigned int max_scrollback;
+
+    unsigned int cols;
+    unsigned int rows;
+
+    RenderingServer *rs;
+
+    tsm_screen *screen;
+    tsm_vte *vte;
+    tsm_age_t framebuffer_age;
+
+    static void _write_cb(struct tsm_vte *vte, const char *u8, size_t len,
+                          void *data);
+    static int _draw_cb(struct tsm_screen *con, uint64_t id, const uint32_t *ch,
+                        size_t len, unsigned int width, unsigned int posx,
+                        unsigned int posy, const struct tsm_screen_attr *attr,
+                        tsm_age_t age, void *data);
+
+    PackedColorArray palette;
+    Ref<Font> font;
+    int32_t font_size;
+    Vector2 size;
+    Vector2 cell_size;
+
+    Ref<Image> attr_image;
+    Ref<ImageTexture> attr_texture;
+
+    // Background.
+    Ref<Image> back_image;
+    Ref<ImageTexture> back_texture;
+    Ref<Shader> back_shader;
+    Ref<ShaderMaterial> back_material;
+    RID back_canvas_item;
+
+    // Foreground.
+    RID char_shader, char_material, char_canvas_item, canvas, viewport,
+        fore_canvas_item;
+    Ref<Shader> fore_shader;
+    Ref<ShaderMaterial> fore_material;
+
+    void _notification(const int what);
+
+    void initialize_rendering();
+    void update_theme();
+    void update_sizes(bool force = false);
+    void draw_screen();
+    void refresh();
+    void cleanup_rendering();
+
+    bool _set(const StringName &p_name, const Variant &p_value);
+    void _get_property_list(List<PropertyInfo> *p_list) const;
+    bool _is_valid_color_name(const String &p_name);
+    bool _is_valid_font_type(const String &p_name);
   };
 
-  static const UpdateMode UPDATE_MODE_DISABLED = UpdateMode::DISABLED;
-  static const UpdateMode UPDATE_MODE_AUTO = UpdateMode::AUTO;
-  static const UpdateMode UPDATE_MODE_ALL = UpdateMode::ALL;
-  static const UpdateMode UPDATE_MODE_ALL_NEXT_FRAME =
-      UpdateMode::ALL_NEXT_FRAME;
-
-  bool copy_on_selection = false;
-  void set_copy_on_selection(bool value);
-  bool get_copy_on_selection();
-
-  UpdateMode update_mode = UPDATE_MODE_AUTO;
-  void set_update_mode(UpdateMode value);
-  UpdateMode get_update_mode();
-
-  double bell_cooldown = 0.1f;
-  void set_bell_cooldown(double value);
-  double get_bell_cooldown();
-
-  bool bell_muted = false;
-  void set_bell_muted(bool value);
-  bool get_bell_muted();
-
-  bool blink_enabled = true;
-  void set_blink_enabled(bool value);
-  bool get_blink_enabled();
-
-  double blink_time_off = 0.3;
-  void set_blink_time_off(double value);
-  double get_blink_time_off();
-
-  double blink_time_on = 0.6;
-  void set_blink_time_on(double value);
-  double get_blink_time_on();
-
-  void clear();
-  String copy_all();
-  String copy_selection();
-  int get_cols();
-  int get_rows();
-  void write(Variant data);
-
-  void _gui_input(Ref<InputEvent> event);
-  void _notification(int what);
-
-  void _flush();
-  void _on_back_buffer_draw();
-  void _on_selection_held();
-  void _toggle_blink();
-
-protected:
-  static void _bind_methods();
-
-private:
-  struct ColorDef {
-    const char *default_color;
-    tsm_vte_color tsm_color;
-  };
-
-  struct ThemeCache {
-    int font_size = 0;
-    std::map<String, Ref<Font>> fonts = std::map<String, Ref<Font>>{};
-    std::map<String, Color> colors = std::map<String, Color>{};
-  } theme_cache;
-
-  typedef std::map<const char *, ColorDef> ColorMap;
-  typedef std::pair<Color, Color> ColorPair;
-  typedef std::map<const char *, const char *> FontMap;
-  typedef std::map<std::pair<Key, char32_t>, uint32_t> KeyMap;
-
-  static const KeyMap KEY_MAP;
-  static const ColorMap COLORS;
-  static const FontMap FONTS;
-
-  enum SelectionMode { NONE, POINTER };
-
-  Control *back_buffer = new Control();
-  SubViewport *sub_viewport = new SubViewport();
-  TextureRect *front_buffer = new TextureRect();
-
-  Timer *bell_timer = new Timer();
-  Timer *blink_timer = new Timer();
-  Timer *selection_timer = new Timer();
-
-  tsm_screen *screen;
-  tsm_vte *vte;
-
-  Array write_buffer = Array();
-
-  int cols = 80;
-  int rows = 24;
-
-  // Whether blinking characters are visible. Not whether blinking is enabled
-  // which is determined by `blink_enabled`.
-  bool blink_on = true;
-
-  Vector2 cell_size = Vector2(0, 0);
-
-  std::map<int, Color> palette = {};
-
-  tsm_age_t framebuffer_age;
-
-  Ref<InputEventKey> last_input_event_key;
-
-  bool selecting = false;
-  SelectionMode selection_mode = SelectionMode::NONE;
-
-  static void _bell_cb(tsm_vte *vte, void *data);
-  static int _text_draw_cb(tsm_screen *con, uint64_t id, const uint32_t *ch,
-                           size_t len, unsigned int width, unsigned int col,
-                           unsigned int row, const tsm_screen_attr *attr,
-                           tsm_age_t age, void *data);
-  static void _write_cb(tsm_vte *vte, const char *u8, size_t len, void *data);
-
-  void _draw_background(int row, int col, Color bgcol, int width);
-  void _draw_foreground(int row, int col, char *ch, const tsm_screen_attr *attr,
-                        Color fgcol);
-  ColorPair _get_cell_colors(const tsm_screen_attr *attr);
-  void _handle_key_input(Ref<InputEventKey> event);
-  void _handle_mouse_wheel(Ref<InputEventMouseButton> event);
-  void _handle_selection(Ref<InputEventMouse> event);
-  void _recalculate_size();
-  void _refresh();
-  void _update_theme_item_cache();
-};
-
-VARIANT_ENUM_CAST(Terminal::UpdateMode);
-
-#endif // GODOT_XTERM_TERMINAL_H
+} // namespace godot

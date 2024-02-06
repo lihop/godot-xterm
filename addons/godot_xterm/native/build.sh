@@ -53,7 +53,7 @@ updateSubmodules() {
 }
 
 updateSubmodules LIBUV_DIR ${NATIVE_DIR}/thirdparty/libuv
-updateSubmodules LIBTSM_DIR ${NATIVE_DIR}/thirdparty/libtsm 
+updateSubmodules LIBTSM_DIR ${NATIVE_DIR}/thirdparty/libtsm
 updateSubmodules GODOT_CPP_DIR ${NATIVE_DIR}/thirdparty/godot-cpp
 
 # Build libuv as a static library.

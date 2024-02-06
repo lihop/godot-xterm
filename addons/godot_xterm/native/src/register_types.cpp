@@ -2,17 +2,6 @@
 
 #include "terminal.h"
 
-#if !defined(_PTY_DISABLED)
-#include "libuv_utils.h"
-#include "pipe.h"
-#if defined(__linux__) || defined(__APPLE__)
-#include "node_pty/unix/pty.h"
-#endif
-#if defined(__WIN32)
-// #include "node_pty/win/conpty.h"
-#endif
-#endif
-
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
@@ -25,16 +14,6 @@ void initialize_godot_xterm_module(ModuleInitializationLevel p_level) {
   }
 
   ClassDB::register_class<Terminal>();
-#if !defined(_PTY_DISABLED)
-  ClassDB::register_class<Pipe>();
-  ClassDB::register_class<LibuvUtils>();
-#if defined(__linux__) || defined(__APPLE__)
-  ClassDB::register_class<PTYUnix>();
-#endif
-#if defined(__WIN32)
-  // ClassDB::register_class<ConPTY>();
-#endif
-#endif
 }
 
 void uninitialize_godot_xterm_module(ModuleInitializationLevel p_level) {
@@ -44,7 +23,7 @@ void uninitialize_godot_xterm_module(ModuleInitializationLevel p_level) {
 }
 
 extern "C" {
-// Initialization
+// Initialization.
 GDExtensionBool GDE_EXPORT
 godot_xterm_library_init(GDExtensionInterfaceGetProcAddress p_get_proc_address,
                          const GDExtensionClassLibraryPtr p_library,

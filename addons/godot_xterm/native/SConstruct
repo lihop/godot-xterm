@@ -1,66 +1,39 @@
 #!/usr/bin/env python
 
-# SPDX-FileCopyrightText: 2020-2023 Leroy Hopson <godot-xterm@leroy.geek.nz>
+# SPDX-FileCopyrightText: 2020-2024 Leroy Hopson <godot-xterm@leroy.nix.nz>
 # SPDX-License-Identifier: MIT
 
 import os
-import sys
 
-env = SConscript("./thirdparty/godot-cpp/SConstruct")
+env = SConscript("thirdparty/godot-cpp/SConstruct")
 env['ENV'] = os.environ
 
-opts = Variables([], ARGUMENTS)
-opts.Add(BoolVariable(
-    'disable_pty',
-    'Disables the PTY and its dependencies (LibuvUtils and Pipe). Has no effect on platforms where PTY is not supported',
-    False
-))
-opts.Update(env)
-Help(opts.GenerateHelpText(env))
+VariantDir('build', 'src', duplicate=0)
+env['OBJPREFIX'] = os.path.join('build', '')
 
 env.Append(CPPPATH=[
-    'src/',
-    'thirdparty/libtsm/src/tsm',
-    'thirdparty/libtsm/external',
-    'thirdparty/libtsm/src/shared',
-    'thirdparty/libuv/include',
+    "thirdparty/libtsm/src/tsm",
+    "thirdparty/libtsm/external",
+    "thirdparty/libtsm/src/shared",
 ])
 
-sources = Glob('thirdparty/libtsm/src/tsm/*.c')
+sources = Glob("src/*.cpp") + Glob("thirdparty/libtsm/src/tsm/*.c")
 sources.append([
     'thirdparty/libtsm/external/wcwidth/wcwidth.c',
     'thirdparty/libtsm/src/shared/shl-htable.c',
-    'src/register_types.cpp',
-    'src/constants.cpp',
-    'src/terminal.cpp',
 ])
 
-if env['disable_pty'] or env['platform'] == 'javascript':
-    env.Append(CPPDEFINES=['_PTY_DISABLED'])
+if env["platform"] == "macos":
+    library = env.SharedLibrary(
+        "bin/libgodot-xterm.{}.{}.framework/libgodot-xterm.{}.{}".format(
+            env["platform"], env["target"], env["platform"], env["target"]
+        ),
+        source=sources,
+    )
 else:
-    sources.append('src/pipe.cpp')
-    sources.append('src/libuv_utils.cpp')
-    if env['platform'] != 'windows':
-        sources.append('src/node_pty/unix/pty.cc')
-        env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
-    else:
-        sources.append('src/node_pty/win/conpty.cc')
-        env.Append(LIBS=[
-            env.File('thirdparty/libuv/build/{}/uv_a.lib'.format(env["target"].capitalize())),
-            'Advapi32.lib',
-            'Iphlpapi.lib',
-            'user32.lib',
-            'userenv.lib',
-            'Ws2_32.lib',
-        ])
-
-env.Append(LINKFLAGS=['-static-libstdc++'])
-
-library = env.SharedLibrary(
-    target='bin/libgodot-xterm{}{}'.format(
-        env['suffix'],
-        env['SHLIBSUFFIX'],
-    ), source=sources
-)
+    library = env.SharedLibrary(
+        "bin/libgodot-xterm{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        source=sources,
+    )
 
 Default(library)
