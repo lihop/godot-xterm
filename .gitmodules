@@ -6,4 +6,4 @@
 	url = https://github.com/libuv/libuv
 [submodule "addons/godot_xterm/native/thirdparty/libtsm"]
 	path = addons/godot_xterm/native/thirdparty/libtsm
-	url = https://github.com/lihop/libtsm
+	url = https://github.com/Aetf/libtsm
