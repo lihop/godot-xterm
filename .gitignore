@@ -43,3 +43,6 @@ docs/logs
 .directory
 .DS_Store
 *~
+
+# Other ignores
+.env
