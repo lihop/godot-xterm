@@ -13,6 +13,7 @@ uniform vec2 cell_size;
 uniform vec2 grid_size;
 
 uniform sampler2D attributes;
+uniform bool inverse_enabled = true;
 
 #ifdef BACKGROUND
 uniform vec4 background_color;
@@ -46,7 +47,7 @@ void fragment() {
 		color = texture(TEXTURE, UV);
 #endif
 
-		if (has_attribute(sample_uv, FLAG_INVERSE)) {
+		if (has_attribute(sample_uv, FLAG_INVERSE) && inverse_enabled) {
 			color = vec4(1.0 - color.rgb, color.a);
 		}
 

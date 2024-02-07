@@ -34,6 +34,11 @@ namespace godot
       BLINK = 1 << 1,
     };
 
+    enum InverseMode {
+      INVERSE_MODE_INVERT,
+      INVERSE_MODE_SWAP,
+    };
+
     Terminal();
     ~Terminal();
 
@@ -52,6 +57,9 @@ namespace godot
     void set_blink_off_time(const float p_blink_off_time);
     float get_blink_off_time() const;
 
+    void set_inverse_mode(const int mode);
+    int get_inverse_mode() const;
+
     void write(Variant data);
 
   protected:
@@ -65,6 +73,8 @@ namespace godot
 
     float blink_on_time;
     float blink_off_time;
+
+    InverseMode inverse_mode;
 
     RenderingServer *rs;
 
@@ -118,3 +128,5 @@ namespace godot
   };
 
 } // namespace godot
+
+VARIANT_ENUM_CAST(Terminal::InverseMode);

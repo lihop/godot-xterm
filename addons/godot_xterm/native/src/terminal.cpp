@@ -31,6 +31,14 @@ void Terminal::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_max_scrollback", "max_scrollback"), &Terminal::set_max_scrollback);
 	ClassDB::add_property("Terminal", PropertyInfo(Variant::INT, "max_scrollback"), "set_max_scrollback", "get_max_scrollback");
 
+	// Inverse mode.
+
+	BIND_ENUM_CONSTANT(INVERSE_MODE_INVERT);
+	BIND_ENUM_CONSTANT(INVERSE_MODE_SWAP);
+	ClassDB::bind_method(D_METHOD("get_inverse_mode"), &Terminal::get_inverse_mode);
+	ClassDB::bind_method(D_METHOD("set_inverse_mode", "inverse_mode"), &Terminal::set_inverse_mode);
+	ClassDB::add_property("Terminal", PropertyInfo(Variant::INT, "inverse_mode", PROPERTY_HINT_ENUM, "Invert,Swap"), "set_inverse_mode", "get_inverse_mode");
+
 	// Blink.
 
 	ClassDB::add_property_group("Terminal", "Blink", "blink_");
@@ -52,6 +60,8 @@ Terminal::Terminal()
 
 	blink_on_time = 0.6;
 	blink_off_time = 0.3;
+
+	inverse_mode = InverseMode::INVERSE_MODE_INVERT;
 
 	if (tsm_screen_new(&screen, NULL, NULL))
 	{
@@ -198,6 +208,9 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 	Color bgcol = std::min(attr->bccode, (int8_t)TSM_COLOR_BACKGROUND) >= 0
 		? term->palette[attr->bccode]
 		: Color(attr->br / 255.0f, attr->bg / 255.0f, attr->bb / 255.0f);
+
+	if (attr->inverse && term->inverse_mode == InverseMode::INVERSE_MODE_SWAP)
+		std::swap(fgcol, bgcol);
 
 	// Draw background.
 	term->back_image->set_pixel(posx, posy, bgcol);
@@ -490,4 +503,18 @@ void Terminal::set_blink_off_time(const float time)
 float Terminal::get_blink_off_time() const
 {
 	return blink_off_time;
+}
+
+void Terminal::set_inverse_mode(const int mode) {
+	inverse_mode = static_cast<InverseMode>(mode);
+
+	bool inverse_enabled = inverse_mode == InverseMode::INVERSE_MODE_INVERT;
+	back_material->set_shader_parameter("inverse_enabled", inverse_enabled);
+	fore_material->set_shader_parameter("inverse_enabled", inverse_enabled);
+
+	refresh();
+}
+
+int Terminal::get_inverse_mode() const {
+	return static_cast<int>(inverse_mode);
 }
