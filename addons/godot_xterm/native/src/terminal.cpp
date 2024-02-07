@@ -52,6 +52,7 @@ void Terminal::_bind_methods()
 	// Methods.
 
 	ClassDB::bind_method(D_METHOD("write", "data"), &Terminal::write);
+	ClassDB::bind_method(D_METHOD("get_cursor_pos"), &Terminal::get_cursor_pos);
 }
 
 Terminal::Terminal()
@@ -102,6 +103,10 @@ void Terminal::set_rows(const int p_rows)
 int Terminal::get_rows() const
 {
 	return rows;
+}
+
+Vector2 Terminal::get_cursor_pos() const {
+	return Vector2(tsm_screen_get_cursor_x(screen), tsm_screen_get_cursor_y(screen));
 }
 
 void Terminal::set_max_scrollback(const int p_max_scrollback)
