@@ -332,12 +332,19 @@ void Terminal::update_sizes(bool force)
 	attr_image = Image::create(std::max(cols, 1u), std::max(rows, 1u), false, Image::FORMAT_L8);
 	attr_texture->set_image(attr_image);
 
-	back_material->set_shader_parameter("cols", cols);
-	back_material->set_shader_parameter("rows", rows);
-	back_material->set_shader_parameter("size", size);
-	back_material->set_shader_parameter("cell_size", cell_size);
+	update_shader_parameters(back_material);
+	update_shader_parameters(fore_material);
 
 	refresh();
+}
+
+void Terminal::update_shader_parameters(Ref<ShaderMaterial> material)
+{
+	material->set_shader_parameter("cols", cols);
+	material->set_shader_parameter("rows", rows);
+	material->set_shader_parameter("size", size);
+	material->set_shader_parameter("cell_size", cell_size);
+	material->set_shader_parameter("grid_size", Vector2(cols * cell_size.x, rows * cell_size.y));
 }
 
 void Terminal::initialize_rendering() {
@@ -354,7 +361,7 @@ void Terminal::initialize_rendering() {
 
 	back_material.instantiate();
 	back_material->set_shader(back_shader);
-	back_material->set_shader_parameter("cell_colors", back_texture);
+	back_material->set_shader_parameter("background_colors", back_texture);
 	back_material->set_shader_parameter("attributes", attr_texture);
 
 	back_canvas_item = rs->canvas_item_create();
@@ -404,7 +411,7 @@ void Terminal::update_theme() {
 		tsm_vte_color color = static_cast<tsm_vte_color>(i);
 		palette[color] = get_theme_color(String(COLOR_NAMES[i]));
 	}
-	back_material->set_shader_parameter("background", palette[TSM_COLOR_BACKGROUND]);
+	back_material->set_shader_parameter("background_color", palette[TSM_COLOR_BACKGROUND]);
 
 	// TODO: Default to mono font and handle other styles.
 	font = get_theme_font("normal_font");

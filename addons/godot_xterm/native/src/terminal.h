@@ -97,6 +97,7 @@ namespace godot
     void initialize_rendering();
     void update_theme();
     void update_sizes(bool force = false);
+    void update_shader_parameters(Ref<ShaderMaterial> material);
     void draw_screen();
     void refresh();
     void cleanup_rendering();

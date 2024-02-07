@@ -1,7 +1,5 @@
+// SPDX-FileCopyrightText: 2024 Leroy Hopson <godot-xterm@leroy.nix.nz>
+// SPDX-License-Identifier: MIT
 shader_type canvas_item;
-
-void fragment() {
-	COLOR = texture(TEXTURE, UV);
-	// TODO: Check blink attribute and hide/show using the below.
-	//COLOR = vec4(0);
-}
+#define FOREGROUND
+#include "./common.gdshaderinc"
