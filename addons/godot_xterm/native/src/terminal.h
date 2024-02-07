@@ -46,6 +46,12 @@ namespace godot
     void set_max_scrollback(const int p_max_scrollback);
     int get_max_scrollback() const;
 
+    void set_blink_on_time(const float p_blink_on_time);
+    float get_blink_on_time() const;
+
+    void set_blink_off_time(const float p_blink_off_time);
+    float get_blink_off_time() const;
+
     void write(Variant data);
 
   protected:
@@ -56,6 +62,9 @@ namespace godot
 
     unsigned int cols;
     unsigned int rows;
+
+    float blink_on_time;
+    float blink_off_time;
 
     RenderingServer *rs;
 

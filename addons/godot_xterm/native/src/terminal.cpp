@@ -31,6 +31,18 @@ void Terminal::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_max_scrollback", "max_scrollback"), &Terminal::set_max_scrollback);
 	ClassDB::add_property("Terminal", PropertyInfo(Variant::INT, "max_scrollback"), "set_max_scrollback", "get_max_scrollback");
 
+	// Blink.
+
+	ClassDB::add_property_group("Terminal", "Blink", "blink_");
+	ClassDB::bind_method(D_METHOD("get_blink_on_time"), &Terminal::get_blink_on_time);
+	ClassDB::bind_method(D_METHOD("set_blink_on_time", "time"), &Terminal::set_blink_on_time);
+	ClassDB::add_property("Terminal", PropertyInfo(Variant::FLOAT, "blink_on_time"), "set_blink_on_time", "get_blink_on_time");
+	ClassDB::bind_method(D_METHOD("get_blink_off_time"), &Terminal::get_blink_off_time);
+	ClassDB::bind_method(D_METHOD("set_blink_off_time", "time"), &Terminal::set_blink_off_time);
+	ClassDB::add_property("Terminal", PropertyInfo(Variant::FLOAT, "blink_off_time"), "set_blink_off_time", "get_blink_off_time");
+
+	// Methods.
+
 	ClassDB::bind_method(D_METHOD("write", "data"), &Terminal::write);
 }
 
@@ -38,6 +50,8 @@ Terminal::Terminal()
 {
 	max_scrollback = 1000;
 
+	blink_on_time = 0.6;
+	blink_off_time = 0.3;
 
 	if (tsm_screen_new(&screen, NULL, NULL))
 	{
@@ -454,4 +468,26 @@ void Terminal::cleanup_rendering() {
 	rs->free_rid(char_canvas_item);
 	rs->free_rid(char_material);
 	rs->free_rid(char_shader);
+}
+
+void Terminal::set_blink_on_time(const float time)
+{
+	blink_on_time = time;
+	fore_material->set_shader_parameter("blink_on_time", blink_on_time);
+}
+
+float Terminal::get_blink_on_time() const
+{
+	return blink_on_time;
+}
+
+void Terminal::set_blink_off_time(const float time)
+{
+	blink_off_time = time;
+	fore_material->set_shader_parameter("blink_off_time", blink_off_time);
+}
+
+float Terminal::get_blink_off_time() const
+{
+	return blink_off_time;
 }
