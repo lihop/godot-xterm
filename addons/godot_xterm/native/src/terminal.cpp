@@ -9,6 +9,7 @@
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
+#include <godot_cpp/classes/timer.hpp>
 #include <libtsm.h>
 
 #define SHADERS_DIR "res://addons/godot_xterm/shaders/"
@@ -39,6 +40,16 @@ void Terminal::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_inverse_mode", "inverse_mode"), &Terminal::set_inverse_mode);
 	ClassDB::add_property("Terminal", PropertyInfo(Variant::INT, "inverse_mode", PROPERTY_HINT_ENUM, "Invert,Swap"), "set_inverse_mode", "get_inverse_mode");
 
+	// Bell.
+	ADD_SIGNAL(MethodInfo("bell"));
+	ClassDB::add_property_group("Terminal", "Bell", "bell_");
+	ClassDB::bind_method(D_METHOD("get_bell_muted"), &Terminal::get_bell_muted);
+	ClassDB::bind_method(D_METHOD("set_bell_muted", "muted"), &Terminal::set_bell_muted);
+	ClassDB::add_property("Terminal", PropertyInfo(Variant::BOOL, "bell_muted"), "set_bell_muted", "get_bell_muted");
+	ClassDB::bind_method(D_METHOD("get_bell_cooldown"), &Terminal::get_bell_cooldown);
+	ClassDB::bind_method(D_METHOD("set_bell_cooldown", "time"), &Terminal::set_bell_cooldown);
+	ClassDB::add_property("Terminal", PropertyInfo(Variant::FLOAT, "bell_cooldown"), "set_bell_cooldown", "get_bell_cooldown");
+
 	// Blink.
 
 	ClassDB::add_property_group("Terminal", "Blink", "blink_");
@@ -62,6 +73,12 @@ Terminal::Terminal()
 	blink_on_time = 0.6;
 	blink_off_time = 0.3;
 
+	bell_muted = false;
+	bell_cooldown = 0;
+	bell_timer = memnew(Timer);
+	bell_timer->set_one_shot(true);
+	add_child(bell_timer, false, INTERNAL_MODE_FRONT);
+
 	inverse_mode = InverseMode::INVERSE_MODE_INVERT;
 
 	if (tsm_screen_new(&screen, NULL, NULL))
@@ -74,6 +91,7 @@ Terminal::Terminal()
 	{
 		ERR_PRINT("Failed to create tsm vte.");
 	}
+	tsm_vte_set_bell_cb(vte, &Terminal::_bell_cb, this);
 
 	initialize_rendering();
 	update_theme();
@@ -250,6 +268,18 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 	);
 
 	return OK;
+}
+
+void Terminal::_bell_cb(struct tsm_vte *vte, void *data)
+{
+	Terminal *term = static_cast<Terminal *>(data);
+
+	if (!term->bell_muted && term->bell_timer->is_stopped()) {
+		term->emit_signal("bell");
+
+		if (term->bell_cooldown > 0)
+			term->bell_timer->start(term->bell_cooldown);
+	}
 }
 
 bool Terminal::_set(const StringName &property, const Variant &value)
@@ -503,6 +533,27 @@ void Terminal::cleanup_rendering() {
 	rs->free_rid(char_canvas_item);
 	rs->free_rid(char_material);
 	rs->free_rid(char_shader);
+}
+
+void Terminal::set_bell_muted(const bool muted) {
+	bell_muted = muted;
+}
+
+bool Terminal::get_bell_muted() const {
+	return bell_muted;
+}
+
+void Terminal::set_bell_cooldown(const double time) {
+	bell_cooldown = time;
+	bell_timer->stop();
+
+	double remaining_time = std::max(0.0, bell_cooldown - bell_timer->get_time_left());
+	if (remaining_time > 0)
+		bell_timer->start(remaining_time);
+}
+
+double Terminal::get_bell_cooldown() const {
+	return bell_cooldown;
 }
 
 void Terminal::set_blink_on_time(const float time)

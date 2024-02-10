@@ -9,6 +9,7 @@
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
+#include <godot_cpp/classes/timer.hpp>
 #include <libtsm.h>
 
 namespace godot
@@ -62,6 +63,12 @@ namespace godot
     void set_max_scrollback(const int p_max_scrollback);
     int get_max_scrollback() const;
 
+    void set_bell_muted(const bool p_bell_muted);
+    bool get_bell_muted() const;
+
+    void set_bell_cooldown(const double p_bell_cooldown);
+    double get_bell_cooldown() const;
+
     void set_blink_on_time(const float p_blink_on_time);
     float get_blink_on_time() const;
 
@@ -96,6 +103,11 @@ namespace godot
     PackedByteArray response;
     static void _write_cb(struct tsm_vte *vte, const char *u8, size_t len,
                           void *data);
+
+    bool bell_muted;
+    double bell_cooldown;
+    Timer* bell_timer;
+    static void _bell_cb(struct tsm_vte *vte, void *data);
 
     static int _draw_cb(struct tsm_screen *con, uint64_t id, const uint32_t *ch,
                         size_t len, unsigned int width, unsigned int posx,
