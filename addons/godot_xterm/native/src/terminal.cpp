@@ -120,7 +120,7 @@ int Terminal::get_max_scrollback() const
 	return max_scrollback;
 }
 
-void Terminal::write(Variant data)
+String Terminal::write(const Variant data)
 {
 	PackedByteArray bytes;
 
@@ -133,16 +133,16 @@ void Terminal::write(Variant data)
 		bytes = data;
 		break;
 	default:
-		ERR_FAIL_MSG("Data must be a String or PackedByteArray.");
-		return;
+		ERR_FAIL_V_MSG("", "Data must be a String or PackedByteArray.");
 	}
 
-	if (bytes.is_empty())
-		return;
+	if (bytes.is_empty()) return "";
 
+	response.clear();
 	tsm_vte_input(vte, (char *)bytes.ptr(), bytes.size());
-
 	queue_redraw();
+
+	return response.get_string_from_utf8();
 }
 
 void Terminal::_notification(int what)
@@ -176,6 +176,13 @@ void Terminal::_notification(int what)
 void Terminal::_write_cb(tsm_vte *vte, const char *u8, size_t len, void *data)
 {
 	Terminal *term = static_cast<Terminal *>(data);
+
+	if (len > 0) {
+		size_t old_size = term->response.size();
+		term->response.resize(old_size + len);
+		uint8_t *dest = term->response.ptrw() + old_size;
+		memcpy(dest, u8, len);
+	}
 }
 
 int Terminal::_draw_cb(struct tsm_screen *con,

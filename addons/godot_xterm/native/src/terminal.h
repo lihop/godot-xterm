@@ -71,7 +71,7 @@ namespace godot
     void set_inverse_mode(const int mode);
     int get_inverse_mode() const;
 
-    void write(Variant data);
+    String write(const Variant data);
 
   protected:
     static void _bind_methods();
@@ -93,8 +93,10 @@ namespace godot
     tsm_vte *vte;
     tsm_age_t framebuffer_age;
 
+    PackedByteArray response;
     static void _write_cb(struct tsm_vte *vte, const char *u8, size_t len,
                           void *data);
+
     static int _draw_cb(struct tsm_screen *con, uint64_t id, const uint32_t *ch,
                         size_t len, unsigned int width, unsigned int posx,
                         unsigned int posy, const struct tsm_screen_attr *attr,
