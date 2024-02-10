@@ -28,7 +28,7 @@ namespace godot
     };
 
   public:
-    enum AttrFlags
+    enum AttrFlag
     {
       INVERSE = 1 << 0,
       BLINK = 1 << 1,

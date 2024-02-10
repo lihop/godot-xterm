@@ -200,9 +200,9 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 	// Update attributes.
 	int attr_flags = 0;
 	if (attr->inverse)
-		attr_flags |= AttrFlags::INVERSE;
+		attr_flags |= AttrFlag::INVERSE;
 	if (attr->blink)
-		attr_flags |= AttrFlags::BLINK;
+		attr_flags |= AttrFlag::BLINK;
 	term->attr_image->set_pixel(posx, posy, Color(attr_flags / 255.0f, 0, 0, 0));
 
 	// Colors.
