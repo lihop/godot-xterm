@@ -507,8 +507,8 @@ void Terminal::draw_screen() {
 		rs->viewport_set_clear_mode(viewport, RenderingServer::ViewportClearMode::VIEWPORT_CLEAR_ONLY_NEXT_FRAME);
 
 		rs->canvas_item_clear(back_canvas_item);
-		rs->canvas_item_add_rect(back_canvas_item, rect, palette[TSM_COLOR_BLACK]);
-		back_image->fill(palette[TSM_COLOR_BLACK]);
+		rs->canvas_item_add_rect(back_canvas_item, rect, palette[TSM_COLOR_BACKGROUND]);
+		back_image->fill(palette[TSM_COLOR_BACKGROUND]);
 
 		rs->canvas_item_clear(fore_canvas_item);
 		rs->canvas_item_add_texture_rect(fore_canvas_item, rect, rs->viewport_get_texture(viewport));
