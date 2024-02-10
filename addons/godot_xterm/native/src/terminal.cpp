@@ -223,15 +223,14 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 		return OK;
 	}
 
-	// Update attributes.
+	// Collect attributes.
 	int attr_flags = 0;
 	if (attr->inverse)
 		attr_flags |= AttrFlag::INVERSE;
 	if (attr->blink)
 		attr_flags |= AttrFlag::BLINK;
-	term->attr_image->set_pixel(posx, posy, Color(attr_flags / 255.0f, 0, 0, 0));
 
-	// Colors.
+	// Collect colors.
 	Color fgcol = std::min(attr->fccode, (int8_t)TSM_COLOR_FOREGROUND) >= 0
 		? term->palette[attr->fccode]
 		: Color(attr->fr / 255.0f, attr->fg / 255.0f, attr->fb / 255.0f);
@@ -243,8 +242,11 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 	if (attr->inverse && term->inverse_mode == InverseMode::INVERSE_MODE_SWAP)
 		std::swap(fgcol, bgcol);
 
-	// Draw background.
-	term->back_image->set_pixel(posx, posy, bgcol);
+	// Update images (accounting for ultra-wide characters).
+	for (int i = 0; i < width && (posx + i) < term->cols; i++) {
+		term->back_image->set_pixel(posx + i, posy, bgcol);
+		term->attr_image->set_pixel(posx + i, posy, Color(attr_flags / 255.0f, 0, 0, 0));
+	}
 
 	if (len < 1)
 	{	// No foreground to draw.
