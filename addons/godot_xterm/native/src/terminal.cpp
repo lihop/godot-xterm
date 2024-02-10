@@ -233,12 +233,11 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 	term->rs->canvas_item_add_rect(term->char_canvas_item, cell_rect, Color(1, 1, 1, 0));
 
 	FontType font_type = static_cast<FontType>((attr->bold ? 1 : 0) | (attr->italic ? 2 : 0));
-	Ref<Font> font = term->fonts[font_type];
 
-	font->draw_char(
+	term->fonts[font_type]->draw_char(
 		term->char_canvas_item,
 		Vector2i(cell_position.x, cell_position.y + term->font_offset),
-		String((char *)ch).unicode_at(0),
+		static_cast<uint64_t>(*ch),
 		term->font_size,
 		fgcol
 	);
