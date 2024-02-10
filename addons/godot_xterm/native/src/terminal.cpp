@@ -158,6 +158,7 @@ void Terminal::_notification(int what)
 	case NOTIFICATION_THEME_CHANGED:
 	{
 		update_theme();
+		[[fallthrough]];
 	}
 	case NOTIFICATION_RESIZED:
 	{
