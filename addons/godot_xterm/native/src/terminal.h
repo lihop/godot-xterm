@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include<map>
+
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
@@ -25,6 +27,13 @@ namespace godot
 
     static constexpr const char *FONT_TYPES[] = {
         "normal_font", "bold_font", "italics_font", "bold_italics_font",
+    };
+
+    enum FontType {
+      NORMAL,
+      BOLD,
+      ITALICS,
+      BOLD_ITALICS,
     };
 
   public:
@@ -92,8 +101,9 @@ namespace godot
                         tsm_age_t age, void *data);
 
     PackedColorArray palette;
-    Ref<Font> font;
+    std::map<FontType, Ref<Font>> fonts;
     int32_t font_size;
+    double font_offset;
     Vector2 size;
     Vector2 cell_size;
 

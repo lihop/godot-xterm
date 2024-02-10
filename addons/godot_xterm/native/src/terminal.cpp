@@ -232,15 +232,16 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 	// Erase any previous character in the cell.
 	term->rs->canvas_item_add_rect(term->char_canvas_item, cell_rect, Color(1, 1, 1, 0));
 
-	term->font->draw_char(
+	FontType font_type = static_cast<FontType>((attr->bold ? 1 : 0) | (attr->italic ? 2 : 0));
+	Ref<Font> font = term->fonts[font_type];
+
+	font->draw_char(
 		term->char_canvas_item,
-		Vector2i(cell_position.x, cell_position.y + term->font->get_height(
-																		  term->font_size /
-																		  1.25)),
+		Vector2i(cell_position.x, cell_position.y + term->font_offset),
 		String((char *)ch).unicode_at(0),
 		term->font_size,
 		fgcol
-		);
+	);
 
 	return OK;
 }
@@ -347,9 +348,14 @@ void Terminal::update_sizes(bool force)
 	uint prev_rows = rows;
 
 	size = get_size();
+
+	Ref<Font> font = fonts[FontType::NORMAL];
 	font_size = get_theme_font_size("font_size");
-	cell_size = get_theme_font("normal_font")->get_string_size(
-		"W", HORIZONTAL_ALIGNMENT_LEFT, -1, get_theme_font_size("font_size"));
+	font_offset = font->get_height(font_size / 1.25);
+
+	cell_size = font->get_string_size(
+		"W", HORIZONTAL_ALIGNMENT_LEFT, -1, font_size);
+
 	cols = floor(size.x / cell_size.x);
 	rows = floor(size.y / cell_size.y);
 
@@ -439,6 +445,7 @@ void Terminal::initialize_rendering() {
 }
 
 void Terminal::update_theme() {
+	// Update colors.
 	palette.resize(TSM_COLOR_NUM);
 	for (int i = 0; i < TSM_COLOR_NUM; i++) {
 		tsm_vte_color color = static_cast<tsm_vte_color>(i);
@@ -446,8 +453,11 @@ void Terminal::update_theme() {
 	}
 	back_material->set_shader_parameter("background_color", palette[TSM_COLOR_BACKGROUND]);
 
-	// TODO: Default to mono font and handle other styles.
-	font = get_theme_font("normal_font");
+	// Update fonts.
+	for (int i = FontType::NORMAL; i <= FontType::BOLD_ITALICS; i++) {
+		FontType type = static_cast<FontType>(i);
+		fonts[type] = has_theme_font(FONT_TYPES[type]) ? get_theme_font(FONT_TYPES[type]) : get_theme_font(FONT_TYPES[FontType::NORMAL]);
+	}
 
 	refresh();
 }
