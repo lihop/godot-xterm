@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [ubuntu-22.04]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Import assets
         uses: ./.github/actions/import-assets
         with:
@@ -136,7 +136,7 @@ jobs:
           scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} generate_bindings=yes -j2
       - name: Setup cmake
         if: steps.cache-submodules.outputs.cache-hit != 'true'
-        uses: jwlawson/actions-setup-cmake@v1
+        uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: "3.23.2"
           use-32bit: ${{ matrix.bits == 32 && matrix.os == 'windows-2022' }}
@@ -198,7 +198,7 @@ jobs:
       - name: Import assets
         uses: ./.github/actions/import-assets
       - name: Export HTML5
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           command: godot --no-window --export HTML5
           retry_on: error
@@ -325,7 +325,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.9
           cache: "pip"
