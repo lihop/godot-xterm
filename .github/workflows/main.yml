@@ -300,7 +300,7 @@ jobs:
       - name: Check that archive only contains addons/godot_xterm directory
         run: |
           shopt -s nullglob dotglob
-          ls -lR /tmp/unzipped
+          ls -laR /tmp/unzipped
           files=(/tmp/unzipped/*)
           if [ ${#files[@]} -ne 1 ]; then
             echo "Wrong number of files in archive (${#files[@]}) expected 1."
