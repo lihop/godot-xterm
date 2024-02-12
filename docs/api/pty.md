@@ -10,7 +10,7 @@ permalink: /api/pty
 
 **Inherits:** [Node] < [Object]
 
-*Linux and macOS only.*
+_Linux and macOS only._
 
 Node for forking processes (e.g. bash, nodejs, python) with pseudoterminal file descriptors.
 Can be used with the [Terminal] node to get an actual shell.
@@ -18,35 +18,31 @@ Can be used with the [Terminal] node to get an actual shell.
 Not currently supported on Windows, but it could be in the future using [ConPTY](https://docs.microsoft.com/en-us/windows/console) or [WinPTY](https://github.com/rprichard/winpty).
 See issue [\#25](https://github.com/lihop/godot-xterm/issues/25).
 
-
 ## Overview
 
 ![PTY Diagram](../media/pty_diagram.png)
 <sub>"PTY Diagram" is a derivative of [Termios-script-diagram.svg](https://commons.wikimedia.org/wiki/File:Termios-script-diagram.svg) by [Krishnavedala](https://en.wikipedia.org/wiki/User:Krishnavedala?rdfrom=commons:User:Krishnavedala), used under [CC0](https://creativecommons.org/share-your-work/public-domain/cc0/).
 
-
 ## Properties
 
 | Type         | Name                                 | Default                                                |
-|--------------|--------------------------------------|--------------------------------------------------------|
+| ------------ | ------------------------------------ | ------------------------------------------------------ |
 | [NodePath]   | [terminal_path](#prop-terminal_path) | None                                                   |
 | [int]        | [cols](#prop-cols)                   | `80`                                                   |
 | [int]        | [rows](#prop-rows)                   | `24`                                                   |
 | [Dictionary] | [env](#prop-env)                     | `{ COLORTERM = "truecolor", TERM = "xterm-256color" }` |
 | [bool]       | [use_os_env](#prop-use_os_env)       | `true`                                                 |
 
-
 ## Methods
 
 | Returns | Signature                                                                                                                           |
-|---------|-------------------------------------------------------------------------------------------------------------------------------------|
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | [Error] | [fork](#mthd-fork) **(** [String] file=`$SHELL`, [PoolStringArray] args=[], [String] cwd=`$PWD`, [int] cols=80, [int] rows=24 **)** |
 | void    | [kill](#mthd-kill) **(** [int] signum **)**                                                                                         |
 | [Error] | [open](#mthd-open) **(** [int] cols=80, [int] rows=24 **)**                                                                         |
-| void    | [resize](#mthd-resize) **(** [int] cols, [int] rows **)** 	                                                                        |
+| void    | [resize](#mthd-resize) **(** [int] cols, [int] rows **)**                                                                           |
 | void    | [resizev](#mthd-resizev) **(** [Vector2] size **)**                                                                                 |
 | void    | [write](#mthd-write) **(** [String]\|[PoolByteArray] data **)**                                                                     |
-
 
 ## Signals
 
@@ -77,28 +73,27 @@ See issue [\#25](https://github.com/lihop/godot-xterm/issues/25).
 - **SIGALRM** = 14 --- Alarm clock.
 - **SIGTERM** = 15 --- Termination signal.
 
-
 ## Property Descriptions
 
 ### <a name="prop-terminal_path" /> [NodePath] **terminal_path**
 
-  |           |                          |
-  |-----------|--------------------------|
-  | *Default* | None                     |
-  | *Setter*  | set_terminal_path(value) |
-  | *Getter*  | None                     |
+|           |                          |
+| --------- | ------------------------ |
+| _Default_ | None                     |
+| _Setter_  | set_terminal_path(value) |
+| _Getter_  | None                     |
 
-  [NodePath] to a [Terminal]. Setting this path will automatically connect the appropriate signals of both nodes for standard operation. It will also disconnected the signals of the previously set terminal, if any.
+[NodePath] to a [Terminal]. Setting this path will automatically connect the appropriate signals of both nodes for standard operation. It will also disconnected the signals of the previously set terminal, if any.
 
 ---
 
 - <a name="prop-cols" /> [int] **cols**
 
-  |           |                          |
-  |-----------|--------------------------|
-  | *Default* | `80`                     |
-  | *Setter*  | set_cols(value)          |
-  | *Getter*  | None                     |
+  |           |                 |
+  | --------- | --------------- |
+  | _Default_ | `80`            |
+  | _Setter_  | set_cols(value) |
+  | _Getter_  | None            |
 
   The column size in characters.
 
@@ -106,11 +101,11 @@ See issue [\#25](https://github.com/lihop/godot-xterm/issues/25).
 
 - <a name="prop-rows" /> [int] **rows**
 
-  |           |                          |
-  |-----------|--------------------------|
-  | *Default* | `24`                     |
-  | *Setter*  | set_rows(value)          |
-  | *Getter*  | None                     |
+  |           |                 |
+  | --------- | --------------- |
+  | _Default_ | `24`            |
+  | _Setter_  | set_rows(value) |
+  | _Getter_  | None            |
 
   The row size in characters.
 
@@ -119,10 +114,10 @@ See issue [\#25](https://github.com/lihop/godot-xterm/issues/25).
 - <a name="prop-env" /> [Dictionary] **env**
 
   |           |                                                        |
-  |-----------|--------------------------------------------------------|
-  | *Default* | `{ COLORTERM = "truecolor", TERM = "xterm-256color" }` |
-  | *Setter*  | None                                                   |
-  | *Getter*  | None                                                   |
+  | --------- | ------------------------------------------------------ |
+  | _Default_ | `{ COLORTERM = "truecolor", TERM = "xterm-256color" }` |
+  | _Setter_  | None                                                   |
+  | _Getter_  | None                                                   |
 
   Environment variables to be set for the child program.
 
@@ -131,13 +126,12 @@ See issue [\#25](https://github.com/lihop/godot-xterm/issues/25).
 - <a name="prop-use_os_env" /> [bool] **use_os_env**
 
   |           |        |
-  |-----------|--------|
-  | *Default* | `true` |
-  | *Setter*  | None   |
-  | *Getter*  | None   |
+  | --------- | ------ |
+  | _Default_ | `true` |
+  | _Setter_  | None   |
+  | _Getter_  | None   |
 
   If `true` the environment variables from `env` will be merged with the environment variables of the current program (i.e. Godot), with the variables from `env` taking precedence over the environment variables of the current program.
-
 
 ## Method Descriptions
 
@@ -183,7 +177,6 @@ See issue [\#25](https://github.com/lihop/godot-xterm/issues/25).
 - <a name="mthd-write" /> void **write** **(** [String] \| [PoolByteArray] data **)**
 
   Writes data to the pseudoterminal master device.
-
 
 [Dictionary]: https://docs.godotengine.org/en/stable/classes/class_dictionary.html
 [Error]: https://docs.godotengine.org/en/stable/classes/class_%40globalscope.html#enum-globalscope-error
