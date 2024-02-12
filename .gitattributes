@@ -28,6 +28,7 @@
 /icon.png export-ignore
 /icon.png.import export-ignore
 /.import export-ignore
+/Justfile export-ignore
 /LICENSE.md export-ignore
 /misc export-ignore
 /.pre-commit-config.yaml export-ignore
