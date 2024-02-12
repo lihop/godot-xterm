@@ -22,7 +22,7 @@ jobs:
         target: [release, debug]
         bits: [64, 32]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Cache submodules
@@ -80,7 +80,7 @@ jobs:
           - platform: osx
             bits: 32 # Only 64-bit supported on macOS.
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Cache submodules
@@ -175,7 +175,7 @@ jobs:
     needs: [build_docker, build_native]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
@@ -239,7 +239,7 @@ jobs:
           - os: macos-12
             bits: 32
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
@@ -272,7 +272,7 @@ jobs:
     name: "Check Archive"
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Create git archive
@@ -306,7 +306,7 @@ jobs:
     name: "Check Code Format"
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: 3.9
