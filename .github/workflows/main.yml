@@ -52,7 +52,7 @@ jobs:
         working-directory: addons/godot_xterm/native
         run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e BITS=${{ matrix.bits }} libgodot-xterm-linux
       - name: Upload binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: libgodot-xterm-${{ matrix.target }}
           path: |
@@ -162,7 +162,7 @@ jobs:
           cd addons/godot_xterm/native
           scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} -j2
       - name: Upload binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: libgodot-xterm-${{ matrix.target }}
           path: |
@@ -212,7 +212,7 @@ jobs:
           npx serve ../../docs/demo -p 3000 &
           npx cypress run
       - name: Upload cypress artifacts (on failure)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: cypress-artifacts
@@ -220,7 +220,7 @@ jobs:
             test/html5/cypress/screenshots
             test/html5/cypress/videos
       - name: Upload export
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: html5-demo
           path: docs/demo
