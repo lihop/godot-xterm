@@ -320,16 +320,9 @@ jobs:
             exit 1
           fi
 
-  check-code-format:
-    name: "Check Code Format"
+  check-pre-commit:
+    name: "Check Pre-Commit"
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.9
-          cache: "pip"
-      - name: Install python dependencies
-        run: pip install -r requirements.txt
-      - name: GDScript format check
-        run: gdformat -c .
+      - uses: pre-commit/action@v3.0.1

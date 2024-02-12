@@ -24,9 +24,9 @@ enum SelectionMode {
 	POINTER,
 }
 
-@export var update_mode: UpdateMode = UpdateMode.AUTO :
+@export var update_mode: UpdateMode = UpdateMode.AUTO:
 	get:
-		return update_mode # TODOConverter40 Non existent get function 
+		return update_mode  # TODOConverter40 Non existent get function
 	set(p_update_mode):
 		set_update_mode(p_update_mode)
 
@@ -113,9 +113,9 @@ func _ready():
 	_update_theme()
 
 	_native_terminal.update_mode = update_mode
-	_native_terminal.connect("data_sent",Callable(self,"_on_data_sent"))
-	_native_terminal.connect("key_pressed",Callable(self,"_on_key_pressed"))
-	_native_terminal.connect("size_changed",Callable(self,"_on_size_changed"))
+	_native_terminal.connect("data_sent", Callable(self, "_on_data_sent"))
+	_native_terminal.connect("key_pressed", Callable(self, "_on_key_pressed"))
+	_native_terminal.connect("size_changed", Callable(self, "_on_size_changed"))
 
 	_viewport.size = size
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
@@ -123,12 +123,12 @@ func _ready():
 	_screen.set_anchors_preset(PRESET_VCENTER_WIDE)
 	_screen.texture = _viewport.get_texture()
 
-	_native_terminal.connect("bell",Callable(self,"_on_bell"))
+	_native_terminal.connect("bell", Callable(self, "_on_bell"))
 	_bell_timer.one_shot = true
 	add_child(_bell_timer)
 
 	_selection_timer.wait_time = 0.05
-	_selection_timer.connect("timeout",Callable(self,"_on_selection_held"))
+	_selection_timer.connect("timeout", Callable(self, "_on_selection_held"))
 
 	add_child(_viewport)
 	add_child(_screen)
@@ -140,7 +140,7 @@ func _ready():
 	# we make all the draw_* calls caused by writing. We need to use signals
 	# here rather than yield otherwise we will sometimes get a "Resumed
 	# function after yield but class instance is gone" error.
-	RenderingServer.connect("frame_pre_draw",Callable(self,"_flush"))
+	RenderingServer.connect("frame_pre_draw", Callable(self, "_flush"))
 
 
 func _update_theme():
@@ -176,7 +176,7 @@ func _refresh():
 
 
 func _gui_input(event):
-	_native_terminal.__gui_input(event) # FIXME: use _gui_input rather than __gui_input.
+	_native_terminal.__gui_input(event)  # FIXME: use _gui_input rather than __gui_input.
 
 	if event is InputEventKey and event.pressed:
 		# Return to bottom of scrollback buffer if we scrolled up. Ignore modifier
@@ -243,7 +243,10 @@ func _handle_selection(event: InputEventMouse):
 
 
 func _on_selection_held() -> void:
-	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or _selecting_mode == SelectionMode.NONE:
+	if (
+		not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+		or _selecting_mode == SelectionMode.NONE
+	):
 		if copy_on_selection:
 			var selection = _native_terminal.copy_selection()
 			# TODO:godot4
