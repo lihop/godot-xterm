@@ -181,7 +181,7 @@ jobs:
         with:
           export-templates: true
       - name: Install binary build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: libgodot-xterm-release
           path: addons/godot_xterm/native/bin
@@ -246,7 +246,7 @@ jobs:
           version: ${{ matrix.godot_version }}
           bits: ${{ matrix.bits }}
       - name: Install binary build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: libgodot-xterm-release
           path: addons/godot_xterm/native/bin
