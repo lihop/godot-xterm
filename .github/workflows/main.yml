@@ -200,7 +200,7 @@ jobs:
           timeout_minutes: 5
           max_attempts: 6
       - name: NPM cache
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           cache: "npm"
           cache-dependency-path: test/html5/package-lock.json
