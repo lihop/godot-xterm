@@ -1,4 +1,4 @@
-# Git hooks for GodotXterm 
+# Git hooks for GodotXterm
 
 This folder contains git hooks meant to be installed locally by GodotXterm
 contributors to make sure they comply with our requirements.

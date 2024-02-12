@@ -30,6 +30,7 @@
 /.import export-ignore
 /LICENSE.md export-ignore
 /misc export-ignore
+/.pre-commit-config.yaml export-ignore
 /project.godot export-ignore
 /README.md export-ignore
 /requirements.txt export-ignore

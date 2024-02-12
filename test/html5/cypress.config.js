@@ -1,5 +1,5 @@
 const { defineConfig } = require("cypress");
-const getCompareSnapshotsPlugin = require('cypress-image-diff-js/dist/plugin');
+const getCompareSnapshotsPlugin = require("cypress-image-diff-js/dist/plugin");
 
 module.exports = defineConfig({
   e2e: {

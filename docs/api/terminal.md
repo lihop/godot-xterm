@@ -10,13 +10,13 @@ permalink: /api/terminal
 
 **Inherits:** [Control] < [CanvasItem] < [Node] < [Object]
 
-A Terminal emulator Control node. 
+A Terminal emulator Control node.
 
 Supports ANSI and (some) XTerm Control Sequences which can be used to do things such as clear the screen, move the cursor, change printed text color, ring a bell, and so on.
 For an exhaustive list of terminal control sequences (not all of which are supported by GodotXterm) see ["XTerm Control Sequences"](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html).
 
+## Overview
 
-## Overview 
 ![Terminal Flow Diagram](../media/flow_diagram.svg)
 <sub>"Terminal Flow Diagram" is a derivative of ["computer keyboard 2"](https://openclipart.org/detail/2396/computer-keyboard-2) and ["monitor"](https://openclipart.org/detail/1637/monitor), from U.S. patent drawings, uploaded by [johnny_automatic](https://openclipart.org/artist/johnny_automatic), used under [CC0](https://creativecommons.org/share-your-work/public-domain/cc0/).<sub/>
 
@@ -40,29 +40,26 @@ In the other direction, data can be sent to the terminal. This corresponds to th
 The input from (3) is then interpreted by the terminal state machine and drawn to the screen.
 For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal, then it would draw a green colored capital letter 'A' on the screen.
 
-
 ## Properties
 
 | Type         | Name                                 | Default |
-|--------------|--------------------------------------|---------|
+| ------------ | ------------------------------------ | ------- |
 | [bool]       | [bell_muted](#prop-bell_muted)       | `false` |
 | [float]      | [bell_cooldown](#prop-bell_cooldown) | `0.1`   |
-| [int]        | [cols](#prop-cols) *(deprecated)*    | `2`     |
-| [int]        | [rows](#prop-rows) *(deprecated)*    | `2`     |
+| [int]        | [cols](#prop-cols) _(deprecated)_    | `2`     |
+| [int]        | [rows](#prop-rows) _(deprecated)_    | `2`     |
 | [UpdateMode] | [update_mode](#prop-update_mode)     | `AUTO`  |
-
 
 ## Methods
 
 | Returns  | Signature                                                         |
-|----------|-------------------------------------------------------------------|
+| -------- | ----------------------------------------------------------------- |
 | void     | [clear](#mthd-clear) **()**                                       |
 | [String] | [copy_all](#mthd-copy_all) **()**                                 |
 | [String] | [copy_selection](#mthd-copy_selection) **()**                     |
 | [int]    | [get_cols](#mthd-get_cols) **()**                                 |
 | [int]    | [get_rows](#mthd-get_rows) **()**                                 |
 | void     | [write](#mthd-write) **(** [String] \| [PoolByteArray] data **)** |
-
 
 ## Signals
 
@@ -90,46 +87,43 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 
 - <a name="sgnl-size_changed"> **size_changed** **(** [Vector2] new_size **)**
 
-  Emitted when the terminal's size changes, typically in response to its `rect_size` changing. 
+  Emitted when the terminal's size changes, typically in response to its `rect_size` changing.
   `new_size.x` will be the number of columns and `new_size.y` will be the number of rows.
   This information should be forwarded to a pseudoterminal, if it is connected, so that it can update its size accordingly.
-
 
 ## Enumerations
 
 <a name="enum-update_mode" /> enum **UpdateMode**:
 
-- **DISABLED**       = **0** --- The terminal's `update()` method will never be called. No new cells will be drawn.
-- **AUTO**           = **1** --- Only changed cells will be drawn after `update()` is called, but will switch to **ALL_NEXT_FRAME** when mass redraws are required.
-- **ALL**            = **2** --- Every cell will be drawn on every `update()` call.
+- **DISABLED** = **0** --- The terminal's `update()` method will never be called. No new cells will be drawn.
+- **AUTO** = **1** --- Only changed cells will be drawn after `update()` is called, but will switch to **ALL_NEXT_FRAME** when mass redraws are required.
+- **ALL** = **2** --- Every cell will be drawn on every `update()` call.
 - **ALL_NEXT_FRAME** = **3** --- Draws every cell afetr the next `update()` call, then returns to **AUTO**.
 
-
 ## Property Descriptions
-
 
 - <a name="prop-cols" /> [int] **cols**
 
   |           |            |
-  |-----------|------------|
-  | *Default* | `2`        |
-  | *Setter*  | None       |
-  | *Getter*  | get_cols() |
+  | --------- | ---------- |
+  | _Default_ | `2`        |
+  | _Setter_  | None       |
+  | _Getter_  | get_cols() |
 
-  *Deprecated*. This property is deprecated and will be removed in a future version.
+  _Deprecated_. This property is deprecated and will be removed in a future version.
   Please use [get_cols](#mthd-get_cols) instead.
 
 ---
 
-- <a name="prop-rows" /> [int] **rows** ***Deprecated***
+- <a name="prop-rows" /> [int] **rows** **_Deprecated_**
 
   |           |            |
-  |-----------|------------|
-  | *Default* | `2`        |
-  | *Setter*  | None       |
-  | *Getter*  | get_rows() |
-  
-  *Deprecated*. This property is deprecated and will be removed in a future version.
+  | --------- | ---------- |
+  | _Default_ | `2`        |
+  | _Setter_  | None       |
+  | _Getter_  | get_rows() |
+
+  _Deprecated_. This property is deprecated and will be removed in a future version.
   Please use the [get_rows](#mthd-get_rows) instead.
 
 ---
@@ -137,10 +131,10 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 - <a name="prop-bell_muted" /> [bool] **bell_muted**
 
   |           |         |
-  |-----------|---------|
-  | *Default* | `false` |
-  | *Setter*  | None    |
-  | *Getter*  | None    | 
+  | --------- | ------- |
+  | _Default_ | `false` |
+  | _Setter_  | None    |
+  | _Getter_  | None    |
 
   If muted, no [`bell`](#sgnl-bell) signal will be emitted when the bell character (`"\u0007"`) is written to the terminal.
 
@@ -149,10 +143,10 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 - <a name="prop-bell_cooldown" /> [float] **bell_cooldown**
 
   |           |       |
-  |-----------|-------|
-  | *Default* | `0.1` |
-  | *Setter*  | None  |
-  | *Getter*  | None  |
+  | --------- | ----- |
+  | _Default_ | `0.1` |
+  | _Setter_  | None  |
+  | _Getter_  | None  |
 
   The minimum amount of time to wait before emitting another [`bell`](#sgnl-bell) signal on subsequent writes of the bell character.
   Writing the bell character too frequently, for example by running the command `while true; do echo -e "\a"; done`,
@@ -164,16 +158,15 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 - <a name="prop-update_mode" /> [UpdateMode] **update_mode**
 
   |           |                        |
-  |-----------|------------------------|
-  | *Default* | `AUTO`                 |
-  | *Setter*  | set_update_mode(value) |
-  | *Getter*  | None                   |
+  | --------- | ---------------------- |
+  | _Default_ | `AUTO`                 |
+  | _Setter_  | set_update_mode(value) |
+  | _Getter_  | None                   |
 
   Determines which cells of the terminal will be updated when its state changes.
   By default `AUTO` will only update cells that changed, but will update all cells (i.e. the entire screen) on major changes,
   such as terminal resize.
   If you are having trouble with the terminal not updating correctly or exhibiting artifacts, you can try remedying this by setting `update_mode` to `ALL`, however, this will have a negative impact on performance.
-
 
 ## Method Descriptions
 
@@ -218,6 +211,7 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
   Typically it would be connected to the output of a [PTY]'s [`data_received()`](/api/pty#sgnl-data_received) signal.
 
   Example:
+
   ```gdscript
   $Terminal.write("Hello World")
   $Terminal.write("Hello World".to_utf8())

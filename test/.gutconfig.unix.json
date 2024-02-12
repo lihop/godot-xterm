@@ -1,7 +1,5 @@
 {
-  "dirs": [
-    "res://test/platform/unix"
-  ],
+  "dirs": ["res://test/platform/unix"],
   "prefix": "",
   "suffix": ".test.gd",
   "include_subdirs": true,

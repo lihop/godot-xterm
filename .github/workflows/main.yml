@@ -1,4 +1,4 @@
-name: 'Build and Test'
+name: "Build and Test"
 
 on:
   push:
@@ -14,13 +14,13 @@ env:
 
 jobs:
   build_docker:
-    name: 'Build Docker (linux, ${{ matrix.target }}, ${{ matrix.bits }})'
+    name: "Build Docker (linux, ${{ matrix.target }}, ${{ matrix.bits }})"
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        target: [ release, debug ]
-        bits: [ 64, 32 ]
+        target: [release, debug]
+        bits: [64, 32]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -59,14 +59,14 @@ jobs:
             addons/godot_xterm/native/bin/*.so
 
   build_native:
-    name: 'Build Native'
+    name: "Build Native"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [ javascript, osx, windows ]
-        target: [ release, debug ]
-        bits: [ 64, 32 ]
+        platform: [javascript, osx, windows]
+        target: [release, debug]
+        bits: [64, 32]
         include:
           - platform: javascript
             os: ubuntu-22.04
@@ -129,7 +129,7 @@ jobs:
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         uses: jwlawson/actions-setup-cmake@v1
         with:
-          cmake-version: '3.23.2'
+          cmake-version: "3.23.2"
           use-32bit: ${{ matrix.bits == 32 && matrix.os == 'windows-2022' }}
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
@@ -171,70 +171,70 @@ jobs:
             addons/godot_xterm/native/bin/*.dll
 
   html5_export:
-    name: 'HTML5 Export'
-    needs: [ build_docker, build_native ]
+    name: "HTML5 Export"
+    needs: [build_docker, build_native]
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup Godot
-      uses: lihop/setup-godot@v2
-      with:
-        export-templates: true
-    - name: Install binary build artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: libgodot-xterm-release
-        path: addons/godot_xterm/native/bin
-    - name: Import assets
-      uses: nick-fields/retry@v2
-      with:
-        command: godot --editor .github/import_assets.tscn
-        retry_on: error
-        timeout_minutes: 5
-        max_attempts: 6
-    - name: Export HTML5
-      uses: nick-fields/retry@v2
-      with:
-        command: godot --no-window --export HTML5
-        retry_on: error
-        timeout_minutes: 5
-        max_attempts: 6
-    - name: NPM cache
-      uses: actions/setup-node@v3
-      with:
-        cache: 'npm'
-        cache-dependency-path: test/html5/package-lock.json
-    - name: Smoke test HTML5 export
-      shell: bash
-      working-directory: test/html5
-      run: |
-        npm ci
-        npx serve ../../docs/demo -p 3000 &
-        npx cypress run
-    - name: Upload cypress artifacts (on failure)
-      uses: actions/upload-artifact@v3
-      if: ${{ failure() }}
-      with:
-        name: cypress-artifacts
-        path: |-
-          test/html5/cypress/screenshots
-          test/html5/cypress/videos
-    - name: Upload export
-      uses: actions/upload-artifact@v3
-      with:
-        name: html5-demo
-        path: docs/demo
+      - uses: actions/checkout@v3
+      - name: Setup Godot
+        uses: lihop/setup-godot@v2
+        with:
+          export-templates: true
+      - name: Install binary build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: libgodot-xterm-release
+          path: addons/godot_xterm/native/bin
+      - name: Import assets
+        uses: nick-fields/retry@v2
+        with:
+          command: godot --editor .github/import_assets.tscn
+          retry_on: error
+          timeout_minutes: 5
+          max_attempts: 6
+      - name: Export HTML5
+        uses: nick-fields/retry@v2
+        with:
+          command: godot --no-window --export HTML5
+          retry_on: error
+          timeout_minutes: 5
+          max_attempts: 6
+      - name: NPM cache
+        uses: actions/setup-node@v3
+        with:
+          cache: "npm"
+          cache-dependency-path: test/html5/package-lock.json
+      - name: Smoke test HTML5 export
+        shell: bash
+        working-directory: test/html5
+        run: |
+          npm ci
+          npx serve ../../docs/demo -p 3000 &
+          npx cypress run
+      - name: Upload cypress artifacts (on failure)
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: cypress-artifacts
+          path: |-
+            test/html5/cypress/screenshots
+            test/html5/cypress/videos
+      - name: Upload export
+        uses: actions/upload-artifact@v3
+        with:
+          name: html5-demo
+          path: docs/demo
 
   test:
-    name: 'Test'
-    needs: [ build_docker, build_native ]
+    name: "Test"
+    needs: [build_docker, build_native]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2022, macos-12, ubuntu-22.04 ]
-        bits: [ 64, 32 ]
-        godot_version: [ 'v3.4.5-stable', 'v3.5-stable' ]
+        os: [windows-2022, macos-12, ubuntu-22.04]
+        bits: [64, 32]
+        godot_version: ["v3.4.5-stable", "v3.5-stable"]
         exclude:
           - os: macos-12
             bits: 32
@@ -267,51 +267,50 @@ jobs:
           timeout_minutes: 5
           max_attempts: 6
 
-
   # Git archive should only include addons/godot_xterm directory.
   check-archive:
-    name: 'Check Archive'
+    name: "Check Archive"
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-    - name: Create git archive
-      run: git archive -o archive.zip HEAD
-    - name: Extract archive
-      run: mkdir -p /tmp/unzipped && unzip archive.zip -d /tmp/unzipped
-    - name: Check that archive only contains addons directory
-      run: |
-        shopt -s nullglob dotglob
-        ls -lR /tmp/unzipped
-        files=(/tmp/unzipped/*)
-        if [ ${#files[@]} -ne 1 ]; then
-          echo "Wrong number of files in archive (${#files[@]}) expected 1."
-          exit 1
-        fi
-        if [ ! -d "/tmp/unzipped/addons" ]; then
-          echo "Expected directory (addons) not found."
-          exit 1
-        fi
-        files=(/tmp/unzipped/addons)
-        if [ ${#files[@]} -ne 1 ]; then
-          echo "Wrong number of files in addons directory (${#files[@]}) expected 1."
-          exit 1
-        fi
-        if [ ! -d "/tmp/unzipped/addons/godot_xterm" ]; then
-          echo "Expected directory (addons/godot_xterm) not found."
-          exit 1
-        fi
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Create git archive
+        run: git archive -o archive.zip HEAD
+      - name: Extract archive
+        run: mkdir -p /tmp/unzipped && unzip archive.zip -d /tmp/unzipped
+      - name: Check that archive only contains addons directory
+        run: |
+          shopt -s nullglob dotglob
+          ls -lR /tmp/unzipped
+          files=(/tmp/unzipped/*)
+          if [ ${#files[@]} -ne 1 ]; then
+            echo "Wrong number of files in archive (${#files[@]}) expected 1."
+            exit 1
+          fi
+          if [ ! -d "/tmp/unzipped/addons" ]; then
+            echo "Expected directory (addons) not found."
+            exit 1
+          fi
+          files=(/tmp/unzipped/addons)
+          if [ ${#files[@]} -ne 1 ]; then
+            echo "Wrong number of files in addons directory (${#files[@]}) expected 1."
+            exit 1
+          fi
+          if [ ! -d "/tmp/unzipped/addons/godot_xterm" ]; then
+            echo "Expected directory (addons/godot_xterm) not found."
+            exit 1
+          fi
 
   check-code-format:
-    name: 'Check Code Format'
+    name: "Check Code Format"
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
-      with:
-        python-version: 3.9
-    - name: GDFormat Check
-      run: |
-        python -m pip install -r requirements.txt
-        gdformat -c .
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: GDFormat Check
+        run: |
+          python -m pip install -r requirements.txt
+          gdformat -c .
