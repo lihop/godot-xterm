@@ -8,7 +8,7 @@ permalink: /setup/building-from-source
 
 # Building From Source
 
-Building GodotXterm from source consists of four steps: 
+Building GodotXterm from source consists of four steps:
 
 1. Clone git submodules.
 2. Compile libuv using CMake.
@@ -27,10 +27,12 @@ This plugin follows the same format as the [GDNative C++ Example](https://docs.g
 ## The Easy Way
 
 Run the build script in `addons/godot-xterm/native`:
+
 ```
 cd addons/godot_xterm/native
 ./build.sh
 ```
+
 On Windows you can use `git-bash` to run this script.
 Provided the dependencies above are installed then it should "just work™".
 

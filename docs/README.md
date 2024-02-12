@@ -1,6 +1,7 @@
 <img align="left" width="64" height="64" src="./media/icon.png">
 
 # GodotXterm - Terminal Emulator
+
 <br/>
 
 [![Godot Version](https://img.shields.io/badge/Godot-3.4.x-blue.svg)](#supported-godot-versions)
@@ -25,6 +26,7 @@ https://user-images.githubusercontent.com/3696783/126894061-a69eb6ad-9979-4723-a
 [![View it on GitHub](./media/view_it_on_github_button.png)](https://github.com/lihop/godot-xterm)
 
 #### Table of Contents
+
 1. [Features](#features)
 2. [Screenshots](#screenshots)
 3. [Demos and Examples](#demos-and-examples)
@@ -36,13 +38,15 @@ https://user-images.githubusercontent.com/3696783/126894061-a69eb6ad-9979-4723-a
 ## Features
 
 - ### [Terminal](https://lihop.github.io/godot-xterm/api/terminal)
-  A Terminal emulator Control node. 
+
+  A Terminal emulator Control node.
 
   Supports ANSI and (some) XTerm Control Sequences which can be used to do things such as clear the screen, move the cursor, change printed text color, ring a bell, and so on.
   For an exhaustive list of terminal control sequences (not all of which are supported by GodotXterm) see ["XTerm Control Sequences"](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html).
 
 - ### [PTY](https://lihop.github.io/godot-xterm/api/pty)
-  *Linux and macOS only.*
+
+  _Linux and macOS only._
 
   Node for forking processes (e.g. bash, nodejs, python) with pseudoterminal file descriptors.
   Can be used with the Terminal node to get an actual shell.
@@ -51,12 +55,14 @@ https://user-images.githubusercontent.com/3696783/126894061-a69eb6ad-9979-4723-a
   See issue [\#25](https://github.com/lihop/godot-xterm/issues/25).
 
 - ### Terminal Editor Plugin
-  *Linux and macOS only.*
+
+  _Linux and macOS only._
 
   Adds a panel to the Editor's bottom panel that can be used to spawn terminals in the editor.
   Similar to VSCode's integrated terminal and IntelliJ's embedded terminal.
 
 - ### Asciicast Import Plugin
+
   Adds support for importing asciinema v2 `.cast` files as animations that can be played by an AnimationPlayer that is a child of a Terminal node.
   Example `.cast` files can be downloaded from the [asciinema website](https://asciinema.org).
 
@@ -67,10 +73,10 @@ https://user-images.githubusercontent.com/3696783/126894061-a69eb6ad-9979-4723-a
 
 ## Screenshots
 
-|                                      |                                      |
-|--------------------------------------|--------------------------------------|
-|![](./media/screenshot_editor.png)    |![](./media/screenshot_the_guest.png) |
-|![](./media/screenshot_retro_term.jpg)|![](./media/screenshot_xterminate.png)|
+|                                        |                                        |
+| -------------------------------------- | -------------------------------------- |
+| ![](./media/screenshot_editor.png)     | ![](./media/screenshot_the_guest.png)  |
+| ![](./media/screenshot_retro_term.jpg) | ![](./media/screenshot_xterminate.png) |
 
 ## Demos and Examples
 
@@ -93,7 +99,7 @@ Are you using GodotXterm in your project and want it listed here? Please [open a
 GodotXterm aims to support the current stable release of Godot, but may lag slightly.
 Currently, Godot versions 3.5.x and 3.4.x are supported, but custom export templates
 are required for HTML5 exports from versions < 3.5.
-Versions 3.3.x are no longer officially supported but *may* work if the GDNative libraries are
+Versions 3.3.x are no longer officially supported but _may_ work if the GDNative libraries are
 compiled using an older version of godot-cpp.
 
 ## Installation
@@ -122,10 +128,9 @@ The GDNative source code incorporates code snippets and source code from many th
 
 - The Hack regular font is bundled with GodotXterm as the default Terminal font. This is also the default monospace font of the Godot editor. See the [full license](https://github.com/lihop/godot-xterm/blob/stable/addons/godot_xterm/themes/fonts/hack/LICENSE.md).
 
-
 ### Nonbundled Resources
-The following resources are not bundled with GodotXterm (i.e. are not included in the `addons/godot_xterm` directory) but are included in this repository for demo and testing purposes. They are:
 
+The following resources are not bundled with GodotXterm (i.e. are not included in the `addons/godot_xterm` directory) but are included in this repository for demo and testing purposes. They are:
 
 #### Sounds
 
@@ -133,7 +138,7 @@ The following resources are not bundled with GodotXterm (i.e. are not included i
 
 #### Fonts
 
-- The **bold**, *italic*, and ***bold italic*** styles of the Hack font which are covered by the same license as above.
+- The **bold**, _italic_, and **_bold italic_** styles of the Hack font which are covered by the same license as above.
 - Nerd Fonts. Combines symbols from a multitude of other fonts. See [license information](https://github.com/lihop/godot-xterm/blob/stable/themes/fonts/nerd_fonts/README.md).
 - Noto Color Emoji. Released under the [SIL Open Font License](https://github.com/lihop/godot-xterm/blob/stable/themes/fonts/noto_color_emoji/LICENSE_OFL.txt).
 - Unifont. Dual-licensed (since version 13.0.04) under the GNU GPL 2+ with the GNU font embedding exception and the SIL Open Font License (OFL) version 1.1. This project uses it under the terms of the [SIL Open Font License](https://github.com/lihop/godot-xterm/blob/stable/themes/fonts/unifont/LICENSE_OFL-1.1.txt).

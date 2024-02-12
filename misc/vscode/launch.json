@@ -1,88 +1,80 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Main (gdb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/run/current-system/sw/bin/godot",
+      "args": ["${workspaceFolder}/examples/menu/menu.tscn"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
         {
-            "name": "Main (gdb) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "/run/current-system/sw/bin/godot",
-            "args": [
-                "${workspaceFolder}/examples/menu/menu.tscn",
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true,
-                },
-                {
-                    "description":  "Set Disassembly Flavor to Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true,
-                },
-            ],
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
         },
+        {
+          "description": "Set Disassembly Flavor to Intel",
+          "text": "-gdb-set disassembly-flavor intel",
+          "ignoreFailures": true
+        }
+      ]
+    },
 
+    {
+      "name": "Editor (gdb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/run/current-system/sw/bin/godot",
+      "args": ["--editor"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
         {
-            "name": "Editor (gdb) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "/run/current-system/sw/bin/godot",
-            "args": [
-                "--editor",
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true,
-                },
-                {
-                    "description":  "Set Disassembly Flavor to Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true,
-                },
-                {
-                    "description": "Debug forked child process",
-                    "text": "-gdb-set follow-fork-mode child",
-                },
-            ],
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
         },
         {
-            "name": "Test (gdb) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "/run/current-system/sw/bin/godot",
-            "args": [
-                "--no-window",
-                "-s",
-                "addons/gut/gut_cmdln.gd"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true,
-                },
-            ],
+          "description": "Set Disassembly Flavor to Intel",
+          "text": "-gdb-set disassembly-flavor intel",
+          "ignoreFailures": true
         },
-    ],
+        {
+          "description": "Debug forked child process",
+          "text": "-gdb-set follow-fork-mode child"
+        }
+      ]
+    },
+    {
+      "name": "Test (gdb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/run/current-system/sw/bin/godot",
+      "args": ["--no-window", "-s", "addons/gut/gut_cmdln.gd"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
 }
