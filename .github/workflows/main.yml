@@ -186,14 +186,14 @@ jobs:
           name: libgodot-xterm-release
           path: addons/godot_xterm/native/bin
       - name: Import assets
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           command: godot --editor .github/import_assets.tscn
           retry_on: error
           timeout_minutes: 5
           max_attempts: 6
       - name: Export HTML5
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           command: godot --no-window --export HTML5
           retry_on: error
@@ -251,7 +251,7 @@ jobs:
           name: libgodot-xterm-release
           path: addons/godot_xterm/native/bin
       - name: Run tests
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           shell: bash
           command: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
@@ -260,7 +260,7 @@ jobs:
           max_attempts: 6
       - name: Run unix tests
         if: ${{ matrix.os != 'windows-2022' }}
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           command: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
           retry_on: error
