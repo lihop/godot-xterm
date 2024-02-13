@@ -12,7 +12,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04]
+        platform: [linux, macos, windows]
+        include:
+          - platform: linux
+            os: ubuntu-22.04
+          - platform: macos
+            os: macos-12
+          - platform: windows
+            os: windows-2022
     steps:
       - uses: actions/checkout@v4
       - name: Import assets
@@ -26,13 +33,13 @@ jobs:
           path: .godot/
 
   build_docker:
-    name: "Build Docker"
+    name: Build Docker (linux, ${{ matrix.arch }}, ${{ matrix.target }})
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        target: [release, debug]
         arch: [x86_64, x86_32]
+        target: [release, debug]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,8 +49,8 @@ jobs:
         id: cache-submodules
         with:
           platform: linux
-          target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
+          target: ${{ matrix.target }}
       - name: Pull docker images
         run: docker-compose pull
         working-directory: addons/godot_xterm/native
@@ -67,27 +74,36 @@ jobs:
             addons/godot_xterm/native/bin/*.so
 
   build_native:
-    if: false # Temporarily disabled.
-    name: "Build Native"
+    name: Build Native (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.target}})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [javascript, osx, windows]
+        platform: [web, macos, windows]
         target: [release, debug]
         bits: [64, 32]
+        exclude:
+          - platform: web
+            bits: 64
+          - platform: macos
+            bits: 32
         include:
-          - platform: javascript
+          - platform: web
             os: ubuntu-22.04
-          - platform: osx
+          - platform: macos
             os: macos-12
           - platform: windows
             os: windows-2022
-        exclude:
-          - platform: javascript
-            bits: 64 # Currently only wasm32 is supported.
-          - platform: osx
-            bits: 32 # Only 64-bit supported on macOS.
+          - platform: web
+            arch: wasm32
+          - platform: macos
+            arch: universal
+          - platform: windows
+            bits: 64
+            arch: x86_64
+          - platform: windows
+            bits: 32
+            arch: x86_32
     steps:
       - uses: actions/checkout@v4
         with:
@@ -98,9 +114,9 @@ jobs:
         with:
           platform: ${{ matrix.platform }}
           target: ${{ matrix.target }}
-          bits: ${{ matrix.bits }}
+          arch: ${{ matrix.arch }}
       - name: Cache emscripten
-        if: ${{ matrix.platform == 'javascript' }}
+        if: ${{ matrix.platform == 'web' }}
         uses: actions/cache@v3
         env:
           cache-name: cache-emscripten
@@ -109,14 +125,14 @@ jobs:
           key: emsdk-cache-${{ matrix.target }}-${{ hashFiles('**/*.c*', '**/*.h*') }}
           restore-keys: |
             emsdk-cache-${{ matrix.target }}-
-      - name: Install javascript build dependencies
-        if: ${{ matrix.platform == 'javascript' }}
+      - name: Install web build dependencies
+        if: ${{ matrix.platform == 'web' }}
         uses: mymindstorm/setup-emsdk@v11
         with:
           version: 3.1.14
           actions-cache-folder: emsdk-cache-${{ matrix.target }}
-      - name: Install additional javascript build dependencies
-        if: ${{ matrix.platform == 'javascript' }}
+      - name: Install additional web build dependencies
+        if: ${{ matrix.platform == 'web' }}
         run: sudo apt-get update && sudo apt-get install -y scons gcc-multilib g++-multilib
       - name: Install additional macos build dependencies
         if: ${{ matrix.os == 'macos-12' }}
@@ -129,11 +145,6 @@ jobs:
         if: ${{ matrix.os == 'windows-2022' }}
         with:
           arch: win${{ matrix.bits }}
-      - name: Build godot-cpp bindings
-        if: steps.cache-submodules.outputs.cache-hit != 'true'
-        run: |
-          cd addons/godot_xterm/native/thirdparty/godot-cpp
-          scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} generate_bindings=yes -j2
       - name: Setup cmake
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         uses: jwlawson/actions-setup-cmake@v2
@@ -166,10 +177,15 @@ jobs:
             cd ..
           fi
           cmake --build build --config $TARGET
+      - name: Ensure scons cache exists
+        run: mkdir -p ${{github.workspace}}/.scons-cache
+        shell: bash
       - name: Build libgodot-xterm
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons-cache
         run: |
           cd addons/godot_xterm/native
-          scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} -j2
+          scons platform=${{ matrix.platform }} target=template_${{ matrix.target }} arch=${{ matrix.arch }} -j2
       - name: Upload binaries
         uses: actions/upload-artifact@v3
         with:
@@ -236,11 +252,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04] #, macos-12, windows-2022 ] Temporarily disabled.
+        platform: [linux, macos, windows]
         bits: [64, 32]
         godot_version: ["v4.2.1-stable"]
+        include:
+          - platform: linux
+            os: ubuntu-22.04
+          - platform: macos
+            os: macos-12
+          - platform: windows
+            os: windows-2022
         exclude:
-          - os: macos-12
+          - platform: macos
             bits: 32
     steps:
       - uses: actions/checkout@v4
@@ -253,7 +276,7 @@ jobs:
         uses: fountainhead/action-wait-for-check@v1.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Import Assets (${{ matrix.os }})
+          checkName: Import Assets (${{ matrix.platform }})
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Download imports
         uses: actions/download-artifact@v3
@@ -264,7 +287,7 @@ jobs:
         uses: fountainhead/action-wait-for-check@v1.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Build Docker (debug, x86_${{ matrix.bits }})
+          checkName: Build Docker (linux, x86_${{ matrix.bits }}, debug)
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Install debug binary build artifacts
         uses: actions/download-artifact@v3

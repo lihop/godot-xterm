@@ -382,8 +382,8 @@ void Terminal::update_sizes(bool force)
 	Vector2 prev_size = Vector2(size);
 	int32_t prev_font_size = font_size;
 	Vector2 prev_cell_size = Vector2(cell_size);
-	uint prev_cols = cols;
-	uint prev_rows = rows;
+	unsigned int prev_cols = cols;
+	unsigned int prev_rows = rows;
 
 	size = get_size();
 
