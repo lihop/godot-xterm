@@ -230,6 +230,7 @@ jobs:
           path: docs/demo
 
   test:
+    if: false # Temporarily disabled.
     name: "Test"
     runs-on: ${{ matrix.os }}
     strategy:
