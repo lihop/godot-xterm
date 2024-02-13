@@ -6,7 +6,7 @@ on:
     - cron: 0 11 * * *
 
 jobs:
-  import_assets:
+  import-assets:
     name: "Import Assets"
     runs-on: ${{ matrix.os }}
     strategy:
@@ -29,11 +29,11 @@ jobs:
       - name: Upload imports
         uses: actions/upload-artifact@v3
         with:
-          name: imports-${{ matrix.os }}
+          name: imports-${{ matrix.platform }}
           path: .godot/
 
-  build_docker:
-    name: Build Docker (linux, ${{ matrix.arch }}, ${{ matrix.target }})
+  build-linux:
+    name: Build (linux, ${{ matrix.arch }}, ${{ matrix.target }})
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -73,8 +73,8 @@ jobs:
           path: |
             addons/godot_xterm/native/bin/*.so
 
-  build_native:
-    name: Build Native (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.target}})
+  build-other-platforms:
+    name: Build (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.target}})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -195,10 +195,10 @@ jobs:
             addons/godot_xterm/native/bin/*.dylib
             addons/godot_xterm/native/bin/*.dll
 
-  html5_export:
+  html5-export:
     if: false # Temporarily disabled.
     name: "HTML5 Export"
-    needs: [build_docker, build_native]
+    needs: [build-linux]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -246,15 +246,17 @@ jobs:
           path: docs/demo
 
   test:
-    if: false # Temporarily disabled.
-    name: "Test"
+    name: Test (${{ matrix.platform }}, ${{ matrix.arch }}, release)
+    needs: [check-archive, check-pre-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         platform: [linux, macos, windows]
         bits: [64, 32]
-        godot_version: ["v4.2.1-stable"]
+        exclude:
+          - platform: macos
+            bits: 32
         include:
           - platform: linux
             os: ubuntu-22.04
@@ -262,16 +264,26 @@ jobs:
             os: macos-12
           - platform: windows
             os: windows-2022
-        exclude:
-          - platform: macos
+          - platform: linux
+            bits: 64
+            arch: x86_64
+          - platform: linux
             bits: 32
+            arch: x86_32
+          - platform: macos
+            arch: universal
+          - platform: windows
+            bits: 64
+            arch: x86_64
+          - platform: windows
+            bits: 32
+            arch: x86_32
     steps:
       - uses: actions/checkout@v4
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
-          version: ${{ matrix.godot_version }}
-          bits: ${{ matrix.bits }}
+          version: "4.2.1-stable"
       - name: Wait for asset import
         uses: fountainhead/action-wait-for-check@v1.1.0
         with:
@@ -281,29 +293,24 @@ jobs:
       - name: Download imports
         uses: actions/download-artifact@v3
         with:
-          name: imports-${{ matrix.os }}
+          name: imports-${{ matrix.platform }}
           path: .godot
       - name: Wait for build
         uses: fountainhead/action-wait-for-check@v1.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Build Docker (linux, x86_${{ matrix.bits }}, debug)
+          checkName: Build (${{ matrix.platform }}, ${{ matrix.arch }}, release)
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Install debug binary build artifacts
+      - name: Install binary build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: libgodot-xterm-debug
+          name: libgodot-xterm-release
           path: addons/godot_xterm/native/bin
-      - name: Run tests
-        run: godot -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
-      - name: Run unix tests
-        if: ${{ matrix.os != 'windows-2022' }}
-        run: godot -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
 
-  delete_imports:
-    name: "Delete Imports"
-    needs: [test]
+  delete-asset-imports:
+    name: Delete Asset Imports
     runs-on: ubuntu-22.04
+    needs: [import-assets, test]
     steps:
       - uses: geekyeggo/delete-artifact@v2
         with:
