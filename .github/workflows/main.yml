@@ -39,7 +39,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [x86_64, x86_32]
-        target: [release, debug]
+        target: [release]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -80,7 +80,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [web, macos, windows]
-        target: [release, debug]
+        target: [release]
         bits: [64, 32]
         exclude:
           - platform: web
