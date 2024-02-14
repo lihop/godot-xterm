@@ -20,15 +20,7 @@ namespace godot
     GDCLASS(Terminal, Control)
 
   private:
-    static constexpr const char *COLOR_NAMES[] = {
-        "ansi_0_color", "ansi_1_color", "ansi_2_color", "ansi_3_color", "ansi_4_color", "ansi_5_color", "ansi_6_color", "ansi_7_color",
-        "ansi_8_color", "ansi_9_color", "ansi_10_color", "ansi_11_color", "ansi_12_color", "ansi_13_color", "ansi_14_color", "ansi_15_color",
-        "foreground_color", "background_color",
-    };
-
-    static constexpr const char *FONT_TYPES[] = {
-        "normal_font", "bold_font", "italics_font", "bold_italics_font",
-    };
+    typedef std::map<std::pair<Key, char32_t>, uint32_t> KeyMap;
 
     enum FontType {
       NORMAL,
@@ -37,8 +29,8 @@ namespace godot
       BOLD_ITALICS,
     };
 
-    typedef std::map<std::pair<Key, char32_t>, uint32_t> KeyMap;
-
+    static const char *COLOR_NAMES[18];
+    static const char *FONT_TYPES[4];
     static const KeyMap KEY_MAP;
   public:
     enum AttrFlag

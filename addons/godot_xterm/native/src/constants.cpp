@@ -7,6 +7,16 @@
 
 using namespace godot;
 
+const char* Terminal::COLOR_NAMES[18] = {
+    "ansi_0_color", "ansi_1_color", "ansi_2_color", "ansi_3_color", "ansi_4_color", "ansi_5_color", "ansi_6_color", "ansi_7_color",
+    "ansi_8_color", "ansi_9_color", "ansi_10_color", "ansi_11_color", "ansi_12_color", "ansi_13_color", "ansi_14_color", "ansi_15_color",
+    "foreground_color", "background_color",
+};
+
+const char* Terminal::FONT_TYPES[4] = {
+    "normal_font", "bold_font", "italics_font", "bold_italics_font",
+};
+
 const Terminal::KeyMap Terminal::KEY_MAP = {
     // Godot does not have seperate scancodes for keypad keys when NumLock is
     // off. We can check the unicode value to determine whether it is off and
