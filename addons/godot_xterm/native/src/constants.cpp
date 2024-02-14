@@ -1,36 +1,11 @@
+// SPDX-FileCopyrightText: 2021, 2024 Leroy Hopson <godot-xterm@leroy.nix.nz>
+// SPDX-License-Identifier: MIT
+
 #include "terminal.h"
+
 #include <xkbcommon/xkbcommon-keysyms.h>
 
 using namespace godot;
-
-const std::map<const char *, const char *> Terminal::FONTS = {
-    {"normal_font", "res://addons/godot_xterm/fonts/normal.ttf"},
-    {"bold_font", "res://addons/godot_xterm/fonts/bold.ttf"},
-    {"italics_font", "res://addons/godot_xterm/fonts/italics.ttf"},
-    {"bold_italics_font", "res://addons/godot_xterm/fonts/bold_italics.ttf"},
-};
-
-// TODO: Ensure it is default Xterm dark theme.
-const Terminal::ColorMap Terminal::COLORS = {
-    {"ansi_0_color", {"#000000", TSM_COLOR_BLACK}},
-    {"ansi_1_color", {"#CD0000", TSM_COLOR_RED}},
-    {"ansi_2_color", {"#00CD00", TSM_COLOR_GREEN}},
-    {"ansi_3_color", {"#CDCD00", TSM_COLOR_YELLOW}},
-    {"ansi_4_color", {"#0000EE", TSM_COLOR_BLUE}},
-    {"ansi_5_color", {"#CD00CD", TSM_COLOR_MAGENTA}},
-    {"ansi_6_color", {"#00CDCD", TSM_COLOR_CYAN}},
-    {"ansi_7_color", {"#E5E5E5", TSM_COLOR_LIGHT_GREY}},
-    {"ansi_8_color", {"#7F7F7F", TSM_COLOR_DARK_GREY}},
-    {"ansi_9_color", {"#FF0000", TSM_COLOR_LIGHT_RED}},
-    {"ansi_10_color", {"#00FF00", TSM_COLOR_LIGHT_GREEN}},
-    {"ansi_11_color", {"#FFFF00", TSM_COLOR_LIGHT_YELLOW}},
-    {"ansi_12_color", {"#0000FC", TSM_COLOR_LIGHT_BLUE}},
-    {"ansi_13_color", {"#FF00FF", TSM_COLOR_LIGHT_MAGENTA}},
-    {"ansi_14_color", {"#00FFFF", TSM_COLOR_LIGHT_CYAN}},
-    {"ansi_15_color", {"#FFFFFF", TSM_COLOR_WHITE}},
-    {"foreground_color", {"#FFFFFF", TSM_COLOR_FOREGROUND}},
-    {"background_color", {"#000000", TSM_COLOR_BACKGROUND}},
-};
 
 const Terminal::KeyMap Terminal::KEY_MAP = {
     // Godot does not have seperate scancodes for keypad keys when NumLock is

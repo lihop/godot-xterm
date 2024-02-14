@@ -37,6 +37,9 @@ namespace godot
       BOLD_ITALICS,
     };
 
+    typedef std::map<std::pair<Key, char32_t>, uint32_t> KeyMap;
+
+    static const KeyMap KEY_MAP;
   public:
     enum AttrFlag
     {
