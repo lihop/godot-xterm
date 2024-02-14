@@ -6,7 +6,10 @@
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/font.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
+#include <godot_cpp/classes/input.hpp>
 #include <godot_cpp/classes/input_event_key.hpp>
+#include <godot_cpp/classes/input_event_mouse_button.hpp>
+#include <godot_cpp/classes/input_event_mouse_motion.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
@@ -67,6 +70,7 @@ void Terminal::_bind_methods()
 	ClassDB::bind_method(D_METHOD("write", "data"), &Terminal::write);
 	ClassDB::bind_method(D_METHOD("get_cursor_pos"), &Terminal::get_cursor_pos);
 	ClassDB::bind_method(D_METHOD("_on_gui_input", "event"), &Terminal::_gui_input);
+	ClassDB::bind_method(D_METHOD("_on_selection_held"), &Terminal::_on_selection_held);
 }
 
 Terminal::Terminal()
@@ -171,6 +175,7 @@ String Terminal::write(const Variant data)
 
 void Terminal::_gui_input(const Ref<InputEvent> &event) {
 	_handle_key_input(event);
+	_handle_selection(event);
 }
 
 void Terminal::_notification(int what)
@@ -605,6 +610,13 @@ int Terminal::get_inverse_mode() const {
 }
 
 void Terminal::initialize_input() {
+	selecting = false;
+	selection_mode = SelectionMode::NONE;
+	selection_timer = memnew(Timer);
+	selection_timer->set_wait_time(0.05);
+	selection_timer->connect("timeout", Callable(this, "_on_selection_held"));
+	add_child(selection_timer, false, INTERNAL_MODE_FRONT);
+
 	connect("gui_input", Callable(this, "_on_gui_input"));
 }
 
@@ -644,4 +656,51 @@ void Terminal::_handle_key_input(Ref<InputEventKey> event) {
     std::set<Key> tab_arrow_keys = {KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_TAB};
     if (tab_arrow_keys.find(keycode) != tab_arrow_keys.end())
       accept_event();
+}
+
+void Terminal::_handle_selection(Ref<InputEventMouse> event) {
+  if (!event.is_valid())
+    return;
+
+  Ref<InputEventMouseButton> mb = event;
+  if (mb.is_valid()) {
+    if (!mb->is_pressed() || !mb->get_button_index() == MOUSE_BUTTON_LEFT)
+      return;
+
+    if (selecting) {
+      selecting = false;
+      selection_mode = SelectionMode::NONE;
+      tsm_screen_selection_reset(screen);
+	  queue_redraw();
+    }
+
+    selecting = false;
+    selection_mode = SelectionMode::POINTER;
+
+    return;
+  }
+
+  Ref<InputEventMouseMotion> mm = event;
+  if (mm.is_valid()) {
+    if ((mm->get_button_mask() & MOUSE_BUTTON_MASK_LEFT) && selection_mode != SelectionMode::NONE && !selecting) {
+      selecting = true;
+      Vector2 start = event->get_position() / cell_size;
+      tsm_screen_selection_start(screen, start.x, start.y);
+	  queue_redraw();
+      selection_timer->start();
+    }
+    return;
+  }
+}
+
+void Terminal::_on_selection_held() {
+  if (!(Input::get_singleton()->is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) || selection_mode == SelectionMode::NONE) {
+    selection_timer->stop();
+    return;
+  }
+
+  Vector2 target = get_local_mouse_position() / cell_size;
+  tsm_screen_selection_target(screen, target.x, target.y);
+  queue_redraw();
+  selection_timer->start();
 }

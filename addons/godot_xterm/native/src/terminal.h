@@ -8,6 +8,7 @@
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/input_event_key.hpp>
+#include <godot_cpp/classes/input_event_mouse.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
 #include <godot_cpp/classes/timer.hpp>
@@ -152,6 +153,13 @@ namespace godot
     Ref<InputEventKey> last_input_event_key;
     void initialize_input();
     void _handle_key_input(Ref<InputEventKey> event);
+
+    enum SelectionMode { NONE, POINTER };
+    bool selecting = false;
+    SelectionMode selection_mode = SelectionMode::NONE;
+    Timer *selection_timer = new Timer();
+    void _handle_selection(Ref<InputEventMouse> event);
+    void _on_selection_held();
   };
 
 } // namespace godot
