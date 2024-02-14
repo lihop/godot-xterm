@@ -7,6 +7,7 @@
 
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
+#include <godot_cpp/classes/input_event_key.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
 #include <godot_cpp/classes/timer.hpp>
@@ -75,6 +76,7 @@ namespace godot
 
     String write(const Variant data);
 
+    void _gui_input(const Ref<InputEvent> &event) override;
   protected:
     static void _bind_methods();
 
@@ -146,6 +148,10 @@ namespace godot
     void _get_property_list(List<PropertyInfo> *p_list) const;
     bool _is_valid_color_name(const String &p_name);
     bool _is_valid_font_type(const String &p_name);
+
+    Ref<InputEventKey> last_input_event_key;
+    void initialize_input();
+    void _handle_key_input(Ref<InputEventKey> event);
   };
 
 } // namespace godot

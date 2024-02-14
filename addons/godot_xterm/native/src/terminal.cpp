@@ -6,11 +6,13 @@
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/font.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
+#include <godot_cpp/classes/input_event_key.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
 #include <godot_cpp/classes/timer.hpp>
 #include <libtsm.h>
+#include <xkbcommon/xkbcommon-keysyms.h>
 
 #define SHADERS_DIR "res://addons/godot_xterm/shaders/"
 #define FOREGROUND_SHADER_PATH SHADERS_DIR "foreground.gdshader"
@@ -64,10 +66,13 @@ void Terminal::_bind_methods()
 
 	ClassDB::bind_method(D_METHOD("write", "data"), &Terminal::write);
 	ClassDB::bind_method(D_METHOD("get_cursor_pos"), &Terminal::get_cursor_pos);
+	ClassDB::bind_method(D_METHOD("_on_gui_input", "event"), &Terminal::_gui_input);
 }
 
 Terminal::Terminal()
 {
+	set_focus_mode(FOCUS_ALL);
+
 	max_scrollback = 1000;
 
 	blink_on_time = 0.6;
@@ -93,6 +98,7 @@ Terminal::Terminal()
 	}
 	tsm_vte_set_bell_cb(vte, &Terminal::_bell_cb, this);
 
+	initialize_input();
 	initialize_rendering();
 	update_theme();
 	update_sizes();
@@ -161,6 +167,10 @@ String Terminal::write(const Variant data)
 	queue_redraw();
 
 	return response.get_string_from_utf8();
+}
+
+void Terminal::_gui_input(const Ref<InputEvent> &event) {
+	_handle_key_input(event);
 }
 
 void Terminal::_notification(int what)
@@ -592,4 +602,46 @@ void Terminal::set_inverse_mode(const int mode) {
 
 int Terminal::get_inverse_mode() const {
 	return static_cast<int>(inverse_mode);
+}
+
+void Terminal::initialize_input() {
+	connect("gui_input", Callable(this, "_on_gui_input"));
+}
+
+void Terminal::_handle_key_input(Ref<InputEventKey> event) {
+    if (!event.is_valid() || !event->is_pressed())
+        return;
+
+    const Key keycode = event->get_keycode();
+    char32_t unicode = event->get_unicode();
+    uint32_t ascii = unicode <= 127 ? unicode : 0;
+
+    unsigned int mods = 0;
+    if (event->is_alt_pressed())
+        mods |= TSM_SHIFT_MASK;
+    if (event->is_ctrl_pressed())
+        mods |= TSM_CONTROL_MASK;
+    if (event->is_shift_pressed())
+        mods |= TSM_SHIFT_MASK;
+
+    std::pair<Key, char32_t> key = {keycode, unicode};
+    uint32_t keysym = (KEY_MAP.count(key) > 0) ? KEY_MAP.at(key) : XKB_KEY_NoSymbol;
+
+    last_input_event_key = event;
+    tsm_vte_handle_keyboard(vte, keysym, ascii, mods, unicode ? unicode : TSM_VTE_INVALID);
+
+    // Return to the bottom of the scrollback buffer if we scrolled up. Ignore
+    // modifier keys pressed in isolation or if Ctrl+Shift modifier keys are
+    // pressed.
+    std::set<Key> mod_keys = {KEY_ALT, KEY_SHIFT, KEY_CTRL, KEY_META};
+    if (mod_keys.find(keycode) == mod_keys.end() &&
+        !(event->is_ctrl_pressed() && event->is_shift_pressed())) {
+      tsm_screen_sb_reset(screen);
+      queue_redraw();
+    }
+
+    // Prevent focus changing to other inputs when pressing Tab or Arrow keys.
+    std::set<Key> tab_arrow_keys = {KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_TAB};
+    if (tab_arrow_keys.find(keycode) != tab_arrow_keys.end())
+      accept_event();
 }
