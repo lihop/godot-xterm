@@ -176,6 +176,7 @@ String Terminal::write(const Variant data)
 void Terminal::_gui_input(const Ref<InputEvent> &event) {
 	_handle_key_input(event);
 	_handle_selection(event);
+	_handle_mouse_wheel(event);
 }
 
 void Terminal::_notification(int what)
@@ -656,6 +657,31 @@ void Terminal::_handle_key_input(Ref<InputEventKey> event) {
     std::set<Key> tab_arrow_keys = {KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_TAB};
     if (tab_arrow_keys.find(keycode) != tab_arrow_keys.end())
       accept_event();
+}
+
+void Terminal::_handle_mouse_wheel(Ref<InputEventMouseButton> event) {
+  if (!event.is_valid() || !event->is_pressed())
+    return;
+
+  void (*scroll_func)(tsm_screen *, unsigned int) = nullptr;
+
+  switch (event->get_button_index()) {
+  case MOUSE_BUTTON_WHEEL_UP:
+    scroll_func = &tsm_screen_sb_up;
+    break;
+  case MOUSE_BUTTON_WHEEL_DOWN:
+    scroll_func = &tsm_screen_sb_down;
+    break;
+  };
+
+  if (scroll_func != nullptr) {
+    // Scroll 5 times as fast as normal if alt is pressed (like TextEdit).
+    // Otherwise, just scroll 3 lines.
+    int speed = event->is_alt_pressed() ? 15 : 3;
+    double factor = event->get_factor();
+    (*scroll_func)(screen, speed * factor);
+    queue_redraw();
+  }
 }
 
 void Terminal::_handle_selection(Ref<InputEventMouse> event) {
