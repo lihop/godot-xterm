@@ -9,6 +9,11 @@ runs:
       uses: lihop/setup-godot@v2
       with:
         version: ${{ inputs.godot-version }}
+    - name: Install just
+      uses: taiki-e/install-action@just
+    - name: Install dev dependencies
+      shell: bash
+      run: just install
     - name: Import assets
       shell: bash
       run: |

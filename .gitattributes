@@ -15,7 +15,7 @@
 *.wav binary
 
 # Files to exclude from asset-lib download.
-/addons/gut export-ignore
+/addons/gd-plug export-ignore
 /CHANGELOG.md export-ignore
 /default_env.tres export-ignore
 /docs export-ignore
@@ -32,6 +32,8 @@
 /Justfile export-ignore
 /LICENSE.md export-ignore
 /misc export-ignore
+/plug.gd export-ignore
+/.plugged export-ignore
 /.pre-commit-config.yaml export-ignore
 /project.godot export-ignore
 /README.md export-ignore

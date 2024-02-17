@@ -39,7 +39,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [x86_64, x86_32]
-        target: [release]
+        target: [release, debug]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -80,7 +80,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: [web, macos, windows]
-        target: [release]
+        target: [release, debug]
         bits: [64, 32]
         exclude:
           - platform: web
@@ -246,22 +246,17 @@ jobs:
           path: docs/demo
 
   test:
-    name: Test (${{ matrix.platform }}, ${{ matrix.arch }}, release)
+    name: Test (${{ matrix.platform }}, ${{ matrix.arch }}, debug)
     needs: [check-archive, check-pre-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [linux, macos, windows]
+        platform: [linux, windows] # Testing not currently supported on macOS.
         bits: [64, 32]
-        exclude:
-          - platform: macos
-            bits: 32
         include:
           - platform: linux
             os: ubuntu-22.04
-          - platform: macos
-            os: macos-12
           - platform: windows
             os: windows-2022
           - platform: linux
@@ -270,8 +265,6 @@ jobs:
           - platform: linux
             bits: 32
             arch: x86_32
-          - platform: macos
-            arch: universal
           - platform: windows
             bits: 64
             arch: x86_64
@@ -284,6 +277,8 @@ jobs:
         uses: lihop/setup-godot@v2
         with:
           version: "4.2.1-stable"
+      - uses: taiki-e/install-action@just
+      - run: just install
       - name: Wait for asset import
         uses: fountainhead/action-wait-for-check@v1.1.0
         with:
@@ -299,13 +294,15 @@ jobs:
         uses: fountainhead/action-wait-for-check@v1.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Build (${{ matrix.platform }}, ${{ matrix.arch }}, release)
+          checkName: Build (${{ matrix.platform }}, ${{ matrix.arch }}, debug)
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Install binary build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: libgodot-xterm-release
+          name: libgodot-xterm-debug
           path: addons/godot_xterm/native/bin
+      - name: Test
+        run: just test
 
   delete-asset-imports:
     name: Delete Asset Imports

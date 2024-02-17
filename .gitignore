@@ -33,6 +33,10 @@ test/test_metadata.json
 
 # GodotXterm-specific ignores
 .gdxterm
+.plugged/
+addons/*
+!addons/gd-plug/
+!addons/godot_xterm/
 docs/demo
 docs/logs
 
