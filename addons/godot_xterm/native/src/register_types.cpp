@@ -9,7 +9,7 @@
 using namespace godot;
 
 void initialize_godot_xterm_module(ModuleInitializationLevel p_level) {
-  if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+  if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE || ClassDB::class_exists("Terminal")) {
     return;
   }
 
@@ -17,7 +17,7 @@ void initialize_godot_xterm_module(ModuleInitializationLevel p_level) {
 }
 
 void uninitialize_godot_xterm_module(ModuleInitializationLevel p_level) {
-  if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+  if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE && !ClassDB::class_exists("Terminal")) {
     return;
   }
 }
