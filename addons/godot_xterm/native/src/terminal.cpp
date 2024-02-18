@@ -546,6 +546,7 @@ void Terminal::cleanup_rendering() {
 	rs->free_rid(back_canvas_item);
 
 	// Foreground.
+	rs->free_rid(fore_canvas_item);
 	rs->free_rid(viewport);
 	rs->free_rid(canvas);
 	rs->free_rid(char_canvas_item);
