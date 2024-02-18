@@ -160,7 +160,7 @@ namespace godot
     enum SelectionMode { NONE, POINTER };
     bool selecting = false;
     SelectionMode selection_mode = SelectionMode::NONE;
-    Timer *selection_timer = new Timer();
+    Timer *selection_timer;
     void _handle_selection(Ref<InputEventMouse> event);
     void _on_selection_held();
   };
