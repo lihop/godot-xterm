@@ -564,11 +564,14 @@ bool Terminal::get_bell_muted() const {
 
 void Terminal::set_bell_cooldown(const double time) {
 	bell_cooldown = time;
-	bell_timer->stop();
 
-	double remaining_time = std::max(0.0, bell_cooldown - bell_timer->get_time_left());
-	if (remaining_time > 0)
-		bell_timer->start(remaining_time);
+	if (!bell_timer->is_stopped()) {
+		bell_timer->stop();
+
+		double remaining_time = std::max(0.0, bell_cooldown - bell_timer->get_time_left());
+		if (remaining_time > 0)
+			bell_timer->start(remaining_time);
+	}
 }
 
 double Terminal::get_bell_cooldown() const {
