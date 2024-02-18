@@ -70,6 +70,7 @@ void Terminal::_bind_methods()
 	ClassDB::bind_method(D_METHOD("write", "data"), &Terminal::write);
 	ClassDB::bind_method(D_METHOD("get_cursor_pos"), &Terminal::get_cursor_pos);
 	ClassDB::bind_method(D_METHOD("get_cell_size"), &Terminal::get_cell_size);
+	ClassDB::bind_method(D_METHOD("_on_frame_post_draw"), &Terminal::_on_frame_post_draw);
 	ClassDB::bind_method(D_METHOD("_on_gui_input", "event"), &Terminal::_gui_input);
 	ClassDB::bind_method(D_METHOD("_on_selection_held"), &Terminal::_on_selection_held);
 }
@@ -173,7 +174,7 @@ String Terminal::write(const Variant data)
 
 	response.clear();
 	tsm_vte_input(vte, (char *)bytes.ptr(), bytes.size());
-	queue_redraw();
+	redraw_requested = true;
 
 	return response.get_string_from_utf8();
 }
@@ -489,7 +490,7 @@ void Terminal::initialize_rendering() {
 	rs->viewport_set_disable_3d(viewport, true);
 	rs->viewport_set_transparent_background(viewport, true);
 	rs->viewport_set_clear_mode(viewport, RenderingServer::ViewportClearMode::VIEWPORT_CLEAR_NEVER);
-	rs->viewport_set_update_mode(viewport, RenderingServer::ViewportUpdateMode::VIEWPORT_UPDATE_WHEN_VISIBLE);
+	rs->viewport_set_update_mode(viewport, RenderingServer::ViewportUpdateMode::VIEWPORT_UPDATE_ALWAYS);
 	rs->viewport_set_active(viewport, true);
 
 	fore_shader = rl->load(FOREGROUND_SHADER_PATH);
@@ -501,6 +502,8 @@ void Terminal::initialize_rendering() {
 	fore_canvas_item = rs->canvas_item_create();
 	rs->canvas_item_set_material(fore_canvas_item, fore_material->get_rid());
 	rs->canvas_item_set_parent(fore_canvas_item, get_canvas_item());
+
+	rs->connect("frame_post_draw", Callable(this, "_on_frame_post_draw"));
 }
 
 void Terminal::update_theme() {
@@ -519,6 +522,13 @@ void Terminal::update_theme() {
 	}
 
 	refresh();
+}
+
+void Terminal::_on_frame_post_draw() {
+	if (redraw_requested) {
+		queue_redraw();
+		redraw_requested = false;
+	}
 }
 
 void Terminal::draw_screen() {

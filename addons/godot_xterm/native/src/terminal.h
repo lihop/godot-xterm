@@ -143,6 +143,8 @@ namespace godot
     void update_theme();
     void update_sizes(bool force = false);
     void update_shader_parameters(Ref<ShaderMaterial> material);
+    bool redraw_requested = false;
+    void _on_frame_post_draw();
     void draw_screen();
     void refresh();
     void cleanup_rendering();

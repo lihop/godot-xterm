@@ -246,7 +246,7 @@ jobs:
           path: docs/demo
 
   test:
-    name: Test (${{ matrix.platform }}, ${{ matrix.arch }}, debug)
+    name: Test (${{ matrix.test-type }}, ${{ matrix.platform }}, ${{ matrix.arch }}, debug)
     needs: [check-archive, check-pre-commit]
     runs-on: ${{ matrix.os }}
     strategy:
@@ -254,6 +254,10 @@ jobs:
       matrix:
         platform: [linux, windows] # Testing not currently supported on macOS.
         bits: [64, 32]
+        test-type: [headless, rendering]
+        exclude:
+          - platform: windows
+            test-type: rendering
         include:
           - platform: linux
             os: ubuntu-22.04
@@ -302,7 +306,13 @@ jobs:
           name: libgodot-xterm-debug
           path: addons/godot_xterm/native/bin
       - name: Test
-        run: just test
+        shell: bash
+        run: |
+          if [ "${{ matrix.test-type }}" = "headless" ]; then
+            just test
+          else
+            just test-${{ matrix.test-type }}
+          fi
 
   delete-asset-imports:
     name: Delete Asset Imports
