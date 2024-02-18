@@ -69,6 +69,7 @@ void Terminal::_bind_methods()
 
 	ClassDB::bind_method(D_METHOD("write", "data"), &Terminal::write);
 	ClassDB::bind_method(D_METHOD("get_cursor_pos"), &Terminal::get_cursor_pos);
+	ClassDB::bind_method(D_METHOD("get_cell_size"), &Terminal::get_cell_size);
 	ClassDB::bind_method(D_METHOD("_on_gui_input", "event"), &Terminal::_gui_input);
 	ClassDB::bind_method(D_METHOD("_on_selection_held"), &Terminal::_on_selection_held);
 }
@@ -135,6 +136,10 @@ int Terminal::get_rows() const
 
 Vector2i Terminal::get_cursor_pos() const {
 	return Vector2i(tsm_screen_get_cursor_x(screen), tsm_screen_get_cursor_y(screen));
+}
+
+Vector2 Terminal::get_cell_size() const {
+	return cell_size;
 }
 
 void Terminal::set_max_scrollback(const int p_max_scrollback)
