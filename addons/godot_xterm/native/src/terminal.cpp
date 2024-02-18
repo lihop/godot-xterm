@@ -133,8 +133,8 @@ int Terminal::get_rows() const
 	return rows;
 }
 
-Vector2 Terminal::get_cursor_pos() const {
-	return Vector2(tsm_screen_get_cursor_x(screen), tsm_screen_get_cursor_y(screen));
+Vector2i Terminal::get_cursor_pos() const {
+	return Vector2i(tsm_screen_get_cursor_x(screen), tsm_screen_get_cursor_y(screen));
 }
 
 void Terminal::set_max_scrollback(const int p_max_scrollback)

@@ -56,7 +56,7 @@ namespace godot
     void set_rows(const int p_rows);
     int get_rows() const;
 
-    Vector2 get_cursor_pos() const;
+    Vector2i get_cursor_pos() const;
 
     void set_max_scrollback(const int p_max_scrollback);
     int get_max_scrollback() const;

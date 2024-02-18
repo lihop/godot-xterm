@@ -1,4 +1,4 @@
-class_name TerminalTest extends GutTest
+class_name TerminalTest extends "res://addons/gut/test.gd"
 
 var terminal: Terminal
 
@@ -27,7 +27,7 @@ class TestCursorPos:
 	extends TerminalTest
 
 	func test_get_cursor_pos_initial():
-		assert_eq(terminal.get_cursor_pos(), Vector2.ZERO)
+		assert_eq(terminal.get_cursor_pos(), Vector2i.ZERO)
 
 	func test_get_cursor_pos_x():
 		terminal.write("_")
