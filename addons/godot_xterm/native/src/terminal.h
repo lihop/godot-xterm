@@ -60,6 +60,8 @@ public:
   void sb_reset();
   void clear_sb();
 
+  Vector2 get_cursor_pos();
+
   void start_selection(Vector2 position);
   void select_to_pointer(Vector2 position);
   void reset_selection();

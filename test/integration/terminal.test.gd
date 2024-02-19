@@ -33,6 +33,21 @@ func test_bell_cooldown() -> void:
 	assert_signal_emit_count(terminal, "bell", 2)
 
 
+func test_cursor_get_pos_initially_0_0() -> void:
+	assert_eq(terminal.get_cursor_pos(), Vector2(0, 0))
+
+
+func test_cursor_get_pos_increments_immediately() -> void:
+	terminal.write(" ")
+	assert_eq(terminal.get_cursor_pos(), Vector2(1, 0))
+
+
+func test_cursor_get_pos_increments_eventually() -> void:
+	terminal.write(" ")
+	yield(yield_to(get_tree(), "idle_frame", 1), YIELD)
+	assert_eq(terminal.get_cursor_pos(), Vector2(1, 0))
+
+
 func test_writing_random_data_to_terminal_does_not_crash_application():
 	add_child_autofree(preload("res://test/scenes/write_random.tscn").instance())
 	yield(yield_frames(5, "Writing random data to terminal"), YIELD)
