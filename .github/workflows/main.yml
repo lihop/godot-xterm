@@ -27,7 +27,7 @@ jobs:
         with:
           godot-version: v4.2.1-stable
       - name: Upload imports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: imports-${{ matrix.platform }}
           path: .godot/
@@ -232,7 +232,7 @@ jobs:
           npx serve ../../docs/demo -p 3000 &
           npx cypress run
       - name: Upload cypress artifacts (on failure)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: cypress-artifacts
@@ -240,7 +240,7 @@ jobs:
             test/html5/cypress/screenshots
             test/html5/cypress/videos
       - name: Upload export
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: html5-demo
           path: docs/demo
@@ -290,7 +290,7 @@ jobs:
           checkName: Import Assets (${{ matrix.platform }})
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Download imports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: imports-${{ matrix.platform }}
           path: .godot
