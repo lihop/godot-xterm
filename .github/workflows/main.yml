@@ -273,15 +273,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [linux, windows] # Testing not currently supported on macOS.
+        platform: [linux, macos, windows]
         bits: [64, 32]
         test-type: [headless, rendering]
         exclude:
+          - platform: macos
+            bits: 32
           - platform: windows
             test-type: rendering
         include:
           - platform: linux
             os: ubuntu-22.04
+          - platform: macos
+            os: macos-12
           - platform: windows
             os: windows-2022
           - platform: linux
@@ -290,6 +294,8 @@ jobs:
           - platform: linux
             bits: 32
             arch: x86_32
+          - platform: macos
+            arch: universal
           - platform: windows
             bits: 64
             arch: x86_64
@@ -326,6 +332,12 @@ jobs:
         with:
           name: libgodot-xterm-${{ matrix.platform }}-${{ matrix.arch }}-debug
           path: addons/godot_xterm/native/bin
+      - name: Install molten-vk
+        if: ${{ matrix.platform == 'macos' && matrix.test-type == 'rendering' }}
+        run: brew install molten-vk
+      - name: Re-run editor
+        if: ${{ matrix.platform == 'macos' }}
+        run: godot --editor --headless --quit-after 100 || true # Required for macos to detect GutUtils class.
       - name: Test
         shell: bash
         run: |
