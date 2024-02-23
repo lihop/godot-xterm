@@ -52,11 +52,10 @@ jobs:
         working-directory: addons/godot_xterm/native
         run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e BITS=${{ matrix.bits }} libgodot-xterm-linux
       - name: Upload binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: libgodot-xterm-${{ matrix.target }}
-          path: |
-            addons/godot_xterm/native/bin/*.so
+          name: libgodot-xterm-linux-${{ matrix.bits }}-${{ matrix.target }}
+          path: addons/godot_xterm/native/bin/*.so
 
   build_native:
     name: "Build Native"
@@ -162,9 +161,9 @@ jobs:
           cd addons/godot_xterm/native
           scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} -j2
       - name: Upload binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: libgodot-xterm-${{ matrix.target }}
+          name: libgodot-xterm-${{ matrix.platform }}-${{ matrix.bits }}-${{ matrix.target }}
           path: |
             addons/godot_xterm/native/bin/*.wasm
             addons/godot_xterm/native/bin/*.dylib
@@ -181,9 +180,9 @@ jobs:
         with:
           export-templates: true
       - name: Install binary build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: libgodot-xterm-release
+          name: libgodot-xterm-javascript-32-release
           path: addons/godot_xterm/native/bin
       - name: Import assets
         uses: nick-fields/retry@v3
@@ -212,7 +211,7 @@ jobs:
           npx serve ../../docs/demo -p 3000 &
           npx cypress run
       - name: Upload cypress artifacts (on failure)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: cypress-artifacts
@@ -220,7 +219,7 @@ jobs:
             test/html5/cypress/screenshots
             test/html5/cypress/videos
       - name: Upload export
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: html5-demo
           path: docs/demo
@@ -235,6 +234,13 @@ jobs:
         os: [windows-2022, macos-12, ubuntu-22.04]
         bits: [64, 32]
         godot_version: ["v3.4.5-stable", "v3.5-stable"]
+        include:
+          - os: ubuntu-22.04
+            platform: "linux"
+          - os: macos-12
+            platform: "osx"
+          - os: windows-2022
+            platform: "windows"
         exclude:
           - os: macos-12
             bits: 32
@@ -246,9 +252,9 @@ jobs:
           version: ${{ matrix.godot_version }}
           bits: ${{ matrix.bits }}
       - name: Install binary build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: libgodot-xterm-release
+          name: libgodot-xterm-${{ matrix.platform}}-${{ matrix.bits }}-release
           path: addons/godot_xterm/native/bin
       - name: Run tests
         uses: nick-fields/retry@v3
@@ -266,6 +272,21 @@ jobs:
           retry_on: error
           timeout_minutes: 5
           max_attempts: 6
+
+  merge_artifacts:
+    name: "Merge ${{ matrix.target }} artifacts"
+    runs-on: ubuntu-latest
+    needs: test
+    strategy:
+      matrix:
+        target: [release, debug]
+    steps:
+      - name: Merge artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: libgodot-xterm-${{ matrix.target }}
+          pattern: "*-${{ matrix.target }}"
+          delete-merged: true
 
   # Git archive should only include addons/godot_xterm directory.
   check-archive:
