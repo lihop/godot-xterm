@@ -108,14 +108,14 @@ jobs:
         if: ${{ matrix.platform == 'web' }}
         run: sudo apt-get update && sudo apt-get install -y scons gcc-multilib g++-multilib
       - name: Install additional macos build dependencies
-        if: ${{ matrix.os == 'macos-12' }}
+        if: ${{ matrix.platform == 'macos' }}
         run: brew install scons
       - name: Install additional windows build dependencies
-        if: ${{ matrix.os == 'windows-2022' }}
+        if: ${{ matrix.platform == 'windows' }}
         run: python -m pip install scons
       - name: Setup MSVC command prompt
         uses: ilammy/msvc-dev-cmd@v1
-        if: ${{ matrix.os == 'windows-2022' }}
+        if: ${{ matrix.platform == 'windows' }}
         with:
           arch: win${{ matrix.bits }}
       - name: Setup cmake
@@ -123,14 +123,14 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: "3.23.2"
-          use-32bit: ${{ matrix.bits == 32 && matrix.os == 'windows-2022' }}
+          use-32bit: ${{ matrix.bits == 32 && matrix.platform == 'windows' }}
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         shell: bash
         env:
+          PLATFORM: ${{ matrix.platform }}
           TARGET: ${{ matrix.target }}
           BITS: ${{ matrix.bits }}
-          OS: ${{ matrix.os }}
         run: |
           cd addons/godot_xterm/native/thirdparty/libuv
           args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
@@ -140,7 +140,7 @@ jobs:
           else
             args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"
           fi
-          if [ "$BITS" -eq 32 -a "$OS" == "windows-2022" ]; then
+          if [ "$BITS" -eq 32 -a "$PLATFORM" == "windows" ]; then
             cmake -G "Visual Studio 17 2022" -A Win32 -S $(pwd) -B "build" $args
           else
             mkdir build || true
