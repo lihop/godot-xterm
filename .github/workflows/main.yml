@@ -192,6 +192,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: addons/godot_xterm/native/bin
+          merge-multiple: true
       # Some remaining steps temporarily disabled.
       - name: Export HTML5
         if: false
@@ -297,6 +298,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: addons/godot_xterm/native/bin
+          merge-multiple: true
       - name: Test
         shell: bash
         run: |
@@ -309,7 +311,7 @@ jobs:
   merge-artifacts:
     name: Merge Artifacts
     runs-on: ubuntu-latest
-    needs: [test, html5-export]
+    needs: [build-linux, build-other-platforms, test, html5-export]
     strategy:
       matrix:
         target: [release, debug]
