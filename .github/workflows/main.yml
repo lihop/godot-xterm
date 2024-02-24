@@ -231,7 +231,6 @@ jobs:
 
   test:
     name: Test (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.test-type }}, debug)
-    needs: [check-archive, check-pre-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
