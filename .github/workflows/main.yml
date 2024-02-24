@@ -6,32 +6,6 @@ on:
     - cron: 0 11 * * *
 
 jobs:
-  import-assets:
-    name: "Import Assets"
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux, macos, windows]
-        include:
-          - platform: linux
-            os: ubuntu-22.04
-          - platform: macos
-            os: macos-12
-          - platform: windows
-            os: windows-2022
-    steps:
-      - uses: actions/checkout@v4
-      - name: Import assets
-        uses: ./.github/actions/import-assets
-        with:
-          godot-version: v4.2.1-stable
-      - name: Upload imports
-        uses: actions/upload-artifact@v4
-        with:
-          name: imports-${{ matrix.platform }}
-          path: .godot/
-
   build-linux:
     name: Build (linux, ${{ matrix.arch }}, ${{ matrix.target }})
     runs-on: ubuntu-22.04
@@ -206,18 +180,8 @@ jobs:
         uses: lihop/setup-godot@v2
         with:
           version: "4.2.1-stable"
-          export-templates: true
-      - name: Wait for asset import
-        uses: fountainhead/action-wait-for-check@v1.1.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Import Assets (linux)
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Download imports
-        uses: actions/download-artifact@v4
-        with:
-          name: imports-linux
-          path: .godot
+      - name: Import assets
+        run: godot --editor --headless --quit-after 100 || true
       - name: Wait for build
         uses: fountainhead/action-wait-for-check@v1.1.0
         with:
@@ -227,7 +191,6 @@ jobs:
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: libgodot-xterm-web-wasm32-release
           path: addons/godot_xterm/native/bin
       # Some remaining steps temporarily disabled.
       - name: Export HTML5
@@ -308,19 +271,16 @@ jobs:
         uses: lihop/setup-godot@v2
         with:
           version: "4.2.1-stable"
-      - uses: taiki-e/install-action@just
-      - run: just install
-      - name: Wait for asset import
-        uses: fountainhead/action-wait-for-check@v1.1.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Import Assets (${{ matrix.platform }})
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Download imports
-        uses: actions/download-artifact@v4
-        with:
-          name: imports-${{ matrix.platform }}
-          path: .godot
+      - name: Install molten-vk
+        if: ${{ matrix.platform == 'macos' && matrix.test-type == 'rendering' }}
+        run: brew install molten-vk
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Install dependencies
+        run: just install
+      - name: Import assets
+        shell: bash
+        run: godot --editor --headless --quit-after 100 || true
       - name: Wait for build
         uses: fountainhead/action-wait-for-check@v1.1.0
         with:
@@ -330,14 +290,7 @@ jobs:
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: libgodot-xterm-${{ matrix.platform }}-${{ matrix.arch }}-debug
           path: addons/godot_xterm/native/bin
-      - name: Install molten-vk
-        if: ${{ matrix.platform == 'macos' && matrix.test-type == 'rendering' }}
-        run: brew install molten-vk
-      - name: Re-run editor
-        if: ${{ matrix.platform == 'macos' }}
-        run: godot --editor --headless --quit-after 100 || true # Required for macos to detect GutUtils class.
       - name: Test
         shell: bash
         run: |
@@ -360,15 +313,6 @@ jobs:
           name: libgodot-xterm-${{ matrix.target }}
           pattern: "*-${{ matrix.target }}"
           delete-merged: true
-
-  delete-asset-imports:
-    name: Delete Asset Imports
-    runs-on: ubuntu-22.04
-    needs: [test, html5-export]
-    steps:
-      - uses: geekyeggo/delete-artifact@v2
-        with:
-          name: imports-*
 
   # Git archive should only include addons/godot_xterm directory.
   check-archive:
