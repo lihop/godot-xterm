@@ -167,6 +167,7 @@ jobs:
             addons/godot_xterm/native/bin/*.so
             addons/godot_xterm/native/bin/*.wasm
             addons/godot_xterm/native/bin/*.framework
+            addons/godot_xterm/native/bin/spawn-helper
             addons/godot_xterm/native/bin/*.xcframework
             addons/godot_xterm/native/bin/*.dll
 
@@ -238,12 +239,14 @@ jobs:
       matrix:
         platform: [linux, macos, windows]
         bits: [64, 32]
-        test-type: [headless, rendering]
+        test-type: [headless, rendering, unix]
         exclude:
           - platform: macos
             bits: 32
           - platform: windows
             test-type: rendering
+          - platform: windows
+            test-type: unix
         include:
           - platform: linux
             os: ubuntu-22.04
@@ -299,6 +302,10 @@ jobs:
         with:
           path: addons/godot_xterm/native/bin
           merge-multiple: true
+      - name: Set spawn-helper file permissions
+        if: ${{ matrix.platform == 'macos' }}
+        # File permissions are not preserved by upload-artifact.
+        run: chmod +x addons/godot_xterm/native/bin/spawn-helper
       - name: Test
         shell: bash
         run: |

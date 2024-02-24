@@ -1,7 +1,9 @@
 /**
  * Copyright (c) 2012-2015, Christopher Jeffrey (MIT License)
  * Copyright (c) 2017, Daniel Imms (MIT License)
- * Copyright (c) 2021, Leroy Hopson (MIT License)
+ * Copyright (c) 2021, 2024 Leroy Hopson (MIT License)
+ *
+ * SPDX-License-Identifier: MIT
  *
  * pty.cc:
  *   This file is responsible for starting processes
@@ -18,8 +20,9 @@
  * Includes
  */
 
-#include "pty.h"
-#include "libuv_utils.h"
+#if !defined(_WIN32) && !defined(_PTY_DISABLED)
+
+#include "pty_unix.h"
 #include <godot_cpp/variant/callable.hpp>
 #include <uv.h>
 
@@ -29,7 +32,6 @@
 #include <unistd.h>
 
 #include <fcntl.h>
-#include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -339,14 +341,15 @@ Error PTYUnix::resize(int p_fd, int p_cols, int p_rows) {
 
   if (ioctl(fd, TIOCSWINSZ, &winp) == -1) {
     switch (errno) {
-    case EBADF:
-      RETURN_UV_ERR(UV_EBADF)
-    case EFAULT:
-      RETURN_UV_ERR(UV_EFAULT)
-    case EINVAL:
-      RETURN_UV_ERR(UV_EINVAL);
-    case ENOTTY:
-      RETURN_UV_ERR(UV_ENOTTY);
+    // TODO: Fixme!
+    //case EBADF:
+    //  RETURN_UV_ERR(UV_EBADF)
+    //case EFAULT:
+    //  RETURN_UV_ERR(UV_EFAULT)
+    //case EINVAL:
+    //  RETURN_UV_ERR(UV_EINVAL);
+    //case ENOTTY:
+    //  RETURN_UV_ERR(UV_ENOTTY);
     }
     ERR_PRINT("ioctl(2) failed");
     return FAILED;
@@ -673,3 +676,5 @@ void PTYUnix::_bind_methods() {
 }
 
 void PTYUnix::_init() {}
+
+#endif

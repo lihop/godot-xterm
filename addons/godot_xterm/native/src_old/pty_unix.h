@@ -1,8 +1,7 @@
-// SPDX-FileCopyrightText: 2021-2022 Leroy Hopson <godot-xterm@leroy.geek.nz>
+// SPDX-FileCopyrightText: 2021-2022, 2024 Leroy Hopson <godot-xterm@leroy.nix.nz>
 // SPDX-License-Identifier: MIT
 
-#ifndef GODOT_XTERM_PTY_H
-#define GODOT_XTERM_PTY_H
+#pragma once
 
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/callable.hpp>
@@ -30,5 +29,3 @@ protected:
 };
 
 } // namespace godot
-
-#endif // GODOT_XTERM_PTY_H

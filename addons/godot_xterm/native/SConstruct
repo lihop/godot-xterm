@@ -15,6 +15,8 @@ env.Append(CPPPATH=[
     "thirdparty/libtsm/src/tsm",
     "thirdparty/libtsm/external",
     "thirdparty/libtsm/src/shared",
+    'thirdparty/libuv/src',
+    'thirdparty/libuv/include',
 ])
 
 sources = Glob("src/*.cpp") + Glob("thirdparty/libtsm/src/tsm/*.c")
@@ -23,6 +25,11 @@ sources.append([
     'thirdparty/libtsm/src/shared/shl-htable.c',
 ])
 
+if env['platform'] == 'linux' or env['platform'] == 'macos':
+    env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
+else:
+    env.Append(CPPDEFINES=['_PTY_DISABLED'])
+
 if env["platform"] == "macos":
     library = env.SharedLibrary(
         "bin/libgodot-xterm.{}.{}.framework/libgodot-xterm.{}.{}".format(
@@ -30,6 +37,11 @@ if env["platform"] == "macos":
         ),
         source=sources,
     )
+    spawn_helper = env.Program(
+        "bin/spawn-helper",
+        source="thirdparty/node-pty/src/unix/spawn-helper.cc"
+    )
+    Default(spawn_helper)
 else:
     library = env.SharedLibrary(
         "bin/libgodot-xterm{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),

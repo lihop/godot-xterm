@@ -7,3 +7,6 @@
 [submodule "addons/godot_xterm/native/thirdparty/libtsm"]
 	path = addons/godot_xterm/native/thirdparty/libtsm
 	url = https://github.com/Aetf/libtsm
+[submodule "addons/godot_xterm/native/thirdparty/node-pty"]
+	path = addons/godot_xterm/native/thirdparty/node-pty
+	url = https://github.com/microsoft/node-pty

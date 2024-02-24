@@ -15,7 +15,6 @@ class BaseTest:
 	var mock_pty_native: MockPTY
 
 	func before_each():
-		var PTY = load("res://addons/godot_xterm/pty.gd")
 		pty = add_child_autofree(PTY.new())
 		mock_pty_native = autofree(MockPTY.new())
 		pty._pty_native = mock_pty_native

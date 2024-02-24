@@ -16,7 +16,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     *)
-      echo "Usage: ./build.sh [-t|--target <release|debug>]";
+      echo "Usage: ./build.sh [-t|--target <template_release|template_debug>]";
       exit 128
       shift
       ;;
@@ -24,8 +24,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Set defaults.
-target=${target:-debug}
-if [ "$target" == "debug" ]; then
+target=${target:-template_debug}
+if [ "$target" == "template_debug" ]; then
     debug_symbols="yes"
 else
     debug_symbols="no"
@@ -62,7 +62,7 @@ mkdir build || true
 cd build
 args="-DCMAKE_BUILD_TYPE=$target -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
 	-DCMAKE_OSX_ARCHITECTURES=$(uname -m)"
-if [ "$target" == "release" ]; then
+if [ "$target" == "template_release" ]; then
 	args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
 else
 	args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"
@@ -73,7 +73,7 @@ cmake --build build --config $target -j$nproc
 
 # Build libgodot-xterm.
 cd ${NATIVE_DIR}
-scons target=template_$target arch=$(uname -m) debug_symbols=$debug_symbols
+scons target=$target arch=$(uname -m) debug_symbols=$debug_symbols
 
 # Use Docker to build libgodot-xterm javascript.
 #if [ -x "$(command -v docker-compose)" ]; then

@@ -28,7 +28,6 @@ func _enter_tree():
 		match OS.get_name():
 			"Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD", "macOS":
 				pty_script = load("%s/pty.gd" % base_dir)
-		add_custom_type("PTY", "Node", pty_script, pty_icon)
 		terminal_panel = preload("./editor_plugins/terminal/terminal_panel.tscn").instantiate()
 		terminal_panel.editor_plugin = self
 		terminal_panel.editor_interface = get_editor_interface()
@@ -45,6 +44,5 @@ func _exit_tree():
 	remove_custom_type("Asciicast")
 
 	if pty_supported:
-		remove_custom_type("PTY")
 		remove_control_from_bottom_panel(terminal_panel)
 		terminal_panel.free()
