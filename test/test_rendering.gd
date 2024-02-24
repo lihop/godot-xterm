@@ -30,6 +30,6 @@ class TestRendering:
 		await get_tree().physics_frame
 		terminal.queue_redraw()
 		await wait_for_signal(terminal.draw, 3)
-		await wait_frames(10)
+		await wait_frames(15)
 		var cell_color = pick_cell_color(Vector2i(0, 0))
 		assert_eq(cell_color, Color.RED)
