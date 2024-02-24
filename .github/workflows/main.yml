@@ -271,9 +271,16 @@ jobs:
         uses: lihop/setup-godot@v2
         with:
           version: "4.2.1-stable"
-      - name: Install molten-vk
+      - name: Macos setup
         if: ${{ matrix.platform == 'macos' && matrix.test-type == 'rendering' }}
-        run: brew install molten-vk
+        run: |
+          # Some macos runners have metal which means we can use vulkan, others don't.
+          if system_profiler SPDisplaysDataType | grep -q "Metal"; then
+            echo RENDERING_DRIVER=vulkan >> .env
+            brew install molten-vk
+          else
+            echo RENDERING_DRIVER=opengl3 >> .env
+          fi
       - name: Install just
         uses: taiki-e/install-action@just
       - name: Install dependencies

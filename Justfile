@@ -3,7 +3,7 @@
 
 set dotenv-load
 
-godot := `echo "${GODOT:-godot}"`
+godot := `echo "${GODOT:-godot} --rendering-driver ${RENDERING_DRIVER:-vulkan}"`
 
 build:
     cd addons/godot_xterm/native && scons
