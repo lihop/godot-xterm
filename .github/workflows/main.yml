@@ -54,12 +54,7 @@ jobs:
       matrix:
         platform: [web, macos, windows]
         target: [release, debug]
-        bits: [64, 32]
-        exclude:
-          - platform: web
-            bits: 64
-          - platform: macos
-            bits: 32
+        arch: [wasm32, universal, x86_64, x86_32]
         include:
           - platform: web
             os: ubuntu-22.04
@@ -67,16 +62,23 @@ jobs:
             os: macos-12
           - platform: windows
             os: windows-2022
+        exclude:
           - platform: web
+            arch: x86_64
+          - platform: web
+            arch: x86_32
+          - platform: web
+            arch: universal
+          - platform: macos
             arch: wasm32
           - platform: macos
-            arch: universal
-          - platform: windows
-            bits: 64
             arch: x86_64
-          - platform: windows
-            bits: 32
+          - platform: macos
             arch: x86_32
+          - platform: windows
+            arch: wasm32
+          - platform: windows
+            arch: universal
     steps:
       - uses: actions/checkout@v4
         with:
@@ -117,20 +119,20 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         if: ${{ matrix.platform == 'windows' }}
         with:
-          arch: win${{ matrix.bits }}
+          arch: win${{ matrix.arch == 'x86_64' && '64' || '32' }}
       - name: Setup cmake
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: "3.23.2"
-          use-32bit: ${{ matrix.bits == 32 && matrix.platform == 'windows' }}
+          use-32bit: ${{ matrix.arch == 'x86_32' && matrix.platform == 'windows' }}
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         shell: bash
         env:
           PLATFORM: ${{ matrix.platform }}
           TARGET: ${{ matrix.target }}
-          BITS: ${{ matrix.bits }}
+          BITS: ${{ matrix.arch == 'x86_64' && 64 || 32 }}
         run: |
           cd addons/godot_xterm/native/thirdparty/libuv
           args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
@@ -238,11 +240,17 @@ jobs:
       fail-fast: false
       matrix:
         platform: [linux, macos, windows]
-        bits: [64, 32]
         test-type: [headless, rendering, unix]
+        arch: [x86_64, x86_32, universal]
         exclude:
+          - platform: linux
+            arch: universal
           - platform: macos
-            bits: 32
+            arch: x86_64
+          - platform: macos
+            arch: x86_32
+          - platform: windows
+            arch: universal
           - platform: windows
             test-type: rendering
           - platform: windows
@@ -254,20 +262,6 @@ jobs:
             os: macos-12
           - platform: windows
             os: windows-2022
-          - platform: linux
-            bits: 64
-            arch: x86_64
-          - platform: linux
-            bits: 32
-            arch: x86_32
-          - platform: macos
-            arch: universal
-          - platform: windows
-            bits: 64
-            arch: x86_64
-          - platform: windows
-            bits: 32
-            arch: x86_32
     steps:
       - uses: actions/checkout@v4
       - name: Setup Godot
