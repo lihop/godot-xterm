@@ -57,6 +57,13 @@ class TestKeyPressed:
 		await wait_for_signal(terminal.key_pressed, 1)
 		assert_signal_emitted(terminal, "key_pressed")
 
+	func test_key_pressed_emitted_only_once_per_key_input():
+		input_event.keycode = KEY_B
+		input_event.unicode = "b".unicode_at(0)
+
+		await wait_for_signal(terminal.key_pressed, 1)
+		assert_signal_emit_count(terminal, "key_pressed", 1)
+
 	func test_key_pressed_emits_interpreted_key_input_as_first_param():
 		input_event.keycode = KEY_UP
 		input_event.unicode = 0

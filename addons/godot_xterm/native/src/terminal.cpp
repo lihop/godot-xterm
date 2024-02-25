@@ -646,8 +646,6 @@ void Terminal::initialize_input() {
 	selection_timer->set_wait_time(0.05);
 	selection_timer->connect("timeout", Callable(this, "_on_selection_held"));
 	add_child(selection_timer, false, INTERNAL_MODE_FRONT);
-
-	connect("gui_input", Callable(this, "_on_gui_input"));
 }
 
 void Terminal::_handle_key_input(Ref<InputEventKey> event) {
