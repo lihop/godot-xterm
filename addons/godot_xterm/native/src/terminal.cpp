@@ -698,6 +698,8 @@ void Terminal::_handle_mouse_wheel(Ref<InputEventMouseButton> event) {
   case MOUSE_BUTTON_WHEEL_DOWN:
     scroll_func = &tsm_screen_sb_down;
     break;
+  default:
+	break;
   };
 
   if (scroll_func != nullptr) {
@@ -716,7 +718,7 @@ void Terminal::_handle_selection(Ref<InputEventMouse> event) {
 
   Ref<InputEventMouseButton> mb = event;
   if (mb.is_valid()) {
-    if (!mb->is_pressed() || !mb->get_button_index() == MOUSE_BUTTON_LEFT)
+    if (!mb->is_pressed() || mb->get_button_index() != MOUSE_BUTTON_LEFT)
       return;
 
     if (selecting) {
