@@ -111,7 +111,7 @@ Error PTY::fork(const String &file, const PackedStringArray &args, const String 
 
     #if defined(__linux__) || defined(__APPLE__)
     String helper_path = ProjectSettings::get_singleton()->globalize_path("res://addons/godot_xterm/native/bin/spawn-helper");
-    result = PTYUnix::fork(fork_file, args, PackedStringArray(), cwd, cols, rows, -1, -1, true, helper_path, Callable(this, "_on_exit"));
+    result = PTYUnix::fork(fork_file, args, _parse_env(fork_env), cwd, cols, rows, -1, -1, true, helper_path, Callable(this, "_on_exit"));
     #endif
 
     Error err = static_cast<Error>((int)result["error"]);
@@ -276,6 +276,18 @@ Dictionary PTY::_get_fork_env() const {
     }
 
     return os_env;
+}
+
+PackedStringArray PTY::_parse_env(const Dictionary &env) const {
+    PackedStringArray parsed_env;
+    PackedStringArray keys = PackedStringArray(env.keys());
+
+    for (int i = 0; i < keys.size(); i++) {
+        String key = keys[i];
+        parsed_env.push_back(key + "=" + String(env[key]));
+    }
+
+    return parsed_env;
 }
 
 void PTY::_on_exit(int exit_code, int exit_signal) {

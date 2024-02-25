@@ -82,6 +82,7 @@ namespace godot
 
     String _get_fork_file(const String &file) const;
     Dictionary _get_fork_env() const;
+    PackedStringArray _parse_env(const Dictionary &env) const;
     void _on_exit(int exit_code, int exit_signal);
     void _close();
 
