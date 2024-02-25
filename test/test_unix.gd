@@ -22,60 +22,10 @@ func test_fork_succeeds():
 	assert_eq(err, OK)
 
 
-func xtest_fork_has_output():
-	pty.call_deferred("fork", "exit")
+func test_fork_emits_data_received():
+	pty.call_deferred("fork", "sh", ["-c", "echo'"])
 	await wait_for_signal(pty.data_received, 1)
-	var expected := PackedByteArray(
-		[
-			101,
-			120,
-			101,
-			99,
-			118,
-			112,
-			40,
-			51,
-			41,
-			32,
-			102,
-			97,
-			105,
-			108,
-			101,
-			100,
-			46,
-			58,
-			32,
-			78,
-			111,
-			32,
-			115,
-			117,
-			99,
-			104,
-			32,
-			102,
-			105,
-			108,
-			101,
-			32,
-			111,
-			114,
-			32,
-			100,
-			105,
-			114,
-			101,
-			99,
-			116,
-			111,
-			114,
-			121,
-			13,
-			10
-		]
-	)
-	assert_signal_emitted_with_parameters(pty, "data_received", [expected])
+	assert_signal_emitted(pty, "data_received")
 
 
 func test_open_succeeds():
@@ -90,13 +40,13 @@ func test_open_creates_a_new_pty():
 	assert_eq(new_num_pts, num_pts + 1)
 
 
-func xtest_open_pty_has_correct_name():
+func test_open_pty_has_correct_name():
 	var original_pts = helper.get_pts()
-	var result = pty.open()
+	pty.open()
 	var new_pts = helper.get_pts()
 	for pt in original_pts:
 		new_pts.erase(pt)
-	#assert_eq(result[1].pty, new_pts[0])
+	assert_eq(pty.get_pts(), new_pts[0])
 
 
 func xtest_open_pty_has_correct_win_size():
@@ -147,8 +97,6 @@ func test_emits_exit_code_on_failure():
 
 
 func test_emits_exited_on_kill():
-	if OS.get_name() == "macOS":
-		return
 	pty.call("fork", "yes")
 	await wait_frames(1)
 	pty.call_deferred("kill", PTY.SIGNAL_SIGKILL)
@@ -157,8 +105,6 @@ func test_emits_exited_on_kill():
 
 
 func test_emits_exited_with_signal():
-	if OS.get_name() == "macOS":
-		return
 	pty.call("fork", "yes")
 	await wait_frames(1)
 	pty.call_deferred("kill", PTY.SIGNAL_SIGSEGV)
