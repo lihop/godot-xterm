@@ -27,6 +27,7 @@ void Terminal::_bind_methods()
 {
     ADD_SIGNAL(MethodInfo("data_sent", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
     ADD_SIGNAL(MethodInfo("key_pressed", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data"), PropertyInfo(Variant::OBJECT, "event")));
+    ADD_SIGNAL(MethodInfo("size_changed", PropertyInfo(Variant::VECTOR2I, "new_size")));
 
 	ClassDB::bind_method(D_METHOD("get_cols"), &Terminal::get_cols);
 	ClassDB::bind_method(D_METHOD("set_cols", "cols"), &Terminal::set_cols);
@@ -443,6 +444,9 @@ void Terminal::update_sizes(bool force)
 
 	update_shader_parameters(back_material);
 	update_shader_parameters(fore_material);
+
+	if (prev_cols != cols || prev_rows != rows)
+		emit_signal("size_changed", Vector2i(cols, rows));
 
 	refresh();
 }
