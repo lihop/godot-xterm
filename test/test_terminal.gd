@@ -9,6 +9,7 @@ var terminal: Terminal
 func before_each():
 	terminal = Terminal.new()
 	terminal.size = Vector2(400, 200)
+	watch_signals(terminal)
 	add_child_autofree(terminal)
 
 
@@ -76,3 +77,17 @@ class TestWrite:
 	func test_returns_response_to_multiple_queries_among_other_data():
 		var response = terminal.write("hello\r\nworld\u001b[6nother\r\ndata\u001b[5ntest")
 		assert_eq(response, "\u001b[2;6R\u001b[0n")
+
+	func test_data_sent_emitted_on_query():
+		terminal.write("\u001b[6n")
+		assert_signal_emitted(terminal, "data_sent")
+
+	func test_data_sent_emitted_with_response():
+		terminal.write("\u001b[6n")
+		assert_signal_emitted_with_parameters(
+			terminal, "data_sent", ["\u001b[1;1R".to_utf8_buffer()]
+		)
+
+	func test_data_sent_not_emitted_when_empty_string_written():
+		terminal.write("")
+		assert_signal_emit_count(terminal, "data_sent", 0)

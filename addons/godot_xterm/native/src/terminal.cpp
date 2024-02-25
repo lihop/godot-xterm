@@ -25,6 +25,7 @@ using namespace godot;
 
 void Terminal::_bind_methods()
 {
+    ADD_SIGNAL(MethodInfo("data_sent", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
     ADD_SIGNAL(MethodInfo("key_pressed", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data"), PropertyInfo(Variant::OBJECT, "event")));
 
 	ClassDB::bind_method(D_METHOD("get_cols"), &Terminal::get_cols);
@@ -229,6 +230,8 @@ void Terminal::_write_cb(tsm_vte *vte, const char *u8, size_t len, void *data)
 			term->emit_signal("key_pressed", data.get_string_from_utf8(), term->last_input_event_key);
 			term->last_input_event_key.unref();
 		}
+
+		term->emit_signal("data_sent", data);
 	}
 }
 
