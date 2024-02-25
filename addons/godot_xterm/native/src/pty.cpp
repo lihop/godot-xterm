@@ -55,6 +55,8 @@ void PTY::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("fork", "file", "args", "cwd", "cols", "rows"), &PTY::fork, DEFVAL(""), DEFVAL(PackedStringArray()), DEFVAL("."), DEFVAL(80), DEFVAL(24));
 	ClassDB::bind_method(D_METHOD("open", "cols", "rows"), &PTY::open, DEFVAL(80), DEFVAL(24));
 	ClassDB::bind_method(D_METHOD("write", "data"), &PTY::write);
+	ClassDB::bind_method(D_METHOD("resize", "cols", "rows"), &PTY::resize);
+	ClassDB::bind_method(D_METHOD("resizev", "size"), &PTY::resizev);
 	ClassDB::bind_method(D_METHOD("kill", "signal"), &PTY::kill);
 
 	ClassDB::bind_method(D_METHOD("_on_exit", "exit_code", "signal_code"), &PTY::_on_exit);
@@ -156,6 +158,9 @@ Error PTY::open(const int cols, const int rows) {
 }
 
 void PTY::resize(const int cols, const int rows) const {
+    #if defined(__linux__) || defined(__APPLE__)
+    PTYUnix::resize(fd, cols, rows);
+    #endif
 }
 
 void PTY::write(const Variant &data) const {

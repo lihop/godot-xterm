@@ -467,7 +467,7 @@ Dictionary PTYUnix::open(
   return result;
 }
 
-void resize(
+void PTYUnix::resize(
   const int &p_fd,
   const int &p_cols,
   const int &p_rows

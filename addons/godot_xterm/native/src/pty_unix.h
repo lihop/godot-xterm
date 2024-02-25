@@ -29,5 +29,11 @@ namespace godot
       const int &p_cols,
       const int &p_rows
     );
+
+    static void resize(
+      const int &p_fd,
+      const int &p_cols,
+      const int &p_rows
+    );
   };
 } // namespace godot
