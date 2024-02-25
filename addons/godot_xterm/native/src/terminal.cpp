@@ -25,6 +25,8 @@ using namespace godot;
 
 void Terminal::_bind_methods()
 {
+    ADD_SIGNAL(MethodInfo("key_pressed", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data"), PropertyInfo(Variant::OBJECT, "event")));
+
 	ClassDB::bind_method(D_METHOD("get_cols"), &Terminal::get_cols);
 	ClassDB::bind_method(D_METHOD("set_cols", "cols"), &Terminal::set_cols);
 	ClassDB::add_property("Terminal", PropertyInfo(Variant::INT, "cols"), "set_cols", "get_cols");
@@ -218,10 +220,15 @@ void Terminal::_write_cb(tsm_vte *vte, const char *u8, size_t len, void *data)
 	Terminal *term = static_cast<Terminal *>(data);
 
 	if (len > 0) {
-		size_t old_size = term->response.size();
-		term->response.resize(old_size + len);
-		uint8_t *dest = term->response.ptrw() + old_size;
-		memcpy(dest, u8, len);
+		PackedByteArray data;
+		data.resize(len);
+		memcpy(data.ptrw(), u8, len);
+		term->response.append_array(data);
+
+		if (term->last_input_event_key.is_valid()) {
+			term->emit_signal("key_pressed", data.get_string_from_utf8(), term->last_input_event_key);
+			term->last_input_event_key.unref();
+		}
 	}
 }
 

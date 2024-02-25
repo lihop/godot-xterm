@@ -60,3 +60,19 @@ class TestCursorPos:
 	func test_get_cursor_pos_y():
 		terminal.write("_".repeat(terminal.cols + 1))
 		assert_eq(terminal.get_cursor_pos().y, 1)
+
+
+class TestWrite:
+	extends TerminalTest
+
+	func test_returns_response_when_input_contains_query():
+		var response = terminal.write("\u001b[6n")  # Query cursor position.
+		assert_eq(response, "\u001b[1;1R")
+
+	func test_returns_response_to_multiple_queries():
+		var response = terminal.write("\u001b[6n\u001b[5n")  # Query cursor position and status.
+		assert_eq(response, "\u001b[1;1R\u001b[0n")
+
+	func test_returns_response_to_multiple_queries_among_other_data():
+		var response = terminal.write("hello\r\nworld\u001b[6nother\r\ndata\u001b[5ntest")
+		assert_eq(response, "\u001b[2;6R\u001b[0n")
