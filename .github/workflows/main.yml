@@ -234,13 +234,12 @@ jobs:
           path: docs/demo
 
   test:
-    name: Test (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.test-type }}, debug)
+    name: Test (${{ matrix.platform }}, ${{ matrix.arch }}, debug)
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         platform: [linux, macos, windows]
-        test-type: [headless, rendering, unix]
         arch: [x86_64, x86_32, universal]
         exclude:
           - platform: linux
@@ -251,10 +250,6 @@ jobs:
             arch: x86_32
           - platform: windows
             arch: universal
-          - platform: windows
-            test-type: rendering
-          - platform: windows
-            test-type: unix
         include:
           - platform: linux
             os: ubuntu-22.04
@@ -269,7 +264,7 @@ jobs:
         with:
           version: "4.2.1-stable"
       - name: Macos setup
-        if: ${{ matrix.platform == 'macos' && matrix.test-type == 'rendering' }}
+        if: ${{ matrix.platform == 'macos' }}
         run: |
           # Some macos runners have metal which means we can use vulkan, others don't.
           if system_profiler SPDisplaysDataType | grep -q "Metal"; then
@@ -303,10 +298,10 @@ jobs:
       - name: Test
         shell: bash
         run: |
-          if [ "${{ matrix.test-type }}" = "headless" ]; then
+          if [ "${{ matrix.platform }}" = "windows" ]; then
             just test
           else
-            just test-${{ matrix.test-type }}
+            just test-all
           fi
 
   merge-artifacts:
