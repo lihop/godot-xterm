@@ -19,6 +19,7 @@ using namespace godot;
 
 void _alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf);
 void _read_cb(uv_stream_t *pipe, ssize_t nread, const uv_buf_t *buf);
+void _write_cb(uv_write_t *req, int status) { std::free(req); }
 void _close_cb(uv_handle_t *handle);
 
 void PTY::_bind_methods() {
@@ -158,6 +159,31 @@ void PTY::resize(const int cols, const int rows) const {
 }
 
 void PTY::write(const Variant &data) const {
+    PackedByteArray bytes;
+
+	switch (data.get_type())
+	{
+	case Variant::STRING:
+		bytes = ((String)data).to_utf8_buffer();
+		break;
+	case Variant::PACKED_BYTE_ARRAY:
+		bytes = data;
+		break;
+	default:
+		ERR_FAIL_MSG("Data must be a String or PackedByteArray.");
+	}
+
+    if (status == STATUS_CONNECTED) {
+        #if defined(__linux__) || defined(__APPLE__)
+        uv_buf_t buf;
+        buf.base = (char *)bytes.ptr();
+        buf.len = bytes.size();
+        uv_write_t *req = (uv_write_t *)malloc(sizeof(uv_write_t));
+        req->data = (void *)buf.base;
+        uv_write(req, (uv_stream_t *)&pipe, &buf, 1, _write_cb);
+        uv_run(uv_default_loop(), UV_RUN_NOWAIT);
+        #endif
+    }
 }
 
 void PTY::_process(double delta) {
