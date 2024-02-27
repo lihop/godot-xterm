@@ -30,12 +30,7 @@ void Terminal::_bind_methods()
     ADD_SIGNAL(MethodInfo("size_changed", PropertyInfo(Variant::VECTOR2I, "new_size")));
 
 	ClassDB::bind_method(D_METHOD("get_cols"), &Terminal::get_cols);
-	ClassDB::bind_method(D_METHOD("set_cols", "cols"), &Terminal::set_cols);
-	ClassDB::add_property("Terminal", PropertyInfo(Variant::INT, "cols"), "set_cols", "get_cols");
-
 	ClassDB::bind_method(D_METHOD("get_rows"), &Terminal::get_rows);
-	ClassDB::bind_method(D_METHOD("set_rows", "rows"), &Terminal::set_rows);
-	ClassDB::add_property("Terminal", PropertyInfo(Variant::INT, "rows"), "set_rows", "get_rows");
 
 	ClassDB::bind_method(D_METHOD("get_max_scrollback"), &Terminal::get_max_scrollback);
 	ClassDB::bind_method(D_METHOD("set_max_scrollback", "max_scrollback"), &Terminal::set_max_scrollback);
@@ -119,19 +114,9 @@ Terminal::~Terminal()
 	cleanup_rendering();
 }
 
-void Terminal::set_cols(const int p_cols)
-{
-	cols = p_cols;
-}
-
 int Terminal::get_cols() const
 {
 	return cols;
-}
-
-void Terminal::set_rows(const int p_rows)
-{
-	rows = p_rows;
 }
 
 int Terminal::get_rows() const
@@ -369,8 +354,23 @@ bool Terminal::_set(const StringName &property, const Variant &value)
 	return false;
 }
 
+bool Terminal::_get(const StringName &p_name, Variant &r_value) {
+	if (p_name == String("cols")) {
+		r_value = cols;
+		return true;
+	}
+	if (p_name == String("rows")) {
+		r_value = rows;
+		return true;
+	}
+	return false;
+}
+
 void Terminal::_get_property_list(List<PropertyInfo> *p_list) const
 {
+	p_list->push_back(PropertyInfo(Variant::INT, "cols", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_READ_ONLY));
+	p_list->push_back(PropertyInfo(Variant::INT, "rows", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_READ_ONLY));
+
 	p_list->push_back(PropertyInfo(Variant::NIL, "Theme Overrides", PROPERTY_HINT_NONE, "theme_override_", PROPERTY_USAGE_GROUP));
 	p_list->push_back(PropertyInfo(Variant::NIL, "Colors", PROPERTY_HINT_NONE, "theme_override_colors/", PROPERTY_USAGE_SUBGROUP));
 	for (int i = 0; i < TSM_COLOR_NUM; ++i)

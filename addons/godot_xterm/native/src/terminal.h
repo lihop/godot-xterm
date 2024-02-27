@@ -50,10 +50,7 @@ namespace godot
     Terminal();
     ~Terminal();
 
-    void set_cols(const int p_cols);
     int get_cols() const;
-
-    void set_rows(const int p_rows);
     int get_rows() const;
 
     Vector2i get_cursor_pos() const;
@@ -150,6 +147,7 @@ namespace godot
     void cleanup_rendering();
 
     bool _set(const StringName &p_name, const Variant &p_value);
+    bool _get(const StringName &p_name, Variant &r_value);
     void _get_property_list(List<PropertyInfo> *p_list) const;
     bool _is_valid_color_name(const String &p_name);
     bool _is_valid_font_type(const String &p_name);
