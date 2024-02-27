@@ -302,16 +302,16 @@ void Terminal::_bell_cb(struct tsm_vte *vte, void *data)
 	}
 }
 
-bool Terminal::_set(const StringName &property, const Variant &value)
+bool Terminal::_set(const StringName &p_name, const Variant &p_value)
 {
-	if (property.begins_with("theme_override_colors/"))
+	if (p_name.begins_with("theme_override_colors/"))
 	{
-		String color_name = property.split("/")[1];
+		String color_name = p_name.split("/")[1];
 		if (_is_valid_color_name(color_name))
 		{
-			if (value.get_type() != Variant::Type::NIL)
+			if (p_value.get_type() != Variant::Type::NIL)
 			{
-				add_theme_color_override(color_name, value);
+				add_theme_color_override(color_name, p_value);
 			}
 			else
 			{
@@ -321,14 +321,14 @@ bool Terminal::_set(const StringName &property, const Variant &value)
 		}
 	}
 
-	if (property.begins_with("theme_override_fonts/"))
+	if (p_name.begins_with("theme_override_fonts/"))
 	{
-		String font_type = property.split("/")[1];
+		String font_type = p_name.split("/")[1];
 		if (_is_valid_font_type(font_type))
 		{
-			if (value.get_type() != Variant::Type::NIL)
+			if (p_value.get_type() != Variant::Type::NIL)
 			{
-				add_theme_font_override(font_type, value);
+				add_theme_font_override(font_type, p_value);
 			}
 			else
 			{
@@ -338,11 +338,11 @@ bool Terminal::_set(const StringName &property, const Variant &value)
 		}
 	}
 
-	if (property == String("theme_override_font_sizes/font_size"))
+	if (p_name == String("theme_override_font_sizes/font_size"))
 	{
-		if (value.get_type() != Variant::Type::NIL)
+		if (p_value.get_type() != Variant::Type::NIL)
 		{
-			add_theme_font_size_override("font_size", value == Variant(0) ? Variant(1) : value);
+			add_theme_font_size_override("font_size", p_value == Variant(0) ? Variant(1) : p_value);
 		}
 		else
 		{
