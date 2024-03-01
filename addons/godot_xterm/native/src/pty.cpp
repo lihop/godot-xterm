@@ -63,8 +63,6 @@ void PTY::_bind_methods() {
 }
 
 PTY::PTY() {
-    status = STATUS_NONE;
-
     env["TERM"] = "xterm-256color";
     env["COLORTERM"] = "truecolor";
 
@@ -131,7 +129,7 @@ Error PTY::fork(const String &file, const PackedStringArray &args, const String 
     }
     #endif
 
-    status = STATUS_CONNECTED;
+    status = STATUS_OPEN;
     set_process_internal(true);
 
     return OK;
@@ -181,7 +179,7 @@ void PTY::write(const Variant &data) const {
 		ERR_FAIL_MSG("Data must be a String or PackedByteArray.");
 	}
 
-    if (status == STATUS_CONNECTED) {
+    if (status == STATUS_OPEN) {
         #if defined(__linux__) || defined(__APPLE__)
         uv_buf_t buf;
         buf.base = (char *)bytes.ptr();
@@ -198,7 +196,11 @@ void PTY::_notification(int p_what) {
     switch (p_what)
     {
     case  NOTIFICATION_INTERNAL_PROCESS:
-        _run(UV_RUN_NOWAIT);
+        switch (status)
+        {
+        case STATUS_OPEN:
+            _run(UV_RUN_NOWAIT);
+        }
         break;
     }
 }
@@ -214,22 +216,21 @@ void PTY::_run(uv_run_mode mode) {
 }
 
 void PTY::_close() {
-    set_process_internal(false);
-    status = STATUS_NONE;
-
     #if defined(__linux__) || defined(__APPLE__)
     if (!uv_is_closing((uv_handle_t *)&pipe)) {
         uv_close((uv_handle_t *)&pipe, _close_cb);
+        uv_run(uv_default_loop(), UV_RUN_ONCE);
     }
-
-    uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 
     if (fd > 0) close(fd);
     if (pid > 0) kill(SIGNAL_SIGHUP);
+    #endif
 
     fd = -1;
     pid = -1;
-    #endif
+
+    set_process_internal(false);
+    status = STATUS_CLOSED;
 } 
 
 String PTY::_get_fork_file(const String &file) const {
@@ -327,7 +328,7 @@ void _read_cb(uv_stream_t *pipe, ssize_t nread, const uv_buf_t *buf) {
         // Can happen when the process exits.
         // As long as PTY has caught it, we should be fine.
         uv_read_stop(pipe);
-        pty->status = PTY::Status::STATUS_NONE;
+        pty->status = PTY::Status::STATUS_CLOSED;
         return;
       default:
         pty->status = PTY::Status::STATUS_ERROR;
@@ -350,7 +351,7 @@ void _read_cb(uv_stream_t *pipe, ssize_t nread, const uv_buf_t *buf) {
 
 void _close_cb(uv_handle_t *pipe) {
     PTY *pty = static_cast<PTY *>(pipe->data);
-    pty->status = PTY::Status::STATUS_NONE;
+    pty->status = PTY::Status::STATUS_CLOSED;
 }
 
 Error PTY::_pipe_open(const int fd) {

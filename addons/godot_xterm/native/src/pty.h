@@ -33,9 +33,8 @@ namespace godot
     };
 
     enum Status {
-      STATUS_NONE,
-      STATUS_CONNECTING,
-      STATUS_CONNECTED,
+      STATUS_CLOSED,
+      STATUS_OPEN,
       STATUS_PAUSED,
       STATUS_ERROR,
     };
@@ -43,7 +42,7 @@ namespace godot
     PTY();
     ~PTY();
 
-    Status status = STATUS_NONE;
+    Status status = STATUS_CLOSED;
 
     int get_cols() const;
     int get_rows() const;
