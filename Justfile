@@ -6,7 +6,7 @@ set dotenv-load
 godot := `echo "${GODOT:-godot} --rendering-driver ${RENDERING_DRIVER:-vulkan}"`
 
 build:
-    cd addons/godot_xterm/native && scons
+    cd addons/godot_xterm/native && scons debug_symbols=yes
 
 install:
     {{godot}} --headless -s plug.gd install
