@@ -131,6 +131,9 @@ Error PTY::fork(const String &file, const PackedStringArray &args, const String 
     }
     #endif
 
+    status = STATUS_CONNECTED;
+    set_process_internal(true);
+
     return OK;
 }
 
@@ -191,19 +194,31 @@ void PTY::write(const Variant &data) const {
     }
 }
 
-void PTY::_process(double delta) {
+void PTY::_notification(int p_what) {
+    switch (p_what)
+    {
+    case  NOTIFICATION_INTERNAL_PROCESS:
+        _run(UV_RUN_NOWAIT);
+        break;
+    }
+}
+
+void PTY::_run(uv_run_mode mode) {
   #if defined(__linux__) || defined(__APPLE__)
   if (status == STATUS_CONNECTED) {
     if (!uv_is_active((uv_handle_t *)&pipe)) {
         uv_read_start((uv_stream_t *)&pipe, _alloc_buffer, _read_cb);
     }
 
-    uv_run(uv_default_loop(), UV_RUN_NOWAIT);
+    uv_run(uv_default_loop(), mode);
   }
   #endif
 }
 
 void PTY::_close() {
+    set_process_internal(false);
+    status = STATUS_NONE;
+
     #if defined(__linux__) || defined(__APPLE__)
     if (!uv_is_closing((uv_handle_t *)&pipe)) {
         uv_close((uv_handle_t *)&pipe, _close_cb);
@@ -216,7 +231,6 @@ void PTY::_close() {
 
     fd = -1;
     pid = -1;
-    status = STATUS_NONE;
     #endif
 } 
 
@@ -350,7 +364,6 @@ Error PTY::_pipe_open(const int fd) {
     ERR_FAIL_UV_ERR(uv_stream_set_blocking((uv_stream_t *)&pipe, false));
     ERR_FAIL_UV_ERR(uv_read_start((uv_stream_t *)&pipe, _alloc_buffer, _read_cb));
 
-    status = STATUS_CONNECTED;
     return OK;
 }
 

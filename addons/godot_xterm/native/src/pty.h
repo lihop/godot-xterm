@@ -63,7 +63,8 @@ namespace godot
     void resizev(const Vector2i &size) const { resize(size.x, size.y); };
     void write(const Variant &data) const;
 
-    void _process(double delta) override;
+    void _notification(int p_what);
+    void _run(uv_run_mode mode);
 
   protected:
     static void _bind_methods();
