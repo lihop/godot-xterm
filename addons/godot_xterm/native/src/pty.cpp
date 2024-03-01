@@ -138,11 +138,11 @@ Error PTY::fork(const String &file, const PackedStringArray &args, const String 
 }
 
 void PTY::kill(const int signal) {
-#if (defined(__linux__) || defined(__APPLE__)) && !defined(_PTY_DISABLED)
+    #if (defined(__linux__) || defined(__APPLE__)) && !defined(_PTY_DISABLED)
     if (pid > 0) {
         uv_kill(pid, signal);
     }
-#endif
+    #endif
 }
 
 Error PTY::open(const int cols, const int rows) {
@@ -204,15 +204,13 @@ void PTY::_notification(int p_what) {
 }
 
 void PTY::_run(uv_run_mode mode) {
-  #if defined(__linux__) || defined(__APPLE__)
-  if (status == STATUS_CONNECTED) {
+    #if defined(__linux__) || defined(__APPLE__)
     if (!uv_is_active((uv_handle_t *)&pipe)) {
         uv_read_start((uv_stream_t *)&pipe, _alloc_buffer, _read_cb);
     }
 
     uv_run(uv_default_loop(), mode);
-  }
-  #endif
+    #endif
 }
 
 void PTY::_close() {
@@ -243,23 +241,21 @@ String PTY::_get_fork_file(const String &file) const {
     }
 
     #if defined(__linux__)
-        return "sh";
-    #endif
-    #if defined(__APPLE__)
-        return "zsh";
-    #endif
-    #if defined(_WIN32)
-        return "cmd.exe";
-    #endif
-
+    return "sh";
+    #elif defined(__APPLE__)
+    return "zsh";
+    #elif defined(_WIN32)
+    return "cmd.exe";
+    #else
     return "";
+    #endif
 }
 
 Dictionary PTY::_get_fork_env() const {
     if (!use_os_env) return env;
 
     #if defined(_PTY_DISABLED)
-        return env;
+    return env;
     #endif
 
     Dictionary os_env;
