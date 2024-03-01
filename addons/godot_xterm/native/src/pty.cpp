@@ -72,10 +72,6 @@ PTY::PTY() {
     #endif
 }
 
-PTY::~PTY() {
-    _close();
-}
-
 int PTY::get_cols() const {
    return cols;
 }
@@ -201,6 +197,9 @@ void PTY::_notification(int p_what) {
         case STATUS_OPEN:
             _run(UV_RUN_NOWAIT);
         }
+        break;
+    case NOTIFICATION_EXIT_TREE:
+        _close();
         break;
     }
 }

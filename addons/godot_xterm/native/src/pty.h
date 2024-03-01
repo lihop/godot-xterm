@@ -40,7 +40,6 @@ namespace godot
     };
 
     PTY();
-    ~PTY();
 
     Status status = STATUS_CLOSED;
 
