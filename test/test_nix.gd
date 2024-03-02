@@ -1,4 +1,4 @@
-class_name UnixTest extends GutTest
+class_name NixTest extends GutTest
 
 var pty: PTY
 var helper: Helper
@@ -110,6 +110,15 @@ func test_emits_exited_with_signal():
 	pty.call_deferred("kill", PTY.SIGNAL_SIGSEGV)
 	await wait_for_signal(pty.exited, 1)
 	assert_signal_emitted_with_parameters(pty, "exited", [0, PTY.SIGNAL_SIGSEGV])
+
+
+# Run the same tests, but with use_threads = false.
+class TestNoThreads:
+	extends NixTest
+
+	func before_each():
+		super.before_each()
+		pty.use_threads = false
 
 
 class Helper:
