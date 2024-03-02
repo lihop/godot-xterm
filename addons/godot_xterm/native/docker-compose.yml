@@ -56,4 +56,9 @@ services:
       - /bin/bash
       - -c
       - |
-        scons target=template_$${TARGET:-debug} arch=$${ARCH:-x86_64}
+        if [ -z "$$DEBUG_SYMBOLS" ]; then
+          if [ "$$TARGET" == "debug" ]; then
+            DEBUG_SYMBOLS=yes
+          fi
+        fi
+        scons target=template_$${TARGET:-debug} arch=$${ARCH:-x86_64} debug_symbols=$${DEBUG_SYMBOLS:-no}
