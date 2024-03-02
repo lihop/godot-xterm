@@ -100,6 +100,7 @@ namespace godot
     void _thread_func();
 
     #if defined(__linux__) || defined(__APPLE__)
+    uv_loop_t loop;
     uv_pipe_t pipe;
     Error _pipe_open(const int fd);
     #endif

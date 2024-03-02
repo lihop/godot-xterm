@@ -86,8 +86,9 @@ PTY::PTY() {
     env["COLORTERM"] = "truecolor";
 
     #if defined(__linux__) || defined(__APPLE__)
-    uv_async_init(uv_default_loop(), &async_handle, [](uv_async_t *handle) {});
-    uv_pipe_init(uv_default_loop(), &pipe, false);
+    uv_loop_init(&loop);
+    uv_async_init(&loop, &async_handle, [](uv_async_t *handle) {});
+    uv_pipe_init(&loop, &pipe, false);
     pipe.data = this;
     #endif
 }
@@ -214,7 +215,7 @@ void PTY::write(const Variant &data) const {
         uv_write_t *req = (uv_write_t *)malloc(sizeof(uv_write_t));
         req->data = (void *)buf.base;
         uv_write(req, (uv_stream_t *)&pipe, &buf, 1, _write_cb);
-        uv_run(uv_default_loop(), UV_RUN_NOWAIT);
+        uv_run((uv_loop_t*)&loop, UV_RUN_NOWAIT);
         #endif
     }
 }
@@ -225,7 +226,7 @@ void PTY::_notification(int p_what) {
     case  NOTIFICATION_INTERNAL_PROCESS:
     {
         #if defined(__linux__) || defined(__APPLE__)
-        if (!use_threads) uv_run(uv_default_loop(), UV_RUN_NOWAIT);
+        if (!use_threads) uv_run(&loop, UV_RUN_NOWAIT);
         #endif
 
         buffer_write_mutex->lock();
@@ -248,7 +249,7 @@ void PTY::_thread_func() {
     while (!stop_thread.is_set()) {
         if (buffer.size() < BUFFER_LIMIT) {
             #if defined(__linux__) || defined(__APPLE__)
-            uv_run(uv_default_loop(), UV_RUN_ONCE);
+            uv_run(&loop, UV_RUN_ONCE);
             #endif
         } else {
             buffer_cleared->wait();
@@ -276,7 +277,8 @@ void PTY::_close() {
         uv_close((uv_handle_t *)&async_handle, _close_cb);
     }
 
-    uv_run(uv_default_loop(), UV_RUN_NOWAIT);
+    uv_run(&loop, UV_RUN_NOWAIT);
+    uv_loop_close(&loop);
 
     if (fd > 0) close(fd);
     if (pid > 0) kill(SIGNAL_SIGHUP);
