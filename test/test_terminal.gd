@@ -80,11 +80,6 @@ class TestInterface:
 
 	# Enums.
 
-	# TODO: Implement SelectionMode enum.
-	func xtest_has_enum_selection_mode():
-		assert_eq(described_class.SELECTION_MODE_NONE, 0)
-		assert_eq(described_class.SELECTION_MODE_POINTER, 1)
-
 	# TODO: Implement UpdateMode enum.
 	func xtest_has_enum_update_mode():
 		assert_eq(described_class.UPDATE_MODE_DISABLED, 0)
