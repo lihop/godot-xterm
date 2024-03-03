@@ -234,13 +234,14 @@ jobs:
           path: docs/demo
 
   test:
-    name: Test (${{ matrix.platform }}, ${{ matrix.arch }}, debug)
+    name: Test (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.godot-version }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         platform: [linux, macos, windows]
         arch: [x86_64, x86_32, universal]
+        godot-version: ["v4.2-stable", "v4.2.1-stable"]
         exclude:
           - platform: linux
             arch: universal
@@ -262,7 +263,7 @@ jobs:
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
-          version: "4.2.1-stable"
+          version: ${{ matrix.godot-version }}
       - name: Macos setup
         if: ${{ matrix.platform == 'macos' }}
         run: |
@@ -299,9 +300,16 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.platform }}" = "windows" ]; then
-            just test
+            just test | tee output.log
           else
-            just test-all
+            just test-all | tee output.log
+          fi
+
+          # This step often passes when it shouldn't, due to GUT not failing on script errors
+          # (see: https://github.com/bitwes/Gut/issues/210). Therefore, we check the output
+          # for expected (and unexpected) strings.
+          if 'SCRIPT_ERROR:' output.log; then
+            exit 1
           fi
 
   merge-artifacts:

@@ -29,7 +29,9 @@ runs:
       uses: actions/cache@v3
       id: cache
       with:
-        path: addons/godot_xterm/native/thirdparty
+        path: |
+          addons/godot_xterm/native/thirdparty/libuv
+          addons/godot_xterm/native/thirdparty/node-pty
         key: thirdparty-${{ inputs.platform }}-${{ inputs.arch }}-${{ inputs.target }}-${{ steps.hash.outputs.hash }}-${{ steps.hash.outputs.build-files-hash }}
         restore-keys: |
           thirdparty-${{ inputs.platform }}-${{ inputs.arch }}-${{ inputs.target }}-${{ steps.hash.outputs.hash }}-
