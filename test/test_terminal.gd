@@ -32,8 +32,7 @@ class TestInterface:
 	func test_has_property_blink_off_time():
 		assert_has_property_with_default_value("blink_off_time", 0.3)
 
-	# TODO: Implement copy_on_selection property.
-	func xtest_has_property_copy_on_selection():
+	func test_has_property_copy_on_selection():
 		assert_has_property_with_default_value("copy_on_selection", false)
 
 	# TODO: Implement update_mode property.
@@ -53,8 +52,7 @@ class TestInterface:
 	func xtest_has_method_copy_all():
 		assert_has_method_with_return_type("copy_all", TYPE_STRING)
 
-	# TODO: Implement copy_selection() method.
-	func xtest_has_method_copy_selection():
+	func test_has_method_copy_selection():
 		assert_has_method_with_return_type("copy_selection", TYPE_STRING)
 
 	func test_has_method_get_cols():

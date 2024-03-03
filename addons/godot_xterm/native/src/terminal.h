@@ -71,6 +71,10 @@ namespace godot
     void set_blink_off_time(const double p_blink_off_time);
     double get_blink_off_time() const;
 
+    String copy_selection();
+    void set_copy_on_selection(const bool p_enable);
+    bool get_copy_on_selection() const;
+
     void set_inverse_mode(const int mode);
     int get_inverse_mode() const;
 
@@ -88,6 +92,8 @@ namespace godot
 
     double blink_on_time;
     double blink_off_time;
+
+    bool copy_on_selection;
 
     InverseMode inverse_mode;
 

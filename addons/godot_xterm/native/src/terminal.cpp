@@ -17,6 +17,10 @@
 #include <libtsm.h>
 #include <xkbcommon/xkbcommon-keysyms.h>
 
+#if defined(__linux)
+#include <godot_cpp/classes/display_server.hpp>
+#endif
+
 #define SHADERS_DIR "res://addons/godot_xterm/shaders/"
 #define FOREGROUND_SHADER_PATH SHADERS_DIR "foreground.gdshader"
 #define BACKGROUND_SHADER_PATH SHADERS_DIR "background.gdshader"
@@ -64,6 +68,12 @@ void Terminal::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_blink_off_time", "time"), &Terminal::set_blink_off_time);
 	ClassDB::add_property("Terminal", PropertyInfo(Variant::FLOAT, "blink_off_time"), "set_blink_off_time", "get_blink_off_time");
 
+	// Selection copying.
+	ClassDB::bind_method(D_METHOD("copy_selection"), &Terminal::copy_selection);
+	ClassDB::bind_method(D_METHOD("set_copy_on_selection", "enabled"), &Terminal::set_copy_on_selection);
+	ClassDB::bind_method(D_METHOD("get_copy_on_selection"), &Terminal::get_copy_on_selection);
+	ClassDB::add_property("Terminal", PropertyInfo(Variant::BOOL, "copy_on_selection"), "set_copy_on_selection", "get_copy_on_selection");
+
 	// Methods.
 
 	ClassDB::bind_method(D_METHOD("write", "data"), &Terminal::write);
@@ -88,6 +98,8 @@ Terminal::Terminal()
 	bell_timer = memnew(Timer);
 	bell_timer->set_one_shot(true);
 	add_child(bell_timer, false, INTERNAL_MODE_FRONT);
+
+	copy_on_selection = false;
 
 	inverse_mode = InverseMode::INVERSE_MODE_INVERT;
 
@@ -629,6 +641,25 @@ double Terminal::get_blink_off_time() const
 	return blink_off_time;
 }
 
+String Terminal::copy_selection() {
+  char *out;
+  PackedByteArray data;
+
+  data.resize(tsm_screen_selection_copy(screen, &out));
+  memcpy(data.ptrw(), out, data.size());
+  std::free(out);
+
+  return data.get_string_from_utf8();
+}
+
+void Terminal::set_copy_on_selection(const bool p_enabled) {
+	copy_on_selection = p_enabled;
+}
+
+bool Terminal::get_copy_on_selection() const {
+	return copy_on_selection;
+}
+
 void Terminal::set_inverse_mode(const int mode) {
 	inverse_mode = static_cast<InverseMode>(mode);
 
@@ -754,6 +785,12 @@ void Terminal::_handle_selection(Ref<InputEventMouse> event) {
 
 void Terminal::_on_selection_held() {
   if (!(Input::get_singleton()->is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) || selection_mode == SelectionMode::NONE) {
+	#if defined(__linux__)
+	if (copy_on_selection) {
+		DisplayServer::get_singleton()->clipboard_set_primary(copy_selection());
+	}
+	#endif
+
     selection_timer->stop();
     return;
   }
