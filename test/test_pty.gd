@@ -66,7 +66,6 @@ class TestInterface:
 
 	# Enums.
 
-	# Added SIGNAL_ prefix to name.
 	func test_has_enum_signal():
 		assert_eq(described_class.SIGNAL_SIGHUP, 1)
 		assert_eq(described_class.SIGNAL_SIGINT, 2)
