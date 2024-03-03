@@ -1,7 +1,10 @@
-class_name NixTest extends GutTest
+class_name NixTest extends GodotXtermTest
 
-var pty: PTY
 var helper: Helper
+
+
+func get_described_class():
+	return PTY
 
 
 func before_all():
@@ -11,48 +14,42 @@ func before_all():
 		helper = LinuxHelper.new()
 
 
-func before_each():
-	pty = PTY.new()
-	watch_signals(pty)
-	add_child_autofree(pty)
-
-
 func test_fork_succeeds():
-	var err = pty.fork("sh")
+	var err = subject.fork("sh")
 	assert_eq(err, OK)
 
 
 func test_fork_emits_data_received():
-	pty.call_deferred("fork", "sh", ["-c", "echo'"])
-	await wait_for_signal(pty.data_received, 1)
-	assert_signal_emitted(pty, "data_received")
+	subject.call_deferred("fork", "sh", ["-c", "echo'"])
+	await wait_for_signal(subject.data_received, 1)
+	assert_signal_emitted(subject, "data_received")
 
 
 func test_open_succeeds():
-	var err = pty.open()
+	var err = subject.open()
 	assert_eq(err, OK)
 
 
 func test_open_creates_a_new_pty():
 	var num_pts = helper.get_pts().size()
-	pty.open()
+	subject.open()
 	var new_num_pts = helper.get_pts().size()
 	assert_eq(new_num_pts, num_pts + 1)
 
 
 func test_open_pty_has_correct_name():
 	var original_pts = helper.get_pts()
-	pty.open()
+	subject.open()
 	var new_pts = helper.get_pts()
 	for pt in original_pts:
 		new_pts.erase(pt)
-	assert_eq(pty.get_pts(), new_pts[0])
+	assert_eq(subject.get_pts(), new_pts[0])
 
 
 func xtest_open_pty_has_correct_win_size():
 	var cols = 7684
 	var rows = 9314
-	#var result = pty.open(cols, rows)
+	#var result = subject.open(cols, rows)
 	#var winsize = helper._get_winsize(result[1].master)
 	#assert_eq(winsize.cols, cols)
 	#assert_eq(winsize.rows, rows)
@@ -61,7 +58,7 @@ func xtest_open_pty_has_correct_win_size():
 func xtest_win_size_supports_max_unsigned_short_value():
 	var cols = 65535
 	var rows = 65535
-	#var result = pty.open(cols, rows)
+	#var result = subject.open(cols, rows)
 	#var winsize = helper._get_winsize(result[1].master)
 	#assert_eq(winsize.cols, cols)
 	#assert_eq(winsize.cols, rows)
@@ -71,45 +68,45 @@ func test_closes_pty_on_free():
 	if OS.get_name() == "macOS":
 		return
 	var num_pts = helper.get_pts().size()
-	pty.fork("sleep", ["1000"])
-	pty.free()
+	subject.fork("sleep", ["1000"])
+	subject.free()
 	await wait_frames(1)
 	var new_num_pts = helper.get_pts().size()
 	assert_eq(new_num_pts, num_pts)
 
 
 func test_emits_exited_signal_when_child_process_exits():
-	pty.call_deferred("fork", "exit")
-	await wait_for_signal(pty.exited, 1)
-	assert_signal_emitted(pty, "exited")
+	subject.call_deferred("fork", "exit")
+	await wait_for_signal(subject.exited, 1)
+	assert_signal_emitted(subject, "exited")
 
 
 func test_emits_exit_code_on_success():
-	pty.call_deferred("fork", "true")
-	await wait_for_signal(pty.exited, 1)
-	assert_signal_emitted_with_parameters(pty, "exited", [0, 0])
+	subject.call_deferred("fork", "true")
+	await wait_for_signal(subject.exited, 1)
+	assert_signal_emitted_with_parameters(subject, "exited", [0, 0])
 
 
 func test_emits_exit_code_on_failure():
-	pty.call_deferred("fork", "false")
-	await wait_for_signal(pty.exited, 1)
-	assert_signal_emitted_with_parameters(pty, "exited", [1, 0])
+	subject.call_deferred("fork", "false")
+	await wait_for_signal(subject.exited, 1)
+	assert_signal_emitted_with_parameters(subject, "exited", [1, 0])
 
 
 func test_emits_exited_on_kill():
-	pty.call("fork", "yes")
+	subject.call("fork", "yes")
 	await wait_frames(1)
-	pty.call_deferred("kill", PTY.SIGNAL_SIGKILL)
-	await wait_for_signal(pty.exited, 1)
-	assert_signal_emitted(pty, "exited")
+	subject.call_deferred("kill", PTY.SIGNAL_SIGKILL)
+	await wait_for_signal(subject.exited, 1)
+	assert_signal_emitted(subject, "exited")
 
 
 func test_emits_exited_with_signal():
-	pty.call("fork", "yes")
+	subject.call("fork", "yes")
 	await wait_frames(1)
-	pty.call_deferred("kill", PTY.SIGNAL_SIGSEGV)
-	await wait_for_signal(pty.exited, 1)
-	assert_signal_emitted_with_parameters(pty, "exited", [0, PTY.SIGNAL_SIGSEGV])
+	subject.call_deferred("kill", PTY.SIGNAL_SIGSEGV)
+	await wait_for_signal(subject.exited, 1)
+	assert_signal_emitted_with_parameters(subject, "exited", [0, PTY.SIGNAL_SIGSEGV])
 
 
 # Run the same tests, but with use_threads = false.
@@ -118,7 +115,7 @@ class TestNoThreads:
 
 	func before_each():
 		super.before_each()
-		pty.use_threads = false
+		subject.use_threads = false
 
 
 class Helper:
@@ -156,13 +153,12 @@ class Helper:
 
 
 class XTestPTYSize:
-	extends "res://addons/gut/test.gd"
+	extends NixTest
 	# Tests to check that psuedoterminal size (as reported by the stty command)
 	# matches the size of the Terminal node. Uses various scene tree layouts with
 	# Terminal and PTY nodes in different places.
 	# See: https://github.com/lihop/godot-xterm/issues/56
 
-	var pty: PTY
 	var terminal: Terminal
 	var scene: Node
 	var regex := RegEx.new()
@@ -183,14 +179,14 @@ class XTestPTYSize:
 			"PTYCousinAbove2",
 			"PTYCousinBelow2"
 		]:
-			pty = scene.get_node(s).find_child("PTY")
+			subject = scene.get_node(s).find_child("PTY")
 			terminal = scene.get_node(s).find_child("Terminal")
 
-			pty.call_deferred("fork", OS.get_environment("SHELL"))
-			pty.call_deferred("write", "stty -a | head -n1\n")
+			subject.call_deferred("fork", OS.get_environment("SHELL"))
+			subject.call_deferred("write", "stty -a | head -n1\n")
 			var output := ""
 			while not "rows" in output and not "columns" in output:
-				output = (await pty.data_received).get_string_from_utf8()
+				output = (await subject.data_received).get_string_from_utf8()
 			var regex_match = regex.search(output)
 			var stty_rows = int(regex_match.get_string("rows"))
 			var stty_cols = int(regex_match.get_string("columns"))
