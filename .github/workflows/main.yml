@@ -308,7 +308,7 @@ jobs:
           # This step often passes when it shouldn't, due to GUT not failing on script errors
           # (see: https://github.com/bitwes/Gut/issues/210). Therefore, we check the output
           # for expected (and unexpected) strings.
-          if 'SCRIPT_ERROR:' output.log; then
+          if grep -q 'SCRIPT_ERROR:' output.log || grep -q 'Tests             none' output.log; then
             exit 1
           fi
 
