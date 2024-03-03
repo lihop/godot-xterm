@@ -68,7 +68,8 @@ void Terminal::_bind_methods()
 	ClassDB::bind_method(D_METHOD("set_blink_off_time", "time"), &Terminal::set_blink_off_time);
 	ClassDB::add_property("Terminal", PropertyInfo(Variant::FLOAT, "blink_off_time"), "set_blink_off_time", "get_blink_off_time");
 
-	// Selection copying.
+	// Copying.
+	ClassDB::bind_method(D_METHOD("copy_all"), &Terminal::copy_all);
 	ClassDB::bind_method(D_METHOD("copy_selection"), &Terminal::copy_selection);
 	ClassDB::bind_method(D_METHOD("set_copy_on_selection", "enabled"), &Terminal::set_copy_on_selection);
 	ClassDB::bind_method(D_METHOD("get_copy_on_selection"), &Terminal::get_copy_on_selection);
@@ -641,15 +642,23 @@ double Terminal::get_blink_off_time() const
 	return blink_off_time;
 }
 
+String Terminal::_copy_screen(ScreenCopyFunction func) {
+	char *out;
+	PackedByteArray data;
+
+	data.resize(func(screen, &out));
+	memcpy(data.ptrw(), out, data.size());
+	std::free(out);
+
+	return data.get_string_from_utf8();
+}
+
+String Terminal::copy_all() {
+	return _copy_screen(&tsm_screen_copy_all);
+}
+
 String Terminal::copy_selection() {
-  char *out;
-  PackedByteArray data;
-
-  data.resize(tsm_screen_selection_copy(screen, &out));
-  memcpy(data.ptrw(), out, data.size());
-  std::free(out);
-
-  return data.get_string_from_utf8();
+	return _copy_screen(&tsm_screen_selection_copy);
 }
 
 void Terminal::set_copy_on_selection(const bool p_enabled) {

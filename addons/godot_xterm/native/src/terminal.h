@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include<map>
+#include <functional>
+#include <map>
 
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
@@ -71,6 +72,7 @@ namespace godot
     void set_blink_off_time(const double p_blink_off_time);
     double get_blink_off_time() const;
 
+    String copy_all();
     String copy_selection();
     void set_copy_on_selection(const bool p_enable);
     bool get_copy_on_selection() const;
@@ -170,6 +172,9 @@ namespace godot
     Timer *selection_timer;
     void _handle_selection(Ref<InputEventMouse> event);
     void _on_selection_held();
+
+    typedef std::function<int(struct tsm_screen*, char**)> ScreenCopyFunction;
+    String _copy_screen(ScreenCopyFunction func);
   };
 
 } // namespace godot

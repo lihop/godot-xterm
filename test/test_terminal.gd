@@ -48,8 +48,7 @@ class TestInterface:
 	func xtest_has_method_clear():
 		assert_has_method_with_return_type("clear", TYPE_NIL)
 
-	# TODO: Implement copy_all() method.
-	func xtest_has_method_copy_all():
+	func test_has_method_copy_all():
 		assert_has_method_with_return_type("copy_all", TYPE_STRING)
 
 	func test_has_method_copy_selection():
@@ -192,3 +191,32 @@ class TestWrite:
 	func test_data_sent_not_emitted_when_empty_string_written():
 		subject.write("")
 		assert_signal_emit_count(subject, "data_sent", 0)
+
+
+class TestCopy:
+	extends TerminalTest
+
+	func fill_screen(char: String = "A") -> String:
+		var result = char.repeat(subject.get_cols() * subject.get_rows())
+		subject.write(result)
+		return result
+
+	func test_copy_all_copies_the_entire_screen():
+		var text = fill_screen()
+		# The text will be wrapped over multiple lines and copy_all() preserves
+		# these line wraps, therefore we need to strip them.
+		assert_eq(subject.copy_all().replace("\n", ""), text)
+
+	func test_copy_all_empty_screen():
+		assert_eq(subject.copy_all(), "\n".repeat(subject.get_rows()))
+
+	func test_copy_all_copies_the_scrollback_buffer():
+		var text = fill_screen()
+		text += fill_screen("B")
+		text += fill_screen("C")
+		assert_eq(subject.copy_all().replace("\n", ""), text)
+
+	func test_copy_all_copies_unicode_text():
+		var text = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿ"
+		subject.write(text)
+		assert_string_contains(subject.copy_all(), text)
