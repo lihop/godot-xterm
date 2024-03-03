@@ -17,11 +17,10 @@ runs:
       working-directory: addons/godot_xterm/native/thirdparty
       shell: bash
       run: |
-        godot_cpp_rev=$(git ls-tree HEAD godot-cpp --object-only)
         libuv_rev=$(git ls-tree HEAD libuv --object-only)
-        libtsm_rev=$(git ls-tree HEAD libtsm --object-only)
+        node_pty_rev=$(git ls-tree HEAD node-pty --object-only)
         hash_cmd=$([[ $RUNNER_OS == 'Windows' ]] && echo 'sha1sum' || echo 'shasum')
-        hash_of_hashes=$(echo -n "$godot_cpp_rev$libuv_rev$libtsm_rev" | $hash_cmd | head -c 40)
+        hash_of_hashes=$(echo -n "$libuv_rev$node_pty_rev" | $hash_cmd | head -c 40)
         echo "hash=$hash_of_hashes" >> $GITHUB_OUTPUT
         build_files_hash=${{ hashFiles('**/build.sh', '**/*.Dockerfile', '**/SConstruct', '**/*.yml') }}
         echo "build-files-hash=$build_files_hash" >> $GITHUB_OUTPUT
