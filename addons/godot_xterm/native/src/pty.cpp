@@ -62,7 +62,7 @@ void PTY::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_using_threads"), &PTY::is_using_threads);
 	ClassDB::add_property("PTY", PropertyInfo(Variant::BOOL, "use_threads"), "set_use_threads", "is_using_threads");
 
-	ClassDB::bind_method(D_METHOD("get_pts"), &PTY::get_pts);
+	ClassDB::bind_method(D_METHOD("get_pts_name"), &PTY::get_pts_name);
 
 	ClassDB::bind_method(D_METHOD("fork", "file", "args", "cwd", "cols", "rows"), &PTY::fork, DEFVAL(""), DEFVAL(PackedStringArray()), DEFVAL("."), DEFVAL(80), DEFVAL(24));
 	ClassDB::bind_method(D_METHOD("open", "cols", "rows"), &PTY::open, DEFVAL(80), DEFVAL(24));
@@ -126,8 +126,8 @@ bool PTY::is_using_threads() const {
     return use_threads;
 }
 
-String PTY::get_pts() const {
-    return pts;
+String PTY::get_pts_name() const {
+    return pts_name;
 }
 
 Error PTY::fork(const String &file, const PackedStringArray &args, const String &cwd, const int cols, const int rows) {
@@ -145,8 +145,8 @@ Error PTY::fork(const String &file, const PackedStringArray &args, const String 
 
     fd = result["fd"];
     pid = result["pid"];
-    pts = result["pty"];
-
+    pts_name = result["pty"];
+ 
     status = STATUS_OPEN;
 
     #if defined(__linux__) || defined(__APPLE__)
@@ -181,7 +181,7 @@ Error PTY::open(const int cols, const int rows) {
    Error err = static_cast<Error>((int)result["error"]);
    ERR_FAIL_COND_V(err != OK, err);
 
-   pts = result["pty"];
+   pts_name = result["pty"];
 
    return OK;
 }

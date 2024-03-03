@@ -43,7 +43,7 @@ func test_open_pty_has_correct_name():
 	var new_pts = helper.get_pts()
 	for pt in original_pts:
 		new_pts.erase(pt)
-	assert_eq(subject.get_pts(), new_pts[0])
+	assert_eq(subject.get_pts_name(), new_pts[0])
 
 
 func xtest_open_pty_has_correct_win_size():

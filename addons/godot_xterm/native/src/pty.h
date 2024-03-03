@@ -58,7 +58,7 @@ namespace godot
     void set_use_threads(bool p_use);
     bool is_using_threads() const;
 
-    String get_pts() const;
+    String get_pts_name() const;
 
     Error fork(const String &file = "", const PackedStringArray &args = PackedStringArray(), const String &cwd = ".", const int cols = 80, const int rows = 24);
     void kill(const int signum = Signal::SIGNAL_SIGHUP);
@@ -82,7 +82,7 @@ namespace godot
     Dictionary env = Dictionary();
     bool use_os_env = true;
 
-    String pts = "";
+    String pts_name = "";
 
     String _get_fork_file(const String &file) const;
     Dictionary _get_fork_env() const;

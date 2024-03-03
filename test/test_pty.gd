@@ -11,8 +11,6 @@ func get_described_class():
 class TestInterface:
 	extends PTYTest
 
-	## API V2.
-
 	# Properties.
 
 	# TODO: Implement cols property.
@@ -45,6 +43,9 @@ class TestInterface:
 
 	func test_has_method_open():
 		assert_has_method_with_return_type("open", TYPE_INT)
+
+	func test_has_method_get_pts_name():
+		assert_has_method_with_return_type("get_pts_name", TYPE_STRING)
 
 	func test_has_method_resize():
 		assert_has_method_with_return_type("resize", TYPE_NIL)
