@@ -84,7 +84,7 @@ Terminal::Terminal()
 	blink_off_time = 0.3;
 
 	bell_muted = false;
-	bell_cooldown = 0;
+	bell_cooldown = 0.1;
 	bell_timer = memnew(Timer);
 	bell_timer->set_one_shot(true);
 	add_child(bell_timer, false, INTERNAL_MODE_FRONT);
@@ -607,24 +607,24 @@ double Terminal::get_bell_cooldown() const {
 	return bell_cooldown;
 }
 
-void Terminal::set_blink_on_time(const float time)
+void Terminal::set_blink_on_time(const double time)
 {
 	blink_on_time = time;
 	fore_material->set_shader_parameter("blink_on_time", blink_on_time);
 }
 
-float Terminal::get_blink_on_time() const
+double Terminal::get_blink_on_time() const
 {
 	return blink_on_time;
 }
 
-void Terminal::set_blink_off_time(const float time)
+void Terminal::set_blink_off_time(const double time)
 {
 	blink_off_time = time;
 	fore_material->set_shader_parameter("blink_off_time", blink_off_time);
 }
 
-float Terminal::get_blink_off_time() const
+double Terminal::get_blink_off_time() const
 {
 	return blink_off_time;
 }

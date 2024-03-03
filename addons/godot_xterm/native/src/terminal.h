@@ -65,11 +65,11 @@ namespace godot
     void set_bell_cooldown(const double p_bell_cooldown);
     double get_bell_cooldown() const;
 
-    void set_blink_on_time(const float p_blink_on_time);
-    float get_blink_on_time() const;
+    void set_blink_on_time(const double p_blink_on_time);
+    double get_blink_on_time() const;
 
-    void set_blink_off_time(const float p_blink_off_time);
-    float get_blink_off_time() const;
+    void set_blink_off_time(const double p_blink_off_time);
+    double get_blink_off_time() const;
 
     void set_inverse_mode(const int mode);
     int get_inverse_mode() const;
@@ -86,8 +86,8 @@ namespace godot
     unsigned int cols;
     unsigned int rows;
 
-    float blink_on_time;
-    float blink_off_time;
+    double blink_on_time;
+    double blink_off_time;
 
     InverseMode inverse_mode;
 
