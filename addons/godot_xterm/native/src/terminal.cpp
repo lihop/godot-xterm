@@ -75,8 +75,8 @@ void Terminal::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_copy_on_selection"), &Terminal::get_copy_on_selection);
 	ClassDB::add_property("Terminal", PropertyInfo(Variant::BOOL, "copy_on_selection"), "set_copy_on_selection", "get_copy_on_selection");
 
-	// Methods.
-
+	// Other methods.
+	ClassDB::bind_method(D_METHOD("clear"), &Terminal::clear);
 	ClassDB::bind_method(D_METHOD("write", "data"), &Terminal::write);
 	ClassDB::bind_method(D_METHOD("get_cursor_pos"), &Terminal::get_cursor_pos);
 	ClassDB::bind_method(D_METHOD("get_cell_size"), &Terminal::get_cell_size);
@@ -640,6 +640,19 @@ void Terminal::set_blink_off_time(const double time)
 double Terminal::get_blink_off_time() const
 {
 	return blink_off_time;
+}
+
+void Terminal::clear() {
+  // Resize the terminal to a single row, forcing content above in to the scrollback buffer.
+  tsm_screen_resize(screen, cols, 1);
+
+  // Clear the scrollback buffer (hence clearing the content that was above).
+  tsm_screen_clear_sb(screen);
+
+  // Resize the screen to its original size.
+  tsm_screen_resize(screen, cols, rows);
+
+  refresh();
 }
 
 String Terminal::_copy_screen(ScreenCopyFunction func) {

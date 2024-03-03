@@ -72,6 +72,8 @@ namespace godot
     void set_blink_off_time(const double p_blink_off_time);
     double get_blink_off_time() const;
 
+    void clear();
+
     String copy_all();
     String copy_selection();
     void set_copy_on_selection(const bool p_enable);

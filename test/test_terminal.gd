@@ -13,6 +13,13 @@ func before_each():
 	subject.size = Vector2(400, 200)
 
 
+# Helper function to fill the screen with the given character.
+func fill_screen(char: String = "A") -> String:
+	var result = char.repeat(subject.get_cols() * subject.get_rows())
+	subject.write(result)
+	return result
+
+
 class TestInterface:
 	extends TerminalTest
 
@@ -44,8 +51,7 @@ class TestInterface:
 
 	# Methods.
 
-	# TODO: Implement clear() method.
-	func xtest_has_method_clear():
+	func test_has_method_clear():
 		assert_has_method_with_return_type("clear", TYPE_NIL)
 
 	func test_has_method_copy_all():
@@ -196,11 +202,6 @@ class TestWrite:
 class TestCopy:
 	extends TerminalTest
 
-	func fill_screen(char: String = "A") -> String:
-		var result = char.repeat(subject.get_cols() * subject.get_rows())
-		subject.write(result)
-		return result
-
 	func test_copy_all_copies_the_entire_screen():
 		var text = fill_screen()
 		# The text will be wrapped over multiple lines and copy_all() preserves
@@ -220,3 +221,22 @@ class TestCopy:
 		var text = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿ"
 		subject.write(text)
 		assert_string_contains(subject.copy_all(), text)
+
+
+class TestClear:
+	extends TerminalTest
+
+	func test_clear_an_empty_screen_changes_nothing():
+		var empty_screen = subject.copy_all()
+		subject.clear()
+		var screen_after = subject.copy_all()
+		assert_eq(screen_after, empty_screen)
+
+	func test_clear_when_screen_is_full_clears_all_but_the_bottommost_row():
+		fill_screen()
+		var final_line = "THIS SHOULDN'T BE CLEARED"
+		subject.write(final_line)
+		subject.clear()
+		var screen_after = subject.copy_all()
+		var expected = final_line + "\n".repeat(subject.get_rows())
+		assert_eq(screen_after, expected)
