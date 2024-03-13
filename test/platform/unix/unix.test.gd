@@ -149,17 +149,20 @@ class Helper:
 		)
 		var python_path = output[0].strip_edges()
 
-		var exit_code = OS.execute(
-			python_path,
-			[
-				"-c",
-				(
-					"import struct, fcntl, termios; print(struct.unpack('HH', fcntl.ioctl(%d, termios.TIOCGWINSZ, '1234')))"
-					% fd
-				)
-			],
-			true,
-			output
+		var exit_code = (
+			OS
+			. execute(
+				python_path,
+				[
+					"-c",
+					(
+						"import struct, fcntl, termios; print(struct.unpack('HH', fcntl.ioctl(%d, termios.TIOCGWINSZ, '1234')))"
+						% fd
+					)
+				],
+				true,
+				output
+			)
 		)
 		assert(exit_code == 0, "Failed to run python command for this test.")
 
