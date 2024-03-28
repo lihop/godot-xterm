@@ -47,6 +47,14 @@ void PTY::_bind_methods() {
     ADD_SIGNAL(MethodInfo("data_received", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
     ADD_SIGNAL(MethodInfo("exited", PropertyInfo(Variant::INT, "exit_code"), PropertyInfo(Variant::INT, "signal_code")));
 
+	ClassDB::bind_method(D_METHOD("set_cols", "num_cols"), &PTY::set_cols);
+	ClassDB::bind_method(D_METHOD("get_cols"), &PTY::get_cols);
+	ClassDB::add_property("PTY", PropertyInfo(Variant::INT, "cols"), "set_cols", "get_cols");
+
+	ClassDB::bind_method(D_METHOD("set_rows", "num_rows"), &PTY::set_rows);
+	ClassDB::bind_method(D_METHOD("get_rows"), &PTY::get_rows);
+	ClassDB::add_property("PTY", PropertyInfo(Variant::INT, "rows"), "set_rows", "get_rows");
+
 	ClassDB::bind_method(D_METHOD("get_env"), &PTY::get_env);
 	ClassDB::bind_method(D_METHOD("set_env", "env"), &PTY::set_env);
 	ClassDB::add_property("PTY", PropertyInfo(Variant::DICTIONARY, "env"), "set_env", "get_env");
@@ -90,8 +98,22 @@ PTY::PTY() {
     #endif
 }
 
+void PTY::set_cols(const int num_cols) {
+    if (cols != num_cols) {
+        cols = num_cols;
+        resize(cols, rows);
+    }
+}
+
 int PTY::get_cols() const {
    return cols;
+}
+
+void PTY::set_rows(const int num_rows) {
+    if (rows != num_rows) {
+        rows = num_rows;
+        resize(cols, rows);
+    }
 }
 
 int PTY::get_rows() const {
@@ -127,14 +149,14 @@ String PTY::get_pts_name() const {
     return pts_name;
 }
 
-Error PTY::fork(const String &file, const PackedStringArray &args, const String &cwd, const int cols, const int rows) {
+Error PTY::fork(const String &file, const PackedStringArray &args, const String &cwd, const int p_cols, const int p_rows) {
     String fork_file = _get_fork_file(file);
     Dictionary fork_env = _get_fork_env();
     Dictionary result;
 
     #if defined(__linux__) || defined(__APPLE__)
     String helper_path = ProjectSettings::get_singleton()->globalize_path("res://addons/godot_xterm/native/bin/spawn-helper");
-    result = PTYUnix::fork(fork_file, args, _parse_env(fork_env), cwd, cols, rows, -1, -1, true, helper_path, Callable(this, "_on_exit"));
+    result = PTYUnix::fork(fork_file, args, _parse_env(fork_env), cwd, p_cols, p_rows, -1, -1, true, helper_path, Callable(this, "_on_exit"));
     #endif
 
     Error err = static_cast<Error>((int)result["error"]);
@@ -178,14 +200,22 @@ Error PTY::open(const int cols, const int rows) {
    Error err = static_cast<Error>((int)result["error"]);
    ERR_FAIL_COND_V(err != OK, err);
 
+   fd = result["master"];
    pts_name = result["pty"];
 
    return OK;
 }
 
-void PTY::resize(const int cols, const int rows) const {
+void PTY::resize(const int p_cols, const int p_rows) {
+    cols = p_cols;
+    rows = p_rows;
+
     #if defined(__linux__) || defined(__APPLE__)
-    PTYUnix::resize(fd, cols, rows);
+    if (fd > -1) {
+        PTYUnix::resize(fd, cols, rows);
+    } else {
+        ERR_PRINT("fd <= -1");
+    }
     #endif
 }
 

@@ -43,7 +43,9 @@ namespace godot
 
     Status status = STATUS_CLOSED;
 
+    void set_cols(const int num_cols);
     int get_cols() const;
+    void set_rows(const int num_rows);
     int get_rows() const;
 
     Dictionary get_env() const;
@@ -60,8 +62,8 @@ namespace godot
     Error fork(const String &file = "", const PackedStringArray &args = PackedStringArray(), const String &cwd = ".", const int cols = 80, const int rows = 24);
     void kill(const int signum = Signal::SIGNAL_SIGHUP);
     Error open(const int cols = 80, const int rows = 24);
-    void resize(const int cols, const int rows) const;
-    void resizev(const Vector2i &size) const { resize(size.x, size.y); };
+    void resize(const int cols, const int rows);
+    void resizev(const Vector2i &size) { resize(size.x, size.y); };
     void write(const Variant &data) const;
 
     void _notification(int p_what);
@@ -73,8 +75,8 @@ namespace godot
     int pid = -1;
     int fd = -1;
 
-    unsigned int cols = 0;
-    unsigned int rows = 0;
+    unsigned int cols = 80;
+    unsigned int rows = 24;
 
     Dictionary env = Dictionary();
     bool use_os_env = true;

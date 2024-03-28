@@ -13,8 +13,7 @@ class TestInterface:
 
 	# Properties.
 
-	# TODO: Implement cols property.
-	func xtest_has_property_cols() -> void:
+	func test_has_property_cols() -> void:
 		assert_has_property_with_default_value("cols", 80)
 
 	func test_has_property_env() -> void:
@@ -22,8 +21,7 @@ class TestInterface:
 			"env", {"TERM": "xterm-256color", "COLORTERM": "truecolor"}
 		)
 
-	# TODO: Implement rows property.
-	func xtest_has_property_rows() -> void:
+	func test_has_property_rows() -> void:
 		assert_has_property_with_default_value("rows", 24)
 
 	# TODO: Implement terminal_path property.

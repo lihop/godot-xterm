@@ -152,55 +152,95 @@ class Helper:
 		return {rows = int(size.x), cols = int(size.y)}
 
 
-class XTestPTYSize:
-	extends NixTest
-	# Tests to check that psuedoterminal size (as reported by the stty command)
-	# matches the size of the Terminal node. Uses various scene tree layouts with
-	# Terminal and PTY nodes in different places.
-	# See: https://github.com/lihop/godot-xterm/issues/56
+class TestPTYSize:
+	extends GodotXtermTest
 
-	var terminal: Terminal
-	var scene: Node
 	var regex := RegEx.new()
 
+	func get_described_class():
+		return PTY
+
 	func before_all():
-		regex.compile(".*rows (?<rows>[0-9]+).*columns (?<columns>[0-9]+).*")
+		# Depending on the implementation, the output of stty -a may vary.
+		# For example, on linux the format is "rows 24; columns 80;", while on
+		# macOS it is "rows 24; columns 80;". This regex should match both.
+		(
+			regex
+			. compile(
+				".*rows (?<rows>[0-9]+).*columns (?<columns>[0-9]+).*|.*; (?<rows>[0-9]+) rows; (?<columns>[0-9]+) columns.*"
+			)
+		)
+
+	# Get the size as reported by stty.
+	func get_stty_size() -> Vector2i:
+		await wait_frames(1)
+		subject.call_deferred("write", "stty -a | head -n1\n")
+		var output := ""
+		while not "rows" in output or not "columns" in output:
+			output += (await subject.data_received).get_string_from_utf8()
+		var regex_match = regex.search(output)
+		var stty_rows = int(regex_match.get_string("rows"))
+		var stty_cols = int(regex_match.get_string("columns"))
+		return Vector2i(stty_cols, stty_rows)
 
 	func before_each():
-		scene = add_child_autofree(preload("res://test/scenes/pty_and_terminal.tscn").instantiate())
+		super.before_each()
+		subject.call_deferred("fork", OS.get_environment("SHELL"))
+		await wait_for_signal(subject.data_received, 1)
 
-	func xtest_correct_stty_reports_correct_size():
-		for s in [
-			"PTYChild",
-			"PTYSiblingAbove",
-			"PTYSiblingBelow",
-			"PTYCousinAbove",
-			"PTYCousinBelow",
-			"PTYCousinAbove2",
-			"PTYCousinBelow2"
-		]:
-			subject = scene.get_node(s).find_child("PTY")
-			terminal = scene.get_node(s).find_child("Terminal")
+	func after_each():
+		subject.call_deferred("kill", PTY.SIGNAL_SIGHUP)
+		await wait_for_signal(subject.exited, 1)
 
-			subject.call_deferred("fork", OS.get_environment("SHELL"))
-			subject.call_deferred("write", "stty -a | head -n1\n")
-			var output := ""
-			while not "rows" in output and not "columns" in output:
-				output = (await subject.data_received).get_string_from_utf8()
-			var regex_match = regex.search(output)
-			var stty_rows = int(regex_match.get_string("rows"))
-			var stty_cols = int(regex_match.get_string("columns"))
+	func test_pty_default_size():
+		var stty_size = await get_stty_size()
+		assert_eq(stty_size, Vector2i(80, 24))
 
-			assert_eq(
-				stty_rows,
-				terminal.get_rows(),
-				"Expected stty to report correct number of rows for layout '%s'" % s
-			)
-			assert_eq(
-				stty_cols,
-				terminal.get_cols(),
-				"Expected stty to report correct number of columns for layout '%s'" % s
-			)
+	func test_pty_set_cols():
+		subject.set_cols(5768)
+		var stty_size = await get_stty_size()
+		assert_eq(stty_size, Vector2i(5768, 24))
+
+	func test_pty_set_rows():
+		subject.set_rows(5768)
+		var stty_size = await get_stty_size()
+		assert_eq(stty_size, Vector2i(80, 5768))
+
+	func test_pty_resize():
+		subject.resize(2778, 8120)
+		var stty_size = await get_stty_size()
+		assert_eq(stty_size, Vector2i(2778, 8120))
+
+	func test_pty_resizev():
+		subject.resizev(Vector2i(2778, 8120))
+		var stty_size = await get_stty_size()
+		assert_eq(stty_size, Vector2i(2778, 8120))
+
+	func test_pty_min_size():
+		subject.resize(0, 0)
+		var stty_size = await get_stty_size()
+		assert_eq(stty_size, Vector2i.ZERO)
+
+	func test_pty_max_size():
+		subject.resize(65535, 65535)
+		var stty_size = await get_stty_size()
+		assert_eq(stty_size, Vector2i(65535, 65535))
+
+	func test_pty_set_size_on_open():
+		subject = described_class.new()
+		add_child_autofree(subject)
+		subject.call_deferred("fork", OS.get_environment("SHELL"), [], ".", 2236, 1998)
+		var stty_size = await get_stty_size()
+		assert_eq(stty_size, Vector2i(2236, 1998))
+
+
+# FIXME: Currently tests fail when threads are disabled.
+class XTestPTYSizeNoThreads:
+	extends TestPTYSize
+
+	func before_each():
+		super.before_each()
+		subject.use_threads = false
 
 
 class LinuxHelper:
