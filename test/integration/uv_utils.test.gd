@@ -1,7 +1,5 @@
 extends "res://addons/gut/test.gd"
 
-const LibuvUtils = preload("res://addons/godot_xterm/nodes/pty/libuv_utils.gd")
-
 const EMPTY_VAR = "GODOT_XTERM_TEST_EMPTY_ENV_VAR"
 const TEST_VAR = "GODOT_XTERM_TEST_ENV_VAR"
 const TEST_VAL = "TEST123"
@@ -10,8 +8,8 @@ var env: Dictionary
 
 
 func before_each():
-	assert(OS.set_environment(EMPTY_VAR, ""))
-	assert(OS.set_environment(TEST_VAR, TEST_VAL))
+	OS.set_environment(EMPTY_VAR, "")
+	OS.set_environment(TEST_VAR, TEST_VAL)
 	env = LibuvUtils.get_os_environ()
 
 

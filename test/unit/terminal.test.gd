@@ -18,21 +18,21 @@ class TestMultipleInputs:
 
 	var terminal: Control
 
-	func press_key(scancode: int, unicode := 0) -> void:
+	func press_key(keycode: int, unicode := 0) -> void:
 		var key_down = InputEventKey.new()
-		key_down.scancode = scancode
+		key_down.keycode = keycode
 		key_down.pressed = true
 		Input.parse_input_event(key_down)
-		yield(get_tree().create_timer(0.1), "timeout")
+		await get_tree().create_timer(0.1).timeout
 		var key_up = InputEventKey.new()
-		key_up.scancode = scancode
+		key_up.keycode = keycode
 		key_up.pressed = false
 		Input.parse_input_event(key_up)
 
 	func before_each():
-		var scene := preload("../scenes/multiple_inputs.tscn").instance()
+		var scene := preload("../scenes/multiple_inputs.tscn").instantiate()
 		add_child_autofree(scene)
-		terminal = scene.find_node("Terminal")
+		terminal = scene.find_child("Terminal")
 		terminal.grab_focus()
 
 	func test_terminal_keeps_focus_when_certain_keys_pressed():

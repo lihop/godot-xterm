@@ -3,12 +3,8 @@
 # Copyright (c) 2016, Daniel Imms (MIT License).
 # Copyright (c) 2018, Microsoft Corporation (MIT License).
 # Copyright (c) 2021-2022, Leroy Hopson (MIT License).
-tool
+@tool
 extends "../pty_native.gd"
-
-const LibuvUtils := preload("../libuv_utils.gd")
-const Pipe := preload("../pipe.gdns")
-const PTYUnix = preload("./pty_unix.gdns")
 
 const DEFAULT_NAME := "xterm-256color"
 const DEFAULT_COLS := 80
@@ -25,7 +21,7 @@ const FALLBACK_FILE = "sh"
 
 # Any signal_number can be sent to the pty's process using the kill() function,
 # these are just the signals with numbers specified in the POSIX standard.
-enum Signal {
+enum IPCSignal {
 	SIGHUP = 1,  # Hangup
 	SIGINT = 2,  # Terminal interrupt signal
 	SIGQUIT = 3,  # Terminal quit signal
@@ -39,6 +35,14 @@ enum Signal {
 	SIGALRM = 14,  # Alarm clock
 	SIGTERM = 15,  # Termination signal
 }
+
+var _LibuvUtils = (
+	ClassDB.instantiate("LibuvUtils").get_class() if ClassDB.class_exists("LibuvUtils") else null
+)
+var _Pipe = ClassDB.instantiate("Pipe").get_class() if ClassDB.class_exists("Pipe") else null
+var _PTYUnix = (
+	ClassDB.instantiate("PTYUnix").get_class() if ClassDB.class_exists("PTYUnix") else null
+)
 
 # The name of the process.
 #var process: String
@@ -54,7 +58,7 @@ var env := DEFAULT_ENV
 # former taking precedence in the case of conflicts.
 var use_os_env := true
 
-var _pipe: Pipe
+var _pipe = _Pipe
 
 # Security warning: use this option with great caution, as opened file descriptors
 # with higher privileges might leak to the child program.
@@ -62,40 +66,40 @@ var uid: int
 var gid: int
 
 var _fd: int = -1
-var _exit_cb: FuncRef
+var _exit_cb: Callable
 
 
 # Writes data to the socket.
 # data: The data to write.
 func write(data) -> void:
-	assert(
-		data is PoolByteArray or data is String,
-		"Invalid type for argument 'data'. Should be of type PoolByteArray or String"
-	)
+	var correct_type: bool = data is PackedByteArray or data is String
+	var err_message := "Invalid type for argument 'data'. Should be of type PackedByteArray or String"
+	assert(correct_type, err_message)
+
 	if _pipe:
-		_pipe.write(data if data is PoolByteArray else data.to_utf8())
+		_pipe.write(data if data is PackedByteArray else data.to_utf8_buffer())
 
 
 func resize(cols: int, rows: int) -> void:
 	if _fd >= 0:
-		PTYUnix.new().resize(_fd, cols, rows)
+		_PTYUnix.new().resize(_fd, cols, rows)
 
 
-func kill(signum: int = Signal.SIGHUP) -> void:
+func kill(signum: int = IPCSignal.SIGHUP) -> void:
 	if _pipe:
 		_pipe.close()
 	if _pid > 0:
-		LibuvUtils.kill(_pid, signum)
+		_LibuvUtils.kill(_pid, signum)
 
 
-func _parse_env(env: Dictionary = {}) -> PoolStringArray:
+func _parse_env(env: Dictionary = {}) -> PackedStringArray:
 	var keys := env.keys()
-	var pairs := PoolStringArray()
+	var pairs := PackedStringArray()
 
 	for key in keys:
 		var value = env[key]
 		var valid = key is String and value is String
-		assert(valid, "Env key/value pairs must be of type String/String.")
+		assert(valid)  #,"Env key/value pairs must be of type String/String.")
 
 		if not valid:
 			push_warning("Skipping invalid env key/value pair.")
@@ -113,8 +117,8 @@ func _process(_delta):
 
 func fork(
 	file: String = OS.get_environment("SHELL"),
-	args: PoolStringArray = PoolStringArray(),
-	cwd = LibuvUtils.get_cwd(),
+	args: PackedStringArray = PackedStringArray(),
+	cwd = _LibuvUtils.get_cwd(),
 	cols: int = DEFAULT_COLS,
 	rows: int = DEFAULT_ROWS,
 	uid: int = -1,
@@ -122,24 +126,37 @@ func fork(
 	utf8 = true
 ) -> int:
 	# File.
-	if file.empty():
+	if file.is_empty():
 		file = FALLBACK_FILE
 
 	# Environment variables.
 	# If we are using OS env vars, sanitize them to remove variables that might confuse our terminal.
-	var final_env := _sanitize_env(LibuvUtils.get_os_environ()) if use_os_env else {}
+	var final_env := _sanitize_env(_LibuvUtils.get_os_environ()) if use_os_env else {}
 	for key in env.keys():
 		final_env[key] = env[key]
-	var parsed_env: PoolStringArray = _parse_env(final_env)
+	var parsed_env: PackedStringArray = _parse_env(final_env)
 
 	# Exit callback.
-	_exit_cb = FuncRef.new()
-	_exit_cb.set_instance(self)
-	_exit_cb.set_function("_on_exit")
+	_exit_cb = Callable(self, "on_exit")
 
 	# Actual fork.
-	var result = PTYUnix.new().fork(  # VERY IMPORTANT: The must be set null or 0, otherwise will get an ENOTSOCK error after connecting our pipe to the fd.
-		file, null, args, parsed_env, cwd, cols, rows, uid, gid, utf8, _exit_cb
+	var result = (
+		_PTYUnix
+		. new()
+		. fork(
+			# VERY IMPORTANT: The second argument must be 0, otherwise will get an ENOTSOCK error after connecting our pipe to the fd.
+			file,
+			0,
+			args,
+			parsed_env,
+			cwd,
+			cols,
+			rows,
+			uid,
+			gid,
+			utf8,
+			_exit_cb
+		)
 	)
 
 	if result[0] != OK:
@@ -153,23 +170,23 @@ func fork(
 
 	_pid = result[1].pid
 
-	_pipe = Pipe.new()
-	_pipe.open(_fd)
+	_pipe = _Pipe.new()
+	_pipe.open(_fd, false)
 
 	# Must connect to signal AFTER opening, otherwise we will get error ENOTSOCK.
-	_pipe.connect("data_received", self, "_on_pipe_data_received")
+	_pipe.connect("data_received", Callable(self, "_on_pipe_data_received"))
 
 	return OK
 
 
 func open(cols: int = DEFAULT_COLS, rows: int = DEFAULT_ROWS) -> Array:
-	return PTYUnix.new().open(cols, rows)
+	return _PTYUnix.new().open(cols, rows)
 
 
 func _exit_tree():
-	_exit_cb = null
+	_exit_cb = Callable()
 	if _pid > 1:
-		LibuvUtils.kill(_pid, Signal.SIGHUP)
+		_LibuvUtils.kill(_pid, IPCSignal.SIGHUP)
 		if _pipe:
 			while _pipe.get_status() != 0:
 				continue

@@ -1,4 +1,8 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: 2020-2023 Leroy Hopson <godot-xterm@leroy.geek.nz>
+# SPDX-License-Identifier: MIT
+
 set -e
 
 # Parse args.
@@ -11,34 +15,32 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
-    --disable-pty)
-      disable_pty="yes"
-      shift
-      ;;
     *)
-      echo "Usage: ./build.sh [-t|--target <release|debug>] [--disable_pty]";
+      echo "Usage: ./build.sh [-t|--target <template_release|template_debug>]";
       exit 128
       shift
       ;;
   esac
 done
+
 # Set defaults.
-target=${target:-debug}
-disable_pty=${disable_pty:-no}
+target=${target:-template_debug}
+if [ "$target" == "template_debug" ]; then
+    debug_symbols="yes"
+else
+    debug_symbols="no"
+fi
 nproc=$(nproc || sysctl -n hw.ncpu)
 
-
-#GODOT_DIR Get the absolute path to the directory this script is in.
+# Get the absolute path to the directory this script is in.
 NATIVE_DIR="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-
 
 # Run script inside a nix shell if it is available.
 if command -v nix-shell && [ $NIX_PATH ] && [ -z $IN_NIX_SHELL ]; then
 	cd ${NATIVE_DIR}
-	nix-shell --pure --run "NIX_PATH=${NIX_PATH} ./build.sh $args"
+	nix-shell --pure --keep SCONS_CACHE --run "NIX_PATH=${NIX_PATH} ./build.sh $args"
 	exit
 fi
-
 
 # Update git submodules.
 updateSubmodules() {
@@ -51,14 +53,8 @@ updateSubmodules() {
 }
 
 updateSubmodules LIBUV_DIR ${NATIVE_DIR}/thirdparty/libuv
-updateSubmodules LIBTSM_DIR ${NATIVE_DIR}/thirdparty/libtsm 
+updateSubmodules LIBTSM_DIR ${NATIVE_DIR}/thirdparty/libtsm
 updateSubmodules GODOT_CPP_DIR ${NATIVE_DIR}/thirdparty/godot-cpp
-
-
-# Build godot-cpp bindings.
-cd ${GODOT_CPP_DIR}
-echo "scons generate_bindings=yes target=$target -j$nproc"
-scons generate_bindings=yes macos_arch=$(uname -m) target=$target -j$nproc
 
 # Build libuv as a static library.
 cd ${LIBUV_DIR}
@@ -66,7 +62,7 @@ mkdir build || true
 cd build
 args="-DCMAKE_BUILD_TYPE=$target -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
 	-DCMAKE_OSX_ARCHITECTURES=$(uname -m)"
-if [ "$target" == "release" ]; then
+if [ "$target" == "template_release" ]; then
 	args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
 else
 	args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"
@@ -77,10 +73,10 @@ cmake --build build --config $target -j$nproc
 
 # Build libgodot-xterm.
 cd ${NATIVE_DIR}
-scons target=$target macos_arch=$(uname -m) disable_pty=$disable_pty -j$nproc
+scons target=$target arch=$(uname -m) debug_symbols=$debug_symbols
 
 # Use Docker to build libgodot-xterm javascript.
-if [ -x "$(command -v docker-compose)" ]; then
-	UID_GID="0:0" TARGET=$target docker-compose build javascript
-	UID_GID="$(id -u):$(id -g)" TARGET=$target docker-compose run --rm javascript
-fi
+#if [ -x "$(command -v docker-compose)" ]; then
+#	UID_GID="0:0" TARGET=$target docker-compose build javascript
+#	UID_GID="$(id -u):$(id -g)" TARGET=$target docker-compose run --rm javascript
+#fi

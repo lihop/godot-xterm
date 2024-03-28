@@ -1,4 +1,4 @@
-tool
+@tool
 extends Control
 # This scene demonstrates how we can control the Terminal node directly by
 # sending and receiving strings and ANSI escape sequences to the terminal
@@ -38,15 +38,15 @@ var row: int
 var menu_start_row: int
 var offset: int
 
-onready var tput = TPut.new($Terminal)
+@onready var tput = TPut.new($Terminal)
 
 
 func _ready():
-	if not $Terminal.is_connected("key_pressed", self, "_on_Terminal_key_pressed"):
+	if not $Terminal.is_connected("key_pressed", Callable(self, "_on_Terminal_key_pressed")):
 		# warning-ignore:return_value_discarded
-		$Terminal.connect("key_pressed", self, "_on_Terminal_key_pressed")
+		$Terminal.connect("key_pressed", Callable(self, "_on_Terminal_key_pressed"))
 	# warning-ignore:return_value_discarded
-	$Terminal.connect("size_changed", self, "draw_all")
+	$Terminal.connect("size_changed", Callable(self, "draw_all"))
 	$Terminal.grab_focus()
 	draw_all()
 
@@ -110,10 +110,10 @@ func draw_menu():
 
 func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 	match data:
-		tput.CURSOR_UP:  # Up arrow key
+		TPut.CURSOR_UP:  # Up arrow key
 			selected_index = int(clamp(selected_index - 1, 0, menu_items.size() - 1))
 			draw_menu()
-		tput.CURSOR_DOWN:  # Down arrow key
+		TPut.CURSOR_DOWN:  # Down arrow key
 			selected_index = int(clamp(selected_index + 1, 0, menu_items.size() - 1))
 			draw_menu()
 		"1":
@@ -127,23 +127,26 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 			draw_menu()
 
 	# We can also match against the raw InputEventKey.
-	if event.scancode == KEY_ENTER:
+	if event.keycode == KEY_ENTER:
 		var item = menu_items[selected_index]
 
 		match item.name:
 			"Asciicast":
-				var scene = item.scene.instance()
+				var scene = item.scene.instantiate()
 				var animation_player: AnimationPlayer = scene.get_node("AnimationPlayer")
-				scene.connect("key_pressed", self, "_on_Asciicast_key_pressed", [animation_player])
+				scene.connect(
+					"key_pressed",
+					Callable(self, "_on_Asciicast_key_pressed").bind(animation_player)
+				)
 				add_child(scene)
 				scene.grab_focus()
-				yield(animation_player, "animation_finished")
+				await animation_player.animation_finished
 				remove_child(scene)
 				$Terminal.grab_focus()
 				scene.queue_free()
 			"Terminal":
 				if OS.get_name() == "Windows":
-					return OS.call_deferred(
+					OS.call_deferred(
 						"alert",
 						(
 							"Psuedoterminal node currently"
@@ -152,17 +155,20 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 						),
 						"Terminal not Supported on Windows"
 					)
-				var scene = item.scene.instance()
+					return
+				var scene = item.scene.instantiate()
 				var pty = scene if OS.has_feature("JavaScript") else scene.get_node("PTY")
 				add_child(scene)
 				scene.grab_focus()
-				yield(pty, "exited")
+				await pty.exited
 				$Terminal.grab_focus()
 				scene.queue_free()
 			"Exit":
-				if OS.has_feature("JavaScript"):
-					JavaScript.eval("window.history.back() || window.close()")
-				get_tree().quit()
+				pass
+				# FIXME
+				#if OS.has_feature("JavaScript"):
+				#JavaScript.eval("window.history.back() || window.close()")
+				#get_tree().quit()
 
 
 func _on_Asciicast_key_pressed(

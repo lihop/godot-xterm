@@ -1,9 +1,9 @@
-extends "res://addons/godot_xterm/terminal.gd"
+extends Terminal
 
-export(String) var exec_path := "bash"
-export(String) var socat_path := "socat"  # E.g. /usr/bin/socat
-export(int) var port := 2023
-export(bool) var verbose := false
+@export var exec_path := "bash"
+@export var socat_path := "socat"  # E.g. /usr/bin/socat
+@export var port := 2023
+@export var verbose := false
 
 var _timeout = 30
 var _pid: int
@@ -15,7 +15,7 @@ func _ready():
 	args.append("tcp-l:%d,reuseaddr,fork" % port)
 	args.append("exec:%s,pty,setsid,setpgid,stderr,ctty" % exec_path)
 
-	_pid = OS.execute(socat_path, args, false)
+	_pid = OS.create_process(socat_path, args)
 
 
 func _process(delta):
@@ -25,13 +25,13 @@ func _process(delta):
 			if _timeout < 1:
 				_error("Timeout: could not connect to socat")
 
-			if not _stream.is_connected_to_host():
+			if _stream.get_connected_host().is_empty():
 				if _stream.connect_to_host("127.0.0.1", port) != OK:
 					_error("Could not connect to socat")
 
 		StreamPeerTCP.STATUS_CONNECTED:
 			var avail = _stream.get_available_bytes()
-			var data = PoolByteArray()
+			var data = PackedByteArray()
 			for i in range(avail):
 				data.append(_stream.get_u8())
 			call_deferred("write", data)

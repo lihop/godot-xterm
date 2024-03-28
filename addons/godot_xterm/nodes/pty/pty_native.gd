@@ -1,4 +1,4 @@
-tool
+@tool
 extends Node
 
 signal data_received(data)

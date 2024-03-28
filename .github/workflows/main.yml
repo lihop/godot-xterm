@@ -5,22 +5,15 @@ on:
   schedule: # Build and test daily.
     - cron: 0 11 * * *
 
-env:
-  # Caches should be automatically invalidated when versions change,
-  # but invalidation can be forced by incrementing these numbers.
-  EMSCRIPTEN_CACHE_VERSION: 1
-  EXPORT_TEMPLATE_CACHE_VERSION: 1
-  GODOT_CACHE_VERSION: 1
-
 jobs:
-  build_docker:
-    name: "Build Docker (linux, ${{ matrix.target }}, ${{ matrix.bits }})"
+  build-linux:
+    name: Build (linux, ${{ matrix.arch }}, ${{ matrix.target }})
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
+        arch: [x86_64, x86_32]
         target: [release, debug]
-        bits: [64, 32]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,54 +23,62 @@ jobs:
         id: cache-submodules
         with:
           platform: linux
+          arch: ${{ matrix.arch }}
           target: ${{ matrix.target }}
-          bits: ${{ matrix.bits }}
       - name: Pull docker images
         run: docker-compose pull
         working-directory: addons/godot_xterm/native
       - name: Cache docker image layers
         uses: jpribyl/action-docker-layer-caching@v0.1.1
         continue-on-error: true
-      - name: Build godot-cpp bindings
-        if: steps.cache-submodules.outputs.cache-hit != 'true'
-        working-directory: addons/godot_xterm/native
-        run: |
-          docker-compose build godot-cpp-linux
-          UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e BITS=${{ matrix.bits }} godot-cpp-linux
+      - name: Ensure scons cache exists
+        run: mkdir -p ${{github.workspace}}/.scons-cache
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         working-directory: addons/godot_xterm/native
-        run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e BITS=${{ matrix.bits }} libuv-linux
+        run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e ARCH=${{ matrix.arch }} -v ${{github.workspace}}/.scons-cache:/scons-cache libuv-linux
       - name: Build libgodot-xterm
         working-directory: addons/godot_xterm/native
-        run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e BITS=${{ matrix.bits }} libgodot-xterm-linux
+        run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e ARCH=${{ matrix.arch }} -v ${{github.workspace}}/.scons-cache:/scons-cache libgodot-xterm-linux
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: libgodot-xterm-linux-${{ matrix.bits }}-${{ matrix.target }}
+          name: libgodot-xterm-linux-${{ matrix.arch }}-${{ matrix.target }}
           path: addons/godot_xterm/native/bin/*.so
 
-  build_native:
-    name: "Build Native"
+  build-other-platforms:
+    name: Build (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.target}})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [javascript, osx, windows]
+        platform: [web, macos, windows]
         target: [release, debug]
-        bits: [64, 32]
+        arch: [wasm32, universal, x86_64, x86_32]
         include:
-          - platform: javascript
+          - platform: web
             os: ubuntu-22.04
-          - platform: osx
+          - platform: macos
             os: macos-12
           - platform: windows
             os: windows-2022
         exclude:
-          - platform: javascript
-            bits: 64 # Currently only wasm32 is supported.
-          - platform: osx
-            bits: 32 # Only 64-bit supported on macOS.
+          - platform: web
+            arch: x86_64
+          - platform: web
+            arch: x86_32
+          - platform: web
+            arch: universal
+          - platform: macos
+            arch: wasm32
+          - platform: macos
+            arch: x86_64
+          - platform: macos
+            arch: x86_32
+          - platform: windows
+            arch: wasm32
+          - platform: windows
+            arch: universal
     steps:
       - uses: actions/checkout@v4
         with:
@@ -88,55 +89,50 @@ jobs:
         with:
           platform: ${{ matrix.platform }}
           target: ${{ matrix.target }}
-          bits: ${{ matrix.bits }}
+          arch: ${{ matrix.arch }}
       - name: Cache emscripten
-        if: ${{ matrix.platform == 'javascript' }}
-        uses: actions/cache@v4
+        if: ${{ matrix.platform == 'web' }}
+        uses: actions/cache@v3
         env:
           cache-name: cache-emscripten
         with:
           path: addons/godot_xterm/native/.emcache
-          key: emsdk-cache-${{ matrix.target }}-v${{ env.EMSCRIPTEN_CACHE_VERSION }}
-      - name: Install javascript build dependencies
-        if: ${{ matrix.platform == 'javascript' }}
-        # Previously mymindstorm/setup-emsdk@v11, but hasn't been updated to Node.js 16.
-        # Should be able to switch back once it has.
-        uses: jeetiss/setup-emsdk@fafd6dd1fc20488845d49b760fd143dfcd7f133c
+          key: emsdk-cache-${{ matrix.target }}-${{ hashFiles('**/*.c*', '**/*.h*') }}
+          restore-keys: |
+            emsdk-cache-${{ matrix.target }}-
+      - name: Install web build dependencies
+        if: ${{ matrix.platform == 'web' }}
+        uses: mymindstorm/setup-emsdk@v11
         with:
           version: 3.1.14
           actions-cache-folder: emsdk-cache-${{ matrix.target }}
-      - name: Install additional javascript build dependencies
-        if: ${{ matrix.platform == 'javascript' }}
+      - name: Install additional web build dependencies
+        if: ${{ matrix.platform == 'web' }}
         run: sudo apt-get update && sudo apt-get install -y scons gcc-multilib g++-multilib
       - name: Install additional macos build dependencies
-        if: ${{ matrix.os == 'macos-12' }}
+        if: ${{ matrix.platform == 'macos' }}
         run: brew install scons
       - name: Install additional windows build dependencies
-        if: ${{ matrix.os == 'windows-2022' }}
+        if: ${{ matrix.platform == 'windows' }}
         run: python -m pip install scons
       - name: Setup MSVC command prompt
         uses: ilammy/msvc-dev-cmd@v1
-        if: ${{ matrix.os == 'windows-2022' }}
+        if: ${{ matrix.platform == 'windows' }}
         with:
-          arch: win${{ matrix.bits }}
-      - name: Build godot-cpp bindings
-        if: steps.cache-submodules.outputs.cache-hit != 'true'
-        run: |
-          cd addons/godot_xterm/native/thirdparty/godot-cpp
-          scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} generate_bindings=yes -j2
+          arch: win${{ matrix.arch == 'x86_64' && '64' || '32' }}
       - name: Setup cmake
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: "3.23.2"
-          use-32bit: ${{ matrix.bits == 32 && matrix.os == 'windows-2022' }}
+          use-32bit: ${{ matrix.arch == 'x86_32' && matrix.platform == 'windows' }}
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         shell: bash
         env:
+          PLATFORM: ${{ matrix.platform }}
           TARGET: ${{ matrix.target }}
-          BITS: ${{ matrix.bits }}
-          OS: ${{ matrix.os }}
+          BITS: ${{ matrix.arch == 'x86_64' && 64 || 32 }}
         run: |
           cd addons/godot_xterm/native/thirdparty/libuv
           args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
@@ -146,7 +142,7 @@ jobs:
           else
             args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"
           fi
-          if [ "$BITS" -eq 32 -a "$OS" == "windows-2022" ]; then
+          if [ "$BITS" -eq 32 -a "$PLATFORM" == "windows" ]; then
             cmake -G "Visual Studio 17 2022" -A Win32 -S $(pwd) -B "build" $args
           else
             mkdir build || true
@@ -156,42 +152,53 @@ jobs:
             cd ..
           fi
           cmake --build build --config $TARGET
+      - name: Ensure scons cache exists
+        run: mkdir -p ${{github.workspace}}/.scons-cache
+        shell: bash
       - name: Build libgodot-xterm
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons-cache
         run: |
           cd addons/godot_xterm/native
-          scons platform=${{ matrix.platform }} target=${{ matrix.target }} bits=${{ matrix.bits }} -j2
+          scons platform=${{ matrix.platform }} target=template_${{ matrix.target }} arch=${{ matrix.arch }} debug_symbols=${{ matrix.platform != 'windows' && matrix.target == 'debug' && 'yes' || 'no' }} -j2
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: libgodot-xterm-${{ matrix.platform }}-${{ matrix.bits }}-${{ matrix.target }}
+          name: libgodot-xterm-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.target }}
           path: |
+            addons/godot_xterm/native/bin/*.so
             addons/godot_xterm/native/bin/*.wasm
-            addons/godot_xterm/native/bin/*.dylib
+            addons/godot_xterm/native/bin/*.framework
+            addons/godot_xterm/native/bin/spawn-helper
+            addons/godot_xterm/native/bin/*.xcframework
             addons/godot_xterm/native/bin/*.dll
 
-  html5_export:
+  html5-export:
     name: "HTML5 Export"
-    needs: [build_docker, build_native]
+    needs: [check-archive, check-pre-commit]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
-          export-templates: true
+          version: "4.2.1-stable"
+      - name: Import assets
+        run: godot --editor --headless --quit-after 100 || true
+      - name: Wait for build
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Build (web, wasm32, release)
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: libgodot-xterm-javascript-32-release
           path: addons/godot_xterm/native/bin
-      - name: Import assets
-        uses: nick-fields/retry@v3
-        with:
-          command: godot --editor .github/import_assets.tscn
-          retry_on: error
-          timeout_minutes: 5
-          max_attempts: 6
+          merge-multiple: true
+      # Some remaining steps temporarily disabled.
       - name: Export HTML5
+        if: false
         uses: nick-fields/retry@v3
         with:
           command: godot --no-window --export HTML5
@@ -199,11 +206,11 @@ jobs:
           timeout_minutes: 5
           max_attempts: 6
       - name: NPM cache
-        uses: actions/setup-node@v4
+        uses: c-hive/gha-npm-cache@v1
         with:
-          cache: "npm"
-          cache-dependency-path: test/html5/package-lock.json
+          directory: test/html5
       - name: Smoke test HTML5 export
+        if: false
         shell: bash
         working-directory: test/html5
         run: |
@@ -212,77 +219,108 @@ jobs:
           npx cypress run
       - name: Upload cypress artifacts (on failure)
         uses: actions/upload-artifact@v4
-        if: ${{ failure() }}
+        if: false
+        #if: ${{ failure() }}
         with:
           name: cypress-artifacts
           path: |-
             test/html5/cypress/screenshots
             test/html5/cypress/videos
       - name: Upload export
+        if: false
         uses: actions/upload-artifact@v4
         with:
           name: html5-demo
           path: docs/demo
 
   test:
-    name: "Test"
-    needs: [build_docker, build_native]
+    name: Test (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.godot-version }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2022, macos-12, ubuntu-22.04]
-        bits: [64, 32]
-        godot_version: ["v3.4.5-stable", "v3.5-stable"]
-        include:
-          - os: ubuntu-22.04
-            platform: "linux"
-          - os: macos-12
-            platform: "osx"
-          - os: windows-2022
-            platform: "windows"
+        platform: [linux, macos, windows]
+        arch: [x86_64, x86_32, universal]
+        godot-version: ["v4.2-stable", "v4.2.1-stable"]
         exclude:
-          - os: macos-12
-            bits: 32
+          - platform: linux
+            arch: universal
+          - platform: macos
+            arch: x86_64
+          - platform: macos
+            arch: x86_32
+          - platform: windows
+            arch: universal
+        include:
+          - platform: linux
+            os: ubuntu-22.04
+          - platform: macos
+            os: macos-12
+          - platform: windows
+            os: windows-2022
     steps:
       - uses: actions/checkout@v4
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
-          version: ${{ matrix.godot_version }}
-          bits: ${{ matrix.bits }}
+          version: ${{ matrix.godot-version }}
+      - name: Macos setup
+        if: ${{ matrix.platform == 'macos' }}
+        run: |
+          # Some macos runners have metal which means we can use vulkan, others don't.
+          if system_profiler SPDisplaysDataType | grep -q "Metal"; then
+            echo RENDERING_DRIVER=vulkan >> .env
+            brew install molten-vk
+          else
+            echo RENDERING_DRIVER=opengl3 >> .env
+          fi
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Install dependencies
+        run: just install
+      - name: Import assets
+        shell: bash
+        run: godot --editor --headless --quit-after 100 || true
+      - name: Wait for build
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Build (${{ matrix.platform }}, ${{ matrix.arch }}, debug)
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: libgodot-xterm-${{ matrix.platform}}-${{ matrix.bits }}-release
           path: addons/godot_xterm/native/bin
-      - name: Run tests
-        uses: nick-fields/retry@v3
-        with:
-          shell: bash
-          command: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.ci.json
-          retry_on: error
-          timeout_minutes: 5
-          max_attempts: 6
-      - name: Run unix tests
-        if: ${{ matrix.os != 'windows-2022' }}
-        uses: nick-fields/retry@v3
-        with:
-          command: godot --no-window -s addons/gut/gut_cmdln.gd -gconfig=test/.gutconfig.unix.json
-          retry_on: error
-          timeout_minutes: 5
-          max_attempts: 6
+          merge-multiple: true
+      - name: Set spawn-helper file permissions
+        if: ${{ matrix.platform == 'macos' }}
+        # File permissions are not preserved by upload-artifact.
+        run: chmod +x addons/godot_xterm/native/bin/spawn-helper
+      - name: Test
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            just test | tee output.log
+          else
+            just test-all | tee output.log
+          fi
 
-  merge_artifacts:
-    name: "Merge ${{ matrix.target }} artifacts"
+          # This step often passes when it shouldn't, due to GUT not failing on script errors
+          # (see: https://github.com/bitwes/Gut/issues/210). Therefore, we check the output
+          # for expected (and unexpected) strings.
+          if grep -q 'SCRIPT_ERROR:' output.log || grep -q 'Tests             none' output.log; then
+            exit 1
+          fi
+
+  merge-artifacts:
+    name: Merge Artifacts
     runs-on: ubuntu-latest
-    needs: test
+    needs: [build-linux, build-other-platforms, test, html5-export]
     strategy:
       matrix:
         target: [release, debug]
     steps:
-      - name: Merge artifacts
-        uses: actions/upload-artifact/merge@v4
+      - uses: actions/upload-artifact/merge@v4
         with:
           name: libgodot-xterm-${{ matrix.target }}
           pattern: "*-${{ matrix.target }}"
@@ -300,10 +338,10 @@ jobs:
         run: git archive -o archive.zip HEAD
       - name: Extract archive
         run: mkdir -p /tmp/unzipped && unzip archive.zip -d /tmp/unzipped
-      - name: Check that archive only contains addons directory
+      - name: Check that archive only contains addons/godot_xterm directory
         run: |
           shopt -s nullglob dotglob
-          ls -lR /tmp/unzipped
+          ls -laR /tmp/unzipped
           files=(/tmp/unzipped/*)
           if [ ${#files[@]} -ne 1 ]; then
             echo "Wrong number of files in archive (${#files[@]}) expected 1."

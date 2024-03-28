@@ -14,7 +14,7 @@ repos:
     hooks:
       - id: prettier
   - repo: https://github.com/Scony/godot-gdscript-toolkit
-    rev: 3.5.0
+    rev: 4.2.2
     hooks:
       - id: gdformat
         exclude: "^addons/gut/"

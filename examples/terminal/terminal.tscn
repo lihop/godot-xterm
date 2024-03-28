@@ -1,28 +1,24 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=3 uid="uid://cysad55lwtnc6"]
 
-[ext_resource path="res://themes/audio/bell.wav" type="AudioStream" id=1]
-[ext_resource path="res://addons/godot_xterm/pty.gd" type="Script" id=2]
-[ext_resource path="res://examples/terminal/terminal.gd" type="Script" id=3]
+[ext_resource type="AudioStream" uid="uid://n0hqjfxltbm0" path="res://themes/audio/bell.wav" id="1"]
+[ext_resource type="Theme" uid="uid://0gk8swmcldbg" path="res://addons/godot_xterm/themes/default.tres" id="1_uci3c"]
+[ext_resource type="Script" path="res://addons/godot_xterm/pty.gd" id="2"]
+[ext_resource type="Script" path="res://examples/terminal/terminal.gd" id="3"]
 
-[node name="Terminal" type="Control"]
+[node name="Terminal" type="Terminal"]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-focus_mode = 2
-script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-copy_on_selection = true
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_uci3c")
+script = ExtResource("3")
 
 [node name="PTY" type="Node" parent="."]
-script = ExtResource( 2 )
+script = ExtResource("2")
 terminal_path = NodePath("..")
-env = {
-"COLORTERM": "truecolor",
-"TERM": "xterm-256color"
-}
 
 [node name="Bell" type="AudioStreamPlayer" parent="."]
-stream = ExtResource( 1 )
+stream = ExtResource("1")
 
 [connection signal="bell" from="." to="Bell" method="play"]

@@ -1,46 +1,47 @@
-tool
+@tool
 extends EditorImportPlugin
 
 const XrdbTheme := preload("../resources/xrdb_theme.gd")
 
 
-func get_importer_name():
+func _get_importer_name():
 	return "godot_xterm_xrdb_importer"
 
 
-func get_visible_name():
+func _get_visible_name():
 	return "xrdb_theme"
 
 
-func get_recognized_extensions():
+func _get_recognized_extensions():
 	return ["xrdb", "Xresources", "xresources"]
 
 
-func get_save_extension():
+func _get_save_extension():
 	return "res"
 
 
-func get_resource_type():
+func _get_resource_type():
 	return "Theme"
 
 
-func get_import_options(preset):
+func _get_import_options(preset, _i):
 	return []
 
 
-func get_preset_count():
+func _get_preset_count():
 	return 0
 
 
-func import(source_file, save_path, options, r_platform_variant, r_gen_files):
-	var file = File.new()
-	var err = file.open(source_file, File.READ)
+func _import(source_file, save_path, options, r_platform_variant, r_gen_files):
+	var file = FileAccess.open(source_file, FileAccess.READ)
+	var err = FileAccess.get_open_error()
 	if err != OK:
 		return err
 
 	var theme: Theme = XrdbTheme.new()
-	theme.set_font("regular", "Terminal", preload("../themes/fonts/regular.tres"))
-	for font in ["bold", "italic", "bold_italic"]:
+	theme.set_font_size("font_size", "Terminal", 14)
+	theme.set_font("normal_font", "Terminal", preload("../themes/fonts/regular.tres"))
+	for font in ["bold_font", "italic_font", "bold_italic_font"]:
 		theme.set_font(font, "Terminal", null)
 
 	var word_regex = RegEx.new()
@@ -72,42 +73,42 @@ func import(source_file, save_path, options, r_platform_variant, r_gen_files):
 			name = words[1].get_string().to_lower()
 			color = Color(words[2].get_string())
 
-		if not name or not color:
+		if name == null or color == null:
 			continue
 
 		match name:
 			"color0", "ansi_0_color":
-				theme.set_color("black", "Terminal", color)
+				theme.set_color("ansi_0_color", "Terminal", color)
 			"color1", "ansi_1_color":
-				theme.set_color("red", "Terminal", color)
+				theme.set_color("ansi_1_color", "Terminal", color)
 			"color2", "ansi_2_color":
-				theme.set_color("green", "Terminal", color)
+				theme.set_color("ansi_2_color", "Terminal", color)
 			"color3", "ansi_3_color":
-				theme.set_color("yellow", "Terminal", color)
+				theme.set_color("ansi_3_color", "Terminal", color)
 			"color4", "ansi_4_color":
-				theme.set_color("blue", "Terminal", color)
+				theme.set_color("ansi_4_color", "Terminal", color)
 			"color5", "ansi_5_color":
-				theme.set_color("magenta", "Terminal", color)
+				theme.set_color("ansi_5_color", "Terminal", color)
 			"color6", "ansi_6_color":
-				theme.set_color("cyan", "Terminal", color)
+				theme.set_color("ansi_6_color", "Terminal", color)
 			"color7", "ansi_7_color":
-				theme.set_color("white", "Terminal", color)
+				theme.set_color("ansi_7_color", "Terminal", color)
 			"color8", "ansi_8_color":
-				theme.set_color("bright_black", "Terminal", color)
+				theme.set_color("ansi_8_color", "Terminal", color)
 			"color9", "ansi_9_color":
-				theme.set_color("bright_red", "Terminal", color)
+				theme.set_color("ansi_9_color", "Terminal", color)
 			"color10", "ansi_10_color":
-				theme.set_color("bright_green", "Terminal", color)
+				theme.set_color("ansi_10_color", "Terminal", color)
 			"color11", "ansi_11_color":
-				theme.set_color("bright_yellow", "Terminal", color)
+				theme.set_color("ansi_11_color", "Terminal", color)
 			"color12", "ansi_12_color":
-				theme.set_color("bright_blue", "Terminal", color)
+				theme.set_color("ansi_12_color", "Terminal", color)
 			"color13", "ansi_13_color":
-				theme.set_color("bright_magenta", "Terminal", color)
+				theme.set_color("ansi_13_color", "Terminal", color)
 			"color14", "ansi_14_color":
-				theme.set_color("bright_cyan", "Terminal", color)
+				theme.set_color("ansi_14_color", "Terminal", color)
 			"color15", "ansi_15_color":
-				theme.set_color("bright_white", "Terminal", color)
+				theme.set_color("ansi_15_color", "Terminal", color)
 			"foreground", "foreground_color":
 				theme.set_color("foreground", "Terminal", color)
 			"background", "background_color":
@@ -121,4 +122,4 @@ func import(source_file, save_path, options, r_platform_variant, r_gen_files):
 			"cursor_text_color":
 				theme.set_color("cursor_text", "Terminal", color)
 
-	return ResourceSaver.save("%s.%s" % [save_path, get_save_extension()], theme)
+	return ResourceSaver.save(theme, "%s.%s" % [save_path, _get_save_extension()])
