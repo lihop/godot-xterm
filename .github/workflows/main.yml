@@ -186,7 +186,7 @@ jobs:
       - name: Import assets
         run: godot --editor --headless --quit-after 100 || true
       - name: Wait for build
-        uses: fountainhead/action-wait-for-check@v1.1.0
+        uses: fountainhead/action-wait-for-check@v1.2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: Build (web, wasm32, release)
@@ -282,7 +282,7 @@ jobs:
         shell: bash
         run: godot --editor --headless --quit-after 100 || true
       - name: Wait for build
-        uses: fountainhead/action-wait-for-check@v1.1.0
+        uses: fountainhead/action-wait-for-check@v1.2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: Build (${{ matrix.platform }}, ${{ matrix.arch }}, debug)
