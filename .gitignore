@@ -39,6 +39,7 @@ addons/*
 !addons/godot_xterm/
 docs/demo
 docs/logs
+docs/_build
 
 # Imported translations (automatically generated from CSV files)
 *.translation

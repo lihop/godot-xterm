@@ -16,7 +16,6 @@
 
 # Files to exclude from asset-lib download.
 /addons/gd-plug export-ignore
-/CHANGELOG.md export-ignore
 /default_env.tres export-ignore
 /docs export-ignore
 /.env.example export-ignore
