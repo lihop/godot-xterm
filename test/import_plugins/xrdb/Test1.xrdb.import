@@ -11,3 +11,4 @@ source_file="res://test/import_plugins/xrdb/Test1.xrdb"
 dest_files=["res://.godot/imported/Test1.xrdb-754efb4c644076f3ce42897c010bc001.res"]
 
 [params]
+
