@@ -1,14 +1,6 @@
----
-layout: default
-title: Terminal
-parent: API
-nav_order: 2
-permalink: /api/terminal
----
-
 # Terminal
 
-**Inherits:** [Control] < [CanvasItem] < [Node] < [Object]
+**Inherits:** {{Control}} < {{CanvasItem}} < {{Node}} < {{Object}}
 
 A Terminal emulator Control node.
 
@@ -17,7 +9,7 @@ For an exhaustive list of terminal control sequences (not all of which are suppo
 
 ## Overview
 
-![Terminal Flow Diagram](../media/flow_diagram.svg)
+![Terminal Flow Diagram](../_static/images/diagram_flow.svg)
 <sub>"Terminal Flow Diagram" is a derivative of ["computer keyboard 2"](https://openclipart.org/detail/2396/computer-keyboard-2) and ["monitor"](https://openclipart.org/detail/1637/monitor), from U.S. patent drawings, uploaded by [johnny_automatic](https://openclipart.org/artist/johnny_automatic), used under [CC0](https://creativecommons.org/share-your-work/public-domain/cc0/).<sub/>
 
 ### (1) User Input
@@ -44,193 +36,204 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 
 | Type         | Name                                 | Default |
 | ------------ | ------------------------------------ | ------- |
-| [bool]       | [bell_muted](#prop-bell_muted)       | `false` |
-| [float]      | [bell_cooldown](#prop-bell_cooldown) | `0.1`   |
-| [int]        | [cols](#prop-cols) _(deprecated)_    | `2`     |
-| [int]        | [rows](#prop-rows) _(deprecated)_    | `2`     |
-| [UpdateMode] | [update_mode](#prop-update_mode)     | `AUTO`  |
+| {{bool}}     | [bell_muted](#prop-bell_muted)       | false   |
+| {{float}}    | [bell_cooldown](#prop-bell_cooldown) | 0.1     |
+| {{int}}      | [cols](#prop-cols) _(deprecated)_    | 2       |
+| {{int}}      | [rows](#prop-rows) _(deprecated)_    | 2       |
+| [UpdateMode] | [update_mode](#prop-update_mode)     | AUTO    |
 
 ## Methods
 
-| Returns  | Signature                                                         |
-| -------- | ----------------------------------------------------------------- |
-| void     | [clear](#mthd-clear) **()**                                       |
-| [String] | [copy_all](#mthd-copy_all) **()**                                 |
-| [String] | [copy_selection](#mthd-copy_selection) **()**                     |
-| [int]    | [get_cols](#mthd-get_cols) **()**                                 |
-| [int]    | [get_rows](#mthd-get_rows) **()**                                 |
-| void     | [write](#mthd-write) **(** [String] \| [PoolByteArray] data **)** |
+| Returns    | Signature                                                           |
+| ---------- | ------------------------------------------------------------------- |
+| void       | [clear](#mthd-clear) **( )**                                        |
+| {{String}} | [copy_all](#mthd-copy_all) **( )**                                  |
+| {{String}} | [copy_selection](#mthd-copy_selection) **( )**                      |
+| {{int}}    | [get_cols](#mthd-get_cols) **( )**                                  |
+| {{int}}    | [get_rows](#mthd-get_rows) **( )**                                  |
+| void       | [write](#mthd-write) **(** {{String}}\|{{PoolByteArray}} data **)** |
 
 ## Signals
 
-- <a name="sgnl-bell" /> **bell** **()**
+<hr id="sgnl-bell" />
 
-  Emitted when the [bell character](https://en.wikipedia.org/wiki/Bell_character) (`"\u0007"`) is written to the terminal.
+**bell** **(** **)**
 
----
+Emitted when the [bell character](https://en.wikipedia.org/wiki/Bell_character) (`"\u0007"`) is written to the terminal.
 
-- <a name="sgnl-data_sent" /> **data_sent** **(** [PoolByteArray] data **)**
+<hr id="sgnl-data-sent" />
 
-  Emitted when some data comes out of the terminal.
-  This typically occurs when the user interacts with the terminal by typing on the keyboard.
-  Input can be interpreted differently depending on modifier keys and the terminal's settings/state.
+**data_sent** **(** {{PoolByteArray}} data **)**
 
-  When connected to a [PTY], this data will be forwarded to it.
+Emitted when some data comes out of the terminal.
+This typically occurs when the user interacts with the terminal by typing on the keyboard.
+Input can be interpreted differently depending on modifier keys and the terminal's settings and state.
 
----
+:::{note}
+When connected to a {{PTY}}, this data will be forwarded to it.
+:::
 
-- <a name="sgnl-key_pressed" /> **key_pressed** **(** [String] data, [InputEventKey] event **)**
+<hr id="sgnl-key_pressed" />
 
-  Emitted when a key is pressed. `data` is the data that would be emitted by the terminal via the [`data_sent()`](#sgnl-data_sent) signal and may vary based on the terminal's state. `event` is the event captured by Godot in the `_gui_input(event)` method.
+**key_pressed** **(** {{String}} data, {{InputEventKey}} event **)**
 
----
+Emitted when a key is pressed. `data` is the data that would be emitted by the terminal via the [`data_sent()`](#sgnl-data_sent) signal and may vary based on the terminal's state. `event` is the event captured by Godot in the `_gui_input(event)` method.
 
-- <a name="sgnl-size_changed"> **size_changed** **(** [Vector2] new_size **)**
+<hr id="sgnl-size_changed" />
 
-  Emitted when the terminal's size changes, typically in response to its `rect_size` changing.
-  `new_size.x` will be the number of columns and `new_size.y` will be the number of rows.
-  This information should be forwarded to a pseudoterminal, if it is connected, so that it can update its size accordingly.
+**size_changed** **(** {{Vector2}} new_size **)**
+
+Emitted when the terminal's size changes, typically in response to its `rect_size` changing.
+`new_size.x` will be the number of columns and `new_size.y` will be the number of rows.
+This information should be forwarded to a pseudoterminal, if it is connected, so that it can update its size accordingly.
+
+<hr/>
 
 ## Enumerations
 
-<a name="enum-update_mode" /> enum **UpdateMode**:
+<hr id="enum-update_mode" />
 
-- **DISABLED** = **0** --- The terminal's `update()` method will never be called. No new cells will be drawn.
-- **AUTO** = **1** --- Only changed cells will be drawn after `update()` is called, but will switch to **ALL_NEXT_FRAME** when mass redraws are required.
-- **ALL** = **2** --- Every cell will be drawn on every `update()` call.
-- **ALL_NEXT_FRAME** = **3** --- Draws every cell afetr the next `update()` call, then returns to **AUTO**.
+enum **UpdateMode**:
+
+- **DISABLED** = 0 --- The terminal's `update()` method will never be called. No new cells will be drawn.
+- **AUTO** = 1 --- Only changed cells will be drawn after `update()` is called, but will switch to `ALL_NEXT_FRAME` when mass redraws are required.
+- **ALL** = 2 --- Every cell will be drawn on every `update()` call.
+- **ALL_NEXT_FRAME** = 3 --- Draws every cell after the next `update()` call, then returns to `AUTO`.
+
+<hr/>
 
 ## Property Descriptions
 
-- <a name="prop-cols" /> [int] **cols**
+<hr id="prop-cols" />
 
-  |           |            |
-  | --------- | ---------- |
-  | _Default_ | `2`        |
-  | _Setter_  | None       |
-  | _Getter_  | get_cols() |
+{{int}} **cols** _(deprecated)_
 
-  _Deprecated_. This property is deprecated and will be removed in a future version.
-  Please use [get_cols](#mthd-get_cols) instead.
+|           |                      |
+| --------- | -------------------- |
+| _Default_ | 2                    |
+| _Setter_  | None                 |
+| _Getter_  | {{int}} get_cols ( ) |
 
----
+:::{warning}
+_Deprecated_. This property is deprecated and will be removed in a future version.
+Please use [get_cols](#mthd-get_cols) instead.
+:::
 
-- <a name="prop-rows" /> [int] **rows** **_Deprecated_**
+<hr id="prop-rows" />
 
-  |           |            |
-  | --------- | ---------- |
-  | _Default_ | `2`        |
-  | _Setter_  | None       |
-  | _Getter_  | get_rows() |
+{{int}} **rows** _(deprecated)_
 
-  _Deprecated_. This property is deprecated and will be removed in a future version.
-  Please use the [get_rows](#mthd-get_rows) instead.
+|           |                      |
+| --------- | -------------------- |
+| _Default_ | 2                    |
+| _Setter_  | None                 |
+| _Getter_  | {{int}} get_rows ( ) |
 
----
+:::{warning}
+_Deprecated_. This property is deprecated and will be removed in a future version.
+Please use the [get_rows](#mthd-get_rows) instead.
+:::
 
-- <a name="prop-bell_muted" /> [bool] **bell_muted**
+<hr id="prop-bell_muted" />
 
-  |           |         |
-  | --------- | ------- |
-  | _Default_ | `false` |
-  | _Setter_  | None    |
-  | _Getter_  | None    |
+{{bool}} **bell_muted**
 
-  If muted, no [`bell`](#sgnl-bell) signal will be emitted when the bell character (`"\u0007"`) is written to the terminal.
+|           |       |
+| --------- | ----- |
+| _Default_ | false |
+| _Setter_  | None  |
+| _Getter_  | None  |
 
----
+If muted, no [`bell`](#sgnl-bell) signal will be emitted when the bell character (`"\u0007"`) is written to the terminal.
 
-- <a name="prop-bell_cooldown" /> [float] **bell_cooldown**
+<hr id="prop-bell_cooldown" />
 
-  |           |       |
-  | --------- | ----- |
-  | _Default_ | `0.1` |
-  | _Setter_  | None  |
-  | _Getter_  | None  |
+{{float}} **bell_cooldown**
 
-  The minimum amount of time to wait before emitting another [`bell`](#sgnl-bell) signal on subsequent writes of the bell character.
-  Writing the bell character too frequently, for example by running the command `while true; do echo -e "\a"; done`,
-  can have a negative impact on performance depending on how the signal is connected.
-  This property allows throttling of that signal.
+|           |      |
+| --------- | ---- |
+| _Default_ | 0.1  |
+| _Setter_  | None |
+| _Getter_  | None |
 
----
+The minimum amount of time to wait before emitting another [`bell`](#sgnl-bell) signal on subsequent writes of the bell character.
 
-- <a name="prop-update_mode" /> [UpdateMode] **update_mode**
+:::{caution}
+Writing the bell character too frequently, for example by running the command `while true; do echo -e "\a"; done`,
+can have a negative impact on performance depending on how the signal is connected.
+This property allows throttling of that signal's emission.
+:::
 
-  |           |                        |
-  | --------- | ---------------------- |
-  | _Default_ | `AUTO`                 |
-  | _Setter_  | set_update_mode(value) |
-  | _Getter_  | None                   |
+<hr id="prop-update_mode" />
 
-  Determines which cells of the terminal will be updated when its state changes.
-  By default `AUTO` will only update cells that changed, but will update all cells (i.e. the entire screen) on major changes,
-  such as terminal resize.
-  If you are having trouble with the terminal not updating correctly or exhibiting artifacts, you can try remedying this by setting `update_mode` to `ALL`, however, this will have a negative impact on performance.
+[UpdateMode] **update_mode**
+
+|           |                                             |
+| --------- | ------------------------------------------- |
+| _Default_ | AUTO                                        |
+| _Setter_  | void set_update_mode ( [UpdateMode] value ) |
+| _Getter_  | None                                        |
+
+Determines which cells of the terminal will be updated when its state changes.
+By default `AUTO` will only update cells that changed, but will update all cells (i.e. the entire screen) on major changes,
+such as terminal resize.
+
+:::{hint}
+If the screen is not updating properly, then setting the `update_mode` to `ALL` can be a workaround for this. However, this will have a negative impact on performance. Update issues should be reported to [the issue tracker](https://github.com/lihop/godot-xterm/issues).
+:::
+
+<hr/>
 
 ## Method Descriptions
 
-- <a name="mthd-clear" /> void **clear** **()**
+<hr id="mthd-clear" />
 
-  Removes all but the bottommost row of the terminal including scrollback buffer.
+void **clear** **( )**
 
----
+Removes all but the bottommost row of the terminal including scrollback buffer.
 
-- <a name="mthd-copy_all" /> [String] **copy_all** **()**
+<hr id="mthd-copy_all" />
 
-  Copies all of the text in the terminal including scrollback buffer.
+{{String}} **copy_all** **( )**
 
----
+Copies all of the text in the terminal including scrollback buffer.
 
-- <a name="mthd-copy_selection" /> [String] **copy_selection** **()**
+<hr id="mthd-copy_selection" />
 
-  Copies only selected (i.e. highlighted) text in the terminal.
-  Will return an empty string if nothing is highligted.
+{{String}} **copy_selection** **( )**
 
----
+Copies only selected (i.e. highlighted) text in the terminal.
+Will return an empty string if nothing is highlighted.
 
-- <a name="mthd-get_cols" /> [int] **get_cols** **()**
+<hr id="mthd-get_cols" />
 
-  Returns the width of the terminal in characters.
-  When using a monospace font, this is the number of visible characters that can fit from one side of the terminal to the other in a single row.
-  It will automatically update according to the terminal's rect_size and theme's font size.
+{{int}} **get_cols** **( )**
 
----
+Returns the width of the terminal in characters.
+When using a monospace font, this is the number of visible characters that can fit from one side of the terminal to the other in a single row.
+It will automatically update according to the terminal's rect_size and theme's font size.
 
-- <a name="mthd-get_rows" /> [int] **get_rows** **()**
+<hr id="mthd-get_rows" />
 
-  Returns the height of the terminal in characters.
-  When using a monospace font, this is the number of visible characters that can fit from the top of the terminal to the bottom in a single column.
-  It will automatically update according to the terminal's rect_size and theme's font size.
+{{int}} **get_rows** **( )**
 
----
+Returns the height of the terminal in characters.
+When using a monospace font, this is the number of visible characters that can fit from the top of the terminal to the bottom in a single column.
+It will automatically update according to the terminal's rect_size and theme's font size.
 
-- <a name="mthd-write" /> void **write** **(** [String] \| [PoolByteArray] data **)**
+<hr id="mthd-write" />
 
-  Writes data to the terminal emulator. Accepts either a [String] or [PoolByteArray].
-  Typically it would be connected to the output of a [PTY]'s [`data_received()`](/api/pty#sgnl-data_received) signal.
+void **write** **(** {{String}}\|{{PoolByteArray}} data **)**
 
-  Example:
+Writes data to the terminal emulator. Accepts either a {{String}} or {{PoolByteArray}}.
+Typically it would be connected to the output of a {{PTY}}'s [`data_received()`](pty.md#sgnl-data_received) signal.
 
-  ```gdscript
-  $Terminal.write("Hello World")
-  $Terminal.write("Hello World".to_utf8())
-  $Terminal.write(PoolByteArray([0x1b, 0x9e])
-  ```
+Example:
 
-[AudioStream]: https://docs.godotengine.org/en/stable/classes/class_audiostream.html
-[CanvasItem]: https://docs.godotengine.org/en/stable/classes/class_canvasitem.html
-[Color]: https://docs.godotengine.org/en/stable/classes/class_color.html
-[Control]: https://docs.godotengine.org/en/stable/classes/class_control.html
-[Font]: https://docs.godotengine.org/en/stable/classes/class_font.html
-[InputEventKey]: https://docs.godotengine.org/en/stable/classes/class_inputeventkey.html
-[Node]: https://docs.godotengine.org/en/stable/classes/class_node.html
-[Object]: https://docs.godotengine.org/en/stable/classes/class_object.html
-[PoolByteArray]: https://docs.godotengine.org/en/stable/classes/class_poolbytearray.html
-[PTY]: /api/pty
-[String]: https://docs.godotengine.org/en/stable/classes/class_string.html
+```gdscript
+$Terminal.write("Hello World")
+$Terminal.write("Hello World".to_utf8())
+$Terminal.write(PoolByteArray([0x1b, 0x9e])
+```
+
 [UpdateMode]: #enum-update_mode
-[Vector2]: https://docs.godotengine.org/en/stable/classes/class_vector2.html
-[bool]: https://docs.godotengine.org/en/stable/classes/class_bool.html
-[float]: https://docs.godotengine.org/en/stable/classes/class_float.html
-[int]: https://docs.godotengine.org/en/stable/classes/class_int.html

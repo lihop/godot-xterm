@@ -28,7 +28,7 @@ _global_script_class_icons={
 
 config/name="GodotXterm"
 run/main_scene="res://examples/menu/menu.tscn"
-config/icon="res://docs/media/icon.png"
+config/icon="res://docs/_static/images/icon.png"
 
 [display]
 
