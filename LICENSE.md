@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2020-2022, Leroy Hopson <<godotxterm@leroy.geek.nz>> and [contributors](https://github.com/lihop/godot-xterm/contributors).
+Copyright (c) 2020-2024, Leroy Hopson and GodotXterm contributors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
