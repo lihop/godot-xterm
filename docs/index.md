@@ -4,7 +4,7 @@
 
 <br/>
 
-[![Godot Version](https://img.shields.io/badge/Godot-3.4.x-blue.svg)](#supported-godot-versions)
+[![Godot Version](https://img.shields.io/badge/Godot-4.2+-blue.svg)](#supported-godot-versions)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/lihop/godot-xterm/blob/stable/LICENSE.md)
 [![Build and Test](https://github.com/lihop/godot-xterm/actions/workflows/main.yml/badge.svg?event=schedule)](https://github.com/lihop/godot-xterm/actions/workflows/main.yml)
 
