@@ -40,7 +40,7 @@ void Terminal::_populate_key_list() {
   };
 #endif
 
-  // Godot does not have seperate scancodes for keypad keys when NumLock is off.
+  // Godot does not have separate scancodes for keypad keys when NumLock is off.
   // We can check the unicode value to determine whether it is off and set the
   // appropriate scancode.
   // Based on the patch which adds support for this to TextEdit/LineEdit:
@@ -401,7 +401,7 @@ void Terminal::update_theme() {
   Ref<Theme> default_theme;
 
   /* Load the default theme if it exists and no theme is set */
-  // Don't actually set the theme to default (to allow inheritence of themes),
+  // Don't actually set the theme to default (to allow inheritance of themes),
   // but do load default values from it.
 
   const char *default_theme_path =
