@@ -1,5 +1,9 @@
 # Building From Source
 
+:::{error}
+The project is undergoing significant changes in the upgrade to Godot 4. Therefore, the documentation about building from source is out of date. This documentation will be updated before the next release.
+:::
+
 Building GodotXterm from source consists of four steps:
 
 1. Clone git submodules.
