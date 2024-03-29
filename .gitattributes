@@ -16,7 +16,6 @@
 
 # Files to exclude from asset-lib download.
 /addons/gut export-ignore
-/CHANGELOG.md export-ignore
 /default_env.tres export-ignore
 /docs export-ignore
 /examples export-ignore

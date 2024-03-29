@@ -28,3 +28,4 @@ test/test_metadata.json
 .gdxterm
 docs/demo
 docs/logs
+docs/_build
