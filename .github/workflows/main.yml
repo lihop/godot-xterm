@@ -102,7 +102,7 @@ jobs:
             emsdk-cache-${{ matrix.target }}-
       - name: Install web build dependencies
         if: ${{ matrix.platform == 'web' }}
-        uses: mymindstorm/setup-emsdk@v11
+        uses: mymindstorm/setup-emsdk@v14
         with:
           version: 3.1.14
           actions-cache-folder: emsdk-cache-${{ matrix.target }}
