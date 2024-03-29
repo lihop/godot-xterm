@@ -195,5 +195,5 @@ Thanks to [@ConteZero](https://github.com/contezero) for reporting and providing
 ### Changed
 
 - Implementation of Terminal node from GDScript to GDNative using [Aetf's patched version of libtsm](https://github.com/Aetf/libtsm).
-- Move input handling to the Terminal node itself, rather than handling it in a seperate Control node.
+- Move input handling to the Terminal node itself, rather than handling it in a separate Control node.
 - The Terminal `write()` method now accepts both String and PoolByteArray.

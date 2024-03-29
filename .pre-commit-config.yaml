@@ -5,11 +5,6 @@ ci:
   autoupdate_commit_msg: "chore: autoupdate"
 exclude: "^addons/gut/"
 repos:
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
-    hooks:
-      - id: codespell
-        args: []
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -23,3 +18,8 @@ repos:
     hooks:
       - id: gdformat
         exclude: "^addons/gut/"
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+      - id: codespell
+        exclude: ".*package-lock.json|.*demo.txt|.*fonts.*LICENSE|.*THIRDPARTY_NOTICES.*|.*.svg"
