@@ -147,7 +147,7 @@ static NAN_METHOD(PtyStartProcess) {
   }
 
   // use environment 'Path' variable to determine location of
-  // the relative path that we have recieved (e.g cmd.exe)
+  // the relative path that we have received (e.g cmd.exe)
   std::wstring shellpath;
   if (::PathIsRelativeW(filename)) {
     shellpath = path_util::get_shell_path(filename);

@@ -395,7 +395,7 @@ Napi::Value PtyFork(const Napi::CallbackInfo& info) {
     }
   }
 
-  // reenable signals
+  // re-enable signals
   pthread_sigmask(SIG_SETMASK, &oldmask, NULL);
 
   switch (pid) {

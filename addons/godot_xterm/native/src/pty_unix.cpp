@@ -377,7 +377,7 @@ Dictionary PTYUnix::fork(
     }
   }
 
-  // reenable signals
+  // re-enable signals
   pthread_sigmask(SIG_SETMASK, &oldmask, NULL);
 
   switch (pid) {

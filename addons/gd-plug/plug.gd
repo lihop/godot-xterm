@@ -852,7 +852,7 @@ func directory_remove_batch(files, args = {}):
 			if dir.remove(dir.get_current_dir()) == OK:
 				logger.debug("Remove empty directory: %s" % dir.get_current_dir())
 		# Dumb method to clean empty ancestor directories
-		logger.debug("Removing emoty ancestor directory for %s..." % dir.get_current_dir())
+		logger.debug("Removing empty ancestor directory for %s..." % dir.get_current_dir())
 		var current_dir = dir.get_current_dir()
 		for i in slash_count:
 			current_dir = current_dir.get_base_dir()

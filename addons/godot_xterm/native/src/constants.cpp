@@ -20,7 +20,7 @@ const char* Terminal::FONT_TYPES[4] = {
 };
 
 const Terminal::KeyMap Terminal::KEY_MAP = {
-    // Godot does not have seperate scancodes for keypad keys when NumLock is
+    // Godot does not have separate scancodes for keypad keys when NumLock is
     // off. We can check the unicode value to determine whether it is off and
     // set the appropriate scancode. Based on the patch which adds support for
     // this to TextEdit/LineEdit:

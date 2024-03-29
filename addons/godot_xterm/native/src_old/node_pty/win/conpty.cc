@@ -149,7 +149,7 @@ HRESULT CreateNamedPipesAndPseudoConsole(COORD size, DWORD dwFlags,
     }
   }
 
-  // Failed to find  kernel32. This is realy unlikely - honestly no idea how
+  // Failed to find  kernel32. This is really unlikely - honestly no idea how
   //    this is even possible to hit. But if it does happen, fall back to
   //    winpty.
   return HRESULT_FROM_WIN32(GetLastError());
@@ -180,7 +180,7 @@ static NAN_METHOD(PtyStartProcess) {
   const bool inheritCursor = Nan::To<bool>(info[5]).FromJust();
 
   // use environment 'Path' variable to determine location of
-  // the relative path that we have recieved (e.g cmd.exe)
+  // the relative path that we have received (e.g cmd.exe)
   std::wstring shellpath;
   if (::PathIsRelativeW(filename.c_str())) {
     shellpath = path_util::get_shell_path(filename.c_str());

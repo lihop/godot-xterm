@@ -227,7 +227,7 @@ Array PTYUnix::fork(String p_file, int _ignored, PackedStringArray p_args,
       sigaction(i, &sig_action, NULL);
     }
   }
-  // reenable signals
+  // re-enable signals
   pthread_sigmask(SIG_SETMASK, &oldmask, NULL);
 
   if (pid) {

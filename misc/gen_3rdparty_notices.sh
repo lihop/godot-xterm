@@ -9,7 +9,7 @@
 out=addons/godot_xterm/THIRDPARTY_NOTICES.txt
 
 # List of licenses to be concatenated.
-# Format (space seperated): Software name, Path to license file from git repo root.
+# Format (space separated): Software name, Path to license file from git repo root.
 # When compiling with option 'disable_pty=yes' libuv, node-pty and tmux can be omitted.
 LICENSES=$(cat <<-END
 godot ./misc/export_templates/godot/LICENSE.txt

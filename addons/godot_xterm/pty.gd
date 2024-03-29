@@ -100,7 +100,7 @@ func _set_terminal(value):
 	if _terminal == value:
 		return
 
-	# Disconect the current terminal, if any.
+	# Disconnect the current terminal, if any.
 	if _terminal != null:
 		disconnect("data_received", Callable(_terminal, "write"))
 		_terminal.disconnect("data_sent", Callable(self, "write"))
