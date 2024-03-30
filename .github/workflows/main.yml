@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-linux:
-    name: Build (linux, ${{ matrix.arch }}, ${{ matrix.target }})
+    name: "Build (linux, ${{ matrix.arch }}, ${{ matrix.target }}) #${{ github.run_number }}/${{ github.run_attempt }}"
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -47,7 +47,7 @@ jobs:
           path: addons/godot_xterm/native/bin/*.so
 
   build-other-platforms:
-    name: Build (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.target}})
+    name: "Build (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.target}}) #${{ github.run_number }}/${{ github.run_attempt }}"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -189,7 +189,7 @@ jobs:
         uses: fountainhead/action-wait-for-check@v1.2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Build (web, wasm32, release)
+          checkName: "Build (web, wasm32, release) #${{ github.run_number }}/${{ github.run_attempt }}"
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
@@ -285,7 +285,7 @@ jobs:
         uses: fountainhead/action-wait-for-check@v1.2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Build (${{ matrix.platform }}, ${{ matrix.arch }}, debug)
+          checkName: "Build (${{ matrix.platform }}, ${{ matrix.arch }}, debug) #${{ github.run_number }}/${{ github.run_attempt }}"
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
