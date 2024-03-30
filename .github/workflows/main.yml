@@ -263,6 +263,7 @@ jobs:
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
+          bits: ${{ matrix.arch == 'x86_32' && 32 || 64 }}
           version: ${{ matrix.godot-version }}
       - name: Macos setup
         if: ${{ matrix.platform == 'macos' }}
