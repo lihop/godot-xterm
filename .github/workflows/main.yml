@@ -235,7 +235,6 @@ jobs:
 
   test:
     name: Test (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.godot-version }})
-    needs: [build-linux, build-other-platforms]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
