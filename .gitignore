@@ -7,7 +7,7 @@ export.cfg
 export/
 export_presets.cfg
 
-# Dummy HTML5 export presets file for continuous integration
+# Dummy Web export presets file for continuous integration
 !.github/dist/export_presets.cfg
 
 # Mono-specific ignores

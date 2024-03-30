@@ -173,16 +173,20 @@ jobs:
             addons/godot_xterm/native/bin/*.xcframework
             addons/godot_xterm/native/bin/*.dll
 
-  html5-export:
-    name: "HTML5 Export"
-    needs: [check-archive, check-pre-commit]
+  web-export:
+    name: "Web Export"
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - id: install-chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: 121
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
           version: "4.2.1-stable"
+          export-templates: true
       - name: Import assets
         run: godot --editor --headless --quit-after 100 || true
       - name: Wait for build
@@ -196,41 +200,28 @@ jobs:
         with:
           path: addons/godot_xterm/native/bin
           merge-multiple: true
-      # Some remaining steps temporarily disabled.
-      - name: Export HTML5
-        if: false
+      - name: Export for web
         uses: nick-fields/retry@v3
         with:
-          command: godot --no-window --export HTML5
+          command: godot --no-window --export-release Web
           retry_on: error
           timeout_minutes: 5
           max_attempts: 6
       - name: NPM cache
         uses: c-hive/gha-npm-cache@v1
         with:
-          directory: test/html5
-      - name: Smoke test HTML5 export
-        if: false
+          directory: test/web
+      - name: Smoke test Web export
         shell: bash
-        working-directory: test/html5
+        working-directory: test/web
         run: |
+          export GODOT_XTERM_CHROME_PATH=${{ steps.install-chrome.outputs.chrome-path }}
           npm ci
-          npx serve ../../docs/demo -p 3000 &
-          npx cypress run
-      - name: Upload cypress artifacts (on failure)
-        uses: actions/upload-artifact@v4
-        if: false
-        #if: ${{ failure() }}
-        with:
-          name: cypress-artifacts
-          path: |-
-            test/html5/cypress/screenshots
-            test/html5/cypress/videos
+          npm test
       - name: Upload export
-        if: false
         uses: actions/upload-artifact@v4
         with:
-          name: html5-demo
+          name: web-demo
           path: docs/demo
 
   test:
@@ -316,7 +307,7 @@ jobs:
   merge-artifacts:
     name: Merge Artifacts
     runs-on: ubuntu-latest
-    needs: [build-linux, build-other-platforms, test, html5-export]
+    needs: [build-linux, build-other-platforms, test, web-export]
     strategy:
       matrix:
         target: [release, debug]
