@@ -11,10 +11,7 @@ services:
       - /bin/bash
       - -c
       - |
-        cd /src/thirdparty/godot-cpp
-        scons platform=javascript target=$${TARGET:-debug} -j$$(nproc)
-        cd /src
-        scons platform=javascript target=$${TARGET:-debug} -j$$(nproc)
+        scons platform=web target=$${TARGET:-template_debug} -j$$(nproc)
   libuv-linux:
     user: ${UID_GID}
     build:

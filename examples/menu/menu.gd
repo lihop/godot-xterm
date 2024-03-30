@@ -25,7 +25,7 @@ var menu_items := [
 		"scene":
 		(
 			preload("../web_console/web_console.tscn")
-			if OS.has_feature("JavaScript")
+			if OS.has_feature("web")
 			else preload("../terminal/terminal.tscn")
 		)
 	},
@@ -157,18 +157,16 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 					)
 					return
 				var scene = item.scene.instantiate()
-				var pty = scene if OS.has_feature("JavaScript") else scene.get_node("PTY")
+				var pty = scene if OS.has_feature("web") else scene.get_node("PTY")
 				add_child(scene)
 				scene.grab_focus()
 				await pty.exited
 				$Terminal.grab_focus()
 				scene.queue_free()
 			"Exit":
-				pass
-				# FIXME
-				#if OS.has_feature("JavaScript"):
-				#JavaScript.eval("window.history.back() || window.close()")
-				#get_tree().quit()
+				if OS.has_feature("web"):
+					JavaScriptBridge.eval("window.history.back() || window.close()")
+				get_tree().quit()
 
 
 func _on_Asciicast_key_pressed(

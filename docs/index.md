@@ -10,7 +10,7 @@
 
 GDNative terminal for Godot.
 Built using [libtsm](https://www.freedesktop.org/wiki/Software/libtsm/), [libuv](https://github.com/libuv/libuv), and [node-pty](https://github.com/microsoft/node-pty).
-Primarily developed and tested on Linux, it also supports macOS with partial support for Windows and HTML5. See the [Features section](introduction.md#features) for more detail.
+Primarily developed and tested on Linux, it also supports macOS with partial support for Windows and Web. See the [Features section](introduction.md#features) for more detail.
 
 <video width="100%" controls>
   <source src="https://user-images.githubusercontent.com/3696783/126894061-a69eb6ad-9979-4723-ade7-829494a9fc87.mp4" />

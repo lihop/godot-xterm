@@ -51,7 +51,13 @@ See the [Setup section](/setup/index.md) for more details.
 
 Other examples of GodotXterm usage are available online:
 
-- [**Live Demo**](https://lihop.github.io/godot-xterm-dist/demo): An HTML5 export of the GodotXterm repo's example scenes.
+- [**Live Demo**](https://lihop.github.io/godot-xterm-dist/demo): A Web export of the GodotXterm repo's example scenes.
+
+:::{error}
+The Web export made with the latest version of the plugin has been verified to work with Google's Chrome browser, and known not to work with Firefox.
+Some aspects of this may be due to the poor compatibility of Godot 4's Web exports with various browsers.
+If you are wanting to export to web, consider using an older version of the plugin built for Godot 3.
+:::
 
 - [**The Guest**](https://lihop.itch.io/the-guest): A Linux only submission to the [Linux Game Jam 2022](https://itch.io/jam/linux-game-jam-2022). Uses GodotXterm in conjunction with the [gdtemu addon](https://github.com/lihop/gdtemu) and Linux's Kernel-based Virtual Machine, to provide the player with an interactive VM that can be used in the game world.
 

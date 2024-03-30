@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "test": "node smoke_test.js"
+  },
+  "devDependencies": {
+    "express": "^4.19.2",
+    "playwright": "^1.42.1"
+  }
+}

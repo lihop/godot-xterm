@@ -8,7 +8,7 @@ var line := ""
 var _tput
 
 @onready var terminal = $Terminal
-@onready var _has_js: bool = OS.has_feature("JavaScript")
+@onready var _has_js: bool = OS.has_feature("web")
 
 
 func prompt(prompt: String):
@@ -42,10 +42,10 @@ func _on_Terminal_key_pressed(_data, event: InputEventKey):
 	if not event:
 		return
 
-	# For some reason, data String is malformed on HTML5, so only use event.unicode.
+	# For some reason, data String is malformed on Web, so only use event.unicode.
 	var data = char(event.unicode)
 
-	match event.scancode:
+	match event.keycode:
 		KEY_ENTER:
 			terminal.write("\r\n")
 
@@ -53,22 +53,20 @@ func _on_Terminal_key_pressed(_data, event: InputEventKey):
 				return emit_signal("exited", 0)
 
 			if not _has_js:
-				var msg := "WebConsole only available in HTML5 build."
+				var msg := "WebConsole only available in Web build."
 				push_error(msg)
 				_tput.setaf(TPut.ANSIColor.red)
 				terminal.write(msg)
 				_tput.sgr0()
 				prompt("\r\n>> ")
 			else:
-				# TODO: godot4
-				pass
-#				var json = JavaScript.eval("JSON.stringify(%s)" % line, true)
-#				_tput.setaf(TPut.ANSIColor.magenta)
-#				terminal.write(str(json))
-#				_tput.sgr0()
+				var json = JavaScriptBridge.eval("JSON.stringify(%s)" % line, true)
+				_tput.setaf(TPut.ANSIColor.magenta)
+				terminal.write(str(json))
+				_tput.sgr0()
 
 			line = ""
-			#_tput.srg0()
+			_tput.sgr0()
 			prompt("\r\n>> ")
 
 		KEY_BACKSPACE:

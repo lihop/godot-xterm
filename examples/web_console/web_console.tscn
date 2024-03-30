@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://d3xc4utggdchf"]
+[gd_scene load_steps=3 format=3 uid="uid://d3xc4utggdchf"]
 
+[ext_resource type="Theme" uid="uid://0gk8swmcldbg" path="res://addons/godot_xterm/themes/default.tres" id="1_28w8r"]
 [ext_resource type="Script" path="res://examples/web_console/web_console.gd" id="3"]
 
 [node name="WebConsole" type="Control"]
@@ -9,9 +10,12 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_28w8r")
 script = ExtResource("3")
 
 [node name="Terminal" type="Terminal" parent="."]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
+
+[connection signal="key_pressed" from="Terminal" to="." method="_on_Terminal_key_pressed"]

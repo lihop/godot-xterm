@@ -8,6 +8,11 @@ godot := `echo "${GODOT:-godot} --rendering-driver ${RENDERING_DRIVER:-vulkan}"`
 build:
     cd addons/godot_xterm/native && scons debug_symbols=yes
 
+build-javascript:
+    UID_GID="$(id -u):$(id -g)" docker-compose -f addons/godot_xterm/native/docker-compose.yml run --rm javascript
+
+build-all: build build-javascript
+
 install:
     {{godot}} --headless -s plug.gd install
 
