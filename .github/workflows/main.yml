@@ -189,11 +189,17 @@ jobs:
           export-templates: true
       - name: Import assets
         run: godot --editor --headless --quit-after 100 || true
-      - name: Wait for build
+      - name: Wait for wasm build
         uses: fountainhead/action-wait-for-check@v1.2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: "Build (web, wasm32, release) #${{ github.run_number }}/${{ github.run_attempt }}"
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Wait for linux build # Required for linux-based editor to recognize the GDExtension node types.
+        uses: fountainhead/action-wait-for-check@v1.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: "Build (linux, x86_64, debug) #${{ github.run_number }}/${{ github.run_attempt }}"
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
@@ -201,12 +207,8 @@ jobs:
           path: addons/godot_xterm/native/bin
           merge-multiple: true
       - name: Export for web
-        uses: nick-fields/retry@v3
-        with:
-          command: godot --no-window --export-release Web
-          retry_on: error
-          timeout_minutes: 5
-          max_attempts: 6
+        shell: bash
+        run: godot --no-window --export-release Web
       - name: NPM cache
         uses: c-hive/gha-npm-cache@v1
         with:
