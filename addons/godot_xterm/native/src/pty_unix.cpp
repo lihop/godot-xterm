@@ -168,7 +168,7 @@ static void await_exit(Callable cb, pid_t pid) {
     break;
   }
 #endif
-  int exit_code, signal_code = 0;
+  int exit_code = 0, signal_code = 0;
   if (WIFEXITED(stat_loc)) {
     exit_code = WEXITSTATUS(stat_loc); // errno?
   }
