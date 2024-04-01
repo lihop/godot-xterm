@@ -1,4 +1,4 @@
-MIT License
+# MIT License
 
 Copyright (c) 2020-2024, Leroy Hopson and GodotXterm contributors.
 

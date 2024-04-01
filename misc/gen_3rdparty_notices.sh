@@ -12,14 +12,12 @@ out=addons/godot_xterm/THIRDPARTY_NOTICES.txt
 # Format (space separated): Software name, Path to license file from git repo root.
 # When compiling with option 'disable_pty=yes' libuv, node-pty and tmux can be omitted.
 LICENSES=$(cat <<-END
-godot ./misc/export_templates/godot/LICENSE.txt
 godot-cpp ./addons/godot_xterm/native/thirdparty/godot-cpp/LICENSE.md
-godot-headers ./addons/godot_xterm/native/thirdparty/godot-cpp/godot-headers/LICENSE.md
 htable ./addons/godot_xterm/native/thirdparty/libtsm/LICENSE_htable
 libtsm ./addons/godot_xterm/native/thirdparty/libtsm/COPYING
 libuv ./addons/godot_xterm/native/thirdparty/LICENSE_libuv-full
-node-pty ./addons/godot_xterm/native/src/node_pty/LICENSE_node-pty
-tmux ./addons/godot_xterm/native/src/node_pty/LICENSE_tmux
+node-pty ./addons/godot_xterm/native/src/LICENSE_node-pty
+tmux ./addons/godot_xterm/native/src/LICENSE_tmux
 wcwidth ./addons/godot_xterm/native/thirdparty/libtsm/external/wcwidth/LICENSE.txt
 END
 )

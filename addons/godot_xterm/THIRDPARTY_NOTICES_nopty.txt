@@ -2,46 +2,18 @@ THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 
 The GodotXterm project incorporates components from the projects listed below.
 The original copyright notices and the licenses under which GodotXterm received such components are set forth below.
-This collection of licenses only applies on platforms where the PTY node is not supported or if the option 'disable_pty=yes' has been used.
 
-1.	godot
-2.	godot-cpp
-3.	godot-headers
-4.	htable
-5.	libtsm
-6.	wcwidth
+1.	godot-cpp
+2.	htable
+3.	libtsm
+4.	wcwidth
 
-
-%% godot NOTICES AND INFORMATION BEGIN HERE
-=========================================
-Copyright (c) 2007-2021 Juan Linietsky, Ariel Manzur.
-Copyright (c) 2014-2021 Godot Engine contributors (cf. AUTHORS.md).
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-=========================================
-END OF godot NOTICES AND INFORMATION
 
 %% godot-cpp NOTICES AND INFORMATION BEGIN HERE
 =========================================
 # MIT License
 
-Copyright (c) 2017-2021 Godot Engine contributors.
+Copyright (c) 2017-present Godot Engine contributors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -62,32 +34,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 =========================================
 END OF godot-cpp NOTICES AND INFORMATION
-
-%% godot-headers NOTICES AND INFORMATION BEGIN HERE
-=========================================
-# MIT License
-
-Copyright (c) 2017-2021 Godot Engine contributors.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-=========================================
-END OF godot-headers NOTICES AND INFORMATION
 
 %% htable NOTICES AND INFORMATION BEGIN HERE
 =========================================
@@ -646,9 +592,6 @@ apply:
 	SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 == Third-Party Source ==
-Various cmake find modules in cmake/modules/gnome-cmake is from
-https://github.com/nemequ/gnome-cmake, see cmake/modules/gnome-cmake/COPYING
-
 The hash-table implementation in src/shared/shl-htable.* uses internally the
 htable from CCAN, see LICENSE_htable.
 
