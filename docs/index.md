@@ -24,6 +24,7 @@ Primarily developed and tested on Linux, it also supports macOS with partial sup
 :caption: Table of Contents
 
 introduction
+themes
 setup/index
 api/index
 CHANGELOG

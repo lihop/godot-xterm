@@ -14,6 +14,8 @@
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
 #include <godot_cpp/classes/timer.hpp>
+#include <godot_cpp/classes/theme.hpp>
+#include <godot_cpp/classes/theme_db.hpp>
 #include <libtsm.h>
 #include <xkbcommon/xkbcommon-keysyms.h>
 
@@ -87,6 +89,7 @@ void Terminal::_bind_methods()
 
 Terminal::Terminal()
 {
+	set_default_theme_items();
 	set_focus_mode(FOCUS_ALL);
 
 	max_scrollback = 1000;
@@ -383,20 +386,6 @@ void Terminal::_get_property_list(List<PropertyInfo> *p_list) const
 {
 	p_list->push_back(PropertyInfo(Variant::INT, "cols", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_READ_ONLY));
 	p_list->push_back(PropertyInfo(Variant::INT, "rows", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_READ_ONLY));
-
-	p_list->push_back(PropertyInfo(Variant::NIL, "Theme Overrides", PROPERTY_HINT_NONE, "theme_override_", PROPERTY_USAGE_GROUP));
-	p_list->push_back(PropertyInfo(Variant::NIL, "Colors", PROPERTY_HINT_NONE, "theme_override_colors/", PROPERTY_USAGE_SUBGROUP));
-	for (int i = 0; i < TSM_COLOR_NUM; ++i)
-	{
-		p_list->push_back(PropertyInfo(Variant::COLOR, "theme_override_colors/" + String(COLOR_NAMES[i]), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE));
-	}
-	p_list->push_back(PropertyInfo(Variant::NIL, "Fonts", PROPERTY_HINT_NONE, "theme_override_fonts/", PROPERTY_USAGE_SUBGROUP));
-	for (const String font_type : FONT_TYPES)
-	{
-		p_list->push_back(PropertyInfo(Variant::OBJECT, "theme_override_fonts/" + font_type, PROPERTY_HINT_RESOURCE_TYPE, "Font", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE));
-	}
-	p_list->push_back(PropertyInfo(Variant::NIL, "Font Sizes", PROPERTY_HINT_NONE, "theme_override_font_sizes/", PROPERTY_USAGE_SUBGROUP));
-	p_list->push_back(PropertyInfo(Variant::INT, "theme_override_font_sizes/font_size", PROPERTY_HINT_RANGE, "1,256,1,or_greater,suffix:px", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_CHECKABLE));
 }
 
 bool Terminal::_is_valid_color_name(const String &p_name)
@@ -821,4 +810,47 @@ void Terminal::_on_selection_held() {
   tsm_screen_selection_target(screen, target.x, target.y);
   queue_redraw();
   selection_timer->start();
+}
+
+// Add default theme items for the "Terminal" theme type if they don't exist.
+// These defaults match Godot's built-in default theme (note: this is different from the default editor theme).
+void Terminal::set_default_theme_items() {
+	Ref<Theme> default_theme = ThemeDB::get_singleton()->get_default_theme();
+	if (default_theme->get_type_list().has("Terminal")) return;
+
+	// Default colors and font sizes from CodeEdit, TextEdit, et al.
+	// A comment on the translucency of the default background color: https://github.com/godotengine/godot/pull/51159#issuecomment-891127783.
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "background_color", "Terminal", Color(0.1, 0.1, 0.1, 0.6));
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "foreground_color", "Terminal", Color(0.875, 0.875, 0.875, 1));
+	default_theme->set_theme_item(Theme::DATA_TYPE_FONT_SIZE, "font_size", "Terminal", 16);
+
+	// Default ANSI colors based on xterm defaults: https://en.wikipedia.org/wiki/ANSI_escape_code#Colors.
+	// Some discussion about the slight difference of the blue colors: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=241717.
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_0_color" , "Terminal", Color::hex(0x000000FF)); // Black
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_1_color" , "Terminal", Color::hex(0xCD0000FF)); // Red
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_2_color" , "Terminal", Color::hex(0x00CD00FF)); // Green
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_3_color" , "Terminal", Color::hex(0xCDCD00FF)); // Yellow
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_4_color" , "Terminal", Color::hex(0x0000EEFF)); // Blue
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_5_color" , "Terminal", Color::hex(0xCD00CDFF)); // Magenta
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_6_color" , "Terminal", Color::hex(0x00CDCDFF)); // Cyan
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_7_color" , "Terminal", Color::hex(0xE5E5E5FF)); // White
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_8_color" , "Terminal", Color::hex(0x7F7F7FFF)); // Bright Black (Gray)
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_9_color" , "Terminal", Color::hex(0xFF0000FF)); // Bright Red
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_10_color", "Terminal", Color::hex(0x00FF00FF)); // Bright Green
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_11_color", "Terminal", Color::hex(0xFFFF00FF)); // Bright Yellow
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_12_color", "Terminal", Color::hex(0x5C5CFFFF)); // Bright Blue
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_13_color", "Terminal", Color::hex(0xFF00FFFF)); // Bright Magenta
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_14_color", "Terminal", Color::hex(0x00FFFFFF)); // Bright Cyan
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_15_color", "Terminal", Color::hex(0xFFFFFFFF)); // Bright White
+
+	// No monospaced font in the default theme, so try to import our own. Will default to a non-monospace font otherwise.
+	ResourceLoader* rl = ResourceLoader::get_singleton();
+	String const font_path = "res://addons/godot_xterm/themes/fonts/regular.tres";
+	if (rl->exists(font_path)) {
+		Ref<Font> default_font = rl->load(font_path);
+		for (int i = FontType::NORMAL; i <= FontType::BOLD_ITALICS; i++) {
+			FontType type = static_cast<FontType>(i);
+			default_theme->set_theme_item(Theme::DATA_TYPE_FONT, FONT_TYPES[type], "Terminal", default_font);
+		}
+	}
 }

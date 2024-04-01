@@ -15,6 +15,8 @@ const char* Terminal::COLOR_NAMES[18] = {
     "foreground_color", "background_color",
 };
 
+// These match the font names of RichTextLabel: https://docs.godotengine.org/en/4.2/classes/class_richtextlabel.html.
+// They are all expected to be monospace fonts.
 const char* Terminal::FONT_TYPES[4] = {
     "normal_font", "bold_font", "italics_font", "bold_italics_font",
 };

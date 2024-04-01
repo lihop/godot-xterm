@@ -45,6 +45,7 @@ myst_substitutions = {
   # Godot classes.
   'AudioStream': '[AudioStream](' + godot_class.format('audiostream.html') + ')',
   'CanvasItem': '[CanvasItem](' + godot_class.format('canvasitem.html') + ')',
+  'CodeEdit': '[CodeEdit](' + godot_class.format('code_edit.html') + ')',
   'Color': '[Color](' + godot_class.format('color.html') + ')',
   'Control': '[Control](' + godot_class.format('control.html') + ')',
   'Error': '[Error](' + godot_class.format('%40globalscope.html#enum-globalscope-error') + ')',
@@ -57,6 +58,7 @@ myst_substitutions = {
   'PoolByteArray': '[PoolByteArray](' + godot_class.format('poolbytearray.html') + ')',
   'PoolStringArray': '[PoolStringArray](' + godot_class.format('poolstringarray.html') + ')',
   'String': '[String](' + godot_class.format('string.html') + ')',
+  'TextEdit': '[TextEdit](' + godot_class.format('text_edit.html') + ')',
   'Vector2': '[Vector2](' + godot_class.format('vector2.html') + ')',
   'bool': '[bool](' + godot_class.format('bool.html') + ')',
   'float': '[float](' + godot_class.format('float.html') + ')',
