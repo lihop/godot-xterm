@@ -1,15 +1,34 @@
-[gd_resource type="FontFile" load_steps=6 format=2]
+[gd_resource type="FontFile" load_steps=6 format=3 uid="uid://65pw442xps67"]
 
-[ext_resource path="res://themes/fonts/unifont/unifont_upper-13.0.06.ttf" type="FontFile" id=1]
-[ext_resource path="res://themes/fonts/unifont/unifont-13.0.06.ttf" type="FontFile" id=2]
-[ext_resource path="res://themes/fonts/noto_color_emoji/noto_color_emoji-20201206-phase3.ttf" type="FontFile" id=3]
-[ext_resource path="res://addons/godot_xterm/themes/fonts/hack/hack_regular-3.003.ttf" type="FontFile" id=4]
-[ext_resource path="res://themes/fonts/nerd_fonts/symbols_2048_em_nerd_font_complete-2.1.0.ttf" type="FontFile" id=5]
+[ext_resource type="FontFile" uid="uid://b4ovh83nuj3d0" path="res://themes/fonts/unifont/unifont_upper-13.0.06.ttf" id="1"]
+[ext_resource type="FontFile" uid="uid://b84quud02s6rq" path="res://themes/fonts/unifont/unifont-13.0.06.ttf" id="2"]
+[ext_resource type="FontFile" uid="uid://bh6ce4yiqcvwi" path="res://themes/fonts/noto_color_emoji/noto_color_emoji-20201206-phase3.ttf" id="3"]
+[ext_resource type="FontFile" uid="uid://c51gnbjamppg" path="res://addons/godot_xterm/themes/fonts/jet_brains_mono/jet_brains_mono_nl-regular-2.304.ttf" id="4"]
+[ext_resource type="FontFile" uid="uid://se3tefc5lv6m" path="res://themes/fonts/nerd_fonts/symbols_2048_em_nerd_font_complete-2.1.0.ttf" id="5"]
 
 [resource]
-size = 14
-font_data = ExtResource( 4 )
-fallback/0 = ExtResource( 5 )
-fallback/1 = ExtResource( 3 )
-fallback/2 = ExtResource( 2 )
-fallback/3 = ExtResource( 1 )
+fallbacks = Array[Font]([ExtResource("4"), ExtResource("5"), ExtResource("3"), ExtResource("2"), ExtResource("1")])
+cache/0/11/0/ascent = 0.0
+cache/0/11/0/descent = 0.0
+cache/0/11/0/underline_position = 0.0
+cache/0/11/0/underline_thickness = 0.0
+cache/0/11/0/scale = 1.0
+cache/0/11/0/kerning_overrides/11/0 = Vector2(0, 0)
+cache/0/11/0/kerning_overrides/14/0 = Vector2(0, 0)
+cache/0/11/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/14/0/ascent = 0.0
+cache/0/14/0/descent = 0.0
+cache/0/14/0/underline_position = 0.0
+cache/0/14/0/underline_thickness = 0.0
+cache/0/14/0/scale = 1.0
+cache/0/14/0/kerning_overrides/11/0 = Vector2(0, 0)
+cache/0/14/0/kerning_overrides/14/0 = Vector2(0, 0)
+cache/0/14/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/16/0/kerning_overrides/11/0 = Vector2(0, 0)
+cache/0/16/0/kerning_overrides/14/0 = Vector2(0, 0)
+cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)

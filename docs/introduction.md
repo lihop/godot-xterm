@@ -100,7 +100,9 @@ On platforms where the PTY node is not supported or if the library has been comp
 
 ### Fonts
 
-- The Hack regular font is bundled with GodotXterm as the default Terminal font. This is also the default monospace font of the Godot editor. See the {{ '[full license]({}/addons/godot_xterm/themes/fonts/hack/LICENSE.md)'.format(repo) }}.
+- The [JetBrains Mono](https://www.jetbrains.com/lp/mono/) NL (no ligatures) Regular font is bundled with GodotXterm as the default Terminal font.
+  This is same as the default monospace font used by the Godot editor.
+  It is released under the terms of the {{ '[SIL Open Font License]({}/addons/godot_xterm/themes/fonts/jet_brains_mono/OFL.txt)'.format(repo) }}.
 
 ### Nonbundled Resources
 
@@ -108,7 +110,7 @@ The following resources are not bundled with GodotXterm (i.e. are not included i
 
 #### Fonts
 
-- The **bold**, _italic_, and **_bold italic_** styles of the Hack font, covered by the same Hack font license as above.
+- The **bold**, _italic_, and **_bold italic_** styles of the JetBrains Mono NL font, covered by the same font license as above.
 - Nerd Fonts. Combines symbols from a multitude of other fonts. See {{ '[license information]({}/themes/fonts/nerd_fonts/README.md)'.format(repo) }}.
 - Noto Color Emoji. Released under the {{ '[SIL Open Font License]({}/themes/fonts/noto_color_emoji/LICENSE_OFL.txt)'.format(repo) }}.
 - Unifont. Dual-licensed (since version 13.0.04) under the GNU GPL 2+ with the GNU font embedding exception and the SIL Open Font License (OFL) version 1.1. This project uses it under the terms of the {{ '[SIL Open Font License]({}/themes/fonts/unifont/LICENSE_OFL-1.1.txt)' }}.

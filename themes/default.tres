@@ -3,7 +3,7 @@
 [ext_resource type="FontFile" path="res://themes/fonts/bold_italic.tres" id="2"]
 [ext_resource type="FontFile" path="res://themes/fonts/italic.tres" id="3"]
 [ext_resource type="FontFile" path="res://themes/fonts/bold.tres" id="4"]
-[ext_resource type="FontFile" path="res://themes/fonts/regular.tres" id="5"]
+[ext_resource type="FontFile" uid="uid://65pw442xps67" path="res://themes/fonts/regular.tres" id="5"]
 
 [resource]
 Terminal/colors/ansi_0_color = Color(0, 0, 0, 1)

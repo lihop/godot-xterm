@@ -1,12 +1,6 @@
-[gd_resource type="FontFile" load_steps=2 format=3 uid="uid://dhmyegcx24dpo"]
-
-[ext_resource type="FontFile" uid="uid://edo5q2qxos3u" path="res://addons/godot_xterm/themes/fonts/hack/hack_regular-3.003.ttf" id="4"]
+[gd_resource type="FontFile" format=3 uid="uid://dhmyegcx24dpo"]
 
 [resource]
-fallbacks = [ExtResource("4")]
-face_index = null
-embolden = null
-transform = null
 cache/0/16/0/ascent = 0.0
 cache/0/16/0/descent = 0.0
 cache/0/16/0/underline_position = 0.0
