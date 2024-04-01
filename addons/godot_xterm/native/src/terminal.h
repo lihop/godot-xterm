@@ -177,6 +177,8 @@ namespace godot
 
     typedef std::function<int(struct tsm_screen*, char**)> ScreenCopyFunction;
     String _copy_screen(ScreenCopyFunction func);
+
+    void set_default_theme_items();
   };
 
 } // namespace godot
