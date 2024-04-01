@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://edo5q2qxos3u"
-path="res://.godot/imported/hack_regular-3.003.ttf-eed242c98102dbda632bf4293360b927.fontdata"
+uid="uid://d13vs8hwu22p"
+path="res://.godot/imported/jet_brains_mono_nl-bold_italic-2.304.ttf-de03e2374fbc1657ec9496c33bc35f22.fontdata"
 
 [deps]
 
-source_file="res://addons/godot_xterm/themes/fonts/hack/hack_regular-3.003.ttf"
-dest_files=["res://.godot/imported/hack_regular-3.003.ttf-eed242c98102dbda632bf4293360b927.fontdata"]
+source_file="res://themes/fonts/jet_brains_mono/jet_brains_mono_nl-bold_italic-2.304.ttf"
+dest_files=["res://.godot/imported/jet_brains_mono_nl-bold_italic-2.304.ttf-de03e2374fbc1657ec9496c33bc35f22.fontdata"]
 
 [params]
 

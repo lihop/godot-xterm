@@ -1,6 +1,6 @@
 [gd_resource type="FontFile" load_steps=6 format=2]
 
-[ext_resource path="res://themes/fonts/hack/hack_bold-3.003.ttf" type="FontFile" id=1]
+[ext_resource path="res://themes/fonts/jet_brains_mono/jet_brains_mono_nl-bold-2.304.ttf" type="FontFile" id=1]
 [ext_resource path="res://themes/fonts/nerd_fonts/symbols_2048_em_nerd_font_complete-2.1.0.ttf" type="FontFile" id=2]
 [ext_resource path="res://themes/fonts/noto_color_emoji/noto_color_emoji-20201206-phase3.ttf" type="FontFile" id=3]
 [ext_resource path="res://themes/fonts/unifont/unifont-13.0.06.ttf" type="FontFile" id=4]
