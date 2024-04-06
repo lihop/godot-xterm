@@ -17,7 +17,9 @@ func pick_cell_color(cell := Vector2i(0, 0)) -> Color:
 
 func before_each():
 	subject = described_class.new()
-	subject.add_theme_font_override("normal_font", preload("res://themes/fonts/regular.tres"))
+	subject.add_theme_font_override(
+		"normal_font", preload("res://addons/godot_xterm/themes/fonts/regular.tres")
+	)
 	subject.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	watch_signals(subject)
 	call_deferred("add_child_autofree", subject)

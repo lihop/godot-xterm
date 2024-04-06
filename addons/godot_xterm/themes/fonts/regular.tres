@@ -1,17 +1,6 @@
-[gd_resource type="FontFile" format=3 uid="uid://dhmyegcx24dpo"]
+[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://vmgmcu8gc6nt"]
+
+[ext_resource type="FontFile" uid="uid://c51gnbjamppg" path="res://addons/godot_xterm/themes/fonts/jet_brains_mono/jet_brains_mono_nl-regular-2.304.ttf" id="1_8kori"]
 
 [resource]
-cache/0/16/0/ascent = 0.0
-cache/0/16/0/descent = 0.0
-cache/0/16/0/underline_position = 0.0
-cache/0/16/0/underline_thickness = 0.0
-cache/0/16/0/scale = 1.0
-cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/16/0/kerning_overrides/14/0 = Vector2(0, 0)
-cache/0/14/0/ascent = 0.0
-cache/0/14/0/descent = 0.0
-cache/0/14/0/underline_position = 0.0
-cache/0/14/0/underline_thickness = 0.0
-cache/0/14/0/scale = 1.0
-cache/0/14/0/kerning_overrides/16/0 = Vector2(0, 0)
-cache/0/14/0/kerning_overrides/14/0 = Vector2(0, 0)
+base_font = ExtResource("1_8kori")
