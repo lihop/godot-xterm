@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bc5o6m6ty0ejn"]
+[gd_scene load_steps=3 format=3 uid="uid://bc5o6m6ty0ejn"]
 
 [ext_resource type="Script" path="res://examples/socat_terminal/socat_terminal.gd" id="1"]
+[ext_resource type="Theme" uid="uid://0gk8swmcldbg" path="res://themes/demo.tres" id="1_rw2ub"]
 
 [node name="Terminal" type="Terminal"]
 anchors_preset = 15
@@ -8,4 +9,5 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_rw2ub")
 script = ExtResource("1")

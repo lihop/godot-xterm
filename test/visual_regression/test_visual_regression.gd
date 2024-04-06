@@ -94,3 +94,13 @@ class TestVisualRegression:
 		subject.write("fg green, 50% transparency")
 		await wait_frames(30)
 		assert_match("transparency")
+
+	func test_emoji():
+		subject.add_theme_font_override("normal_font", preload("res://themes/fonts/regular.tres"))
+		subject.write("👇😑😩👿👅🥺🙄😧😫😢\r\n")
+		subject.write("👾😠🥳😭👅😫🤩🙃👽😫\r\n")
+		subject.write("😟🤏😛🤖🤗👻😳👐😤👀\r\n")
+		subject.write("😆🤳🤫😊😜😻😏👿🥶👻\r\n")
+		subject.write("👈🤮👉💩👃😍🤥😤🙏🤟")
+		await wait_frames(30)
+		assert_match("emoji")

@@ -2,8 +2,6 @@
 
 [ext_resource type="Script" path="res://test/scenes/theme.gd" id="1"]
 
-[node name="Terminal" type="Terminal"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="Terminal2" type="Terminal"]
+custom_minimum_size = Vector2(200, 100)
 script = ExtResource("1")
