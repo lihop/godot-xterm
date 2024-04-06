@@ -22,7 +22,7 @@ test:
     {{godot}} --headless -s addons/gut/gut_cmdln.gd -gtest={{test_files}} -gexit
 
 test-all:
-    {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gdir=res://test -gopacity=0 -gexit
+    {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gdir=res://test -ginclude_subdirs=true -gopacity=0 -gexit
 
 test-rendering:
     {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gtest=res://test/test_rendering.gd -gopacity=0 -gexit

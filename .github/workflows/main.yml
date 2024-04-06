@@ -305,6 +305,12 @@ jobs:
           if grep -q 'SCRIPT_ERROR:' output.log || grep -q 'Tests             none' output.log; then
             exit 1
           fi
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: failed-screenshots
+          path: test/visual_regression/screenshots
 
   merge-artifacts:
     name: Merge Artifacts
