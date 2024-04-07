@@ -1,11 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://cysad55lwtnc6"]
+[gd_scene load_steps=4 format=3 uid="uid://cysad55lwtnc6"]
 
 [ext_resource type="AudioStream" uid="uid://n0hqjfxltbm0" path="res://themes/audio/bell.wav" id="1"]
 [ext_resource type="Theme" uid="uid://0gk8swmcldbg" path="res://themes/demo.tres" id="1_osky4"]
-[ext_resource type="Script" path="res://addons/godot_xterm/pty.gd" id="2"]
 [ext_resource type="Script" path="res://examples/terminal/terminal.gd" id="3"]
 
-[node name="Terminal3" type="Terminal"]
+[node name="Terminal" type="Terminal"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -14,11 +13,13 @@ grow_vertical = 2
 theme = ExtResource("1_osky4")
 script = ExtResource("3")
 
-[node name="PTY" type="Node" parent="."]
-script = ExtResource("2")
+[node name="PTY" type="PTY" parent="."]
 terminal_path = NodePath("..")
 
 [node name="Bell" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("1")
 
 [connection signal="bell" from="." to="Bell" method="play"]
+[connection signal="data_sent" from="." to="PTY" method="write"]
+[connection signal="size_changed" from="." to="PTY" method="resizev"]
+[connection signal="data_received" from="PTY" to="." method="write"]
