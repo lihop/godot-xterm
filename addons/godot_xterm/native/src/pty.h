@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "terminal.h"
+
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/os.hpp>
@@ -57,6 +59,9 @@ namespace godot
     void set_use_threads(bool p_use);
     bool is_using_threads() const;
 
+    void set_terminal_path(NodePath p_terminal_path);
+    NodePath get_terminal_path() const;
+
     String get_pts_name() const;
 
     Error fork(const String &file = "", const PackedStringArray &args = PackedStringArray(), const String &cwd = ".", const int cols = 80, const int rows = 24);
@@ -82,6 +87,9 @@ namespace godot
     bool use_os_env = true;
 
     String pts_name = "";
+
+    NodePath terminal_path;
+    Terminal *terminal = nullptr;
 
     String _get_fork_file(const String &file) const;
     Dictionary _get_fork_env() const;

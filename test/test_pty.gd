@@ -24,9 +24,8 @@ class TestInterface:
 	func test_has_property_rows() -> void:
 		assert_has_property_with_default_value("rows", 24)
 
-	# TODO: Implement terminal_path property.
-	func xtest_has_property_terminal_path() -> void:
-		assert_has_property("terminal_path")
+	func test_has_property_terminal_path() -> void:
+		assert_has_property_with_default_value("terminal_path", NodePath())
 
 	func test_has_proprty_use_os_env() -> void:
 		assert_has_property_with_default_value("use_os_env", true)
@@ -82,3 +81,27 @@ class TestInterface:
 
 	func test_has_no_visible_children():
 		assert_eq(subject.get_child_count(), 0)
+
+
+class TestSetTerminalPath:
+	extends PTYTest
+
+	var terminal: Terminal
+
+	func before_each():
+		super.before_each()
+		terminal = Terminal.new()
+		add_child_autofree(terminal)
+		subject.terminal_path = terminal.get_path()
+
+	func test_terminal_path_is_set():
+		assert_eq(subject.terminal_path, terminal.get_path())
+
+	func test_data_sent_is_connected():
+		assert_connected(terminal, subject, "data_sent", "write")
+
+	func test_size_changed_is_connected():
+		assert_connected(terminal, subject, "size_changed", "resizev")
+
+	func test_data_received_is_connected():
+		assert_connected(subject, terminal, "data_received", "write")

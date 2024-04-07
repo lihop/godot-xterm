@@ -67,6 +67,10 @@ void PTY::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_using_threads"), &PTY::is_using_threads);
 	ClassDB::add_property("PTY", PropertyInfo(Variant::BOOL, "use_threads"), "set_use_threads", "is_using_threads");
 
+	ClassDB::bind_method(D_METHOD("set_terminal_path", "path"), &PTY::set_terminal_path);
+	ClassDB::bind_method(D_METHOD("get_terminal_path"), &PTY::get_terminal_path);
+	ClassDB::add_property("PTY", PropertyInfo(Variant::NODE_PATH, "terminal_path", PropertyHint::PROPERTY_HINT_NODE_PATH_VALID_TYPES, "Terminal"), "set_terminal_path", "get_terminal_path");
+
 	ClassDB::bind_method(D_METHOD("get_pts_name"), &PTY::get_pts_name);
 
 	ClassDB::bind_method(D_METHOD("fork", "file", "args", "cwd", "cols", "rows"), &PTY::fork, DEFVAL(""), DEFVAL(PackedStringArray()), DEFVAL("."), DEFVAL(80), DEFVAL(24));
@@ -145,6 +149,36 @@ bool PTY::is_using_threads() const {
     return use_threads;
 }
 
+void PTY::set_terminal_path(NodePath p_terminal_path) {
+    terminal_path = p_terminal_path;
+
+    Callable write = Callable(this, "write");
+    Callable resizev = Callable(this, "resizev");
+
+    // Disconnect the current terminal, if any.
+    if (terminal != nullptr) {
+        disconnect("data_received", Callable(terminal, "write"));
+        terminal->disconnect("data_sent", write);
+        terminal->disconnect("size_changed", resizev);
+    }
+
+    terminal = Object::cast_to<Terminal>(get_node_or_null(terminal_path));
+    if (terminal == nullptr) return;
+
+    // Connect the new terminal.
+    resize(terminal->get_cols(), terminal->get_rows());
+    if (!terminal->is_connected("size_changed", resizev))
+        terminal->connect("size_changed", resizev, CONNECT_PERSIST);
+    if (!terminal->is_connected("data_sent", write))
+        terminal->connect("data_sent", write, CONNECT_PERSIST);
+    if (!is_connected("data_received", Callable(terminal, "write")))
+        connect("data_received", Callable(terminal, "write"), CONNECT_PERSIST);
+}
+
+NodePath PTY::get_terminal_path() const {
+    return terminal_path;
+}
+
 String PTY::get_pts_name() const {
     return pts_name;
 }
@@ -213,8 +247,6 @@ void PTY::resize(const int p_cols, const int p_rows) {
     #if defined(__linux__) || defined(__APPLE__)
     if (fd > -1) {
         PTYUnix::resize(fd, cols, rows);
-    } else {
-        ERR_PRINT("fd <= -1");
     }
     #endif
 }
@@ -303,9 +335,11 @@ void PTY::_close() {
     if (!uv_is_closing((uv_handle_t *)&async_handle)) {
         uv_close((uv_handle_t *)&async_handle, _close_cb);
     }
-
-    uv_run(&loop, UV_RUN_NOWAIT);
-    uv_loop_close(&loop);
+    
+    if (status == STATUS_OPEN) {
+        uv_run(&loop, UV_RUN_NOWAIT);
+        uv_loop_close(&loop);
+    }
 
     if (fd > 0) close(fd);
     if (pid > 0) kill(SIGNAL_SIGHUP);
