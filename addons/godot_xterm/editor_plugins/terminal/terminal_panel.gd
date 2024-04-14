@@ -46,9 +46,6 @@ var _tab_container_min_size
 
 
 func _ready():
-	tab_container.add_theme_stylebox_override(
-		"panel", get_theme_stylebox("background", "EditorStyles")
-	)
 	_update_settings()
 
 
@@ -140,8 +137,9 @@ func _on_AddButton_pressed():
 
 
 func _on_Tabs_tab_changed(tab_index):
-	tab_container.current_tab = tab_index
-	tab_container.get_child(tab_index).grab_focus()
+	tab_container.call_deferred("set_current_tab", tab_index)
+	await get_tree().process_frame
+	tab_container.get_current_tab_control().grab_focus()
 
 
 func _on_Tabs_tab_close(tab_index):

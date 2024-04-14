@@ -13,6 +13,7 @@
 #include <godot_cpp/classes/input_event_mouse_button.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
+#include <godot_cpp/classes/style_box.hpp>
 #include <godot_cpp/classes/timer.hpp>
 #include <libtsm.h>
 
@@ -132,6 +133,11 @@ namespace godot
 
     Ref<Image> attr_image;
     Ref<ImageTexture> attr_texture;
+
+    // StyleBox.
+    Ref<StyleBox> style_normal;
+    Ref<StyleBox> style_focus;
+    RID style_canvas_item;
 
     // Background.
     Ref<Image> back_image;

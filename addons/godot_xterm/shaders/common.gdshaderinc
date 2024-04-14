@@ -18,6 +18,7 @@ uniform bool inverse_enabled = true;
 #ifdef BACKGROUND
 uniform vec4 background_color;
 uniform sampler2D background_colors;
+uniform sampler2D screen_texture : hint_screen_texture, repeat_disable, filter_nearest;
 #endif
 
 #ifdef FOREGROUND
@@ -48,7 +49,15 @@ void fragment() {
 #endif
 
 		if (has_attribute(sample_uv, FLAG_INVERSE) && inverse_enabled) {
-			color = vec4(1.0 - color.rgb, color.a);
+#ifdef BACKGROUND
+			vec4 bg_color = textureLod(screen_texture, SCREEN_UV, 0.0);
+			vec4 target_color;
+			target_color.a = color.a + (1.0 - color.a) * bg_color.a;
+			target_color.rgb = 1.0 / target_color.a * (color.a * color.rgb + (1.0 - color.a) * bg_color.a * bg_color.rgb);
+#else
+			vec4 target_color = color;
+#endif
+			color = vec4(1.0 - target_color.rgb, target_color.a);
 		}
 
 #ifdef FOREGROUND
@@ -65,10 +74,6 @@ void fragment() {
 		COLOR = color;
 #endif
 	} else { // Outside the grid.
-#ifdef BACKGROUND
-		COLOR = background_color;
-#elif defined(FOREGROUND)
 		COLOR = transparent;
-#endif
 	}
 }

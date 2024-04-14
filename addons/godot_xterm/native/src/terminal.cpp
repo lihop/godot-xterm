@@ -14,6 +14,8 @@
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
+#include <godot_cpp/classes/style_box.hpp>
+#include <godot_cpp/classes/style_box_flat.hpp>
 #include <godot_cpp/classes/timer.hpp>
 #include <godot_cpp/classes/theme.hpp>
 #include <godot_cpp/classes/theme_db.hpp>
@@ -204,6 +206,12 @@ void Terminal::_notification(int what)
 		update_sizes(true);
 		break;
 	}
+	case NOTIFICATION_FOCUS_ENTER:
+	case NOTIFICATION_FOCUS_EXIT:
+	{
+		refresh();
+		break;
+	}
 	case NOTIFICATION_THEME_CHANGED:
 	{
 		update_theme();
@@ -277,8 +285,15 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 		? term->palette[attr->bccode]
 		: Color(attr->br / 255.0f, attr->bg / 255.0f, attr->bb / 255.0f);
 
-	if (attr->inverse && term->inverse_mode == InverseMode::INVERSE_MODE_SWAP)
-		std::swap(fgcol, bgcol);
+	if (attr->inverse && term->inverse_mode == InverseMode::INVERSE_MODE_SWAP) {
+		std::swap(fgcol.r, bgcol.r);
+		std::swap(fgcol.g, bgcol.g);
+		std::swap(fgcol.b, bgcol.b);
+		bgcol.a = term->palette[TSM_COLOR_BACKGROUND].a;
+	}
+
+	if (bgcol == term->palette[TSM_COLOR_BACKGROUND])
+		bgcol.a = 0;
 
 	// Update images (accounting for ultra-wide characters).
 	for (int i = 0; i < width && (posx + i) < term->cols; i++) {
@@ -425,6 +440,10 @@ void Terminal::update_sizes(bool force)
 	unsigned int prev_rows = rows;
 
 	size = get_size();
+	size.x -= (style_normal->get_margin(SIDE_LEFT) + style_normal->get_margin(SIDE_RIGHT));
+	size.y -= (style_normal->get_margin(SIDE_TOP) + style_normal->get_margin(SIDE_BOTTOM));
+	size.x = std::max(size.x, 1.0f);
+	size.y = std::max(size.y, 1.0f);
 
 	Ref<Font> font = fonts[FontType::NORMAL];
 	font_size = get_theme_font_size("font_size");
@@ -438,6 +457,10 @@ void Terminal::update_sizes(bool force)
 
 	if (!force && size == prev_size && font_size == prev_font_size && cell_size == prev_cell_size && cols == prev_cols && rows == prev_rows)
 		return;
+
+	Transform2D transform = Transform2D(0, Vector2(style_normal->get_margin(SIDE_LEFT), style_normal->get_margin(SIDE_TOP)));
+	rs->canvas_item_set_transform(back_canvas_item, transform);
+	rs->canvas_item_set_transform(fore_canvas_item, transform);
 
 	tsm_screen_resize(screen, cols, rows);
 	rs->viewport_set_size(viewport, size.x, size.y);
@@ -471,6 +494,12 @@ void Terminal::initialize_rendering() {
 
 	rs = RenderingServer::get_singleton();
 	attr_texture.instantiate();
+
+	// StyleBox.
+
+	style_canvas_item = rs->canvas_item_create();
+	rs->canvas_item_set_parent(style_canvas_item, get_canvas_item());
+	rs->canvas_item_set_draw_behind_parent(style_canvas_item, true);
 
 	// Background.
 
@@ -533,13 +562,23 @@ void Terminal::update_theme() {
 		tsm_vte_color color = static_cast<tsm_vte_color>(i);
 		palette[color] = get_theme_color(String(COLOR_NAMES[i]));
 	}
-	back_material->set_shader_parameter("background_color", palette[TSM_COLOR_BACKGROUND]);
 
 	// Update fonts.
 	for (int i = FontType::NORMAL; i <= FontType::BOLD_ITALICS; i++) {
 		FontType type = static_cast<FontType>(i);
 		fonts[type] = has_theme_font(FONT_TYPES[type]) ? get_theme_font(FONT_TYPES[type]) : get_theme_font(FONT_TYPES[FontType::NORMAL]);
 	}
+
+	// Update styles.
+	style_normal = get_theme_stylebox("normal");
+	style_focus = get_theme_stylebox("focus");
+
+	if (dynamic_cast<StyleBoxFlat*>(style_normal.ptr()) != nullptr) {
+		// Blend the background color with the style box's background color to get the "true" background color.
+		Color style_background_color = style_normal->get("bg_color");
+		palette[TSM_COLOR_BACKGROUND] = style_background_color.blend(palette[TSM_COLOR_BACKGROUND]); 
+	}
+	back_material->set_shader_parameter("background_color", palette[TSM_COLOR_BACKGROUND]);
 
 	refresh();
 }
@@ -557,9 +596,18 @@ void Terminal::draw_screen() {
 
 		rs->viewport_set_clear_mode(viewport, RenderingServer::ViewportClearMode::VIEWPORT_CLEAR_ONLY_NEXT_FRAME);
 
+		Color bgcol = palette[TSM_COLOR_BACKGROUND];
+
+		rs->canvas_item_clear(style_canvas_item);
+		style_normal->draw(style_canvas_item, get_rect());
+		if (has_focus())
+			style_focus->draw(style_canvas_item, get_rect());
+		if (get_theme_color("background_color").a > 0)
+			rs->canvas_item_add_rect(style_canvas_item, get_rect(), bgcol);
+
 		rs->canvas_item_clear(back_canvas_item);
-		rs->canvas_item_add_rect(back_canvas_item, rect, palette[TSM_COLOR_BACKGROUND]);
-		back_image->fill(palette[TSM_COLOR_BACKGROUND]);
+		rs->canvas_item_add_rect(back_canvas_item, rect, bgcol);
+		back_image->fill(bgcol);
 
 		rs->canvas_item_clear(fore_canvas_item);
 		rs->canvas_item_add_texture_rect(fore_canvas_item, rect, rs->viewport_get_texture(viewport));
@@ -577,6 +625,9 @@ void Terminal::refresh() {
 }
 
 void Terminal::cleanup_rendering() {
+	// StyleBox.
+	rs->free_rid(style_canvas_item);
+
 	// Background.
 	rs->free_rid(back_canvas_item);
 
@@ -846,7 +897,7 @@ void Terminal::set_default_theme_items() {
 
 	// Default colors and font sizes from CodeEdit, TextEdit, et al.
 	// A comment on the translucency of the default background color: https://github.com/godotengine/godot/pull/51159#issuecomment-891127783.
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "background_color", "Terminal", Color(0.1, 0.1, 0.1, 0.6));
+	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "background_color", "Terminal", Color(0.0, 0.0, 0.0, 0.0));
 	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "foreground_color", "Terminal", Color(0.875, 0.875, 0.875, 1));
 	default_theme->set_theme_item(Theme::DATA_TYPE_FONT_SIZE, "font_size", "Terminal", 16);
 
@@ -879,4 +930,7 @@ void Terminal::set_default_theme_items() {
 			default_theme->set_theme_item(Theme::DATA_TYPE_FONT, FONT_TYPES[type], "Terminal", default_font);
 		}
 	}
+
+	default_theme->set_theme_item(Theme::DATA_TYPE_STYLEBOX, "normal", "Terminal", default_theme->get_theme_item(Theme::DATA_TYPE_STYLEBOX, "normal", "TextEdit"));
+	default_theme->set_theme_item(Theme::DATA_TYPE_STYLEBOX, "focus", "Terminal", default_theme->get_theme_item(Theme::DATA_TYPE_STYLEBOX, "focus", "TextEdit"));
 }

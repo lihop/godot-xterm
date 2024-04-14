@@ -1,6 +1,7 @@
-[gd_resource type="Theme" load_steps=2 format=3 uid="uid://0gk8swmcldbg"]
+[gd_resource type="Theme" load_steps=3 format=3 uid="uid://0gk8swmcldbg"]
 
 [ext_resource type="FontVariation" uid="uid://vmgmcu8gc6nt" path="res://addons/godot_xterm/themes/fonts/regular.tres" id="1_aigbn"]
+[ext_resource type="StyleBox" uid="uid://cxaclm5pavuv6" path="res://themes/normal.stylebox" id="1_bj7pu"]
 
 [resource]
 default_font = ExtResource("1_aigbn")
@@ -20,6 +21,6 @@ Terminal/colors/ansi_6_color = Color(0.560784, 1, 0.858824, 1)
 Terminal/colors/ansi_7_color = Color(0.803922, 0.811765, 0.823529, 0.501961)
 Terminal/colors/ansi_8_color = Color(0.211765, 0.239216, 0.290196, 1)
 Terminal/colors/ansi_9_color = Color(1, 0.439216, 0.521569, 1)
-Terminal/colors/background_color = Color(0.113725, 0.133333, 0.160784, 1)
 Terminal/colors/foreground_color = Color(0.803922, 0.811765, 0.823529, 1)
 Terminal/font_sizes/font_size = 14
+Terminal/styles/normal = ExtResource("1_bj7pu")

@@ -264,7 +264,7 @@ class TestSelect:
 	func before_each():
 		super.before_each()
 		text_edit = TextEdit.new()
-		text_edit.text = "0123456789\nABCDEFGHIJ\n)!@#$%^&*(\n\n\n\n\n\n\n"
+		text_edit.text = "0123456789\nABCDEFGHIJ\n)!@#$%^&*(\n\n\n\n\n\n"
 		add_child_autofree(text_edit)
 		subject.write("0123456789\r\nABCDEFGHIJ\r\n)!@#$%^&*(")
 
@@ -306,7 +306,7 @@ class TestSelect:
 		assert_select_eq([-2, 0, 1, 10], "0123456789\nABCDEFGHIJ")
 
 	func test_select_exceeds_row_bounds():
-		assert_select_eq([1, 5, 999, 999], "FGHIJ\n)!@#$%^&*(\n\n\n\n\n\n\n")
+		assert_select_eq([1, 5, 999, 999], "FGHIJ\n)!@#$%^&*(\n\n\n\n\n\n")
 
 	func test_wide_bounds():
-		assert_select_eq([-999, -999, 999, 999], "0123456789\nABCDEFGHIJ\n)!@#$%^&*(\n\n\n\n\n\n\n")
+		assert_select_eq([-999, -999, 999, 999], "0123456789\nABCDEFGHIJ\n)!@#$%^&*(\n\n\n\n\n\n")

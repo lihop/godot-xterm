@@ -88,6 +88,8 @@ class TestVisualRegression:
 		assert_match("default_theme")
 
 	func test_transparency():
+		subject.add_child(preload("./background.tscn").instantiate())
+		subject.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 		subject.add_theme_color_override("foreground_color", Color(0, 1, 0, 0.5))
 		subject.add_theme_color_override("background_color", Color(1, 0, 0, 0.5))
 		subject.write("bg red, 50% transparency\r\n")
@@ -104,3 +106,39 @@ class TestVisualRegression:
 		subject.write("👈🤮👉💩👃😍🤥😤🙏🤟")
 		await wait_frames(30)
 		assert_match("emoji")
+
+	func test_solid_invert_selection():
+		subject.write("██████████\r\n██████████")
+		subject.add_theme_color_override("background_color", Color.ORANGE)
+		subject.inverse_mode = Terminal.INVERSE_MODE_INVERT
+		subject.select(0, 5, 1, 6)
+		await wait_frames(30)
+		assert_match("solid_invert_selection")
+
+	func test_solid_swap_selection():
+		subject.write("██████████\r\n██████████")
+		subject.add_theme_color_override("background_color", Color.ORANGE)
+		subject.inverse_mode = Terminal.INVERSE_MODE_SWAP
+		subject.select(0, 5, 1, 6)
+		await wait_frames(30)
+		assert_match("solid_swap_selection")
+
+	func test_transparent_invert_selection():
+		subject.add_child(preload("./background.tscn").instantiate())
+		subject.write("██████████\r\n██████████")
+		subject.add_theme_color_override("background_color", Color.TRANSPARENT)
+		subject.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+		subject.inverse_mode = Terminal.INVERSE_MODE_INVERT
+		subject.select(0, 5, 1, 6)
+		await wait_frames(30)
+		assert_match("transparent_invert_selection")
+
+	func test_transparent_swap_selection():
+		subject.add_child(preload("./background.tscn").instantiate())
+		subject.write("██████████\r\n██████████")
+		subject.add_theme_color_override("background_color", Color.TRANSPARENT)
+		subject.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+		subject.inverse_mode = Terminal.INVERSE_MODE_SWAP
+		subject.select(0, 5, 1, 6)
+		await wait_frames(30)
+		assert_match("transparent_swap_selection")
