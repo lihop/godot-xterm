@@ -451,7 +451,7 @@ void Terminal::update_sizes(bool force)
 	update_shader_parameters(back_material);
 	update_shader_parameters(fore_material);
 
-	if (prev_cols != cols || prev_rows != rows)
+	if (force || prev_cols != cols || prev_rows != rows)
 		emit_signal("size_changed", Vector2i(cols, rows));
 
 	refresh();
