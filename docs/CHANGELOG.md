@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/lihop/godot-xterm/compare/v2.2.0...HEAD)
 
+### Added
+
+- Added select() method to Terminal.
+
 ### Changed
 
 - Custom export templates are no longer required when exporting to HTML5 from Godot v3.5.x.

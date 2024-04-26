@@ -243,3 +243,70 @@ class TestClear:
 		var screen_after = subject.copy_all()
 		var expected = final_line + "\n".repeat(subject.get_rows())
 		assert_eq(screen_after, expected)
+
+
+class TestSelect:
+	extends TerminalTest
+
+	# Use the behavior of TextEdit's select() method as a reference.
+	var text_edit: TextEdit
+
+	func assert_select_eq(argv, expected):
+		text_edit.callv("select", argv)
+		subject.callv("select", argv)
+		assert_eq(
+			expected,
+			text_edit.get_selected_text(),
+			"expected does not match reference implementation"
+		)
+		assert_eq(subject.copy_selection(), expected)
+
+	func before_each():
+		super.before_each()
+		text_edit = TextEdit.new()
+		text_edit.text = "0123456789\nABCDEFGHIJ\n)!@#$%^&*(\n\n\n\n\n\n\n"
+		add_child_autofree(text_edit)
+		subject.write("0123456789\r\nABCDEFGHIJ\r\n)!@#$%^&*(")
+
+	func test_select_nothing():
+		assert_select_eq([0, 0, 0, 0], "")
+
+	func test_select_first_character():
+		assert_select_eq([0, 0, 0, 1], "0")
+
+	func test_select_last_character():
+		assert_select_eq([2, 9, 2, 10], "(")
+
+	func test_select_reverse_column():
+		assert_select_eq([0, 6, 0, 1], "12345")
+
+	func test_select_preceeds_column_bounds():
+		assert_select_eq([0, -2, 0, -1], "")
+		assert_select_eq([0, -2, 0, 0], "")
+		assert_select_eq([0, -2, 0, 1], "0")
+
+	func test_select_exceeds_column_bounds():
+		assert_select_eq([0, 5, 0, 999], "56789")
+
+	func test_select_first_row():
+		assert_select_eq([0, 0, 0, 10], "0123456789")
+
+	func test_select_second_row():
+		assert_select_eq([1, 0, 1, 10], "ABCDEFGHIJ")
+
+	func test_select_multiple_rows():
+		assert_select_eq([0, 0, 1, 10], "0123456789\nABCDEFGHIJ")
+
+	func test_select_rows_reverse():
+		assert_select_eq([1, 5, 0, 0], "0123456789\nABCDE")
+
+	func test_select_preceeds_row_bounds():
+		assert_select_eq([-2, 0, -1, 10], "0123456789")
+		assert_select_eq([-2, 0, 0, 10], "0123456789")
+		assert_select_eq([-2, 0, 1, 10], "0123456789\nABCDEFGHIJ")
+
+	func test_select_exceeds_row_bounds():
+		assert_select_eq([1, 5, 999, 999], "FGHIJ\n)!@#$%^&*(\n\n\n\n\n\n\n")
+
+	func test_wide_bounds():
+		assert_select_eq([-999, -999, 999, 999], "0123456789\nABCDEFGHIJ\n)!@#$%^&*(\n\n\n\n\n\n\n")
