@@ -3,6 +3,7 @@
 
 #include "terminal.h"
 
+#include <algorithm>
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/font.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
@@ -69,6 +70,9 @@ void Terminal::_bind_methods()
 	ClassDB::bind_method(D_METHOD("get_blink_off_time"), &Terminal::get_blink_off_time);
 	ClassDB::bind_method(D_METHOD("set_blink_off_time", "time"), &Terminal::set_blink_off_time);
 	ClassDB::add_property("Terminal", PropertyInfo(Variant::FLOAT, "blink_off_time"), "set_blink_off_time", "get_blink_off_time");
+
+	// Selection.
+	ClassDB::bind_method(D_METHOD("select", "from_line", "from_column", "to_line", "to_column"), &Terminal::select);
 
 	// Copying.
 	ClassDB::bind_method(D_METHOD("copy_all"), &Terminal::copy_all);
@@ -655,6 +659,26 @@ String Terminal::_copy_screen(ScreenCopyFunction func) {
 	}
 
 	return data.get_string_from_utf8();
+}
+
+void Terminal::select(const int p_from_line, const int p_from_column, const int p_to_line, const int p_to_column) {
+	int from_line = std::clamp((int)p_from_line, 0, (int)rows);
+	int from_column = std::clamp((int)p_from_column, 0, (int)cols);
+	int to_line = std::clamp((int)p_to_line, 0, (int)rows);
+	int to_column = std::clamp((int)p_to_column, 0, (int)cols);
+
+	if (from_line > to_line) {
+		std::swap(to_line, from_line);
+		std::swap(to_column, from_column);
+	} else if ((from_line == to_line) && (from_column > to_column)) {
+		std::swap(to_column, from_column);
+	}
+
+	to_column -= 1;
+
+	tsm_screen_selection_reset(screen);
+	tsm_screen_selection_start(screen, from_column, from_line);
+	tsm_screen_selection_target(screen, to_column, to_line);
 }
 
 String Terminal::copy_all() {

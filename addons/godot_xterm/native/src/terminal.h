@@ -74,6 +74,8 @@ namespace godot
 
     void clear();
 
+    void select(const int p_from_line, const int p_from_column, const int p_to_line, const int p_to_column);
+
     String copy_all();
     String copy_selection();
     void set_copy_on_selection(const bool p_enable);

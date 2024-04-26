@@ -42,14 +42,15 @@ For example if the string `"\u001b[38;2;0;255;0;mA"` was written to the terminal
 
 ## Methods
 
-| Returns    | Signature                                                           |
-| ---------- | ------------------------------------------------------------------- |
-| void       | [clear](#mthd-clear) **( )**                                        |
-| {{String}} | [copy_all](#mthd-copy_all) **( )**                                  |
-| {{String}} | [copy_selection](#mthd-copy_selection) **( )**                      |
-| {{int}}    | [get_cols](#mthd-get_cols) **( )**                                  |
-| {{int}}    | [get_rows](#mthd-get_rows) **( )**                                  |
-| void       | [write](#mthd-write) **(** {{String}}\|{{PoolByteArray}} data **)** |
+| Returns    | Signature                                                                                                    |
+| ---------- | ------------------------------------------------------------------------------------------------------------ |
+| void       | [clear](#mthd-clear) **( )**                                                                                 |
+| {{String}} | [copy_all](#mthd-copy_all) **( )**                                                                           |
+| {{String}} | [copy_selection](#mthd-copy_selection) **( )**                                                               |
+| {{int}}    | [get_cols](#mthd-get_cols) **( )**                                                                           |
+| {{int}}    | [get_rows](#mthd-get_rows) **( )**                                                                           |
+| void       | [select](#mthd-select) **(** {{int}} from_line, {{int}} from_column, {{int}} to_line {{int}} to_column **)** |
+| void       | [write](#mthd-write) **(** {{String}}\|{{PoolByteArray}} data **)**                                          |
 
 ## Signals
 
@@ -188,6 +189,12 @@ It will automatically update according to the terminal's rect_size and theme's f
 Returns the height of the terminal in characters.
 When using a monospace font, this is the number of visible characters that can fit from the top of the terminal to the bottom in a single column.
 It will automatically update according to the terminal's rect_size and theme's font size.
+
+<hr id="mthd-select" />
+
+void **select** **(** {{int}} from_line, {{int}} from_column, {{int}} to_line, {{int}} to_column **)**
+
+Perform selection, from line/column to line/column.
 
 <hr id="mthd-write" />
 
