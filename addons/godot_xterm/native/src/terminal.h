@@ -42,6 +42,7 @@ namespace godot
     {
       INVERSE = 1 << 0,
       BLINK = 1 << 1,
+      CURSOR = 1 << 2,
     };
 
     enum InverseMode {
@@ -130,6 +131,7 @@ namespace godot
     double font_offset;
     Vector2 size;
     Vector2 cell_size;
+    Vector2i cursor_position;
 
     Ref<Image> attr_image;
     Ref<ImageTexture> attr_texture;
@@ -157,7 +159,7 @@ namespace godot
     void initialize_rendering();
     void update_theme();
     void update_sizes(bool force = false);
-    void update_shader_parameters(Ref<ShaderMaterial> material);
+    void set_shader_parameters(const String &name = "", const Variant &value = nullptr);
     bool redraw_requested = false;
     void _on_frame_post_draw();
     void draw_screen();

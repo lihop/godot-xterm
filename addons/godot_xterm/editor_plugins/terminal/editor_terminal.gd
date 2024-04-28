@@ -22,9 +22,6 @@ func _ready():
 	if not editor_settings:
 		return
 
-	add_theme_stylebox_override("normal", get_theme_stylebox("normal", "Tree"))
-	add_theme_stylebox_override("focus", get_theme_stylebox("focus", "Tree"))
-
 	# Get colors from TextEdit theme. Created using the default (Adaptive) theme
 	# for reference, but will probably cause strange results if using another theme
 	# better to use a dedicated terminal theme, rather than relying on this.
