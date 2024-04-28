@@ -51,6 +51,16 @@ class TestVisualRegression:
 		await wait_frames(30)
 		assert_match("empty")
 
+	func test_empty_focused():
+		subject.grab_focus()
+		await wait_frames(30)
+		assert_match("empty_focused")
+
+	func test_hollow_cursor():
+		subject.write("W\b")
+		await wait_frames(30)
+		assert_match("hollow_cursor")
+
 	func test_default_theme():
 		# Print every background color.
 		for i in range(8):

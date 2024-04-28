@@ -209,6 +209,7 @@ void Terminal::_notification(int what)
 	case NOTIFICATION_FOCUS_ENTER:
 	case NOTIFICATION_FOCUS_EXIT:
 	{
+		set_shader_parameters("has_focus", has_focus());
 		refresh();
 		break;
 	}
@@ -275,6 +276,9 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 		attr_flags |= AttrFlag::INVERSE;
 	if (attr->blink)
 		attr_flags |= AttrFlag::BLINK;
+	if (term->cursor_position.x == posx && term->cursor_position.y == posy) {
+		attr_flags |= AttrFlag::CURSOR;
+	}
 
 	// Collect colors.
 	Color fgcol = std::min(attr->fccode, (int8_t)TSM_COLOR_FOREGROUND) >= 0
@@ -471,8 +475,7 @@ void Terminal::update_sizes(bool force)
 	attr_image = Image::create(std::max(cols, 1u), std::max(rows, 1u), false, Image::FORMAT_L8);
 	attr_texture->set_image(attr_image);
 
-	update_shader_parameters(back_material);
-	update_shader_parameters(fore_material);
+	set_shader_parameters();
 
 	if (force || prev_cols != cols || prev_rows != rows)
 		emit_signal("size_changed", Vector2i(cols, rows));
@@ -480,13 +483,18 @@ void Terminal::update_sizes(bool force)
 	refresh();
 }
 
-void Terminal::update_shader_parameters(Ref<ShaderMaterial> material)
+void Terminal::set_shader_parameters(const String &param, const Variant &value)
 {
-	material->set_shader_parameter("cols", cols);
-	material->set_shader_parameter("rows", rows);
-	material->set_shader_parameter("size", size);
-	material->set_shader_parameter("cell_size", cell_size);
-	material->set_shader_parameter("grid_size", Vector2(cols * cell_size.x, rows * cell_size.y));
+	if (param.is_empty()) {
+		set_shader_parameters("cols", cols);
+		set_shader_parameters("rows", rows);
+		set_shader_parameters("size", size);
+		set_shader_parameters("cell_size", cell_size);
+		set_shader_parameters("grid_size", Vector2(cols * cell_size.x, rows * cell_size.y));
+	} else {
+		back_material->set_shader_parameter(param, value);
+		fore_material->set_shader_parameter(param, value);
+	}
 }
 
 void Terminal::initialize_rendering() {
@@ -614,6 +622,7 @@ void Terminal::draw_screen() {
 	}
 
 	rs->canvas_item_clear(char_canvas_item);
+	cursor_position = tsm_screen_get_flags(screen) & TSM_SCREEN_HIDE_CURSOR ? Vector2i(-1, -1) : get_cursor_pos();
 	framebuffer_age = tsm_screen_draw(screen, Terminal::_draw_cb, this);
 	attr_texture->update(attr_image);
 	back_texture->update(back_image);
@@ -752,8 +761,7 @@ void Terminal::set_inverse_mode(const int mode) {
 	inverse_mode = static_cast<InverseMode>(mode);
 
 	bool inverse_enabled = inverse_mode == InverseMode::INVERSE_MODE_INVERT;
-	back_material->set_shader_parameter("inverse_enabled", inverse_enabled);
-	fore_material->set_shader_parameter("inverse_enabled", inverse_enabled);
+	set_shader_parameters("inverse_enabled", inverse_enabled);
 
 	refresh();
 }

@@ -3,6 +3,7 @@
 
 #define FLAG_INVERSE 1 << 0
 #define FLAG_BLINK 1 << 1
+#define FLAG_CURSOR 1 << 2
 
 #define transparent vec4(0)
 
@@ -14,6 +15,7 @@ uniform vec2 grid_size;
 
 uniform sampler2D attributes;
 uniform bool inverse_enabled = true;
+uniform bool has_focus = false;
 
 #ifdef BACKGROUND
 uniform vec4 background_color;
@@ -48,17 +50,21 @@ void fragment() {
 		color = texture(TEXTURE, UV);
 #endif
 
-		if (has_attribute(sample_uv, FLAG_INVERSE) && inverse_enabled) {
+		bool unfocused_cursor = !has_focus && has_attribute(sample_uv, FLAG_CURSOR);
+
 #ifdef BACKGROUND
+		if (has_attribute(sample_uv, FLAG_INVERSE) && inverse_enabled) {
 			vec4 bg_color = textureLod(screen_texture, SCREEN_UV, 0.0);
 			vec4 target_color;
 			target_color.a = color.a + (1.0 - color.a) * bg_color.a;
 			target_color.rgb = 1.0 / target_color.a * (color.a * color.rgb + (1.0 - color.a) * bg_color.a * bg_color.rgb);
-#else
-			vec4 target_color = color;
-#endif
 			color = vec4(1.0 - target_color.rgb, target_color.a);
 		}
+#else
+		if (has_attribute(sample_uv, FLAG_INVERSE) && inverse_enabled && !unfocused_cursor) {
+			color.rgb = vec3(1.0 - color.rgb);
+		}
+#endif
 
 #ifdef FOREGROUND
 		if (has_attribute(sample_uv, FLAG_BLINK)) {
@@ -70,9 +76,18 @@ void fragment() {
         }
 #endif
 
-#if defined(FOREGROUND) || defined(BACKGROUND)
-		COLOR = color;
+#ifdef BACKGROUND
+		if (unfocused_cursor) {
+		    // Draw hollow cursor when not focused.
+		    bool isBorderX = (UV.x * size.x - float(cell_x) * cell_size.x) < 1.0 || (float(cell_x + 1) * cell_size.x - UV.x * size.x) < 1.0;
+		    bool isBorderY = (UV.y * size.y - float(cell_y) * cell_size.y) < 1.0 || (float(cell_y + 1) * cell_size.y - UV.y * size.y) < 1.0;
+		    if (!isBorderX && !isBorderY) {
+				color = transparent;
+		    }
+		}
 #endif
+
+		COLOR = color;
 	} else { // Outside the grid.
 		COLOR = transparent;
 	}
