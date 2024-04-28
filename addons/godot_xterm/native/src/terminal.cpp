@@ -648,9 +648,11 @@ String Terminal::_copy_screen(ScreenCopyFunction func) {
 	char *out;
 	PackedByteArray data;
 
-	data.resize(func(screen, &out));
-	memcpy(data.ptrw(), out, data.size());
-	std::free(out);
+	data.resize(std::max(func(screen, &out), 0));
+	if (data.size() > 0) {
+		memcpy(data.ptrw(), out, data.size());
+		std::free(out);
+	}
 
 	return data.get_string_from_utf8();
 }
