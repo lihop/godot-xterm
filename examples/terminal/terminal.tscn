@@ -14,6 +14,8 @@ theme = ExtResource("1_osky4")
 script = ExtResource("3")
 
 [node name="PTY" type="PTY" parent="."]
+cols = 126
+rows = 31
 terminal_path = NodePath("..")
 
 [node name="Bell" type="AudioStreamPlayer" parent="."]
