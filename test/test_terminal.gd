@@ -222,6 +222,9 @@ class TestCopy:
 		subject.write(text)
 		assert_string_contains(subject.copy_all(), text)
 
+	func test_copy_selection_when_nothing_selected():
+		assert_eq(subject.copy_selection(), "")
+
 
 class TestClear:
 	extends TerminalTest
