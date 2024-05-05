@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom export templates are no longer required when exporting to HTML5 from Godot v3.5.x.
 - The default bundled monospace font is now [JetBrains Mono](https://www.jetbrains.com/lp/mono/) rather than [Hack](https://sourcefoundry.org/hack/).
   This reflects the change to the editor's default monospace font that was made in Godot 4.
+- Editor terminal 'Copy All' menu item replaced with 'Select All'.
 
 ### Removed
 
