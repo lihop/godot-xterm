@@ -16,7 +16,7 @@ enum TerminalPopupMenuOptions {
 	NEW_TERMINAL = 0,
 	COPY = 2,
 	PASTE = 3,
-	COPY_ALL = 4,
+	SELECT_ALL = 4,
 	CLEAR = 6,
 	KILL_TERMINAL = 7,
 }
@@ -228,8 +228,8 @@ func _on_TerminalPopupMenu_id_pressed(id):
 				DisplayServer.clipboard_set(terminal.copy_selection())
 			TerminalPopupMenuOptions.PASTE:
 				terminal.write(DisplayServer.clipboard_get())
-			TerminalPopupMenuOptions.COPY_ALL:
-				DisplayServer.clipboard_set(terminal.copy_all())
+			TerminalPopupMenuOptions.SELECT_ALL:
+				terminal.select(0, 0, terminal.get_rows(), terminal.get_cols())
 			TerminalPopupMenuOptions.CLEAR:
 				terminal.clear()
 			TerminalPopupMenuOptions.KILL_TERMINAL:
