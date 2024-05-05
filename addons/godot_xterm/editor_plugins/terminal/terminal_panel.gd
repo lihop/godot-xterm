@@ -67,24 +67,23 @@ func _update_settings() -> void:
 
 	tabs.tab_close_display_policy = TabBar.CLOSE_BUTTON_SHOW_ALWAYS
 
-#FIXME
-#	# Update shortcuts.
-#	if _settings.new_terminal_shortcut:
-#		terminal_popup_menu.set_item_shortcut(
-#			TerminalPopupMenuOptions.NEW_TERMINAL, _settings.new_terminal_shortcut, true
-#		)
-#	if _settings.kill_terminal_shortcut:
-#		terminal_popup_menu.set_item_shortcut(
-#			TerminalPopupMenuOptions.KILL_TERMINAL, _settings.kill_terminal_shortcut, false
-#		)
-#	if _settings.copy_shortcut:
-#		terminal_popup_menu.set_item_shortcut(
-#			TerminalPopupMenuOptions.COPY, _settings.copy_shortcut, false
-#		)
-#	if _settings.paste_shortcut:
-#		terminal_popup_menu.set_item_shortcut(
-#			TerminalPopupMenuOptions.PASTE, _settings.paste_shortcut, false
-#		)
+	# Update shortcuts.
+	if _settings.new_terminal_shortcut:
+		terminal_popup_menu.set_item_shortcut(
+			TerminalPopupMenuOptions.NEW_TERMINAL, _settings.new_terminal_shortcut, true
+		)
+	if _settings.kill_terminal_shortcut:
+		terminal_popup_menu.set_item_shortcut(
+			TerminalPopupMenuOptions.KILL_TERMINAL, _settings.kill_terminal_shortcut, false
+		)
+	if _settings.copy_shortcut:
+		terminal_popup_menu.set_item_shortcut(
+			TerminalPopupMenuOptions.COPY, _settings.copy_shortcut, false
+		)
+	if _settings.paste_shortcut:
+		terminal_popup_menu.set_item_shortcut(
+			TerminalPopupMenuOptions.PASTE, _settings.paste_shortcut, false
+		)
 
 	_update_terminal_tabs()
 
@@ -172,53 +171,43 @@ func _input(event: InputEvent) -> void:
 		return
 
 	# Global shortcut to open new terminal and make terminal panel visible.
-	# FIXME
-#	if _settings.new_terminal_shortcut and _settings.new_terminal_shortcut.shortcut:
-#		if event.is_match(_settings.new_terminal_shortcut.shortcut):
-#			get_tree().set_input_as_handled()
-#			editor_plugin.make_bottom_panel_item_visible(self)
-#			_on_AddButton_pressed()
+	if _settings.new_terminal_shortcut and _settings.new_terminal_shortcut.matches_event(event):
+		get_viewport().set_input_as_handled()
+		editor_plugin.make_bottom_panel_item_visible(self)
+		_on_AddButton_pressed()
 
 	# Non-global shortcuts, only applied if terminal is active and focused.
 	if (
 		tabs.get_tab_count() > 0 and tab_container.get_child(tabs.current_tab).has_focus()
 		or terminal_popup_menu.has_focus()
 	):
-		pass
 		# Kill terminal.
-		# FIXME shortcut
+		if (
+			_settings.kill_terminal_shortcut
+			and _settings.kill_terminal_shortcut.matches_event(event)
+		):
+			get_viewport().set_input_as_handled()
+			_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.KILL_TERMINAL)
 
+		# Copy.
+		if _settings.copy_shortcut and _settings.copy_shortcut.matches_event(event):
+			get_viewport().set_input_as_handled()
+			_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.COPY)
 
-#		if _settings.kill_terminal_shortcut and _settings.kill_terminal_shortcut.shortcut:
-#			if event.is_match(_settings.kill_terminal_shortcut.shortcut):
-#				get_tree().set_input_as_handled()
-#				_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.KILL_TERMINAL)
+		# Paste.
+		if _settings.paste_shortcut and _settings.paste_shortcut.matches_event(event):
+			get_viewport().set_input_as_handled()
+			_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.PASTE)
 
-# Copy.
-#FIXME
-#		if _settings.copy_shortcut and _settings.copy_shortcut.shortcut:
-#			if event.is_match(_settings.copy_shortcut.shortcut):
-#				get_tree().set_input_as_handled()
-#				_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.COPY)
+		# Next tab.
+		if _settings.next_tab_shortcut and _settings.next_tab_shortcut.matches_event(event):
+			get_viewport().set_input_as_handled()
+			tabs.current_tab = min(tabs.current_tab + 1, tabs.get_tab_count() - 1)
 
-# Paste.
-#FIXME
-#		if _settings.paste_shortcut and _settings.paste_shortcut.shortcut:
-#			if event.is_match(_settings.paste_shortcut.shortcut):
-#				get_tree().set_input_as_handled()
-#				_on_TerminalPopupMenu_id_pressed(TerminalPopupMenuOptions.PASTE)
-#
-#		# Next tab.
-#		if _settings.next_tab_shortcut and _settings.next_tab_shortcut.shortcut:
-#			if event.is_match(_settings.next_tab_shortcut.shortcut):
-#				get_tree().set_input_as_handled()
-#				tabs.current_tab = min(tabs.current_tab + 1, tabs.get_tab_count() - 1)
-#
-#		# Previous tab.
-#		if _settings.previous_tab_shortcut and _settings.previous_tab_shortcut.shortcut:
-#			if event.is_match(_settings.previous_tab_shortcut.shortcut):
-#				get_tree().set_input_as_handled()
-#				tabs.current_tab = max(tabs.current_tab - 1, 0)
+		# Previous tab.
+		if _settings.previous_tab_shortcut and _settings.previous_tab_shortcut.matches_event(event):
+			get_viewport().set_input_as_handled()
+			tabs.current_tab = max(tabs.current_tab - 1, 0)
 
 
 func _on_TabContainer_gui_input(event):
@@ -238,11 +227,7 @@ func _on_TerminalPopupMenu_id_pressed(id):
 			TerminalPopupMenuOptions.COPY:
 				DisplayServer.clipboard_set(terminal.copy_selection())
 			TerminalPopupMenuOptions.PASTE:
-				for i in DisplayServer.clipboard_get().length():
-					var event = InputEventKey.new()
-					event.unicode = DisplayServer.clipboard_get().unicode_at(i)
-					event.button_pressed = true
-					terminal._gui_input(event)
+				terminal.write(DisplayServer.clipboard_get())
 			TerminalPopupMenuOptions.COPY_ALL:
 				DisplayServer.clipboard_set(terminal.copy_all())
 			TerminalPopupMenuOptions.CLEAR:
