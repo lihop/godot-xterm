@@ -1,10 +1,8 @@
-[gd_resource type="Shortcut" load_steps=2 format=2]
+[gd_resource type="Shortcut" load_steps=2 format=3 uid="uid://djs5hhu8vbmqf"]
 
-[sub_resource type="InputEventKey" id=1]
-control = true
-command = true
-pressed = true
-scancode = 16777236
+[sub_resource type="InputEventKey" id="InputEventKey_svjos"]
+ctrl_pressed = true
+keycode = 4194323
 
 [resource]
-shortcut = SubResource( 1 )
+events = [SubResource("InputEventKey_svjos")]
