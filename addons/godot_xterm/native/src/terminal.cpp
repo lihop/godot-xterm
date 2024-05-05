@@ -739,6 +739,18 @@ void Terminal::select(const int p_from_line, const int p_from_column, const int 
 	tsm_screen_selection_reset(screen);
 	tsm_screen_selection_start(screen, from_column, from_line);
 	tsm_screen_selection_target(screen, to_column, to_line);
+
+	String selection = copy_selection();
+
+	#if defined(__linux__)
+	if (copy_on_selection)
+		DisplayServer::get_singleton()->clipboard_set_primary(selection);
+	#endif
+
+	if (selection.length() > 0) {
+		selecting = true;
+		queue_redraw();
+	}
 }
 
 String Terminal::copy_all() {
