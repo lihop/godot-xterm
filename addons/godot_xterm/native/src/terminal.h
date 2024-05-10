@@ -101,6 +101,7 @@ namespace godot
     double blink_on_time;
     double blink_off_time;
 
+    // If true, text in the terminal will be copied to the clipboard when selected.
     bool copy_on_selection;
 
     InverseMode inverse_mode;
@@ -115,7 +116,12 @@ namespace godot
     static void _write_cb(struct tsm_vte *vte, const char *u8, size_t len,
                           void *data);
 
+    // If muted, the "bell" signal will not be emitted when the bell "\u0007" character
+    // is written to the terminal.
     bool bell_muted;
+    // Amount of time in seconds that must pass before emitting a new "bell" signal.
+    // This can be useful in cases where the bell character is being written too
+    // frequently such as `while true; do echo -e "\a"; done`.
     double bell_cooldown;
     Timer* bell_timer;
     static void _bell_cb(struct tsm_vte *vte, void *data);
