@@ -2,8 +2,8 @@ name: "Build and Test"
 
 on:
   push:
-  schedule: # Build and test daily.
-    - cron: 0 11 * * *
+  schedule: # Build and test weekly.
+    - cron: 8 2 * * thu
 
 jobs:
   build-linux:
