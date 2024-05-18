@@ -17,13 +17,8 @@ func _enter_tree():
 	var asciicast_script = preload("./resources/asciicast.gd")
 	add_custom_type("Asciicast", "Animation", asciicast_script, null)
 
-	var terminal_icon = load(
-		"%s/nodes/terminal/terminal_icon.svg" % get_script().resource_path.get_base_dir()
-	)
-
 	if pty_supported:
 		var base_dir = get_script().resource_path.get_base_dir()
-		var pty_icon = load("%s/nodes/pty/pty_icon.svg" % base_dir)
 		var pty_script
 		match OS.get_name():
 			"Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD", "macOS":

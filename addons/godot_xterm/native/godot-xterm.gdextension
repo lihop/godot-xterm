@@ -3,6 +3,11 @@
 entry_symbol = "godot_xterm_library_init"
 compatibility_minimum = "4.2.0"
 
+[icons]
+
+Terminal = "res://addons/godot_xterm/icons/terminal_icon.svg"
+PTY = "res://addons/godot_xterm/icons/pty_icon.svg"
+
 [libraries]
 
 linux.debug.x86_64 = "res://addons/godot_xterm/native/bin/libgodot-xterm.linux.template_debug.x86_64.so"
