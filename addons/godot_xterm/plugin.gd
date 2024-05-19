@@ -18,11 +18,6 @@ func _enter_tree():
 	add_custom_type("Asciicast", "Animation", asciicast_script, null)
 
 	if pty_supported:
-		var base_dir = get_script().resource_path.get_base_dir()
-		var pty_script
-		match OS.get_name():
-			"Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD", "macOS":
-				pty_script = load("%s/pty.gd" % base_dir)
 		terminal_panel = preload("./editor_plugins/terminal/terminal_panel.tscn").instantiate()
 		terminal_panel.editor_plugin = self
 		terminal_panel.editor_interface = get_editor_interface()

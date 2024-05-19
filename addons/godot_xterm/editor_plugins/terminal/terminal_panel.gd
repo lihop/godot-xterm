@@ -25,8 +25,8 @@ enum TerminalPopupMenuOptions {
 # terminal color scheme based on editor theme settings.
 var editor_plugin: EditorPlugin
 var editor_interface: EditorInterface
+var editor_settings: EditorSettings
 
-@onready var editor_settings: EditorSettings = editor_interface.get_editor_settings()
 @onready var tabs: TabBar = $VBoxContainer/TabbarContainer/Tabs
 @onready var tabbar_container: HBoxContainer = $VBoxContainer/TabbarContainer
 @onready var add_button: Button = $VBoxContainer/TabbarContainer/AddButton
@@ -46,6 +46,8 @@ var _tab_container_min_size
 
 
 func _ready():
+	if editor_interface:
+		editor_settings = editor_interface.get_editor_settings()
 	_update_settings()
 
 
@@ -59,11 +61,11 @@ func _update_settings() -> void:
 	_load_or_create_settings()
 
 	var editor_scale: float = 1.0
-	if editor_interface.has_method("get_editor_scale"):
+	if editor_interface and editor_interface.has_method("get_editor_scale"):
 		editor_scale = editor_interface.get_editor_scale()
 
 	custom_minimum_size = Vector2(0, tabbar_container.size.y + 182) * editor_scale
-	size.y = 415
+	call_deferred("set_size", Vector2(size.x, 415))
 
 	tabs.tab_close_display_policy = TabBar.CLOSE_BUTTON_SHOW_ALWAYS
 
