@@ -915,30 +915,34 @@ void Terminal::set_default_theme_items() {
 	Ref<Theme> default_theme = ThemeDB::get_singleton()->get_default_theme();
 	if (default_theme->get_type_list().has("Terminal")) return;
 
+	// As a workaround, create a new theme and then merge it with the default theme at the end.
+	// See: https://github.com/godotengine/godot-cpp/issues/1332#issuecomment-2041060614.
+	Ref<Theme> custom_theme = new Theme();
+
 	// Default colors and font sizes from CodeEdit, TextEdit, et al.
 	// A comment on the translucency of the default background color: https://github.com/godotengine/godot/pull/51159#issuecomment-891127783.
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "background_color", "Terminal", Color(0.0, 0.0, 0.0, 0.0));
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "foreground_color", "Terminal", Color(0.875, 0.875, 0.875, 1));
-	default_theme->set_theme_item(Theme::DATA_TYPE_FONT_SIZE, "font_size", "Terminal", 16);
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "background_color", "Terminal", Color(0.0, 0.0, 0.0, 0.0));
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "foreground_color", "Terminal", Color(0.875, 0.875, 0.875, 1));
+	custom_theme->set_theme_item(Theme::DATA_TYPE_FONT_SIZE, "font_size", "Terminal", 16);
 
 	// Default ANSI colors based on xterm defaults: https://en.wikipedia.org/wiki/ANSI_escape_code#Colors.
 	// Some discussion about the slight difference of the blue colors: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=241717.
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_0_color" , "Terminal", Color::hex(0x000000FF)); // Black
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_1_color" , "Terminal", Color::hex(0xCD0000FF)); // Red
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_2_color" , "Terminal", Color::hex(0x00CD00FF)); // Green
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_3_color" , "Terminal", Color::hex(0xCDCD00FF)); // Yellow
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_4_color" , "Terminal", Color::hex(0x0000EEFF)); // Blue
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_5_color" , "Terminal", Color::hex(0xCD00CDFF)); // Magenta
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_6_color" , "Terminal", Color::hex(0x00CDCDFF)); // Cyan
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_7_color" , "Terminal", Color::hex(0xE5E5E5FF)); // White
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_8_color" , "Terminal", Color::hex(0x7F7F7FFF)); // Bright Black (Gray)
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_9_color" , "Terminal", Color::hex(0xFF0000FF)); // Bright Red
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_10_color", "Terminal", Color::hex(0x00FF00FF)); // Bright Green
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_11_color", "Terminal", Color::hex(0xFFFF00FF)); // Bright Yellow
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_12_color", "Terminal", Color::hex(0x5C5CFFFF)); // Bright Blue
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_13_color", "Terminal", Color::hex(0xFF00FFFF)); // Bright Magenta
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_14_color", "Terminal", Color::hex(0x00FFFFFF)); // Bright Cyan
-	default_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_15_color", "Terminal", Color::hex(0xFFFFFFFF)); // Bright White
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_0_color" , "Terminal", Color::hex(0x000000FF)); // Black
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_1_color" , "Terminal", Color::hex(0xCD0000FF)); // Red
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_2_color" , "Terminal", Color::hex(0x00CD00FF)); // Green
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_3_color" , "Terminal", Color::hex(0xCDCD00FF)); // Yellow
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_4_color" , "Terminal", Color::hex(0x0000EEFF)); // Blue
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_5_color" , "Terminal", Color::hex(0xCD00CDFF)); // Magenta
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_6_color" , "Terminal", Color::hex(0x00CDCDFF)); // Cyan
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_7_color" , "Terminal", Color::hex(0xE5E5E5FF)); // White
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_8_color" , "Terminal", Color::hex(0x7F7F7FFF)); // Bright Black (Gray)
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_9_color" , "Terminal", Color::hex(0xFF0000FF)); // Bright Red
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_10_color", "Terminal", Color::hex(0x00FF00FF)); // Bright Green
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_11_color", "Terminal", Color::hex(0xFFFF00FF)); // Bright Yellow
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_12_color", "Terminal", Color::hex(0x5C5CFFFF)); // Bright Blue
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_13_color", "Terminal", Color::hex(0xFF00FFFF)); // Bright Magenta
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_14_color", "Terminal", Color::hex(0x00FFFFFF)); // Bright Cyan
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_15_color", "Terminal", Color::hex(0xFFFFFFFF)); // Bright White
 
 	// No monospaced font in the default theme, so try to import our own. Will default to a non-monospace font otherwise.
 	ResourceLoader* rl = ResourceLoader::get_singleton();
@@ -947,10 +951,12 @@ void Terminal::set_default_theme_items() {
 		Ref<Font> default_font = rl->load(font_path);
 		for (int i = FontType::NORMAL; i <= FontType::BOLD_ITALICS; i++) {
 			FontType type = static_cast<FontType>(i);
-			default_theme->set_theme_item(Theme::DATA_TYPE_FONT, FONT_TYPES[type], "Terminal", default_font);
+			custom_theme->set_theme_item(Theme::DATA_TYPE_FONT, FONT_TYPES[type], "Terminal", default_font);
 		}
 	}
 
-	default_theme->set_theme_item(Theme::DATA_TYPE_STYLEBOX, "normal", "Terminal", default_theme->get_theme_item(Theme::DATA_TYPE_STYLEBOX, "normal", "TextEdit"));
-	default_theme->set_theme_item(Theme::DATA_TYPE_STYLEBOX, "focus", "Terminal", default_theme->get_theme_item(Theme::DATA_TYPE_STYLEBOX, "focus", "TextEdit"));
+	custom_theme->set_theme_item(Theme::DATA_TYPE_STYLEBOX, "normal", "Terminal", default_theme->get_theme_item(Theme::DATA_TYPE_STYLEBOX, "normal", "TextEdit"));
+	custom_theme->set_theme_item(Theme::DATA_TYPE_STYLEBOX, "focus", "Terminal", default_theme->get_theme_item(Theme::DATA_TYPE_STYLEBOX, "focus", "TextEdit"));
+
+	default_theme->merge_with(custom_theme);
 }
