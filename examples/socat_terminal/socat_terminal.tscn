@@ -11,3 +11,5 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_rw2ub")
 script = ExtResource("1")
+
+[connection signal="data_sent" from="." to="." method="_on_Terminal_data_sent"]
