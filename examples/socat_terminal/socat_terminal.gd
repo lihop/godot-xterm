@@ -19,6 +19,7 @@ func _ready():
 
 
 func _process(delta):
+	_stream.poll()
 	match _stream.get_status():
 		StreamPeerTCP.STATUS_NONE, StreamPeerTCP.STATUS_CONNECTING:
 			_timeout -= 1
