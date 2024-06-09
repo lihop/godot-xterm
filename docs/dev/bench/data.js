@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1717926392841,
+  "lastUpdate": 1717927141357,
   "repoUrl": "https://github.com/lihop/godot-xterm",
   "entries": {
     "GodotXterm Benchmarks": [
@@ -377,6 +377,195 @@ window.BENCHMARK_DATA = {
           {
             "name": "unicode - render gpu",
             "value": 1424,
+            "unit": "milliseconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "git@leroy.geek.nz",
+            "name": "Leroy Hopson",
+            "username": "lihop"
+          },
+          "committer": {
+            "email": "github@leroy.nix.nz",
+            "name": "Leroy Hopson",
+            "username": "lihop"
+          },
+          "distinct": true,
+          "id": "64aa0ff49a56d03a67ef92d17d28c40aa121756e",
+          "message": "perf(term): merge custom theme with default theme\n\nMerges a custom theme containing 'Terminal' theme properties with the\ndefault theme rather than setting them on the default theme directly.\n\nThis improves performance for initial loading of the plugin.",
+          "timestamp": "2024-06-09T21:54:39+12:00",
+          "tree_id": "017b954eb8cc228506a136738158438fbdb1e45e",
+          "url": "https://github.com/lihop/godot-xterm/commit/64aa0ff49a56d03a67ef92d17d28c40aa121756e"
+        },
+        "date": 1717927140420,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "cursor_motion",
+            "value": 70.99,
+            "unit": "milliseconds",
+            "range": "± 17.88"
+          },
+          {
+            "name": "cursor_motion - render cpu",
+            "value": 9.998,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "cursor_motion - render gpu",
+            "value": 1906,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "dense_cells",
+            "value": 104.2,
+            "unit": "milliseconds",
+            "range": "± 25.93"
+          },
+          {
+            "name": "dense_cells - render cpu",
+            "value": 11.03,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "dense_cells - render gpu",
+            "value": 2001,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "editor_launch",
+            "value": 42.7,
+            "unit": "seconds"
+          },
+          {
+            "name": "light_cells",
+            "value": 77.71,
+            "unit": "milliseconds",
+            "range": "± 19.46"
+          },
+          {
+            "name": "light_cells - render cpu",
+            "value": 9.161,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "light_cells - render gpu",
+            "value": 1598,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling",
+            "value": 525.8,
+            "unit": "milliseconds",
+            "range": "± 25.54"
+          },
+          {
+            "name": "scrolling - render cpu",
+            "value": 7.659,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling - render gpu",
+            "value": 3095,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region",
+            "value": 508.2,
+            "unit": "milliseconds",
+            "range": "± 16.81"
+          },
+          {
+            "name": "scrolling_bottom_region - render cpu",
+            "value": 8.068,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region - render gpu",
+            "value": 3167,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_small_region",
+            "value": 508.8,
+            "unit": "milliseconds",
+            "range": "± 16.69"
+          },
+          {
+            "name": "scrolling_bottom_small_region - render cpu",
+            "value": 9.16,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_small_region - render gpu",
+            "value": 3231,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen",
+            "value": 83.23,
+            "unit": "milliseconds",
+            "range": "± 7.54"
+          },
+          {
+            "name": "scrolling_fullscreen - render cpu",
+            "value": 7.228,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen - render gpu",
+            "value": 1491,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region",
+            "value": 516.3,
+            "unit": "milliseconds",
+            "range": "± 25.21"
+          },
+          {
+            "name": "scrolling_top_region - render cpu",
+            "value": 7.964,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region - render gpu",
+            "value": 3175,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region",
+            "value": 502.1,
+            "unit": "milliseconds",
+            "range": "± 20.60"
+          },
+          {
+            "name": "scrolling_top_small_region - render cpu",
+            "value": 7.452,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region - render gpu",
+            "value": 3097,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode",
+            "value": 88.33,
+            "unit": "milliseconds",
+            "range": "± 43.24"
+          },
+          {
+            "name": "unicode - render cpu",
+            "value": 7.3,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode - render gpu",
+            "value": 1444,
             "unit": "milliseconds"
           }
         ]
