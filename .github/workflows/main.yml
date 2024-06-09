@@ -312,6 +312,111 @@ jobs:
           name: failed-screenshots
           path: test/visual_regression/screenshots
 
+  benchmark:
+    name: Benchmark (${{matrix.benchmark}})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        benchmark:
+          [
+            editor_launch,
+            cursor_motion,
+            dense_cells,
+            light_cells,
+            scrolling,
+            scrolling_bottom_region,
+            scrolling_bottom_small_region,
+            scrolling_fullscreen,
+            scrolling_top_region,
+            scrolling_top_small_region,
+            unicode,
+          ]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Setup Godot
+        uses: lihop/setup-godot@v2
+        with:
+          version: "4.2.2-stable"
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Update gdextension file
+        run: | # Use release builds as the build job finishes sooner.
+          sed -i 's/template_debug/template_release/g' addons/godot_xterm/native/godot-xterm.gdextension
+      - name: Import assets
+        shell: bash
+        run: godot --editor --headless --quit-after 100 || true
+      - name: Wait for build
+        uses: fountainhead/action-wait-for-check@v1.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: "Build (linux, x86_64, release) #${{ github.run_number }}"
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install binary build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: addons/godot_xterm/native/bin
+          merge-multiple: true
+      - name: Benchmark
+        shell: bash
+        run: just bench ${{matrix.benchmark}}
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ matrix.benchmark }}
+          path: benchmark/results/*.json
+
+  process-benchmarks:
+    name: Process Benchmarks
+    runs-on: ubuntu-latest
+    needs: [benchmark]
+    permissions:
+      deployments: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact/merge@v4
+        with:
+          name: benchmark-results
+          pattern: "benchmark-results-*"
+          delete-merged: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark/results/
+      - name: Merge results
+        run: jq -s '[.[][]]' benchmark/results/*.json > benchmark/results/all.json
+      - name: Download previous benchmark data
+        uses: actions/cache@v4
+        with:
+          path: ./cache
+          key: ${{runner.os}}-benchmark
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.ref != 'refs/heads/main'
+        with:
+          tool: "customSmallerIsBetter"
+          output-file-path: benchmark/results/all.json
+          external-data-json-path: ./cache/benchmark-data.json
+          alert-threshold: "20%"
+          fail-threshold: "200%"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-on-alert: true
+          summary-always: true
+      - name: Publish benchmark results
+        if: github.ref == 'refs/heads/main'
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: "GodotXterm Benchmarks"
+          tool: "customSmallerIsBetter"
+          output-file-path: benchmark/results/all.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          gh-pages-branch: stable
+          benchmark-data-dir-path: docs/dev/bench
+          auto-push: true
+
   merge-artifacts:
     name: Merge Artifacts
     runs-on: ubuntu-latest
