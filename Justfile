@@ -32,3 +32,12 @@ test-visual:
 
 uninstall:
     {{godot}} --headless -s plug.gd uninstall
+
+bench name="":
+    @if [ "{{name}}" = "editor_launch" ]; then \
+        ./benchmark/editor_launch.sh {{godot}}; \
+    elif [ -n "{{name}}" ]; then \
+        {{godot}} --windowed --resolution 800x600 --position 0,0 benchmark/benchmark.tscn -- --benchmark={{name}}; \
+    else \
+        ls -1 benchmark/vtebench/benchmarks | xargs -I {} just bench {} && just bench editor_launch; \
+    fi

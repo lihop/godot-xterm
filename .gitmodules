@@ -10,3 +10,6 @@
 [submodule "addons/godot_xterm/native/thirdparty/node-pty"]
 	path = addons/godot_xterm/native/thirdparty/node-pty
 	url = https://github.com/microsoft/node-pty
+[submodule "benchmark/vtebench"]
+	path = benchmark/vtebench
+	url = git@github.com:alacritty/vtebench
