@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <godot_cpp/classes/control.hpp>
+#include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/font.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/input.hpp>
@@ -21,10 +22,6 @@
 #include <godot_cpp/classes/theme_db.hpp>
 #include <libtsm.h>
 #include <xkbcommon/xkbcommon-keysyms.h>
-
-#if defined(__linux)
-#include <godot_cpp/classes/display_server.hpp>
-#endif
 
 #define SHADERS_DIR "res://addons/godot_xterm/shaders/"
 #define FOREGROUND_SHADER_PATH SHADERS_DIR "foreground.gdshader"
