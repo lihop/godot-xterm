@@ -184,12 +184,9 @@ namespace godot
 
     void _handle_mouse_wheel(Ref<InputEventMouseButton> event);
 
-    enum SelectionMode { NONE, POINTER };
     bool selecting = false;
-    SelectionMode selection_mode = SelectionMode::NONE;
-    Timer *selection_timer;
+    Vector2i selection_last_point;
     void _handle_selection(Ref<InputEventMouse> event);
-    void _on_selection_held();
 
     typedef std::function<int(struct tsm_screen*, char**)> ScreenCopyFunction;
     String _copy_screen(ScreenCopyFunction func);
