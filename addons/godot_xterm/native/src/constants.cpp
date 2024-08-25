@@ -141,6 +141,7 @@ const Terminal::KeyMap Terminal::KEY_MAP = {
     {{KEY_QUESTION, '?'}, XKB_KEY_question},
 
     {{KEY_HOME, '\0'}, XKB_KEY_Home},
+    {{KEY_END, '\0'}, XKB_KEY_End},
     {{KEY_BACKSPACE, '\0'}, XKB_KEY_BackSpace},
     {{KEY_BACKTAB, '\0'}, XKB_KEY_ISO_Left_Tab},
     {{KEY_CLEAR, '\0'}, XKB_KEY_Clear},
