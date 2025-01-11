@@ -59,7 +59,7 @@ jobs:
           - platform: web
             os: ubuntu-22.04
           - platform: macos
-            os: macos-12
+            os: macos-15
           - platform: windows
             os: windows-2022
         exclude:
@@ -248,7 +248,7 @@ jobs:
           - platform: linux
             os: ubuntu-22.04
           - platform: macos
-            os: macos-12
+            os: macos-15
           - platform: windows
             os: windows-2022
     steps:
