@@ -52,3 +52,4 @@ docs/_build
 
 # Other ignores
 .env
+node_modules/

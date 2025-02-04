@@ -1,6 +1,6 @@
 # Themes
 
-This section explains how you can go about themeing the {{Terminal}} node.
+This section explains how you can go about theming the {{Terminal}} node.
 
 ## Default
 
