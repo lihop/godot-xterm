@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1745752244634,
+  "lastUpdate": 1745839657584,
   "repoUrl": "https://github.com/lihop/godot-xterm",
   "entries": {
     "GodotXterm Benchmarks": [
@@ -21325,6 +21325,193 @@ window.BENCHMARK_DATA = {
           {
             "name": "unicode - render gpu",
             "value": 1515,
+            "unit": "milliseconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Leroy Hopson",
+            "username": "lihop",
+            "email": "git@leroy.geek.nz"
+          },
+          "committer": {
+            "name": "Leroy Hopson",
+            "username": "lihop",
+            "email": "git@leroy.geek.nz"
+          },
+          "id": "89f92f9c1e27213d1de4eeb5929d9d1e7c410684",
+          "message": "fix(ci): update dockerfile\n\nUse correct URL to get python 3.7 version of pip.",
+          "timestamp": "2025-01-11T22:09:04Z",
+          "url": "https://github.com/lihop/godot-xterm/commit/89f92f9c1e27213d1de4eeb5929d9d1e7c410684"
+        },
+        "date": 1745839656226,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "cursor_motion",
+            "value": 72.23,
+            "unit": "milliseconds",
+            "range": "± 17.84"
+          },
+          {
+            "name": "cursor_motion - render cpu",
+            "value": 8.723,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "cursor_motion - render gpu",
+            "value": 2098,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "dense_cells",
+            "value": 104.3,
+            "unit": "milliseconds",
+            "range": "± 26.08"
+          },
+          {
+            "name": "dense_cells - render cpu",
+            "value": 9.133,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "dense_cells - render gpu",
+            "value": 2235,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "editor_launch",
+            "value": 11.08,
+            "unit": "seconds"
+          },
+          {
+            "name": "light_cells",
+            "value": 79.74,
+            "unit": "milliseconds",
+            "range": "± 5.21"
+          },
+          {
+            "name": "light_cells - render cpu",
+            "value": 7.332,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "light_cells - render gpu",
+            "value": 1908,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling",
+            "value": 468.2,
+            "unit": "milliseconds",
+            "range": "± 13.46"
+          },
+          {
+            "name": "scrolling - render cpu",
+            "value": 6.793,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling - render gpu",
+            "value": 3249,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region",
+            "value": 464.7,
+            "unit": "milliseconds",
+            "range": "± 17.12"
+          },
+          {
+            "name": "scrolling_bottom_region - render cpu",
+            "value": 6.404,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region - render gpu",
+            "value": 3205,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_small_region",
+            "value": 458,
+            "unit": "milliseconds",
+            "range": "± 15.95"
+          },
+          {
+            "name": "scrolling_bottom_small_region - render cpu",
+            "value": 7.256,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_small_region - render gpu",
+            "value": 3142,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen",
+            "value": 86.36,
+            "unit": "milliseconds",
+            "range": "± 7.98"
+          },
+          {
+            "name": "scrolling_fullscreen - render cpu",
+            "value": 7.072,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen - render gpu",
+            "value": 1645,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region",
+            "value": 461,
+            "unit": "milliseconds",
+            "range": "± 14.96"
+          },
+          {
+            "name": "scrolling_top_region - render cpu",
+            "value": 6.836,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region - render gpu",
+            "value": 3205,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region",
+            "value": 467.9,
+            "unit": "milliseconds",
+            "range": "± 17.64"
+          },
+          {
+            "name": "scrolling_top_small_region - render cpu",
+            "value": 7.707,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region - render gpu",
+            "value": 3195,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode",
+            "value": 96.15,
+            "unit": "milliseconds",
+            "range": "± 51.48"
+          },
+          {
+            "name": "unicode - render cpu",
+            "value": 6.573,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode - render gpu",
+            "value": 1533,
             "unit": "milliseconds"
           }
         ]
