@@ -1,5 +1,6 @@
 extends "res://addons/gut/test.gd"
 
+
 class BaseTest:
 	extends "res://addons/gut/test.gd"
 
