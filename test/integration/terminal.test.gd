@@ -10,6 +10,7 @@ func before_each():
 
 
 func test_bell() -> void:
+	watch_signals(terminal)
 	terminal.bell_cooldown = 0
 	terminal.write(char(7))
 	terminal.write(char(0x07))
@@ -42,8 +43,8 @@ class TestTheme:
 
 	const TestScene := preload("../scenes/theme.tscn")
 
-	const default_theme := preload("res://addons/godot_xterm/themes/default.tres")
-	const alt_theme := preload("res://addons/godot_xterm/themes/default_light.tres")
+	const default_theme := preload("res://addons/godot_xterm/themes/default_green.tres")
+	const alt_theme := preload("res://addons/godot_xterm/themes/default_white.tres")
 
 	const COLORS := [
 		"ansi_0_color",

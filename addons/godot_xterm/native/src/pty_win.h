@@ -8,7 +8,7 @@
 
 namespace godot
 {
-  class PTYUnix
+  class PTYWin
   {
   public:
     static Dictionary fork(
@@ -29,8 +29,13 @@ namespace godot
         const int &p_rows);
 
     static void resize(
-        const int &p_fd,
+        int64_t p_hpc,
         const int &p_cols,
         const int &p_rows);
+
+    static void close(
+        uint64_t hpc,
+        int fd,
+        int fd_out);
   };
 } // namespace godot

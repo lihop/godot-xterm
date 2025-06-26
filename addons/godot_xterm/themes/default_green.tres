@@ -1,0 +1,58 @@
+[gd_resource type="Theme" load_steps=4 format=3 uid="uid://dtpro3m7sdgvg"]
+
+[ext_resource type="Script" path="res://addons/godot_xterm/resources/xrdb_theme.gd" id="1"]
+[ext_resource type="FontFile" uid="uid://c51gnbjamppg" path="res://addons/godot_xterm/themes/fonts/jet_brains_mono/jet_brains_mono_nl-regular-2.304.ttf" id="2"]
+
+[sub_resource type="FontFile" id="FontFile_tdf0u"]
+fallbacks = Array[Font]([ExtResource("2")])
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
+cache/0/16/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/16/0/kerning_overrides/11/0 = Vector2(0, 0)
+cache/0/16/0/kerning_overrides/14/0 = Vector2(0, 0)
+cache/0/11/0/ascent = 0.0
+cache/0/11/0/descent = 0.0
+cache/0/11/0/underline_position = 0.0
+cache/0/11/0/underline_thickness = 0.0
+cache/0/11/0/scale = 1.0
+cache/0/11/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/11/0/kerning_overrides/11/0 = Vector2(0, 0)
+cache/0/11/0/kerning_overrides/14/0 = Vector2(0, 0)
+cache/0/14/0/ascent = 0.0
+cache/0/14/0/descent = 0.0
+cache/0/14/0/underline_position = 0.0
+cache/0/14/0/underline_thickness = 0.0
+cache/0/14/0/scale = 1.0
+cache/0/14/0/kerning_overrides/16/0 = Vector2(0, 0)
+cache/0/14/0/kerning_overrides/11/0 = Vector2(0, 0)
+cache/0/14/0/kerning_overrides/14/0 = Vector2(0, 0)
+
+[resource]
+Terminal/colors/ansi_0_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_10_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_11_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_12_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_13_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_14_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_15_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_1_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_2_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_3_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_4_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_5_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_6_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_7_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_8_color = Color(0, 1, 0.4, 1)
+Terminal/colors/ansi_9_color = Color(0, 1, 0.4, 1)
+Terminal/colors/background_color = Color(0.156863, 0.156863, 0.156863, 1)
+Terminal/colors/cursor = Color(0, 1, 0.4, 1)
+Terminal/colors/foreground_color = Color(0, 1, 0.4, 1)
+Terminal/font_sizes/font_size = 14
+Terminal/fonts/bold_font = null
+Terminal/fonts/bold_italics_font = null
+Terminal/fonts/italics_font = null
+Terminal/fonts/normal_font = SubResource("FontFile_tdf0u")
+script = ExtResource("1")
