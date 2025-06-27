@@ -189,10 +189,9 @@ Dictionary PTYWin::open(
 
 void PTYWin::close(uint64_t hpc, int fd, int fd_out)
 {
-    ClosePseudoConsole(reinterpret_cast<HPCON>(hpc));
-
     // TODO(ast) this causes assertion errors. Might be related to this: https://stackoverflow.com/questions/5984144/assertion-error-in-crt-calling-osfile-in-vs-2008
     // TODO(ast) leave for now and return when the linking issues are figured out (see SConstruct file)
+    // ClosePseudoConsole(reinterpret_cast<HPCON>(hpc));
     // // Drain remaining data
     // char drain_buf[4096];
     // int bytes_read = 0;
