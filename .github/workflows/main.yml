@@ -356,6 +356,7 @@ jobs:
         run: godot --editor --headless --quit-after 100 || true
       - name: Wait for build
         uses: fountainhead/action-wait-for-check@v1.2.0
+        id: wait-for-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: "Build (linux, x86_64, release) #${{ github.run_number }}"
@@ -366,6 +367,7 @@ jobs:
           path: addons/godot_xterm/native/bin
           merge-multiple: true
       - name: Benchmark
+        if: steps.wait-for-build.outputs.conclusion == 'success'
         shell: bash
         run: just bench ${{matrix.benchmark}}
       - name: Upload results
