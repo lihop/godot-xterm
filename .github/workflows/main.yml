@@ -136,6 +136,10 @@ jobs:
           BITS: ${{ matrix.arch == 'x86_64' && 64 || 32 }}
         run: |
           cd addons/godot_xterm/native/thirdparty/libuv
+          # Clean only CMake configuration files to avoid stale cache issues
+          mkdir -p build
+          rm -f build/CMakeCache.txt
+          rm -rf build/CMakeFiles
           args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
           if [ "$TARGET" == "release" ]; then
@@ -146,7 +150,6 @@ jobs:
           if [ "$BITS" -eq 32 -a "$PLATFORM" == "windows" ]; then
             cmake -G "Visual Studio 17 2022" -A Win32 -S $(pwd) -B "build" $args
           else
-            mkdir build || true
             cd build
             if [ "$BITS" -eq 32 ]; then args="$args -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32"; fi
             cmake .. $args
