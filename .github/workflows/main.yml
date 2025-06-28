@@ -406,7 +406,7 @@ jobs:
           tool: "customSmallerIsBetter"
           output-file-path: benchmark/results/all.json
           external-data-json-path: ./cache/benchmark-data.json
-          alert-threshold: "20%"
+          alert-threshold: "120%"
           fail-threshold: "200%"
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-on-alert: true
