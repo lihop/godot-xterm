@@ -2,6 +2,7 @@ name: "Build and Test"
 
 on:
   push:
+  pull_request:
   schedule: # Build and test daily.
     - cron: 0 11 * * *
 
