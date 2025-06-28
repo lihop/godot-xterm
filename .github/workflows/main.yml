@@ -356,10 +356,16 @@ jobs:
         run: godot --editor --headless --quit-after 100 || true
       - name: Wait for build
         uses: fountainhead/action-wait-for-check@v1.2.0
+        id: wait-for-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: "Build (linux, x86_64, release) #${{ github.run_number }}"
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Fail if build failed
+        if: ${{ steps.wait-for-build.outputs.conclusion != 'success' }}
+        run: |
+          echo "Build failed, can't benchmark!"
+          exit 1
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
