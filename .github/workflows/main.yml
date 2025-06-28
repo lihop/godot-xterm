@@ -210,10 +210,12 @@ jobs:
       - name: Export for web
         shell: bash
         run: godot --no-window --export-release Web
-      - name: NPM cache
-        uses: c-hive/gha-npm-cache@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          directory: test/web
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: test/web/package-lock.json
       - name: Smoke test Web export
         shell: bash
         working-directory: test/web
