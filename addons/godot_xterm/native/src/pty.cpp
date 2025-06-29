@@ -321,12 +321,20 @@ void PTY::write(const Variant &data) const
 
     if (status == STATUS_OPEN)
     {
+        #if defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
         uv_buf_t buf;
         buf.base = (char *)bytes.ptr();
         buf.len = bytes.size();
         uv_write_t *req = (uv_write_t *)malloc(sizeof(uv_write_t));
         req->data = (void *)buf.base;
+        #endif
+
+        #if defined(__linux__) || defined(__APPLE__)
+        uv_write(req, (uv_stream_t *)&pipe, &buf, 1, _write_cb);
+        #elif defined(_WIN32)
         uv_write(req, (uv_stream_t *)&pipe_out, &buf, 1, _write_cb);
+        #endif
+        
         uv_run((uv_loop_t *)&loop, UV_RUN_NOWAIT);
     }
 }
@@ -400,15 +408,15 @@ void PTY::_close()
         uv_loop_close(&loop);
     }
 
-#ifdef _WIN32
-    PTYWin::close(hpc, fd, fd_out);
-    fd_out = -1;
-    hpc = -1;
-#else
+#if defined(__linux__) || defined(__APPLE__)
     if (fd > 0)
         close(fd);
     if (pid > 0)
         kill(IPCSIGNAL_SIGHUP);
+#elif defined(_WIN32)
+    PTYWin::close(hpc, fd, fd_out);
+    fd_out = -1;
+    hpc = -1;
 #endif
 
     fd = -1;

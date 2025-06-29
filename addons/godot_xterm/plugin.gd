@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-var pty_supported := OS.get_name() in ["Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD", "macOS"]
+var pty_supported := OS.get_name() in ["Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD", "macOS", "Windows"]
 var asciicast_import_plugin
 var xrdb_import_plugin
 var terminal_panel: Control
