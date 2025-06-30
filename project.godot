@@ -12,7 +12,7 @@ config_version=5
 
 config/name="GodotXterm"
 run/main_scene="res://examples/menu/menu.tscn"
-config/features=PackedStringArray("4.2")
+config/features=PackedStringArray("4.4")
 config/icon="res://docs/_static/images/icon.png"
 
 [display]

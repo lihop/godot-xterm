@@ -34,6 +34,7 @@
 /LICENSE.md export-ignore
 /misc export-ignore
 /plug.gd export-ignore
+/plug.gd.uid export-ignore
 /.plugged export-ignore
 /.pre-commit-config.yaml export-ignore
 /project.godot export-ignore
