@@ -3,7 +3,6 @@
 ci:
   autofix_commit_msg: "fix: auto fixes"
   autoupdate_commit_msg: "chore: autoupdate"
-exclude: "^addons/gut/"
 repos:
   - repo: https://github.com/lihop/setup-godot
     rev: hooks-v1.0.0-alpha.1
@@ -19,10 +18,9 @@ repos:
     hooks:
       - id: prettier
   - repo: https://github.com/Scony/godot-gdscript-toolkit
-    rev: 4.2.2
+    rev: 4.3.4
     hooks:
       - id: gdformat
-        exclude: "^addons/gut/"
   - repo: https://github.com/codespell-project/codespell
     rev: v2.2.6
     hooks:
