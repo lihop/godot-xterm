@@ -73,19 +73,26 @@ Dictionary PTYWin::fork(
     // args
     PackedStringArray argv_ = p_args;
 
-    // env
+    // env block (see: https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessa)
     PackedStringArray env_ = p_env;
     int envc = env_.size();
-    std::unique_ptr<char *, DelBuf> env_unique_ptr(new char *[envc + 1], DelBuf(envc + 1));
-    char **env = env_unique_ptr.get();
-    env[envc] = NULL;
-    for (int i = 0; i < envc; i++)
-    {
+    // Calculate total size needed
+    size_t total_size = 1; // 1 for the block null terminator
+    for (int i = 0; i < envc; i++) {
         std::string pair = env_[i].utf8().get_data();
-        env[i] = strdup(pair.c_str());
+        total_size += pair.size() + 1; // +1 for string null terminator
     }
+    std::unique_ptr<char[]> env_block(new char[total_size]);
+    size_t offset = 0;
+    for (int i = 0; i < envc; i++) {
+        std::string pair = env_[i].utf8().get_data();
+        memcpy(env_block.get() + offset, pair.c_str(), pair.size() + 1); // +1 for string null terminator
+        offset += pair.size() + 1;
+    }
+    env_block.get()[offset++] = '\0'; // block null terminator
+    char *env = env_block.get();
 
-    std::string cwd_ = p_cwd.utf8().get_data();
+    const char *cwd_ = p_cwd.utf8().get_data();
 
     // Determine required size of Pseudo Console
     COORD winp{};
@@ -97,26 +104,12 @@ Dictionary PTYWin::fork(
 
     std::string helper_path = p_helper_path.utf8().get_data();
 
-    // Build argv
-    int argc = argv_.size();
-    int argl = argc + 2;
-    std::unique_ptr<char *, DelBuf> argv_unique_ptr(new char *[argl], DelBuf(argl));
-    char **argv = argv_unique_ptr.get();
-    argv[0] = strdup(file.c_str());
-    argv[argl - 1] = NULL;
-    for (int i = 0; i < argc; i++)
+    // Aggregate file and args into command string
+    std::string cmd = file;
+    for (int i = 0; i < argv_.size(); i++)
     {
-        std::string arg = argv_[i].utf8().get_data();
-        argv[i + 1] = strdup(arg.c_str());
-    }
-
-    // Aggregate argv into command string
-    std::string cmd;
-    for (int i = 0; i < argl - 1; i++)
-    {
-        if (i > 0)
-            cmd += " ";
-        cmd += argv[i];
+        cmd += " ";
+        cmd += argv_[i].utf8().get_data();
     }
     LPSTR lpcmd = const_cast<char *>(cmd.c_str());
 
@@ -150,8 +143,8 @@ Dictionary PTYWin::fork(
               NULL,                         // Thread handle not inheritable
               FALSE,                        // Inherit handles
               EXTENDED_STARTUPINFO_PRESENT, // Creation flags
-              NULL,                         // Use parent's environment block
-              NULL,                         // Use parent's starting directory
+              env,                          
+              cwd_,                         
               &startupInfo.StartupInfo,     // Pointer to STARTUPINFO
               &pi)                          // Pointer to PROCESS_INFORMATION
               ? S_OK

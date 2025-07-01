@@ -458,7 +458,6 @@ Dictionary PTY::_get_fork_env() const
 #endif
 
     // TODO This might need windows specific adjustment
-    return env;
     Dictionary os_env;
     uv_env_item_t *uv_env;
     int count;
