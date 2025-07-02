@@ -31,11 +31,12 @@ elif env['platform'] == 'windows':
 	env.Append(LIBS=['ws2_32.lib', 'Advapi32', 'User32', 'Userenv', 'iphlpapi'])
 	if env["target"] == "template_release":
 		env.Append(LIBS=[env.File('thirdparty/libuv/build/Release/uv_a.lib')])
+		# TODO(ast) this is a bandaid fix (see https://stackoverflow.com/questions/3007312/resolving-lnk4098-defaultlib-msvcrt-conflicts-with)
+		env.Append(LINKFLAGS=['/VERBOSE:LIB', '/NODEFAULTLIB:libcmtd.lib', '/NODEFAULTLIB:libcmt.lib', '/NODEFAULTLIB:msvcrtd.lib'])
 	else:
 		env.Append(LIBS=[env.File('thirdparty/libuv/build/Debug/uv_a.lib')])
-	# TODO(ast) this is a bandaid fix (see https://stackoverflow.com/questions/3007312/resolving-lnk4098-defaultlib-msvcrt-conflicts-with)
-	# TODO(ast) a release build needs to use msvcrt instead of msvcrtd
-	env.Append(LINKFLAGS=['/VERBOSE:LIB', '/NODEFAULTLIB:libcmtd.lib', '/NODEFAULTLIB:libcmt.lib', '/NODEFAULTLIB:msvcrt.lib'])
+		# TODO(ast) this is a bandaid fix (see https://stackoverflow.com/questions/3007312/resolving-lnk4098-defaultlib-msvcrt-conflicts-with)
+		env.Append(LINKFLAGS=['/VERBOSE:LIB', '/NODEFAULTLIB:libcmtd.lib', '/NODEFAULTLIB:libcmt.lib', '/NODEFAULTLIB:msvcrt.lib'])
 else:
 	env.Append(CPPDEFINES=['_PTY_DISABLED'])
 
