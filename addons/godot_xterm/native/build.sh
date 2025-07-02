@@ -1,8 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
 # SPDX-FileCopyrightText: 2020-2023 Leroy Hopson <godot-xterm@leroy.geek.nz>
 # SPDX-License-Identifier: MIT
 
+# Convenience function to keep the terminal open on failure in some terminals
+function fail () {
+   echo "Failure!"
+   read -p "Press any key to continue" x
+   exit 1
+}
+
+set -x
 set -e
 
 # Parse args.
@@ -27,8 +35,10 @@ done
 target=${target:-template_debug}
 if [ "$target" == "template_debug" ]; then
     debug_symbols="yes"
+    uv_target="debug"
 else
     debug_symbols="no"
+    uv_target="release"
 fi
 nproc=$(nproc || sysctl -n hw.ncpu)
 
@@ -52,6 +62,7 @@ updateSubmodules() {
 	fi
 }
 
+# TODO libtsm causes warnings due to usage of nonstandard \e escape sequence. could be replaced with standard \033 or \x1b if this causes issues
 updateSubmodules LIBUV_DIR ${NATIVE_DIR}/thirdparty/libuv
 updateSubmodules LIBTSM_DIR ${NATIVE_DIR}/thirdparty/libtsm
 updateSubmodules GODOT_CPP_DIR ${NATIVE_DIR}/thirdparty/godot-cpp
@@ -60,23 +71,26 @@ updateSubmodules GODOT_CPP_DIR ${NATIVE_DIR}/thirdparty/godot-cpp
 cd ${LIBUV_DIR}
 mkdir build || true
 cd build
-args="-DCMAKE_BUILD_TYPE=$target -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+args="-DCMAKE_BUILD_TYPE=$uv_target -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
 	-DCMAKE_OSX_ARCHITECTURES=$(uname -m)"
 if [ "$target" == "template_release" ]; then
 	args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
 else
 	args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"
 fi
-cmake .. $args
+cmake .. $args || fail
 cd ..
-cmake --build build --config $target -j$nproc
+cmake --build build --config $uv_target -j$nproc || fail
 
 # Build libgodot-xterm.
 cd ${NATIVE_DIR}
-scons target=$target arch=$(uname -m) debug_symbols=$debug_symbols
+scons target=$target arch=$(uname -m) debug_symbols=$debug_symbols || fail
 
 # Use Docker to build libgodot-xterm javascript.
 #if [ -x "$(command -v docker-compose)" ]; then
 #	UID_GID="0:0" TARGET=$target docker-compose build javascript
 #	UID_GID="$(id -u):$(id -g)" TARGET=$target docker-compose run --rm javascript
 #fi
+
+echo "Done!"
+read -p "Press any key to exit" x
