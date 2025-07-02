@@ -27,7 +27,7 @@ sources.append([
 
 if env['platform'] == 'linux' or env['platform'] == 'macos':
 	env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
-elif env['platform'] == 'windows':
+elif env['platform'] == 'windows' and (env['arch'] == 'x86_64' or env['arch'] == 'amd64'):
 	env.Append(LIBS=['ws2_32.lib', 'Advapi32', 'User32', 'Userenv', 'iphlpapi'])
 	if env["target"] == "template_release":
 		env.Append(LIBS=[env.File('thirdparty/libuv/build/Release/uv_a.lib')])
