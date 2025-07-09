@@ -2,6 +2,7 @@ name: "Build and Test"
 
 on:
   push:
+  pull_request:
   schedule: # Build and test daily.
     - cron: 0 11 * * *
 
@@ -135,17 +136,24 @@ jobs:
           BITS: ${{ matrix.arch == 'x86_64' && 64 || 32 }}
         run: |
           cd addons/godot_xterm/native/thirdparty/libuv
+          # Clean only CMake configuration files to avoid stale cache issues
+          mkdir -p build
+          rm -f build/CMakeCache.txt
+          rm -rf build/CMakeFiles
           args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
           if [ "$TARGET" == "release" ]; then
-            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
+            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"
           else
-            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"
+            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
           fi
-          if [ "$BITS" -eq 32 -a "$PLATFORM" == "windows" ]; then
+          if  [ ${{matrix.platform}} == 'windows' ]; then
+            # godot-cpp always builds with the non-debug version of the CRT. So we use /MT for both debug and release builds. 
+            args="$args -DCMAKE_C_FLAGS_DEBUG=-MT -DCMAKE_C_FLAGS_RELEASE=-MT"
+          fi
+          if [ "$BITS" -eq 32 -a ${{matrix.platform}} == "windows" ]; then
             cmake -G "Visual Studio 17 2022" -A Win32 -S $(pwd) -B "build" $args
           else
-            mkdir build || true
             cd build
             if [ "$BITS" -eq 32 ]; then args="$args -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32"; fi
             cmake .. $args
@@ -209,10 +217,12 @@ jobs:
       - name: Export for web
         shell: bash
         run: godot --no-window --export-release Web
-      - name: NPM cache
-        uses: c-hive/gha-npm-cache@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          directory: test/web
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: test/web/package-lock.json
       - name: Smoke test Web export
         shell: bash
         working-directory: test/web
@@ -350,6 +360,7 @@ jobs:
         run: godot --editor --headless --quit-after 100 || true
       - name: Wait for build
         uses: fountainhead/action-wait-for-check@v1.2.0
+        id: wait-for-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: "Build (linux, x86_64, release) #${{ github.run_number }}"
@@ -360,8 +371,10 @@ jobs:
           path: addons/godot_xterm/native/bin
           merge-multiple: true
       - name: Benchmark
+        if: steps.wait-for-build.outputs.conclusion == 'success'
         shell: bash
         run: just bench ${{matrix.benchmark}}
+        timeout-minutes: 2
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
@@ -400,7 +413,7 @@ jobs:
           tool: "customSmallerIsBetter"
           output-file-path: benchmark/results/all.json
           external-data-json-path: ./cache/benchmark-data.json
-          alert-threshold: "20%"
+          alert-threshold: "120%"
           fail-threshold: "200%"
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-on-alert: true

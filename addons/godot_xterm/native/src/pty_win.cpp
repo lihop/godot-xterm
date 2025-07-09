@@ -182,26 +182,21 @@ Dictionary PTYWin::open(
 
 void PTYWin::close(uint64_t hpc, int fd, int fd_out)
 {
-    // TODO(ast) this causes assertion errors. Might be related to this: https://stackoverflow.com/questions/5984144/assertion-error-in-crt-calling-osfile-in-vs-2008
-    // TODO(ast) leave for now and return when the linking issues are figured out (see SConstruct file)
-    // ClosePseudoConsole(reinterpret_cast<HPCON>(hpc));
-    // // Drain remaining data
-    // char drain_buf[4096];
-    // int bytes_read = 0;
+    ClosePseudoConsole(reinterpret_cast<HPCON>(hpc));
+    // Drain remaining data
+    char drain_buf[4096];
+    int bytes_read = 0;
 
-    // // Check if fd is valid before reading
-    // if (fd >= 0) {
-    //     do {
-    //         bytes_read = read(fd, drain_buf, sizeof(drain_buf));
-    //     } while (bytes_read > 0);
-    //     godot::UtilityFunctions::print("Draining!");
-    // } else {
-    //     godot::UtilityFunctions::print("fd is not valid, skipping drain.");
-    // }
+    // Check if fd is valid before reading
+    if (fd >= 0) {
+        do {
+            bytes_read = read(fd, drain_buf, sizeof(drain_buf));
+        } while (bytes_read > 0);
+    }
 
-    // // Optionally close file descriptors if they are valid
-    // if (fd >= 0) _close(fd);
-    // if (fd_out >= 0) _close(fd_out);
+    // Optionally close file descriptors if they are valid
+    if (fd >= 0) _close(fd);
+    if (fd_out >= 0) _close(fd_out);
 }
 
 // TODO(ast) repeatedly resizing sometimes crashes the terminal

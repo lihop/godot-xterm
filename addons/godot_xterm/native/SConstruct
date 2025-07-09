@@ -27,19 +27,16 @@ sources.append([
 
 if env['platform'] == 'linux' or env['platform'] == 'macos':
 	env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
-elif env['platform'] == 'windows' and (env['arch'] == 'x86_64' or env['arch'] == 'amd64'):
+elif env['platform'] == 'windows':
+	# godot-cpp always builds with the non-debug version of the CRT. So we use /MT for both debug and release builds. 
+	env.Append(CCFLAGS=["-MT"])
 	env.Append(LIBS=['ws2_32.lib', 'Advapi32', 'User32', 'Userenv', 'iphlpapi'])
 	if env["target"] == "template_release":
 		env.Append(LIBS=[env.File('thirdparty/libuv/build/Release/uv_a.lib')])
-		# TODO(ast) this is a bandaid fix (see https://stackoverflow.com/questions/3007312/resolving-lnk4098-defaultlib-msvcrt-conflicts-with)
-		env.Append(LINKFLAGS=['/VERBOSE:LIB', '/NODEFAULTLIB:libcmtd.lib', '/NODEFAULTLIB:libcmt.lib', '/NODEFAULTLIB:msvcrtd.lib'])
 	else:
 		env.Append(LIBS=[env.File('thirdparty/libuv/build/Debug/uv_a.lib')])
-		# TODO(ast) this is a bandaid fix (see https://stackoverflow.com/questions/3007312/resolving-lnk4098-defaultlib-msvcrt-conflicts-with)
-		env.Append(LINKFLAGS=['/VERBOSE:LIB', '/NODEFAULTLIB:libcmtd.lib', '/NODEFAULTLIB:libcmt.lib', '/NODEFAULTLIB:msvcrt.lib'])
 else:
 	env.Append(CPPDEFINES=['_PTY_DISABLED'])
-
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
