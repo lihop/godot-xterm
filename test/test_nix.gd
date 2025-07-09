@@ -96,7 +96,7 @@ func test_emits_exit_code_on_failure():
 func test_emits_exited_on_kill():
 	subject.call("fork", "yes")
 	await wait_frames(1)
-	subject.call_deferred("kill", PTY.SIGNAL_SIGKILL)
+	subject.call_deferred("kill", PTY.IPCSIGNAL_SIGKILL)
 	await wait_for_signal(subject.exited, 1)
 	assert_signal_emitted(subject, "exited")
 
@@ -104,9 +104,9 @@ func test_emits_exited_on_kill():
 func test_emits_exited_with_signal():
 	subject.call("fork", "yes")
 	await wait_frames(1)
-	subject.call_deferred("kill", PTY.SIGNAL_SIGSEGV)
+	subject.call_deferred("kill", PTY.IPCSIGNAL_SIGSEGV)
 	await wait_for_signal(subject.exited, 1)
-	assert_signal_emitted_with_parameters(subject, "exited", [0, PTY.SIGNAL_SIGSEGV])
+	assert_signal_emitted_with_parameters(subject, "exited", [0, PTY.IPCSIGNAL_SIGSEGV])
 
 
 # Run the same tests, but with use_threads = false.
@@ -189,7 +189,7 @@ class TestPTYSize:
 		await wait_for_signal(subject.data_received, 1)
 
 	func after_each():
-		subject.call_deferred("kill", PTY.SIGNAL_SIGHUP)
+		subject.call_deferred("kill", PTY.IPCSIGNAL_SIGHUP)
 		await wait_for_signal(subject.exited, 1)
 
 	func test_pty_default_size():

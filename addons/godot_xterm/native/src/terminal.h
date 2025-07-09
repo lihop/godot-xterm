@@ -27,7 +27,8 @@ namespace godot
   private:
     typedef std::map<std::pair<Key, char32_t>, uint32_t> KeyMap;
 
-    enum FontType {
+    enum FontType
+    {
       NORMAL,
       BOLD,
       ITALICS,
@@ -37,6 +38,7 @@ namespace godot
     static const char *COLOR_NAMES[18];
     static const char *FONT_TYPES[4];
     static const KeyMap KEY_MAP;
+
   public:
     enum AttrFlag
     {
@@ -45,7 +47,8 @@ namespace godot
       CURSOR = 1 << 2,
     };
 
-    enum InverseMode {
+    enum InverseMode
+    {
       INVERSE_MODE_INVERT,
       INVERSE_MODE_SWAP,
     };
@@ -89,6 +92,7 @@ namespace godot
     String write(const Variant data);
 
     void _gui_input(const Ref<InputEvent> &event) override;
+
   protected:
     static void _bind_methods();
 
@@ -123,7 +127,7 @@ namespace godot
     // This can be useful in cases where the bell character is being written too
     // frequently such as `while true; do echo -e "\a"; done`.
     double bell_cooldown;
-    Timer* bell_timer;
+    Timer *bell_timer;
     static void _bell_cb(struct tsm_vte *vte, void *data);
 
     static int _draw_cb(struct tsm_screen *con, uint64_t id, const uint32_t *ch,
@@ -184,14 +188,18 @@ namespace godot
 
     void _handle_mouse_wheel(Ref<InputEventMouseButton> event);
 
-    enum SelectionMode { NONE, POINTER };
+    enum SelectionMode
+    {
+      NONE,
+      POINTER
+    };
     bool selecting = false;
     SelectionMode selection_mode = SelectionMode::NONE;
     Timer *selection_timer;
     void _handle_selection(Ref<InputEventMouse> event);
     void _on_selection_held();
 
-    typedef std::function<int(struct tsm_screen*, char**)> ScreenCopyFunction;
+    typedef std::function<int(struct tsm_screen *, char **)> ScreenCopyFunction;
     String _copy_screen(ScreenCopyFunction func);
 
     void set_default_theme_items();

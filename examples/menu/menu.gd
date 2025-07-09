@@ -145,17 +145,6 @@ func _on_Terminal_key_pressed(data: String, event: InputEventKey) -> void:
 				$Terminal.grab_focus()
 				scene.queue_free()
 			"Terminal":
-				if OS.get_name() == "Windows":
-					OS.call_deferred(
-						"alert",
-						(
-							"Psuedoterminal node currently"
-							+ " uses pty.h but needs to use either winpty or conpty"
-							+ " to work on Windows."
-						),
-						"Terminal not Supported on Windows"
-					)
-					return
 				var scene = item.scene.instantiate()
 				var pty = scene if OS.has_feature("web") else scene.get_node("PTY")
 				add_child(scene)

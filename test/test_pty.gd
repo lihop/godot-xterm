@@ -64,18 +64,18 @@ class TestInterface:
 	# Enums.
 
 	func test_has_enum_signal():
-		assert_eq(described_class.SIGNAL_SIGHUP, 1)
-		assert_eq(described_class.SIGNAL_SIGINT, 2)
-		assert_eq(described_class.SIGNAL_SIGQUIT, 3)
-		assert_eq(described_class.SIGNAL_SIGILL, 4)
-		assert_eq(described_class.SIGNAL_SIGTRAP, 5)
-		assert_eq(described_class.SIGNAL_SIGABRT, 6)
-		assert_eq(described_class.SIGNAL_SIGFPE, 8)
-		assert_eq(described_class.SIGNAL_SIGKILL, 9)
-		assert_eq(described_class.SIGNAL_SIGSEGV, 11)
-		assert_eq(described_class.SIGNAL_SIGPIPE, 13)
-		assert_eq(described_class.SIGNAL_SIGALRM, 14)
-		assert_eq(described_class.SIGNAL_SIGTERM, 15)
+		assert_eq(described_class.IPCSIGNAL_SIGHUP, 1)
+		assert_eq(described_class.IPCSIGNAL_SIGINT, 2)
+		assert_eq(described_class.IPCSIGNAL_SIGQUIT, 3)
+		assert_eq(described_class.IPCSIGNAL_SIGILL, 4)
+		assert_eq(described_class.IPCSIGNAL_SIGTRAP, 5)
+		assert_eq(described_class.IPCSIGNAL_SIGABRT, 6)
+		assert_eq(described_class.IPCSIGNAL_SIGFPE, 8)
+		assert_eq(described_class.IPCSIGNAL_SIGKILL, 9)
+		assert_eq(described_class.IPCSIGNAL_SIGSEGV, 11)
+		assert_eq(described_class.IPCSIGNAL_SIGPIPE, 13)
+		assert_eq(described_class.IPCSIGNAL_SIGALRM, 14)
+		assert_eq(described_class.IPCSIGNAL_SIGTERM, 15)
 
 	## Other tests.
 

@@ -34,9 +34,9 @@ using namespace godot;
 
 void Terminal::_bind_methods()
 {
-    ADD_SIGNAL(MethodInfo("data_sent", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
-    ADD_SIGNAL(MethodInfo("key_pressed", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data"), PropertyInfo(Variant::OBJECT, "event")));
-    ADD_SIGNAL(MethodInfo("size_changed", PropertyInfo(Variant::VECTOR2I, "new_size")));
+	ADD_SIGNAL(MethodInfo("data_sent", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
+	ADD_SIGNAL(MethodInfo("key_pressed", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data"), PropertyInfo(Variant::OBJECT, "event")));
+	ADD_SIGNAL(MethodInfo("size_changed", PropertyInfo(Variant::VECTOR2I, "new_size")));
 
 	ClassDB::bind_method(D_METHOD("get_cols"), &Terminal::get_cols);
 	ClassDB::bind_method(D_METHOD("get_rows"), &Terminal::get_rows);
@@ -146,11 +146,13 @@ int Terminal::get_rows() const
 	return rows;
 }
 
-Vector2i Terminal::get_cursor_pos() const {
+Vector2i Terminal::get_cursor_pos() const
+{
 	return Vector2i(tsm_screen_get_cursor_x(screen), tsm_screen_get_cursor_y(screen));
 }
 
-Vector2 Terminal::get_cell_size() const {
+Vector2 Terminal::get_cell_size() const
+{
 	return cell_size;
 }
 
@@ -181,7 +183,8 @@ String Terminal::write(const Variant data)
 		ERR_FAIL_V_MSG("", "Data must be a String or PackedByteArray.");
 	}
 
-	if (bytes.is_empty()) return "";
+	if (bytes.is_empty())
+		return "";
 
 	response.clear();
 	tsm_vte_input(vte, (char *)bytes.ptr(), bytes.size());
@@ -190,7 +193,8 @@ String Terminal::write(const Variant data)
 	return response.get_string_from_utf8();
 }
 
-void Terminal::_gui_input(const Ref<InputEvent> &event) {
+void Terminal::_gui_input(const Ref<InputEvent> &event)
+{
 	_handle_key_input(event);
 	_handle_selection(event);
 	_handle_mouse_wheel(event);
@@ -235,13 +239,15 @@ void Terminal::_write_cb(tsm_vte *vte, const char *u8, size_t len, void *data)
 {
 	Terminal *term = static_cast<Terminal *>(data);
 
-	if (len > 0) {
+	if (len > 0)
+	{
 		PackedByteArray data;
 		data.resize(len);
 		memcpy(data.ptrw(), u8, len);
 		term->response.append_array(data);
 
-		if (term->last_input_event_key.is_valid()) {
+		if (term->last_input_event_key.is_valid())
+		{
 			term->emit_signal("key_pressed", data.get_string_from_utf8(), term->last_input_event_key);
 			term->last_input_event_key.unref();
 		}
@@ -263,10 +269,11 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 {
 	Terminal *term = static_cast<Terminal *>(data);
 
-	if (age != 0 && age <= term->framebuffer_age) return OK;
+	if (age != 0 && age <= term->framebuffer_age)
+		return OK;
 
 	if (width < 1)
-	{	// No foreground or background to draw.
+	{ // No foreground or background to draw.
 		return OK;
 	}
 
@@ -276,20 +283,22 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 		attr_flags |= AttrFlag::INVERSE;
 	if (attr->blink)
 		attr_flags |= AttrFlag::BLINK;
-	if (term->cursor_position.x == posx && term->cursor_position.y == posy) {
+	if (term->cursor_position.x == posx && term->cursor_position.y == posy)
+	{
 		attr_flags |= AttrFlag::CURSOR;
 	}
 
 	// Collect colors.
 	Color fgcol = std::min(attr->fccode, (int8_t)TSM_COLOR_FOREGROUND) >= 0
-		? term->palette[attr->fccode]
-		: Color(attr->fr / 255.0f, attr->fg / 255.0f, attr->fb / 255.0f);
+					  ? term->palette[attr->fccode]
+					  : Color(attr->fr / 255.0f, attr->fg / 255.0f, attr->fb / 255.0f);
 
 	Color bgcol = std::min(attr->bccode, (int8_t)TSM_COLOR_BACKGROUND) >= 0
-		? term->palette[attr->bccode]
-		: Color(attr->br / 255.0f, attr->bg / 255.0f, attr->bb / 255.0f);
+					  ? term->palette[attr->bccode]
+					  : Color(attr->br / 255.0f, attr->bg / 255.0f, attr->bb / 255.0f);
 
-	if (attr->inverse && term->inverse_mode == InverseMode::INVERSE_MODE_SWAP) {
+	if (attr->inverse && term->inverse_mode == InverseMode::INVERSE_MODE_SWAP)
+	{
 		std::swap(fgcol.r, bgcol.r);
 		std::swap(fgcol.g, bgcol.g);
 		std::swap(fgcol.b, bgcol.b);
@@ -300,7 +309,8 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 		bgcol.a = 0;
 
 	// Update images (accounting for ultra-wide characters).
-	for (int i = 0; i < width && (posx + i) < term->cols; i++) {
+	for (int i = 0; i < width && (posx + i) < term->cols; i++)
+	{
 		term->back_image->set_pixel(posx + i, posy, bgcol);
 		term->attr_image->set_pixel(posx + i, posy, Color(attr_flags / 255.0f, 0, 0, 0));
 	}
@@ -312,7 +322,7 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 	term->rs->canvas_item_add_rect(term->char_canvas_item, cell_rect, Color(1, 1, 1, 0));
 
 	if (len < 1)
-	{	// No foreground to draw.
+	{ // No foreground to draw.
 		return OK;
 	}
 
@@ -323,8 +333,7 @@ int Terminal::_draw_cb(struct tsm_screen *con,
 		Vector2i(cell_position.x, cell_position.y + term->font_offset),
 		static_cast<uint64_t>(*ch),
 		term->font_size,
-		fgcol
-	);
+		fgcol);
 
 	return OK;
 }
@@ -333,7 +342,8 @@ void Terminal::_bell_cb(struct tsm_vte *vte, void *data)
 {
 	Terminal *term = static_cast<Terminal *>(data);
 
-	if (!term->bell_muted && term->bell_timer->is_stopped()) {
+	if (!term->bell_muted && term->bell_timer->is_stopped())
+	{
 		term->emit_signal("bell");
 
 		if (term->bell_cooldown > 0)
@@ -393,12 +403,15 @@ bool Terminal::_set(const StringName &p_name, const Variant &p_value)
 	return false;
 }
 
-bool Terminal::_get(const StringName &p_name, Variant &r_value) {
-	if (p_name == String("cols")) {
+bool Terminal::_get(const StringName &p_name, Variant &r_value)
+{
+	if (p_name == String("cols"))
+	{
 		r_value = cols;
 		return true;
 	}
-	if (p_name == String("rows")) {
+	if (p_name == String("rows"))
+	{
 		r_value = rows;
 		return true;
 	}
@@ -485,20 +498,24 @@ void Terminal::update_sizes(bool force)
 
 void Terminal::set_shader_parameters(const String &param, const Variant &value)
 {
-	if (param.is_empty()) {
+	if (param.is_empty())
+	{
 		set_shader_parameters("cols", cols);
 		set_shader_parameters("rows", rows);
 		set_shader_parameters("size", size);
 		set_shader_parameters("cell_size", cell_size);
 		set_shader_parameters("grid_size", Vector2(cols * cell_size.x, rows * cell_size.y));
-	} else {
+	}
+	else
+	{
 		back_material->set_shader_parameter(param, value);
 		fore_material->set_shader_parameter(param, value);
 	}
 }
 
-void Terminal::initialize_rendering() {
-	ResourceLoader* rl = ResourceLoader::get_singleton();
+void Terminal::initialize_rendering()
+{
+	ResourceLoader *rl = ResourceLoader::get_singleton();
 
 	rs = RenderingServer::get_singleton();
 	attr_texture.instantiate();
@@ -542,7 +559,7 @@ void Terminal::initialize_rendering() {
 	canvas = rs->canvas_create();
 	rs->canvas_item_set_parent(char_canvas_item, canvas);
 
-	viewport = rs-> viewport_create();
+	viewport = rs->viewport_create();
 	rs->viewport_attach_canvas(viewport, canvas);
 	rs->viewport_set_disable_3d(viewport, true);
 	rs->viewport_set_transparent_background(viewport, true);
@@ -563,16 +580,19 @@ void Terminal::initialize_rendering() {
 	rs->connect("frame_post_draw", Callable(this, "_on_frame_post_draw"));
 }
 
-void Terminal::update_theme() {
+void Terminal::update_theme()
+{
 	// Update colors.
 	palette.resize(TSM_COLOR_NUM);
-	for (int i = 0; i < TSM_COLOR_NUM; i++) {
+	for (int i = 0; i < TSM_COLOR_NUM; i++)
+	{
 		tsm_vte_color color = static_cast<tsm_vte_color>(i);
 		palette[color] = get_theme_color(String(COLOR_NAMES[i]));
 	}
 
 	// Update fonts.
-	for (int i = FontType::NORMAL; i <= FontType::BOLD_ITALICS; i++) {
+	for (int i = FontType::NORMAL; i <= FontType::BOLD_ITALICS; i++)
+	{
 		FontType type = static_cast<FontType>(i);
 		fonts[type] = has_theme_font(FONT_TYPES[type]) ? get_theme_font(FONT_TYPES[type]) : get_theme_font(FONT_TYPES[FontType::NORMAL]);
 	}
@@ -581,25 +601,30 @@ void Terminal::update_theme() {
 	style_normal = get_theme_stylebox("normal");
 	style_focus = get_theme_stylebox("focus");
 
-	if (dynamic_cast<StyleBoxFlat*>(style_normal.ptr()) != nullptr) {
+	if (dynamic_cast<StyleBoxFlat *>(style_normal.ptr()) != nullptr)
+	{
 		// Blend the background color with the style box's background color to get the "true" background color.
 		Color style_background_color = style_normal->get("bg_color");
-		palette[TSM_COLOR_BACKGROUND] = style_background_color.blend(palette[TSM_COLOR_BACKGROUND]); 
+		palette[TSM_COLOR_BACKGROUND] = style_background_color.blend(palette[TSM_COLOR_BACKGROUND]);
 	}
 	back_material->set_shader_parameter("background_color", palette[TSM_COLOR_BACKGROUND]);
 
 	refresh();
 }
 
-void Terminal::_on_frame_post_draw() {
-	if (redraw_requested) {
+void Terminal::_on_frame_post_draw()
+{
+	if (redraw_requested)
+	{
 		queue_redraw();
 		redraw_requested = false;
 	}
 }
 
-void Terminal::draw_screen() {
-	if (framebuffer_age == 0) {
+void Terminal::draw_screen()
+{
+	if (framebuffer_age == 0)
+	{
 		Rect2 rect = Rect2(Vector2(), size);
 
 		rs->viewport_set_clear_mode(viewport, RenderingServer::ViewportClearMode::VIEWPORT_CLEAR_ONLY_NEXT_FRAME);
@@ -628,12 +653,14 @@ void Terminal::draw_screen() {
 	back_texture->update(back_image);
 }
 
-void Terminal::refresh() {
+void Terminal::refresh()
+{
 	framebuffer_age = 0;
 	queue_redraw();
 }
 
-void Terminal::cleanup_rendering() {
+void Terminal::cleanup_rendering()
+{
 	// StyleBox.
 	rs->free_rid(style_canvas_item);
 
@@ -649,18 +676,22 @@ void Terminal::cleanup_rendering() {
 	rs->free_rid(char_shader);
 }
 
-void Terminal::set_bell_muted(const bool muted) {
+void Terminal::set_bell_muted(const bool muted)
+{
 	bell_muted = muted;
 }
 
-bool Terminal::get_bell_muted() const {
+bool Terminal::get_bell_muted() const
+{
 	return bell_muted;
 }
 
-void Terminal::set_bell_cooldown(const double time) {
+void Terminal::set_bell_cooldown(const double time)
+{
 	bell_cooldown = time;
 
-	if (!bell_timer->is_stopped()) {
+	if (!bell_timer->is_stopped())
+	{
 		bell_timer->stop();
 
 		double remaining_time = std::max(0.0, bell_cooldown - bell_timer->get_time_left());
@@ -669,7 +700,8 @@ void Terminal::set_bell_cooldown(const double time) {
 	}
 }
 
-double Terminal::get_bell_cooldown() const {
+double Terminal::get_bell_cooldown() const
+{
 	return bell_cooldown;
 }
 
@@ -695,25 +727,28 @@ double Terminal::get_blink_off_time() const
 	return blink_off_time;
 }
 
-void Terminal::clear() {
-  // Resize the terminal to a single row, forcing content above in to the scrollback buffer.
-  tsm_screen_resize(screen, cols, 1);
+void Terminal::clear()
+{
+	// Resize the terminal to a single row, forcing content above in to the scrollback buffer.
+	tsm_screen_resize(screen, cols, 1);
 
-  // Clear the scrollback buffer (hence clearing the content that was above).
-  tsm_screen_clear_sb(screen);
+	// Clear the scrollback buffer (hence clearing the content that was above).
+	tsm_screen_clear_sb(screen);
 
-  // Resize the screen to its original size.
-  tsm_screen_resize(screen, cols, rows);
+	// Resize the screen to its original size.
+	tsm_screen_resize(screen, cols, rows);
 
-  refresh();
+	refresh();
 }
 
-String Terminal::_copy_screen(ScreenCopyFunction func) {
+String Terminal::_copy_screen(ScreenCopyFunction func)
+{
 	char *out;
 	PackedByteArray data;
 
 	data.resize(std::max(func(screen, &out), 0));
-	if (data.size() > 0) {
+	if (data.size() > 0)
+	{
 		memcpy(data.ptrw(), out, data.size());
 		std::free(out);
 	}
@@ -721,16 +756,20 @@ String Terminal::_copy_screen(ScreenCopyFunction func) {
 	return data.get_string_from_utf8();
 }
 
-void Terminal::select(const int p_from_line, const int p_from_column, const int p_to_line, const int p_to_column) {
+void Terminal::select(const int p_from_line, const int p_from_column, const int p_to_line, const int p_to_column)
+{
 	int from_line = std::clamp((int)p_from_line, 0, (int)rows);
 	int from_column = std::clamp((int)p_from_column, 0, (int)cols);
 	int to_line = std::clamp((int)p_to_line, 0, (int)rows);
 	int to_column = std::clamp((int)p_to_column, 0, (int)cols);
 
-	if (from_line > to_line) {
+	if (from_line > to_line)
+	{
 		std::swap(to_line, from_line);
 		std::swap(to_column, from_column);
-	} else if ((from_line == to_line) && (from_column > to_column)) {
+	}
+	else if ((from_line == to_line) && (from_column > to_column))
+	{
 		std::swap(to_column, from_column);
 	}
 
@@ -742,34 +781,40 @@ void Terminal::select(const int p_from_line, const int p_from_column, const int 
 
 	String selection = copy_selection();
 
-	#if defined(__linux__)
+#if defined(__linux__)
 	if (copy_on_selection)
 		DisplayServer::get_singleton()->clipboard_set_primary(selection);
-	#endif
+#endif
 
-	if (selection.length() > 0) {
+	if (selection.length() > 0)
+	{
 		selecting = true;
 		queue_redraw();
 	}
 }
 
-String Terminal::copy_all() {
+String Terminal::copy_all()
+{
 	return _copy_screen(&tsm_screen_copy_all);
 }
 
-String Terminal::copy_selection() {
+String Terminal::copy_selection()
+{
 	return _copy_screen(&tsm_screen_selection_copy);
 }
 
-void Terminal::set_copy_on_selection(const bool p_enabled) {
+void Terminal::set_copy_on_selection(const bool p_enabled)
+{
 	copy_on_selection = p_enabled;
 }
 
-bool Terminal::get_copy_on_selection() const {
+bool Terminal::get_copy_on_selection() const
+{
 	return copy_on_selection;
 }
 
-void Terminal::set_inverse_mode(const int mode) {
+void Terminal::set_inverse_mode(const int mode)
+{
 	inverse_mode = static_cast<InverseMode>(mode);
 
 	bool inverse_enabled = inverse_mode == InverseMode::INVERSE_MODE_INVERT;
@@ -778,11 +823,13 @@ void Terminal::set_inverse_mode(const int mode) {
 	refresh();
 }
 
-int Terminal::get_inverse_mode() const {
+int Terminal::get_inverse_mode() const
+{
 	return static_cast<int>(inverse_mode);
 }
 
-void Terminal::initialize_input() {
+void Terminal::initialize_input()
+{
 	selecting = false;
 	selection_mode = SelectionMode::NONE;
 	selection_timer = memnew(Timer);
@@ -791,129 +838,144 @@ void Terminal::initialize_input() {
 	add_child(selection_timer, false, INTERNAL_MODE_FRONT);
 }
 
-void Terminal::_handle_key_input(Ref<InputEventKey> event) {
-    if (!event.is_valid() || !event->is_pressed())
-        return;
+void Terminal::_handle_key_input(Ref<InputEventKey> event)
+{
+	if (!event.is_valid() || !event->is_pressed())
+		return;
 
-    const Key keycode = event->get_keycode();
-    char32_t unicode = event->get_unicode();
-    uint32_t ascii = unicode <= 127 ? unicode : 0;
+	const Key keycode = event->get_keycode();
+	char32_t unicode = event->get_unicode();
+	uint32_t ascii = unicode <= 127 ? unicode : 0;
 
-    unsigned int mods = 0;
-    if (event->is_alt_pressed())
-        mods |= TSM_SHIFT_MASK;
-    if (event->is_ctrl_pressed())
-        mods |= TSM_CONTROL_MASK;
-    if (event->is_shift_pressed())
-        mods |= TSM_SHIFT_MASK;
+	unsigned int mods = 0;
+	if (event->is_alt_pressed())
+		mods |= TSM_ALT_MASK;
+	if (event->is_ctrl_pressed())
+		mods |= TSM_CONTROL_MASK;
+	if (event->is_shift_pressed())
+		mods |= TSM_SHIFT_MASK;
 
-    std::pair<Key, char32_t> key = {keycode, unicode};
-    uint32_t keysym = (KEY_MAP.count(key) > 0) ? KEY_MAP.at(key) : XKB_KEY_NoSymbol;
+	std::pair<Key, char32_t> key = {keycode, unicode};
+	uint32_t keysym = (KEY_MAP.count(key) > 0) ? KEY_MAP.at(key) : XKB_KEY_NoSymbol;
 
-    last_input_event_key = event;
-    tsm_vte_handle_keyboard(vte, keysym, ascii, mods, unicode ? unicode : TSM_VTE_INVALID);
+	last_input_event_key = event;
+	tsm_vte_handle_keyboard(vte, keysym, ascii, mods, unicode ? unicode : TSM_VTE_INVALID);
 
-    // Return to the bottom of the scrollback buffer if we scrolled up. Ignore
-    // modifier keys pressed in isolation or if Ctrl+Shift modifier keys are
-    // pressed.
-    std::set<Key> mod_keys = {KEY_ALT, KEY_SHIFT, KEY_CTRL, KEY_META};
-    if (mod_keys.find(keycode) == mod_keys.end() &&
-        !(event->is_ctrl_pressed() && event->is_shift_pressed())) {
-      tsm_screen_sb_reset(screen);
-      queue_redraw();
-    }
-
-    // Prevent focus changing to other inputs when pressing Tab or Arrow keys.
-    std::set<Key> tab_arrow_keys = {KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_TAB};
-    if (tab_arrow_keys.find(keycode) != tab_arrow_keys.end())
-      accept_event();
-}
-
-void Terminal::_handle_mouse_wheel(Ref<InputEventMouseButton> event) {
-  if (!event.is_valid() || !event->is_pressed())
-    return;
-
-  void (*scroll_func)(tsm_screen *, unsigned int) = nullptr;
-
-  switch (event->get_button_index()) {
-  case MOUSE_BUTTON_WHEEL_UP:
-    scroll_func = &tsm_screen_sb_up;
-    break;
-  case MOUSE_BUTTON_WHEEL_DOWN:
-    scroll_func = &tsm_screen_sb_down;
-    break;
-  default:
-	break;
-  };
-
-  if (scroll_func != nullptr) {
-    // Scroll 5 times as fast as normal if alt is pressed (like TextEdit).
-    // Otherwise, just scroll 3 lines.
-    int speed = event->is_alt_pressed() ? 15 : 3;
-    double factor = event->get_factor();
-    (*scroll_func)(screen, speed * factor);
-    queue_redraw();
-  }
-}
-
-void Terminal::_handle_selection(Ref<InputEventMouse> event) {
-  if (!event.is_valid())
-    return;
-
-  Ref<InputEventMouseButton> mb = event;
-  if (mb.is_valid()) {
-    if (!mb->is_pressed() || mb->get_button_index() != MOUSE_BUTTON_LEFT)
-      return;
-
-    if (selecting) {
-      selecting = false;
-      selection_mode = SelectionMode::NONE;
-      tsm_screen_selection_reset(screen);
-	  queue_redraw();
-    }
-
-    selecting = false;
-    selection_mode = SelectionMode::POINTER;
-
-    return;
-  }
-
-  Ref<InputEventMouseMotion> mm = event;
-  if (mm.is_valid()) {
-    if ((mm->get_button_mask() & MOUSE_BUTTON_MASK_LEFT) && selection_mode != SelectionMode::NONE && !selecting) {
-      selecting = true;
-      Vector2 start = event->get_position() / cell_size;
-      tsm_screen_selection_start(screen, start.x, start.y);
-	  queue_redraw();
-      selection_timer->start();
-    }
-    return;
-  }
-}
-
-void Terminal::_on_selection_held() {
-  if (!(Input::get_singleton()->is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) || selection_mode == SelectionMode::NONE) {
-	#if defined(__linux__)
-	if (copy_on_selection) {
-		DisplayServer::get_singleton()->clipboard_set_primary(copy_selection());
+	// Return to the bottom of the scrollback buffer if we scrolled up. Ignore
+	// modifier keys pressed in isolation or if Ctrl+Shift modifier keys are
+	// pressed.
+	std::set<Key> mod_keys = {KEY_ALT, KEY_SHIFT, KEY_CTRL, KEY_META};
+	if (mod_keys.find(keycode) == mod_keys.end() &&
+		!(event->is_ctrl_pressed() && event->is_shift_pressed()))
+	{
+		tsm_screen_sb_reset(screen);
+		queue_redraw();
 	}
-	#endif
 
-    selection_timer->stop();
-    return;
-  }
+	// Prevent focus changing to other inputs when pressing Tab or Arrow keys.
+	std::set<Key> tab_arrow_keys = {KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_TAB};
+	if (tab_arrow_keys.find(keycode) != tab_arrow_keys.end())
+		accept_event();
+}
 
-  Vector2 target = get_local_mouse_position() / cell_size;
-  tsm_screen_selection_target(screen, target.x, target.y);
-  queue_redraw();
-  selection_timer->start();
+void Terminal::_handle_mouse_wheel(Ref<InputEventMouseButton> event)
+{
+	if (!event.is_valid() || !event->is_pressed())
+		return;
+
+	void (*scroll_func)(tsm_screen *, unsigned int) = nullptr;
+
+	switch (event->get_button_index())
+	{
+	case MOUSE_BUTTON_WHEEL_UP:
+		scroll_func = &tsm_screen_sb_up;
+		break;
+	case MOUSE_BUTTON_WHEEL_DOWN:
+		scroll_func = &tsm_screen_sb_down;
+		break;
+	default:
+		break;
+	};
+
+	if (scroll_func != nullptr)
+	{
+		// Scroll 5 times as fast as normal if alt is pressed (like TextEdit).
+		// Otherwise, just scroll 3 lines.
+		int speed = event->is_alt_pressed() ? 15 : 3;
+		double factor = event->get_factor();
+		(*scroll_func)(screen, speed *factor);
+		queue_redraw();
+	}
+}
+
+void Terminal::_handle_selection(Ref<InputEventMouse> event)
+{
+	if (!event.is_valid())
+		return;
+
+	Ref<InputEventMouseButton> mb = event;
+	if (mb.is_valid())
+	{
+		if (!mb->is_pressed() || mb->get_button_index() != MOUSE_BUTTON_LEFT)
+			return;
+
+		if (selecting)
+		{
+			selecting = false;
+			selection_mode = SelectionMode::NONE;
+			tsm_screen_selection_reset(screen);
+			queue_redraw();
+		}
+
+		selecting = false;
+		selection_mode = SelectionMode::POINTER;
+
+		return;
+	}
+
+	Ref<InputEventMouseMotion> mm = event;
+	if (mm.is_valid())
+	{
+		if ((mm->get_button_mask() & MOUSE_BUTTON_MASK_LEFT) && selection_mode != SelectionMode::NONE && !selecting)
+		{
+			selecting = true;
+			Vector2 start = event->get_position() / cell_size;
+			tsm_screen_selection_start(screen, start.x, start.y);
+			queue_redraw();
+			selection_timer->start();
+		}
+		return;
+	}
+}
+
+void Terminal::_on_selection_held()
+{
+	if (!(Input::get_singleton()->is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) || selection_mode == SelectionMode::NONE)
+	{
+#if defined(__linux__)
+		if (copy_on_selection)
+		{
+			DisplayServer::get_singleton()->clipboard_set_primary(copy_selection());
+		}
+#endif
+
+		selection_timer->stop();
+		return;
+	}
+
+	Vector2 target = get_local_mouse_position() / cell_size;
+	tsm_screen_selection_target(screen, target.x, target.y);
+	queue_redraw();
+	selection_timer->start();
 }
 
 // Add default theme items for the "Terminal" theme type if they don't exist.
 // These defaults match Godot's built-in default theme (note: this is different from the default editor theme).
-void Terminal::set_default_theme_items() {
+void Terminal::set_default_theme_items()
+{
 	Ref<Theme> default_theme = ThemeDB::get_singleton()->get_default_theme();
-	if (default_theme->get_type_list().has("Terminal")) return;
+	if (default_theme->get_type_list().has("Terminal"))
+		return;
 
 	// As a workaround, create a new theme and then merge it with the default theme at the end.
 	// See: https://github.com/godotengine/godot-cpp/issues/1332#issuecomment-2041060614.
@@ -927,16 +989,16 @@ void Terminal::set_default_theme_items() {
 
 	// Default ANSI colors based on xterm defaults: https://en.wikipedia.org/wiki/ANSI_escape_code#Colors.
 	// Some discussion about the slight difference of the blue colors: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=241717.
-	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_0_color" , "Terminal", Color::hex(0x000000FF)); // Black
-	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_1_color" , "Terminal", Color::hex(0xCD0000FF)); // Red
-	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_2_color" , "Terminal", Color::hex(0x00CD00FF)); // Green
-	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_3_color" , "Terminal", Color::hex(0xCDCD00FF)); // Yellow
-	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_4_color" , "Terminal", Color::hex(0x0000EEFF)); // Blue
-	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_5_color" , "Terminal", Color::hex(0xCD00CDFF)); // Magenta
-	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_6_color" , "Terminal", Color::hex(0x00CDCDFF)); // Cyan
-	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_7_color" , "Terminal", Color::hex(0xE5E5E5FF)); // White
-	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_8_color" , "Terminal", Color::hex(0x7F7F7FFF)); // Bright Black (Gray)
-	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_9_color" , "Terminal", Color::hex(0xFF0000FF)); // Bright Red
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_0_color", "Terminal", Color::hex(0x000000FF));  // Black
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_1_color", "Terminal", Color::hex(0xCD0000FF));  // Red
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_2_color", "Terminal", Color::hex(0x00CD00FF));  // Green
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_3_color", "Terminal", Color::hex(0xCDCD00FF));  // Yellow
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_4_color", "Terminal", Color::hex(0x0000EEFF));  // Blue
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_5_color", "Terminal", Color::hex(0xCD00CDFF));  // Magenta
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_6_color", "Terminal", Color::hex(0x00CDCDFF));  // Cyan
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_7_color", "Terminal", Color::hex(0xE5E5E5FF));  // White
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_8_color", "Terminal", Color::hex(0x7F7F7FFF));  // Bright Black (Gray)
+	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_9_color", "Terminal", Color::hex(0xFF0000FF));  // Bright Red
 	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_10_color", "Terminal", Color::hex(0x00FF00FF)); // Bright Green
 	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_11_color", "Terminal", Color::hex(0xFFFF00FF)); // Bright Yellow
 	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_12_color", "Terminal", Color::hex(0x5C5CFFFF)); // Bright Blue
@@ -945,11 +1007,13 @@ void Terminal::set_default_theme_items() {
 	custom_theme->set_theme_item(Theme::DATA_TYPE_COLOR, "ansi_15_color", "Terminal", Color::hex(0xFFFFFFFF)); // Bright White
 
 	// No monospaced font in the default theme, so try to import our own. Will default to a non-monospace font otherwise.
-	ResourceLoader* rl = ResourceLoader::get_singleton();
+	ResourceLoader *rl = ResourceLoader::get_singleton();
 	String const font_path = "res://addons/godot_xterm/themes/fonts/regular.tres";
-	if (rl->exists(font_path)) {
+	if (rl->exists(font_path))
+	{
 		Ref<Font> default_font = rl->load(font_path);
-		for (int i = FontType::NORMAL; i <= FontType::BOLD_ITALICS; i++) {
+		for (int i = FontType::NORMAL; i <= FontType::BOLD_ITALICS; i++)
+		{
 			FontType type = static_cast<FontType>(i);
 			custom_theme->set_theme_item(Theme::DATA_TYPE_FONT, FONT_TYPES[type], "Terminal", default_font);
 		}
