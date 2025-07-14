@@ -5,6 +5,11 @@ ci:
   autoupdate_commit_msg: "chore: autoupdate"
 exclude: "^addons/gut/"
 repos:
+  - repo: https://github.com/lihop/setup-godot
+    rev: hooks-v1.0.0-alpha.1
+    hooks:
+      - id: check-git-archive
+        args: [addons/godot_xterm]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:

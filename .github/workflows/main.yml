@@ -444,41 +444,6 @@ jobs:
           pattern: "*-${{ matrix.target }}"
           delete-merged: true
 
-  # Git archive should only include addons/godot_xterm directory.
-  check-archive:
-    name: "Check Archive"
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Create git archive
-        run: git archive -o archive.zip HEAD
-      - name: Extract archive
-        run: mkdir -p /tmp/unzipped && unzip archive.zip -d /tmp/unzipped
-      - name: Check that archive only contains addons/godot_xterm directory
-        run: |
-          shopt -s nullglob dotglob
-          ls -laR /tmp/unzipped
-          files=(/tmp/unzipped/*)
-          if [ ${#files[@]} -ne 1 ]; then
-            echo "Wrong number of files in archive (${#files[@]}) expected 1."
-            exit 1
-          fi
-          if [ ! -d "/tmp/unzipped/addons" ]; then
-            echo "Expected directory (addons) not found."
-            exit 1
-          fi
-          files=(/tmp/unzipped/addons)
-          if [ ${#files[@]} -ne 1 ]; then
-            echo "Wrong number of files in addons directory (${#files[@]}) expected 1."
-            exit 1
-          fi
-          if [ ! -d "/tmp/unzipped/addons/godot_xterm" ]; then
-            echo "Expected directory (addons/godot_xterm) not found."
-            exit 1
-          fi
-
   check-pre-commit:
     name: "Check Pre-Commit"
     runs-on: ubuntu-22.04
