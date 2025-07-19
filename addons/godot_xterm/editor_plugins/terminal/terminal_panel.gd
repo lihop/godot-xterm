@@ -92,8 +92,10 @@ func _update_settings() -> void:
 
 func _update_terminal_tabs():
 	# Wait a couple of frames to allow everything to resize before updating.
-	await get_tree().process_frame
-	await get_tree().process_frame
+	var tree = get_tree()
+	if tree:
+		await tree.process_frame
+		await tree.process_frame
 
 	if tabs.get_offset_buttons_visible():
 		# Move add button to fixed position on the tabbar.
