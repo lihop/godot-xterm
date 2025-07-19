@@ -43,8 +43,8 @@ class TestTheme:
 
 	const TestScene := preload("../scenes/theme.tscn")
 
-	const default_theme := preload("res://addons/godot_xterm/themes/default.tres")
-	const alt_theme := preload("res://addons/godot_xterm/themes/default_light.tres")
+	const default_theme := preload("res://themes/demo.tres")
+	const alt_theme := preload("res://themes/retro_green.tres")
 
 	const COLORS := [
 		"ansi_0_color",
