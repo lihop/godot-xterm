@@ -17,40 +17,35 @@
 #include <godot_cpp/classes/timer.hpp>
 #include <libtsm.h>
 
-namespace godot
-{
+namespace godot {
 
-  class Terminal : public Control
-  {
+class Terminal : public Control {
     GDCLASS(Terminal, Control)
 
-  private:
+private:
     typedef std::map<std::pair<Key, char32_t>, uint32_t> KeyMap;
 
-    enum FontType
-    {
-      NORMAL,
-      BOLD,
-      ITALICS,
-      BOLD_ITALICS,
+    enum FontType {
+        NORMAL,
+        BOLD,
+        ITALICS,
+        BOLD_ITALICS,
     };
 
-    static const char *COLOR_NAMES[18];
-    static const char *FONT_TYPES[4];
+    static const char* COLOR_NAMES[18];
+    static const char* FONT_TYPES[4];
     static const KeyMap KEY_MAP;
 
-  public:
-    enum AttrFlag
-    {
-      INVERSE = 1 << 0,
-      BLINK = 1 << 1,
-      CURSOR = 1 << 2,
+public:
+    enum AttrFlag {
+        INVERSE = 1 << 0,
+        BLINK = 1 << 1,
+        CURSOR = 1 << 2,
     };
 
-    enum InverseMode
-    {
-      INVERSE_MODE_INVERT,
-      INVERSE_MODE_SWAP,
+    enum InverseMode {
+        INVERSE_MODE_INVERT,
+        INVERSE_MODE_SWAP,
     };
 
     Terminal();
@@ -91,12 +86,12 @@ namespace godot
 
     String write(const Variant data);
 
-    void _gui_input(const Ref<InputEvent> &event) override;
+    void _gui_input(const Ref<InputEvent>& event) override;
 
-  protected:
+protected:
     static void _bind_methods();
 
-  private:
+private:
     unsigned int max_scrollback;
 
     unsigned int cols;
@@ -110,15 +105,14 @@ namespace godot
 
     InverseMode inverse_mode;
 
-    RenderingServer *rs;
+    RenderingServer* rs;
 
-    tsm_screen *screen;
-    tsm_vte *vte;
+    tsm_screen* screen;
+    tsm_vte* vte;
     tsm_age_t framebuffer_age;
 
     PackedByteArray response;
-    static void _write_cb(struct tsm_vte *vte, const char *u8, size_t len,
-                          void *data);
+    static void _write_cb(struct tsm_vte* vte, const char* u8, size_t len, void* data);
 
     // If muted, the "bell" signal will not be emitted when the bell "\u0007" character
     // is written to the terminal.
@@ -127,13 +121,10 @@ namespace godot
     // This can be useful in cases where the bell character is being written too
     // frequently such as `while true; do echo -e "\a"; done`.
     double bell_cooldown;
-    Timer *bell_timer;
-    static void _bell_cb(struct tsm_vte *vte, void *data);
+    Timer* bell_timer;
+    static void _bell_cb(struct tsm_vte* vte, void* data);
 
-    static int _draw_cb(struct tsm_screen *con, uint64_t id, const uint32_t *ch,
-                        size_t len, unsigned int width, unsigned int posx,
-                        unsigned int posy, const struct tsm_screen_attr *attr,
-                        tsm_age_t age, void *data);
+    static int _draw_cb(struct tsm_screen* con, uint64_t id, const uint32_t* ch, size_t len, unsigned int width, unsigned int posx, unsigned int posy, const struct tsm_screen_attr* attr, tsm_age_t age, void* data);
 
     PackedColorArray palette;
     std::map<FontType, Ref<Font>> fonts;
@@ -160,7 +151,7 @@ namespace godot
 
     // Foreground.
     RID char_shader, char_material, char_canvas_item, canvas, viewport,
-        fore_canvas_item;
+            fore_canvas_item;
     Ref<Shader> fore_shader;
     Ref<ShaderMaterial> fore_material;
 
@@ -169,18 +160,18 @@ namespace godot
     void initialize_rendering();
     void update_theme();
     void update_sizes(bool force = false);
-    void set_shader_parameters(const String &name = "", const Variant &value = nullptr);
+    void set_shader_parameters(const String& name = "", const Variant& value = nullptr);
     bool redraw_requested = false;
     void _on_frame_post_draw();
     void draw_screen();
     void refresh();
     void cleanup_rendering();
 
-    bool _set(const StringName &p_name, const Variant &p_value);
-    bool _get(const StringName &p_name, Variant &r_value);
-    void _get_property_list(List<PropertyInfo> *p_list) const;
-    bool _is_valid_color_name(const String &p_name);
-    bool _is_valid_font_type(const String &p_name);
+    bool _set(const StringName& p_name, const Variant& p_value);
+    bool _get(const StringName& p_name, Variant& r_value);
+    void _get_property_list(List<PropertyInfo>* p_list) const;
+    bool _is_valid_color_name(const String& p_name);
+    bool _is_valid_font_type(const String& p_name);
 
     Ref<InputEventKey> last_input_event_key;
     void initialize_input();
@@ -188,22 +179,21 @@ namespace godot
 
     void _handle_mouse_wheel(Ref<InputEventMouseButton> event);
 
-    enum SelectionMode
-    {
-      NONE,
-      POINTER
+    enum SelectionMode {
+        NONE,
+        POINTER
     };
     bool selecting = false;
     SelectionMode selection_mode = SelectionMode::NONE;
-    Timer *selection_timer;
+    Timer* selection_timer;
     void _handle_selection(Ref<InputEventMouse> event);
     void _on_selection_held();
 
-    typedef std::function<int(struct tsm_screen *, char **)> ScreenCopyFunction;
+    typedef std::function<int(struct tsm_screen*, char**)> ScreenCopyFunction;
     String _copy_screen(ScreenCopyFunction func);
 
     void set_default_theme_items();
-  };
+};
 
 } // namespace godot
 

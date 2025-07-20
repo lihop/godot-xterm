@@ -23,18 +23,16 @@
 #define UV_ERR_MSG(uv_err) \
     String(uv_err_name(uv_err)) + String(": ") + String(uv_strerror(uv_err))
 
-#define ERR_FAIL_UV_ERR(uv_err)                                       \
-    ERR_FAIL_COND_V_MSG(uv_err < 0, PTY::uv_err_to_godot_err(uv_err), \
-                        UV_ERR_MSG(uv_err))
+#define ERR_FAIL_UV_ERR(uv_err) \
+    ERR_FAIL_COND_V_MSG(uv_err < 0, PTY::uv_err_to_godot_err(uv_err), UV_ERR_MSG(uv_err))
 
 using namespace godot;
 
-void _alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf);
-void _write_cb(uv_write_t *req, int status) { std::free(req); }
-void _close_cb(uv_handle_t *handle) { /* no-op */ };
+void _alloc_buffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
+void _write_cb(uv_write_t* req, int status) { std::free(req); }
+void _close_cb(uv_handle_t* handle) { /* no-op */ };
 
-void PTY::_bind_methods()
-{
+void PTY::_bind_methods() {
     BIND_ENUM_CONSTANT(IPCSIGNAL_SIGHUP);
     BIND_ENUM_CONSTANT(IPCSIGNAL_SIGINT);
     BIND_ENUM_CONSTANT(IPCSIGNAL_SIGQUIT);
@@ -87,8 +85,7 @@ void PTY::_bind_methods()
     ClassDB::bind_method(D_METHOD("_on_exit", "exit_code", "signal_code"), &PTY::_on_exit);
 }
 
-PTY::PTY()
-{
+PTY::PTY() {
     use_threads = true;
 
     set_process_internal(false);
@@ -100,7 +97,7 @@ PTY::PTY()
     env["COLORTERM"] = "truecolor";
 
     uv_loop_init(&loop);
-    uv_async_init(&loop, &async_handle, [](uv_async_t *handle) {});
+    uv_async_init(&loop, &async_handle, [](uv_async_t* handle) {});
     uv_pipe_init(&loop, &pipe, false);
 #ifdef _WIN32
     uv_pipe_init(&loop, &pipe_out, false);
@@ -108,75 +105,61 @@ PTY::PTY()
     pipe.data = this;
 }
 
-void PTY::set_cols(const int num_cols)
-{
-    if (cols != num_cols)
-    {
+void PTY::set_cols(const int num_cols) {
+    if (cols != num_cols) {
         cols = num_cols;
         resize(cols, rows);
     }
 }
 
-int PTY::get_cols() const
-{
+int PTY::get_cols() const {
     return cols;
 }
 
-void PTY::set_rows(const int num_rows)
-{
-    if (rows != num_rows)
-    {
+void PTY::set_rows(const int num_rows) {
+    if (rows != num_rows) {
         rows = num_rows;
         resize(cols, rows);
     }
 }
 
-int PTY::get_rows() const
-{
+int PTY::get_rows() const {
     return rows;
 }
 
-Dictionary PTY::get_env() const
-{
+Dictionary PTY::get_env() const {
     return env;
 }
 
-void PTY::set_env(const Dictionary &value)
-{
+void PTY::set_env(const Dictionary& value) {
     env = value;
 }
 
-bool PTY::get_use_os_env() const
-{
+bool PTY::get_use_os_env() const {
     return use_os_env;
 }
 
-void PTY::set_use_os_env(const bool value)
-{
+void PTY::set_use_os_env(const bool value) {
     use_os_env = value;
 }
 
-void PTY::set_use_threads(bool p_use)
-{
+void PTY::set_use_threads(bool p_use) {
     ERR_FAIL_COND(status != STATUS_CLOSED);
     use_threads = p_use;
 }
 
-bool PTY::is_using_threads() const
-{
+bool PTY::is_using_threads() const {
     return use_threads;
 }
 
-void PTY::set_terminal_path(NodePath p_terminal_path)
-{
+void PTY::set_terminal_path(NodePath p_terminal_path) {
     terminal_path = p_terminal_path;
 
     Callable write = Callable(this, "write");
     Callable resizev = Callable(this, "resizev");
 
     // Disconnect the current terminal, if any.
-    if (terminal != nullptr)
-    {
+    if (terminal != nullptr) {
         disconnect("data_received", Callable(terminal, "write"));
         terminal->disconnect("data_sent", write);
         terminal->disconnect("size_changed", resizev);
@@ -196,18 +179,15 @@ void PTY::set_terminal_path(NodePath p_terminal_path)
         connect("data_received", Callable(terminal, "write"), CONNECT_PERSIST);
 }
 
-NodePath PTY::get_terminal_path() const
-{
+NodePath PTY::get_terminal_path() const {
     return terminal_path;
 }
 
-String PTY::get_pts_name() const
-{
+String PTY::get_pts_name() const {
     return pts_name;
 }
 
-Error PTY::fork(const String &file, const PackedStringArray &args, const String &cwd, const int p_cols, const int p_rows)
-{
+Error PTY::fork(const String& file, const PackedStringArray& args, const String& cwd, const int p_cols, const int p_rows) {
     String fork_file = _get_fork_file(file);
     Dictionary fork_env = _get_fork_env();
     Dictionary result;
@@ -240,10 +220,9 @@ Error PTY::fork(const String &file, const PackedStringArray &args, const String 
     _pipe_open(fd_out, &pipe_out);
 #endif
 
-    uv_read_start((uv_stream_t *)&pipe, _alloc_buffer, _read_cb);
+    uv_read_start((uv_stream_t*)&pipe, _alloc_buffer, _read_cb);
 
-    if (use_threads)
-    {
+    if (use_threads) {
         stop_thread.clear();
         thread->start(callable_mp(this, &PTY::_thread_func));
     }
@@ -252,18 +231,15 @@ Error PTY::fork(const String &file, const PackedStringArray &args, const String 
     return OK;
 }
 
-void PTY::kill(const int signal)
-{
+void PTY::kill(const int signal) {
 #if !defined(_PTY_DISABLED)
-    if (pid > 0)
-    {
+    if (pid > 0) {
         uv_kill(pid, signal);
     }
 #endif
 }
 
-Error PTY::open(const int cols, const int rows)
-{
+Error PTY::open(const int cols, const int rows) {
     Dictionary result;
 
 #if defined(__linux__) || defined(__APPLE__)
@@ -283,127 +259,106 @@ Error PTY::open(const int cols, const int rows)
     return OK;
 }
 
-void PTY::resize(const int p_cols, const int p_rows)
-{
+void PTY::resize(const int p_cols, const int p_rows) {
     cols = p_cols;
     rows = p_rows;
 
 #if defined(__linux__) || defined(__APPLE__)
-    if (fd > -1)
-    {
+    if (fd > -1) {
         PTYUnix::resize(fd, cols, rows);
     }
 #endif
 
 #if defined(_WIN32)
-    if (fd > -1)
-    {
+    if (fd > -1) {
         PTYWin::resize(hpc, cols, rows);
     }
 #endif
 }
 
-void PTY::write(const Variant &data) const
-{
+void PTY::write(const Variant& data) const {
     PackedByteArray bytes;
 
-    switch (data.get_type())
-    {
-    case Variant::STRING:
-        bytes = ((String)data).to_utf8_buffer();
-        break;
-    case Variant::PACKED_BYTE_ARRAY:
-        bytes = data;
-        break;
-    default:
-        ERR_FAIL_MSG("Data must be a String or PackedByteArray.");
+    switch (data.get_type()) {
+        case Variant::STRING:
+            bytes = ((String)data).to_utf8_buffer();
+            break;
+        case Variant::PACKED_BYTE_ARRAY:
+            bytes = data;
+            break;
+        default:
+            ERR_FAIL_MSG("Data must be a String or PackedByteArray.");
     }
 
-    if (status == STATUS_OPEN)
-    {
-        #if defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
+    if (status == STATUS_OPEN) {
+#if defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
         uv_buf_t buf;
-        buf.base = (char *)bytes.ptr();
+        buf.base = (char*)bytes.ptr();
         buf.len = bytes.size();
-        uv_write_t *req = (uv_write_t *)malloc(sizeof(uv_write_t));
-        req->data = (void *)buf.base;
-        #endif
+        uv_write_t* req = (uv_write_t*)malloc(sizeof(uv_write_t));
+        req->data = (void*)buf.base;
+#endif
 
-        #if defined(__linux__) || defined(__APPLE__)
-        uv_write(req, (uv_stream_t *)&pipe, &buf, 1, _write_cb);
-        #elif defined(_WIN32)
-        uv_write(req, (uv_stream_t *)&pipe_out, &buf, 1, _write_cb);
-        #endif
-        
-        uv_run((uv_loop_t *)&loop, UV_RUN_NOWAIT);
+#if defined(__linux__) || defined(__APPLE__)
+        uv_write(req, (uv_stream_t*)&pipe, &buf, 1, _write_cb);
+#elif defined(_WIN32)
+        uv_write(req, (uv_stream_t*)&pipe_out, &buf, 1, _write_cb);
+#endif
+
+        uv_run((uv_loop_t*)&loop, UV_RUN_NOWAIT);
     }
 }
 
-void PTY::_notification(int p_what)
-{
-    switch (p_what)
-    {
-    case NOTIFICATION_INTERNAL_PROCESS:
-    {
-        if (!use_threads)
-            uv_run(&loop, UV_RUN_NOWAIT);
+void PTY::_notification(int p_what) {
+    switch (p_what) {
+        case NOTIFICATION_INTERNAL_PROCESS: {
+            if (!use_threads)
+                uv_run(&loop, UV_RUN_NOWAIT);
 
-        buffer_write_mutex->lock();
-        if (buffer.size() > 0)
-        {
-            emit_signal("data_received", buffer);
-            buffer.clear();
-            buffer_cleared->post();
+            buffer_write_mutex->lock();
+            if (buffer.size() > 0) {
+                emit_signal("data_received", buffer);
+                buffer.clear();
+                buffer_cleared->post();
+            }
+            buffer_write_mutex->unlock();
+
+            break;
         }
-        buffer_write_mutex->unlock();
-
-        break;
-    }
-    case NOTIFICATION_EXIT_TREE:
-        _close();
-        break;
+        case NOTIFICATION_EXIT_TREE:
+            _close();
+            break;
     }
 }
 
-void PTY::_thread_func()
-{
-    while (!stop_thread.is_set())
-    {
-        if (buffer.size() < BUFFER_LIMIT)
-        {
+void PTY::_thread_func() {
+    while (!stop_thread.is_set()) {
+        if (buffer.size() < BUFFER_LIMIT) {
             uv_run(&loop, UV_RUN_ONCE);
-        }
-        else
-        {
+        } else {
             buffer_cleared->wait();
         }
     }
 }
 
-void PTY::_close()
-{
-    if (use_threads)
-    {
-        if (thread->is_started())
-        {
+void PTY::_close() {
+    if (use_threads) {
+        if (thread->is_started()) {
             stop_thread.set();
             uv_async_send(&async_handle);
             thread->wait_to_finish();
         }
     }
 
-    if (!uv_is_closing((uv_handle_t *)&pipe))
-    {
-        uv_close((uv_handle_t *)&pipe, _close_cb);
+    if (!uv_is_closing((uv_handle_t*)&pipe)) {
+        uv_close((uv_handle_t*)&pipe, _close_cb);
     }
 
-    if (!uv_is_closing((uv_handle_t *)&async_handle))
-    {
-        uv_close((uv_handle_t *)&async_handle, _close_cb);
+    if (!uv_is_closing((uv_handle_t*)&async_handle)) {
+        uv_close((uv_handle_t*)&async_handle, _close_cb);
     }
 
-    if (status == STATUS_OPEN)
-    {
+    if (status == STATUS_OPEN) {
         uv_run(&loop, UV_RUN_NOWAIT);
         uv_loop_close(&loop);
     }
@@ -426,14 +381,12 @@ void PTY::_close()
     status = STATUS_CLOSED;
 }
 
-String PTY::_get_fork_file(const String &file) const
-{
+String PTY::_get_fork_file(const String& file) const {
     if (!file.is_empty())
         return file;
 
     String shell_env = OS::get_singleton()->get_environment("SHELL");
-    if (!shell_env.is_empty())
-    {
+    if (!shell_env.is_empty()) {
         return shell_env;
     }
 
@@ -448,8 +401,7 @@ String PTY::_get_fork_file(const String &file) const
 #endif
 }
 
-Dictionary PTY::_get_fork_env() const
-{
+Dictionary PTY::_get_fork_env() const {
     if (!use_os_env)
         return env;
 
@@ -459,12 +411,11 @@ Dictionary PTY::_get_fork_env() const
 
     // TODO This might need windows specific adjustment
     Dictionary os_env;
-    uv_env_item_t *uv_env;
+    uv_env_item_t* uv_env;
     int count;
 
     uv_os_environ(&uv_env, &count);
-    for (int i = 0; i < count; i++)
-    {
+    for (int i = 0; i < count; i++) {
         os_env[uv_env[i].name] = uv_env[i].value;
     }
     uv_os_free_environ(uv_env, count);
@@ -486,8 +437,7 @@ Dictionary PTY::_get_fork_env() const
 
     // Merge in our custom environment.
     PackedStringArray keys = PackedStringArray(env.keys());
-    for (int i = 0; i < keys.size(); i++)
-    {
+    for (int i = 0; i < keys.size(); i++) {
         String key = keys[i];
         os_env[key] = env[key];
     }
@@ -495,13 +445,11 @@ Dictionary PTY::_get_fork_env() const
     return os_env;
 }
 
-PackedStringArray PTY::_parse_env(const Dictionary &env) const
-{
+PackedStringArray PTY::_parse_env(const Dictionary& env) const {
     PackedStringArray parsed_env;
     PackedStringArray keys = PackedStringArray(env.keys());
 
-    for (int i = 0; i < keys.size(); i++)
-    {
+    for (int i = 0; i < keys.size(); i++) {
         String key = keys[i];
         parsed_env.push_back(key + "=" + String(env[key]));
     }
@@ -509,41 +457,35 @@ PackedStringArray PTY::_parse_env(const Dictionary &env) const
     return parsed_env;
 }
 
-void PTY::_on_exit(int exit_code, int exit_signal)
-{
+void PTY::_on_exit(int exit_code, int exit_signal) {
     call_deferred("emit_signal", "exited", exit_code, exit_signal);
 }
 
-void _alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf)
-{
-    buf->base = (char *)malloc(suggested_size);
+void _alloc_buffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
+    buf->base = (char*)malloc(suggested_size);
     buf->len = suggested_size;
 }
 
-void PTY::_read_cb(uv_stream_t *pipe, ssize_t nread, const uv_buf_t *buf)
-{
-    PTY *pty = static_cast<PTY *>(pipe->data);
+void PTY::_read_cb(uv_stream_t* pipe, ssize_t nread, const uv_buf_t* buf) {
+    PTY* pty = static_cast<PTY*>(pipe->data);
 
-    if (nread < 0)
-    {
-        switch (nread)
-        {
-        case UV_EOF:
-            // Normal after shell exits.
-        case UV_EIO:
-            // Can happen when the process exits.
-            // As long as PTY has caught it, we should be fine.
-            uv_read_stop(pipe);
-            pty->status = PTY::Status::STATUS_CLOSED;
-            return;
-        default:
-            pty->status = PTY::Status::STATUS_ERROR;
+    if (nread < 0) {
+        switch (nread) {
+            case UV_EOF:
+                // Normal after shell exits.
+            case UV_EIO:
+                // Can happen when the process exits.
+                // As long as PTY has caught it, we should be fine.
+                uv_read_stop(pipe);
+                pty->status = PTY::Status::STATUS_CLOSED;
+                return;
+            default:
+                pty->status = PTY::Status::STATUS_ERROR;
         }
         return;
     }
 
-    if (nread > 0)
-    {
+    if (nread > 0) {
         MutexLock lock(*pty->buffer_write_mutex.ptr());
 
         int old_size = pty->buffer.size();
@@ -552,15 +494,14 @@ void PTY::_read_cb(uv_stream_t *pipe, ssize_t nread, const uv_buf_t *buf)
         pty->buffer.resize(new_size);
         memcpy(pty->buffer.ptrw() + old_size, buf->base, nread);
 
-        std::free((char *)buf->base);
+        std::free((char*)buf->base);
     }
 }
 
-Error PTY::_pipe_open(const int fd, uv_pipe_t *pipe)
-{
+Error PTY::_pipe_open(const int fd, uv_pipe_t* pipe) {
     ERR_FAIL_COND_V_MSG(fd < 0, FAILED, "File descriptor must be a non-negative integer value.");
     ERR_FAIL_UV_ERR(uv_pipe_open(pipe, fd));
-    ERR_FAIL_UV_ERR(uv_stream_set_blocking((uv_stream_t *)pipe, false));
+    ERR_FAIL_UV_ERR(uv_stream_set_blocking((uv_stream_t*)pipe, false));
 
     return OK;
 }

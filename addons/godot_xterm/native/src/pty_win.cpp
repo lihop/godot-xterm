@@ -34,16 +34,15 @@
 
 using namespace godot;
 
-HRESULT CreatePseudoConsoleAndPipes(COORD, HPCON *, int &, int &);
-HRESULT InitializeStartupInfoAttachedToPseudoConsole(STARTUPINFOEX *, HPCON);
+HRESULT CreatePseudoConsoleAndPipes(COORD, HPCON*, int&, int&);
+HRESULT InitializeStartupInfoAttachedToPseudoConsole(STARTUPINFOEX*, HPCON);
 void setup_exit_callback(Callable, int64_t);
 
-struct DelBuf
-{
+struct DelBuf {
     int len;
-    DelBuf(int len) : len(len) {}
-    void operator()(char **p)
-    {
+    DelBuf(int len) :
+            len(len) {}
+    void operator()(char** p) {
         if (p == nullptr)
             return;
         for (int i = 0; i < len; i++)
@@ -53,18 +52,17 @@ struct DelBuf
 };
 
 Dictionary PTYWin::fork(
-    const String &p_file,
-    const PackedStringArray &p_args,
-    const PackedStringArray &p_env,
-    const String &p_cwd,
-    const int &p_cols,
-    const int &p_rows,
-    const int &p_uid,
-    const int &p_gid,
-    const bool &p_utf8,
-    const String &p_helper_path,
-    const Callable &p_on_exit)
-{
+        const String& p_file,
+        const PackedStringArray& p_args,
+        const PackedStringArray& p_env,
+        const String& p_cwd,
+        const int& p_cols,
+        const int& p_rows,
+        const int& p_uid,
+        const int& p_gid,
+        const bool& p_utf8,
+        const String& p_helper_path,
+        const Callable& p_on_exit) {
     Dictionary result;
 
     // file
@@ -90,9 +88,9 @@ Dictionary PTYWin::fork(
         offset += pair.size() + 1;
     }
     env_block.get()[offset++] = '\0'; // block null terminator
-    char *env = env_block.get();
+    char* env = env_block.get();
 
-    const char *cwd_ = p_cwd.utf8().get_data();
+    const char* cwd_ = p_cwd.utf8().get_data();
 
     // Determine required size of Pseudo Console
     COORD winp{};
@@ -106,49 +104,46 @@ Dictionary PTYWin::fork(
 
     // Aggregate file and args into command string
     std::string cmd = file;
-    for (int i = 0; i < argv_.size(); i++)
-    {
+    for (int i = 0; i < argv_.size(); i++) {
         cmd += " ";
         cmd += argv_[i].utf8().get_data();
     }
-    LPSTR lpcmd = const_cast<char *>(cmd.c_str());
+    LPSTR lpcmd = const_cast<char*>(cmd.c_str());
 
-    HRESULT ret{E_UNEXPECTED};
-    HPCON hPC{INVALID_HANDLE_VALUE};
+    HRESULT ret{ E_UNEXPECTED };
+    HPCON hPC{ INVALID_HANDLE_VALUE };
 
     //  Create the Pseudo Console and pipes to it
-    int fd{-1};
-    int fd_out{-1};
+    int fd{ -1 };
+    int fd_out{ -1 };
     ret = CreatePseudoConsoleAndPipes(winp, &hPC, fd, fd_out);
 
-    if (S_OK != ret)
-    {
+    if (S_OK != ret) {
         result["error"] = ERR_CANT_FORK;
         return result;
     }
 
     // Initialize the necessary startup info struct
     STARTUPINFOEX startupInfo{};
-    if (S_OK != InitializeStartupInfoAttachedToPseudoConsole(&startupInfo, hPC))
-    {
+    if (S_OK != InitializeStartupInfoAttachedToPseudoConsole(&startupInfo, hPC)) {
         result["error"] = ERR_UNCONFIGURED;
         return result;
     }
 
     PROCESS_INFORMATION pi{};
     ret = CreateProcess(
-              NULL,                         // No module name - use Command Line
-              lpcmd,                        // Command Line
-              NULL,                         // Process handle not inheritable
-              NULL,                         // Thread handle not inheritable
-              FALSE,                        // Inherit handles
-              EXTENDED_STARTUPINFO_PRESENT, // Creation flags
-              env,                          
-              cwd_,                         
-              &startupInfo.StartupInfo,     // Pointer to STARTUPINFO
-              &pi)                          // Pointer to PROCESS_INFORMATION
-              ? S_OK
-              : GetLastError();
+                  NULL, // No module name - use Command Line
+                  lpcmd, // Command Line
+                  NULL, // Process handle not inheritable
+                  NULL, // Thread handle not inheritable
+                  FALSE, // Inherit handles
+                  EXTENDED_STARTUPINFO_PRESENT, // Creation flags
+                  env,
+                  cwd_,
+                  &startupInfo.StartupInfo, // Pointer to STARTUPINFO
+                  &pi) // Pointer to PROCESS_INFORMATION
+            ? S_OK
+            : GetLastError();
 
     result["fd"] = fd;
     result["fd_out"] = fd_out;
@@ -166,10 +161,9 @@ Dictionary PTYWin::fork(
 }
 
 Dictionary PTYWin::open(
-    const int &p_cols,
-    const int &p_rows)
-{
-    HRESULT ret{E_UNEXPECTED};
+        const int& p_cols,
+        const int& p_rows) {
+    HRESULT ret{ E_UNEXPECTED };
     Dictionary result;
     result["error"] = FAILED;
 
@@ -180,8 +174,7 @@ Dictionary PTYWin::open(
     return result;
 }
 
-void PTYWin::close(uint64_t hpc, int fd, int fd_out)
-{
+void PTYWin::close(uint64_t hpc, int fd, int fd_out) {
     ClosePseudoConsole(reinterpret_cast<HPCON>(hpc));
     // Drain remaining data
     char drain_buf[4096];
@@ -195,24 +188,24 @@ void PTYWin::close(uint64_t hpc, int fd, int fd_out)
     }
 
     // Optionally close file descriptors if they are valid
-    if (fd >= 0) _close(fd);
-    if (fd_out >= 0) _close(fd_out);
+    if (fd >= 0)
+        _close(fd);
+    if (fd_out >= 0)
+        _close(fd_out);
 }
 
 // TODO(ast) repeatedly resizing sometimes crashes the terminal
 void PTYWin::resize(
-    int64_t p_hpc,
-    const int &p_cols,
-    const int &p_rows)
-{
+        int64_t p_hpc,
+        const int& p_cols,
+        const int& p_rows) {
     COORD winp{};
     winp.X = p_cols;
     winp.Y = p_rows;
 
     HPCON hpc = reinterpret_cast<HPCON>(p_hpc);
     HRESULT hr = ResizePseudoConsole(hpc, winp);
-    if (FAILED(hr))
-    {
+    if (FAILED(hr)) {
         DWORD err = GetLastError();
         godot::UtilityFunctions::printerr("ResizePseudoConsole failed. HRESULT: ", String::num_int64(hr), ", GetLastError: ", String::num_int64(err));
     }
@@ -224,9 +217,8 @@ void PTYWin::resize(
  *
  * SPDX-License-Identifier: MIT
  * **/
-HRESULT CreatePseudoConsoleAndPipes(COORD size, HPCON *phPC, int &pFd, int &pFd_out)
-{
-    HRESULT hr{E_UNEXPECTED};
+HRESULT CreatePseudoConsoleAndPipes(COORD size, HPCON* phPC, int& pFd, int& pFd_out) {
+    HRESULT hr{ E_UNEXPECTED };
 
     // Generate unique pipe names using process id and tick count
     DWORD pid = GetCurrentProcessId();
@@ -245,52 +237,61 @@ HRESULT CreatePseudoConsoleAndPipes(COORD size, HPCON *phPC, int &pFd, int &pFd_
     bool hPC_created = false;
 
     hPipeIn = CreateNamedPipeW(
-        pipe_name_in,
-        PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-        PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
-        1,          // Max instances
-        4096, 4096, // Out/in buffer size
-        0,          // Default timeout
-        NULL        // Default security
+            pipe_name_in,
+            PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+            PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
+            1, // Max instances
+            4096,
+            4096, // Out/in buffer size
+            0, // Default timeout
+            NULL // Default security
     );
 
-    if (hPipeIn == INVALID_HANDLE_VALUE)
-    {
+    if (hPipeIn == INVALID_HANDLE_VALUE) {
         hr = HRESULT_FROM_WIN32(GetLastError());
         goto cleanup;
     }
 
     hPipeOut = CreateNamedPipeW(
-        pipe_name_out,
-        PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-        PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
-        1, 4096, 4096, 0, NULL);
+            pipe_name_out,
+            PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+            PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
+            1,
+            4096,
+            4096,
+            0,
+            NULL);
 
-    if (hPipeOut == INVALID_HANDLE_VALUE)
-    {
+    if (hPipeOut == INVALID_HANDLE_VALUE) {
         hr = HRESULT_FROM_WIN32(GetLastError());
         goto cleanup;
     }
 
     // Connect to the named pipes
     hPipeInFile = CreateFileW(
-        pipe_name_in,
-        GENERIC_READ | GENERIC_WRITE,
-        0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+            pipe_name_in,
+            GENERIC_READ | GENERIC_WRITE,
+            0,
+            NULL,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
+            NULL);
 
-    if (hPipeInFile == INVALID_HANDLE_VALUE)
-    {
+    if (hPipeInFile == INVALID_HANDLE_VALUE) {
         hr = HRESULT_FROM_WIN32(GetLastError());
         goto cleanup;
     }
 
     hPipeOutFile = CreateFileW(
-        pipe_name_out,
-        GENERIC_READ | GENERIC_WRITE,
-        0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+            pipe_name_out,
+            GENERIC_READ | GENERIC_WRITE,
+            0,
+            NULL,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
+            NULL);
 
-    if (hPipeOutFile == INVALID_HANDLE_VALUE)
-    {
+    if (hPipeOutFile == INVALID_HANDLE_VALUE) {
         hr = HRESULT_FROM_WIN32(GetLastError());
         goto cleanup;
     }
@@ -298,16 +299,14 @@ HRESULT CreatePseudoConsoleAndPipes(COORD size, HPCON *phPC, int &pFd, int &pFd_
     // Create the Pseudo Console
     hr = CreatePseudoConsole(size, hPipeOut, hPipeIn, 0, phPC);
 
-    if (FAILED(hr))
-    {
+    if (FAILED(hr)) {
         goto cleanup;
     }
     hPC_created = true;
 
     // Convert HANDLE to C file descriptor
     int fd = _open_osfhandle((intptr_t)hPipeInFile, 0);
-    if (fd == -1)
-    {
+    if (fd == -1) {
         hr = HRESULT_FROM_WIN32(GetLastError());
         goto cleanup;
     }
@@ -316,8 +315,7 @@ HRESULT CreatePseudoConsoleAndPipes(COORD size, HPCON *phPC, int &pFd, int &pFd_
     hPipeInFile = INVALID_HANDLE_VALUE; // Ownership transferred to fd
 
     fd = _open_osfhandle((intptr_t)hPipeOutFile, 0);
-    if (fd == -1)
-    {
+    if (fd == -1) {
         hr = HRESULT_FROM_WIN32(GetLastError());
         goto cleanup;
     }
@@ -343,7 +341,6 @@ cleanup:
     return hr;
 }
 
-
 /** 
  * Copied from https://github.com/microsoft/terminal/blob/main/samples/ConPTY/EchoCon/EchoCon/EchoCon.cpp
  * Copyright (c) Microsoft Corporation (MIT License)
@@ -352,12 +349,10 @@ cleanup:
  * **/
 // Initializes the specified startup info struct with the required properties and
 // updates its thread attribute list with the specified ConPTY handle
-HRESULT InitializeStartupInfoAttachedToPseudoConsole(STARTUPINFOEX *pStartupInfo, HPCON hPC)
-{
-    HRESULT hr{E_UNEXPECTED};
+HRESULT InitializeStartupInfoAttachedToPseudoConsole(STARTUPINFOEX* pStartupInfo, HPCON hPC) {
+    HRESULT hr{ E_UNEXPECTED };
 
-    if (pStartupInfo)
-    {
+    if (pStartupInfo) {
         SIZE_T attrListSize{};
 
         pStartupInfo->StartupInfo.cb = sizeof(STARTUPINFOEX);
@@ -367,59 +362,50 @@ HRESULT InitializeStartupInfoAttachedToPseudoConsole(STARTUPINFOEX *pStartupInfo
 
         // Allocate a thread attribute list of the correct size
         pStartupInfo->lpAttributeList =
-            reinterpret_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(malloc(attrListSize));
+                reinterpret_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(malloc(attrListSize));
 
         // Initialize thread attribute list
-        if (pStartupInfo->lpAttributeList && InitializeProcThreadAttributeList(pStartupInfo->lpAttributeList, 1, 0, &attrListSize))
-        {
+        if (pStartupInfo->lpAttributeList && InitializeProcThreadAttributeList(pStartupInfo->lpAttributeList, 1, 0, &attrListSize)) {
             // Set Pseudo Console attribute
             hr = UpdateProcThreadAttribute(
-                     pStartupInfo->lpAttributeList,
-                     0,
-                     PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE,
-                     hPC,
-                     sizeof(HPCON),
-                     NULL,
-                     NULL)
-                     ? S_OK
-                     : HRESULT_FROM_WIN32(GetLastError());
-        }
-        else
-        {
+                         pStartupInfo->lpAttributeList,
+                         0,
+                         PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE,
+                         hPC,
+                         sizeof(HPCON),
+                         NULL,
+                         NULL)
+                    ? S_OK
+                    : HRESULT_FROM_WIN32(GetLastError());
+        } else {
             hr = HRESULT_FROM_WIN32(GetLastError());
         }
     }
     return hr;
 }
 
-static void await_exit(Callable cb, int64_t pid)
-{
+static void await_exit(Callable cb, int64_t pid) {
     DWORD exit_code = 0;
     int signal_code = 0;
 
     HANDLE hProcess = OpenProcess(SYNCHRONIZE | PROCESS_QUERY_INFORMATION, FALSE, static_cast<DWORD>(pid));
-    if (hProcess != NULL)
-    {
+    if (hProcess != NULL) {
         WaitForSingleObject(hProcess, INFINITE);
         GetExitCodeProcess(hProcess, &exit_code);
         CloseHandle(hProcess);
         cb.call_deferred(static_cast<int>(exit_code), signal_code);
-    }
-    else
-    {
+    } else {
         godot::UtilityFunctions::printerr("Could not open process!");
     }
 }
 
-static void on_exit(int exit_code, int signal_code, Callable cb, Thread *thread)
-{
+static void on_exit(int exit_code, int signal_code, Callable cb, Thread* thread) {
     cb.call(exit_code, signal_code);
     thread->wait_to_finish();
 }
 
-void setup_exit_callback(Callable cb, int64_t pid)
-{
-    Thread *thread = memnew(Thread);
+void setup_exit_callback(Callable cb, int64_t pid) {
+    Thread* thread = memnew(Thread);
 
     Callable exit_func = create_custom_callable_static_function_pointer(&on_exit).bind(cb, thread);
     Callable thread_func = create_custom_callable_static_function_pointer(&await_exit).bind(exit_func, pid);

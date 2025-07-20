@@ -6,36 +6,34 @@
 #include <godot_cpp/variant/callable.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
 
-namespace godot
-{
-  class PTYWin
-  {
-  public:
+namespace godot {
+class PTYWin {
+public:
     static Dictionary fork(
-        const String &p_file,
-        const PackedStringArray &p_args,
-        const PackedStringArray &p_env,
-        const String &p_cwd,
-        const int &p_cols,
-        const int &p_rows,
-        const int &p_uid,
-        const int &p_gid,
-        const bool &p_utf8,
-        const String &p_helper_path,
-        const Callable &p_on_exit);
+            const String& p_file,
+            const PackedStringArray& p_args,
+            const PackedStringArray& p_env,
+            const String& p_cwd,
+            const int& p_cols,
+            const int& p_rows,
+            const int& p_uid,
+            const int& p_gid,
+            const bool& p_utf8,
+            const String& p_helper_path,
+            const Callable& p_on_exit);
 
     static Dictionary open(
-        const int &p_cols,
-        const int &p_rows);
+            const int& p_cols,
+            const int& p_rows);
 
     static void resize(
-        int64_t p_hpc,
-        const int &p_cols,
-        const int &p_rows);
+            int64_t p_hpc,
+            const int& p_cols,
+            const int& p_rows);
 
     static void close(
-        uint64_t hpc,
-        int fd,
-        int fd_out);
-  };
+            uint64_t hpc,
+            int fd,
+            int fd_out);
+};
 } // namespace godot
