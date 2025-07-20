@@ -12,6 +12,9 @@
 #if (defined(__linux__) || defined(__APPLE__)) && !defined(_PTY_DISABLED)
 #include "pty_unix.h"
 #include <unistd.h>
+#elif defined(_WIN32) && !defined(_PTY_DISABLED)
+#include "pty_win.h"
+#include <io.h>
 #endif
 
 // Require buffer to be flushed after reaching this size.
@@ -30,18 +33,18 @@ void _write_cb(uv_write_t* req, int status) { std::free(req); }
 void _close_cb(uv_handle_t* handle) { /* no-op */ };
 
 void PTY::_bind_methods() {
-    BIND_ENUM_CONSTANT(SIGNAL_SIGHUP);
-    BIND_ENUM_CONSTANT(SIGNAL_SIGINT);
-    BIND_ENUM_CONSTANT(SIGNAL_SIGQUIT);
-    BIND_ENUM_CONSTANT(SIGNAL_SIGILL);
-    BIND_ENUM_CONSTANT(SIGNAL_SIGTRAP);
-    BIND_ENUM_CONSTANT(SIGNAL_SIGABRT);
-    BIND_ENUM_CONSTANT(SIGNAL_SIGFPE);
-    BIND_ENUM_CONSTANT(SIGNAL_SIGKILL);
-    BIND_ENUM_CONSTANT(SIGNAL_SIGSEGV);
-    BIND_ENUM_CONSTANT(SIGNAL_SIGPIPE);
-    BIND_ENUM_CONSTANT(SIGNAL_SIGALRM);
-    BIND_ENUM_CONSTANT(SIGNAL_SIGTERM);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGHUP);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGINT);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGQUIT);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGILL);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGTRAP);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGABRT);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGFPE);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGKILL);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGSEGV);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGPIPE);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGALRM);
+    BIND_ENUM_CONSTANT(IPCSIGNAL_SIGTERM);
 
     ADD_SIGNAL(MethodInfo("data_received", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
     ADD_SIGNAL(MethodInfo("exited", PropertyInfo(Variant::INT, "exit_code"), PropertyInfo(Variant::INT, "signal_code")));
@@ -93,12 +96,13 @@ PTY::PTY() {
     env["TERM"] = "xterm-256color";
     env["COLORTERM"] = "truecolor";
 
-#if defined(__linux__) || defined(__APPLE__)
     uv_loop_init(&loop);
     uv_async_init(&loop, &async_handle, [](uv_async_t* handle) {});
     uv_pipe_init(&loop, &pipe, false);
-    pipe.data = this;
+#ifdef _WIN32
+    uv_pipe_init(&loop, &pipe_out, false);
 #endif
+    pipe.data = this;
 }
 
 void PTY::set_cols(const int num_cols) {
@@ -193,19 +197,30 @@ Error PTY::fork(const String& file, const PackedStringArray& args, const String&
     result = PTYUnix::fork(fork_file, args, _parse_env(fork_env), cwd, p_cols, p_rows, -1, -1, true, helper_path, Callable(this, "_on_exit"));
 #endif
 
+#if defined(_WIN32)
+    String helper_path = ProjectSettings::get_singleton()->globalize_path("res://addons/godot_xterm/native/bin/spawn-helper");
+    result = PTYWin::fork(fork_file, args, _parse_env(fork_env), cwd, p_cols, p_rows, -1, -1, true, helper_path, Callable(this, "_on_exit"));
+#endif
+
     Error err = static_cast<Error>((int)result["error"]);
     ERR_FAIL_COND_V_MSG(err != OK, err, "Failed to fork.");
 
     fd = result["fd"];
     pid = result["pid"];
     pts_name = result["pty"];
+#ifdef _WIN32
+    fd_out = result["fd_out"];
+    hpc = result["hpc"];
+#endif
 
     status = STATUS_OPEN;
 
-#if defined(__linux__) || defined(__APPLE__)
-    _pipe_open(fd);
-    uv_read_start((uv_stream_t*)&pipe, _alloc_buffer, _read_cb);
+    _pipe_open(fd, &pipe);
+#ifdef _WIN32
+    _pipe_open(fd_out, &pipe_out);
 #endif
+
+    uv_read_start((uv_stream_t*)&pipe, _alloc_buffer, _read_cb);
 
     if (use_threads) {
         stop_thread.clear();
@@ -217,7 +232,7 @@ Error PTY::fork(const String& file, const PackedStringArray& args, const String&
 }
 
 void PTY::kill(const int signal) {
-#if (defined(__linux__) || defined(__APPLE__)) && !defined(_PTY_DISABLED)
+#if !defined(_PTY_DISABLED)
     if (pid > 0) {
         uv_kill(pid, signal);
     }
@@ -229,6 +244,10 @@ Error PTY::open(const int cols, const int rows) {
 
 #if defined(__linux__) || defined(__APPLE__)
     result = PTYUnix::open(cols, rows);
+#endif
+
+#if defined(_WIN32)
+    result = PTYWin::open(cols, rows);
 #endif
 
     Error err = static_cast<Error>((int)result["error"]);
@@ -249,6 +268,12 @@ void PTY::resize(const int p_cols, const int p_rows) {
         PTYUnix::resize(fd, cols, rows);
     }
 #endif
+
+#if defined(_WIN32)
+    if (fd > -1) {
+        PTYWin::resize(hpc, cols, rows);
+    }
+#endif
 }
 
 void PTY::write(const Variant& data) const {
@@ -266,25 +291,29 @@ void PTY::write(const Variant& data) const {
     }
 
     if (status == STATUS_OPEN) {
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
         uv_buf_t buf;
         buf.base = (char*)bytes.ptr();
         buf.len = bytes.size();
         uv_write_t* req = (uv_write_t*)malloc(sizeof(uv_write_t));
         req->data = (void*)buf.base;
-        uv_write(req, (uv_stream_t*)&pipe, &buf, 1, _write_cb);
-        uv_run((uv_loop_t*)&loop, UV_RUN_NOWAIT);
 #endif
+
+#if defined(__linux__) || defined(__APPLE__)
+        uv_write(req, (uv_stream_t*)&pipe, &buf, 1, _write_cb);
+#elif defined(_WIN32)
+        uv_write(req, (uv_stream_t*)&pipe_out, &buf, 1, _write_cb);
+#endif
+
+        uv_run((uv_loop_t*)&loop, UV_RUN_NOWAIT);
     }
 }
 
 void PTY::_notification(int p_what) {
     switch (p_what) {
         case NOTIFICATION_INTERNAL_PROCESS: {
-#if defined(__linux__) || defined(__APPLE__)
             if (!use_threads)
                 uv_run(&loop, UV_RUN_NOWAIT);
-#endif
 
             buffer_write_mutex->lock();
             if (buffer.size() > 0) {
@@ -305,9 +334,7 @@ void PTY::_notification(int p_what) {
 void PTY::_thread_func() {
     while (!stop_thread.is_set()) {
         if (buffer.size() < BUFFER_LIMIT) {
-#if defined(__linux__) || defined(__APPLE__)
             uv_run(&loop, UV_RUN_ONCE);
-#endif
         } else {
             buffer_cleared->wait();
         }
@@ -318,14 +345,11 @@ void PTY::_close() {
     if (use_threads) {
         if (thread->is_started()) {
             stop_thread.set();
-#if defined(__linux__) || defined(__APPLE__)
             uv_async_send(&async_handle);
-#endif
             thread->wait_to_finish();
         }
     }
 
-#if defined(__linux__) || defined(__APPLE__)
     if (!uv_is_closing((uv_handle_t*)&pipe)) {
         uv_close((uv_handle_t*)&pipe, _close_cb);
     }
@@ -339,10 +363,15 @@ void PTY::_close() {
         uv_loop_close(&loop);
     }
 
+#if defined(__linux__) || defined(__APPLE__)
     if (fd > 0)
         close(fd);
     if (pid > 0)
-        kill(SIGNAL_SIGHUP);
+        kill(IPCSIGNAL_SIGHUP);
+#elif defined(_WIN32)
+    PTYWin::close(hpc, fd, fd_out);
+    fd_out = -1;
+    hpc = -1;
 #endif
 
     fd = -1;
@@ -380,6 +409,7 @@ Dictionary PTY::_get_fork_env() const {
     return env;
 #endif
 
+    // TODO This might need windows specific adjustment
     Dictionary os_env;
     uv_env_item_t* uv_env;
     int count;
@@ -431,8 +461,6 @@ void PTY::_on_exit(int exit_code, int exit_signal) {
     call_deferred("emit_signal", "exited", exit_code, exit_signal);
 }
 
-#if defined(__linux__) || defined(__APPLE__)
-
 void _alloc_buffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
     buf->base = (char*)malloc(suggested_size);
     buf->len = suggested_size;
@@ -470,14 +498,10 @@ void PTY::_read_cb(uv_stream_t* pipe, ssize_t nread, const uv_buf_t* buf) {
     }
 }
 
-Error PTY::_pipe_open(const int fd) {
+Error PTY::_pipe_open(const int fd, uv_pipe_t* pipe) {
     ERR_FAIL_COND_V_MSG(fd < 0, FAILED, "File descriptor must be a non-negative integer value.");
-
-    ERR_FAIL_UV_ERR(uv_pipe_open(&pipe, fd));
-    ERR_FAIL_UV_ERR(uv_stream_set_blocking((uv_stream_t*)&pipe, false));
-    ERR_FAIL_UV_ERR(uv_read_start((uv_stream_t*)&pipe, _alloc_buffer, _read_cb));
+    ERR_FAIL_UV_ERR(uv_pipe_open(pipe, fd));
+    ERR_FAIL_UV_ERR(uv_stream_set_blocking((uv_stream_t*)pipe, false));
 
     return OK;
 }
-
-#endif

@@ -17,19 +17,19 @@ class PTY : public Node {
     GDCLASS(PTY, Node)
 
 public:
-    enum Signal {
-        SIGNAL_SIGHUP = 1,
-        SIGNAL_SIGINT = 2,
-        SIGNAL_SIGQUIT = 3,
-        SIGNAL_SIGILL = 4,
-        SIGNAL_SIGTRAP = 5,
-        SIGNAL_SIGABRT = 6,
-        SIGNAL_SIGFPE = 8,
-        SIGNAL_SIGKILL = 9,
-        SIGNAL_SIGSEGV = 11,
-        SIGNAL_SIGPIPE = 13,
-        SIGNAL_SIGALRM = 14,
-        SIGNAL_SIGTERM = 15,
+    enum IPCSignal {
+        IPCSIGNAL_SIGHUP = 1,
+        IPCSIGNAL_SIGINT = 2,
+        IPCSIGNAL_SIGQUIT = 3,
+        IPCSIGNAL_SIGILL = 4,
+        IPCSIGNAL_SIGTRAP = 5,
+        IPCSIGNAL_SIGABRT = 6,
+        IPCSIGNAL_SIGFPE = 8,
+        IPCSIGNAL_SIGKILL = 9,
+        IPCSIGNAL_SIGSEGV = 11,
+        IPCSIGNAL_SIGPIPE = 13,
+        IPCSIGNAL_SIGALRM = 14,
+        IPCSIGNAL_SIGTERM = 15,
     };
 
     enum Status {
@@ -63,7 +63,7 @@ public:
     String get_pts_name() const;
 
     Error fork(const String& file = "", const PackedStringArray& args = PackedStringArray(), const String& cwd = ".", const int cols = 80, const int rows = 24);
-    void kill(const int signum = Signal::SIGNAL_SIGHUP);
+    void kill(const int signum = IPCSignal::IPCSIGNAL_SIGHUP);
     Error open(const int cols = 80, const int rows = 24);
     void resize(const int cols, const int rows);
     void resizev(const Vector2i& size) { resize(size.x, size.y); };
@@ -77,6 +77,10 @@ protected:
 private:
     int pid = -1;
     int fd = -1;
+#ifdef _WIN32
+    int fd_out = -1;
+    int64_t hpc = -1; // pseudoconsole handle
+#endif
 
     unsigned int cols = 80;
     unsigned int rows = 24;
@@ -104,15 +108,17 @@ private:
     bool use_threads;
     void _thread_func();
 
-#if defined(__linux__) || defined(__APPLE__)
     uv_loop_t loop;
     uv_pipe_t pipe;
-    Error _pipe_open(const int fd);
+#ifdef _WIN32
+    uv_pipe_t pipe_out;
 #endif
+
+    Error _pipe_open(const int fd, uv_pipe_t* pipe);
 
     static void _read_cb(uv_stream_t* pipe, ssize_t nread, const uv_buf_t* buf);
     static Error uv_err_to_godot_err(const int uv_err);
 };
 } // namespace godot
 
-VARIANT_ENUM_CAST(PTY::Signal);
+VARIANT_ENUM_CAST(PTY::IPCSignal);

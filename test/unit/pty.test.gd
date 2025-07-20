@@ -1,23 +1,15 @@
 extends "res://addons/gut/test.gd"
 
 
-class MockPTY:
-	extends "res://addons/godot_xterm/nodes/pty/pty_native.gd"
-
-	func write(data):
-		emit_signal("data_received", data)
-
-
 class BaseTest:
 	extends "res://addons/gut/test.gd"
 
 	var pty
-	var mock_pty_native: MockPTY
+	var mock_pty_native: PTY
 
 	func before_each():
 		pty = add_child_autofree(PTY.new())
-		mock_pty_native = autofree(MockPTY.new())
-		pty._pty_native = mock_pty_native
+		mock_pty_native = autofree(PTY.new())
 		watch_signals(mock_pty_native)
 
 
@@ -70,33 +62,17 @@ class TestPTYInterfaceGodotXterm2_0_0:
 	func test_has_signal_exited():
 		assert_has_signal(pty, "exited")
 
-	# NOTE: This differs from the GodotXterm 2.x API which uses Signal rather than IPCSignal.
+	# In Godot 4.x, enums are no longer dictionaries and thus need to be inspected individually.
 	func test_has_enum_Signal():
-		assert_true("IPCSignal" in pty, "Expected pty to have enum IPCSignal.")
-		assert_typeof(pty.IPCSignal, typeof(Dictionary()))
-		var signals = {
-			SIGHUP = 1,
-			SIGINT = 2,
-			SIGQUIT = 3,
-			SIGILL = 4,
-			SIGTRAP = 5,
-			SIGABRT = 6,
-			SIGFPE = 8,
-			SIGKILL = 9,
-			SIGSEGV = 11,
-			SIGPIPE = 13,
-			SIGALRM = 14,
-			SIGTERM = 15,
-		}
-		assert_gt(
-			pty.IPCSignal.size(),
-			signals.size() - 1,
-			"Expected Signal enum to have at least %d members." % signals.size()
-		)
-		for signame in signals.keys():
-			assert_has(pty.IPCSignal, signame, "Expected Signal enum to have member %s." % signame)
-			assert_eq(
-				pty.IPCSignal[signame],
-				signals[signame],
-				"Expected Signal enum member %s to have value %d." % [signame, signals[signame]]
-			)
+		assert_eq(pty.IPCSIGNAL_SIGHUP, 1, "Expected pty to have IPCSIGNAL_SIGHUP.")
+		assert_eq(pty.IPCSIGNAL_SIGINT, 2, "Expected pty to have IPCSIGNAL_SIGINT.")
+		assert_eq(pty.IPCSIGNAL_SIGQUIT, 3, "Expected pty to have IPCSIGNAL_SIGQUIT.")
+		assert_eq(pty.IPCSIGNAL_SIGILL, 4, "Expected pty to have IPCSIGNAL_SIGILL.")
+		assert_eq(pty.IPCSIGNAL_SIGTRAP, 5, "Expected pty to have IPCSIGNAL_SIGTRAP.")
+		assert_eq(pty.IPCSIGNAL_SIGABRT, 6, "Expected pty to have IPCSIGNAL_SIGABRT.")
+		assert_eq(pty.IPCSIGNAL_SIGFPE, 8, "Expected pty to have IPCSIGNAL_SIGFPE.")
+		assert_eq(pty.IPCSIGNAL_SIGKILL, 9, "Expected pty to have IPCSIGNAL_SIGKILL.")
+		assert_eq(pty.IPCSIGNAL_SIGSEGV, 11, "Expected pty to have IPCSIGNAL_SIGSEGV.")
+		assert_eq(pty.IPCSIGNAL_SIGPIPE, 13, "Expected pty to have IPCSIGNAL_SIGPIPE.")
+		assert_eq(pty.IPCSIGNAL_SIGALRM, 14, "Expected pty to have IPCSIGNAL_SIGALRM.")
+		assert_eq(pty.IPCSIGNAL_SIGTERM, 15, "Expected pty to have IPCSIGNAL_SIGTERM.")

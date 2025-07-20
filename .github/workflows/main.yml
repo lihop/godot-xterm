@@ -143,11 +143,15 @@ jobs:
           args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
           if [ "$TARGET" == "release" ]; then
-            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
+            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"
           else
-            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"
+            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
           fi
-          if [ "$BITS" -eq 32 -a "$PLATFORM" == "windows" ]; then
+          if  [ ${{matrix.platform}} == 'windows' ]; then
+            # godot-cpp always builds with the non-debug version of the CRT. So we use /MT for both debug and release builds. 
+            args="$args -DCMAKE_C_FLAGS_DEBUG=-MT -DCMAKE_C_FLAGS_RELEASE=-MT"
+          fi
+          if [ "$BITS" -eq 32 -a ${{matrix.platform}} == "windows" ]; then
             cmake -G "Visual Studio 17 2022" -A Win32 -S $(pwd) -B "build" $args
           else
             cd build

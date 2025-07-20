@@ -751,7 +751,7 @@ void Terminal::_handle_key_input(Ref<InputEventKey> event) {
 
     unsigned int mods = 0;
     if (event->is_alt_pressed())
-        mods |= TSM_SHIFT_MASK;
+        mods |= TSM_ALT_MASK;
     if (event->is_ctrl_pressed())
         mods |= TSM_CONTROL_MASK;
     if (event->is_shift_pressed())
