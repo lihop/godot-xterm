@@ -3,6 +3,7 @@
 *.so
 *.wasm
 *.dylib
+*.exp
 *.framework
 *.xcframework
 *.dll
