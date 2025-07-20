@@ -124,7 +124,11 @@ func _update_terminal_tabs():
 
 
 func _on_AddButton_pressed():
-	var shell = OS.get_environment("SHELL") if OS.has_environment("SHELL") else "sh"
+	var shell = (
+		OS.get_environment("SHELL")
+		if OS.has_environment("SHELL")
+		else ("powershell" if OS.get_name() == "Windows" else "sh")
+	)
 	var terminal := EditorTerminal.instantiate()
 	tabs.add_tab(shell.get_file())
 	terminal.editor_settings = editor_settings
