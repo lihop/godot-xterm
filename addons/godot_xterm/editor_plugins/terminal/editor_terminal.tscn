@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bkcyv0w3setep"]
 
-[ext_resource type="Script" path="res://addons/godot_xterm/editor_plugins/terminal/editor_terminal.gd" id="1"]
+[ext_resource type="Script" uid="uid://cgjg4p52appdp" path="res://addons/godot_xterm/editor_plugins/terminal/editor_terminal.gd" id="1"]
 [ext_resource type="Theme" uid="uid://0gk8swmcldbg" path="res://themes/demo.tres" id="1_htj4w"]
 
 [node name="Terminal" type="Terminal"]
@@ -25,3 +25,4 @@ terminal_path = NodePath("..")
 [connection signal="data_sent" from="." to="PTY" method="write"]
 [connection signal="size_changed" from="." to="PTY" method="resizev"]
 [connection signal="data_received" from="PTY" to="." method="write"]
+[connection signal="exited" from="PTY" to="." method="_on_PTY_exited"]
