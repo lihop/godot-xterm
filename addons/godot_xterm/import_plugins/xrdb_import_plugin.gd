@@ -28,6 +28,10 @@ func _get_import_options(preset, _i):
 	return []
 
 
+func _get_priority():
+	return 1.0
+
+
 func _get_preset_count():
 	return 0
 
