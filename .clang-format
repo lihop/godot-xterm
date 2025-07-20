@@ -1,0 +1,50 @@
+---
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: c++17
+AccessModifierOffset: -4
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
+AlignOperands: DontAlign
+AlignTrailingComments: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: All
+AllowShortEnumsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: true
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBraces: Attach
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: AfterColon
+BreakStringLiterals: false
+ColumnLimit: 0
+CompactNamespaces: false
+ConstructorInitializerIndentWidth: 8
+ContinuationIndentWidth: 8
+Cpp11BracedListStyle: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+IncludeCategories:
+  - Regex: '".*"'
+    Priority: 1
+  - Regex: '^<.*\.h>'
+    Priority: 2
+  - Regex: "^<.*"
+    Priority: 3
+IndentCaseLabels: true
+IndentWidth: 4
+KeepEmptyLinesAtTheStartOfBlocks: false
+PenaltyBreakBeforeFirstCallParameter: 100
+PointerAlignment: Left
+ReferenceAlignment: Left
+ReflowComments: false
+SortIncludes: Never
+SpaceBeforeParens: ControlStatements
+SpacesInLineCommentPrefix:
+  Minimum: 0
+  Maximum: -1
+TabWidth: 4
+UseTab: Never
