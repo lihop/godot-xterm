@@ -244,7 +244,7 @@ jobs:
       matrix:
         platform: [linux, macos, windows]
         arch: [x86_64, x86_32, universal]
-        godot-version: ["v4.2-stable", "v4.2.1-stable"]
+        godot-version: ["v4.2-stable", "v4.4.1-stable"]
         exclude:
           - platform: linux
             arch: universal
@@ -349,7 +349,7 @@ jobs:
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
-          version: "4.2.2-stable"
+          version: "4.4.1-stable"
       - name: Install just
         uses: taiki-e/install-action@just
       - name: Update gdextension file
