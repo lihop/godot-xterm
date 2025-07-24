@@ -444,6 +444,29 @@ jobs:
           pattern: "*-${{ matrix.target }}"
           delete-merged: true
 
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-22.04
+    needs: [merge-artifacts]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: addons/godot_xterm/native/bin
+          merge-multiple: true
+      - name: Create archive
+        run: |
+          git add -f addons/godot_xterm/native/bin/
+          git archive -o godot-xterm-test.zip $(git write-tree)
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: godot-xterm-test.zip
+          draft: true
+          tag_name: test-${{ github.run_number }}
+          name: Test Release ${{ github.run_number }}
+
   check-pre-commit:
     name: "Check Pre-Commit"
     runs-on: ubuntu-22.04
