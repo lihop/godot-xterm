@@ -37,3 +37,4 @@
 /requirements.txt export-ignore
 /test export-ignore
 /themes export-ignore
+/.gutconfig*.json export-ignore

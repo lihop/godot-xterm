@@ -303,16 +303,12 @@ jobs:
       - name: Test
         shell: bash
         run: |
-          if [ "${{ matrix.platform }}" = "windows" ]; then
-            just test | tee output.log
-          else
-            just test-all | tee output.log
-          fi
+          just test | tee output.log
 
           # This step often passes when it shouldn't, due to GUT not failing on script errors
           # (see: https://github.com/bitwes/Gut/issues/210). Therefore, we check the output
           # for expected (and unexpected) strings.
-          if grep -q 'SCRIPT_ERROR:' output.log || grep -q 'Tests             none' output.log; then
+          if grep -q 'SCRIPT ERROR:' output.log || grep -q '\[ERROR\]:' output.log; then
             exit 1
           fi
       - name: Upload screenshots
@@ -320,7 +316,7 @@ jobs:
         if: failure()
         with:
           name: failed-screenshots
-          path: test/visual_regression/screenshots
+          path: test/visual/screenshots
 
   benchmark:
     name: Benchmark (${{matrix.benchmark}})

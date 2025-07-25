@@ -35,19 +35,19 @@ build-all: build build-javascript
 install:
     {{godot}} --headless -s plug.gd install
 
-test_files := if os_family() == "unix" { "test/test_terminal.gd,test/test_pty.gd,test/test_nix.gd" } else { "test/test_terminal.gd,test/test_pty.gd" }
+test_config_suffix := if os_family() == "unix" { "unix.json" } else { "json" }
 
 test:
-    {{godot}} --headless -s addons/gut/gut_cmdln.gd -gtest={{test_files}} -gexit
+    {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.{{test_config_suffix}}
 
-test-all:
-    {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gdir=res://test/ -ginclude_subdirs=true -gopacity=0 -gexit
+test-unit:
+    {{godot}} --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.unit.json
 
-test-rendering:
-    {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gtest=res://test/test_rendering.gd -gopacity=0 -gexit
+test-integration:
+    {{godot}} --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.integration.{{test_config_suffix}}
 
 test-visual:
-    {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gdir=res://test/visual_regression/ -ginclude_subdirs=true -gopacity=0 -gexit
+    {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.visual.json
 
 uninstall:
     {{godot}} --headless -s plug.gd uninstall

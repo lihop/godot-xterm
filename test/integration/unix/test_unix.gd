@@ -3,6 +3,11 @@ class_name NixTest extends GodotXtermTest
 var helper: Helper
 
 
+func should_skip_script():
+	if not OS.get_name() in ["Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD", "macOS", "Windows"]:
+		return "These tests are only for Unix-like systems"
+
+
 func get_described_class():
 	return PTY
 

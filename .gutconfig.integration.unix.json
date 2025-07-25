@@ -1,0 +1,5 @@
+{
+  "dirs": ["res://test/integration", "res://test/integration/unix"],
+  "log_level": 2,
+  "should_exit": true
+}

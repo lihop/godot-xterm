@@ -4,6 +4,11 @@
 class_name RenderingTest extends GodotXtermTest
 
 
+func should_skip_script():
+	if DisplayServer.get_name() == "headless":
+		return "Visual tests require a display server"
+
+
 func get_described_class():
 	return Terminal
 

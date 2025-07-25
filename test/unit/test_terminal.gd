@@ -310,3 +310,43 @@ class TestSelect:
 
 	func test_wide_bounds():
 		assert_select_eq([-999, -999, 999, 999], "0123456789\nABCDEFGHIJ\n)!@#$%^&*(\n\n\n\n\n\n")
+
+
+class TestMultipleInputs:
+	# Tests for when Terminal is around other input nodes and arrow keys or TAB
+	# key is pressed. Focus should not change to other inputs when pressing these
+	# keys (same behaviour as TextEdit node).
+	# See: https://github.com/lihop/godot-xterm/issues/51
+	extends TerminalTest
+
+	const KEYS := {
+		KEY_LEFT = KEY_LEFT,
+		KEY_UP = KEY_UP,
+		KEY_RIGHT = KEY_RIGHT,
+		KEY_DOWN = KEY_DOWN,
+		KEY_TAB = KEY_TAB,
+	}
+
+	func press_key(keycode: int, unicode := 0) -> void:
+		var key_down = InputEventKey.new()
+		key_down.keycode = keycode
+		key_down.pressed = true
+		Input.parse_input_event(key_down)
+		await get_tree().create_timer(0.1).timeout
+		var key_up = InputEventKey.new()
+		key_up.keycode = keycode
+		key_up.pressed = false
+		Input.parse_input_event(key_up)
+
+	func before_each():
+		var scene := preload("res://test/scenes/multiple_inputs.tscn").instantiate()
+		add_child_autofree(scene)
+		subject = scene.find_child("Terminal")
+		subject.grab_focus()
+
+	func test_terminal_keeps_focus_when_certain_keys_pressed():
+		for key in KEYS.keys():
+			press_key(KEYS[key])
+			assert_true(
+				subject.has_focus(), "Terminal should still have focus after %s is pressed." % key
+			)

@@ -1,0 +1,11 @@
+{
+  "dirs": [
+    "res://test/unit",
+    "res://test/integration",
+    "res://test/integration/unix",
+    "res://test/visual"
+  ],
+  "log_level": 2,
+  "opacity": 0,
+  "should_exit": true
+}
