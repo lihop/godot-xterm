@@ -369,7 +369,9 @@ void PTY::_close() {
     if (pid > 0)
         kill(IPCSIGNAL_SIGHUP);
 #elif defined(_WIN32)
-    PTYWin::close(hpc, fd, fd_out);
+    if (hpc > 0) {
+        PTYWin::close(hpc, fd, fd_out);
+    }
     fd_out = -1;
     hpc = -1;
 #endif
