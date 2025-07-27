@@ -287,10 +287,10 @@ int Terminal::_draw_cb(struct tsm_screen* con,
     }
 
     Vector2 cell_position = Vector2(posx * term->cell_size.x, posy * term->cell_size.y);
-    Rect2 cell_rect = Rect2(cell_position, term->cell_size);
 
-    // Erase any previous character in the cell.
-    term->rs->canvas_item_add_rect(term->char_canvas_item, cell_rect, Color(1, 1, 1, 0));
+    // Erase any previous character in the cell(s).
+    Rect2 erase_rect = Rect2(cell_position, Vector2(width * term->cell_size.x, term->cell_size.y));
+    term->rs->canvas_item_add_rect(term->char_canvas_item, erase_rect, Color(1, 1, 1, 0));
 
     if (len < 1) { // No foreground to draw.
         return OK;
