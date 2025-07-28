@@ -47,7 +47,7 @@ test-rendering:
     {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gtest=res://test/test_rendering.gd -gopacity=0 -gexit
 
 test-visual:
-    {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gdir=res://test/visual_regression/ -ginclude_subdirs=true -gopacity=0 -gexit
+    {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gdir=res://test/visual/ -ginclude_subdirs=true -gopacity=0 -gexit
 
 uninstall:
     {{godot}} --headless -s plug.gd uninstall

@@ -26,7 +26,7 @@ func before_each():
 func assert_match(reference: String):
 	var image = get_viewport().get_texture().get_image()
 	image.crop(TERMINAL_SIZE.x, TERMINAL_SIZE.y)
-	var reference_path = "res://test/visual_regression/baseline/%s.png" % reference
+	var reference_path = "res://test/visual/baseline/%s.png" % reference
 
 	if UPDATE or not FileAccess.file_exists(reference_path):
 		image.save_png(reference_path)
@@ -38,8 +38,8 @@ func assert_match(reference: String):
 	var diff = matcher.diff(image, reference_image, diff_image, TERMINAL_SIZE.x, TERMINAL_SIZE.y)
 
 	if diff != 0:
-		diff_image.save_png("res://test/visual_regression/screenshots/%s.diff.png" % reference)
-		image.save_png("res://test/visual_regression/screenshots/%s.png" % reference)
+		diff_image.save_png("res://test/visual/screenshots/%s.diff.png" % reference)
+		image.save_png("res://test/visual/screenshots/%s.png" % reference)
 
 	assert_eq(diff, 0, "Screenshot matches baseline image")
 

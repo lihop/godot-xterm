@@ -320,7 +320,7 @@ jobs:
         if: failure()
         with:
           name: failed-screenshots
-          path: test/visual_regression/screenshots
+          path: test/visual/screenshots
 
   benchmark:
     name: Benchmark (${{matrix.benchmark}})

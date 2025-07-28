@@ -30,7 +30,7 @@ mono_crash.*
 .gutconfig.json
 test/results.xml
 test/test_metadata.json
-test/visual_regression/screenshots/
+test/visual/screenshots/
 
 # GodotXterm-specific ignores
 .gdxterm
