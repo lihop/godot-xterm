@@ -27,6 +27,7 @@
 /.github export-ignore
 /.gitignore export-ignore
 /.gitmodules export-ignore
+/.gutconfig* export-ignore
 /icon.png export-ignore
 /icon.png.import export-ignore
 /.import export-ignore

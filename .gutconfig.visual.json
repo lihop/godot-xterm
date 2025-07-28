@@ -1,0 +1,6 @@
+{
+  "dirs": ["res://test/visual"],
+  "log_level": 2,
+  "opacity": 0,
+  "should_exit": true
+}

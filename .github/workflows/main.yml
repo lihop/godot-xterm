@@ -303,16 +303,21 @@ jobs:
       - name: Test
         shell: bash
         run: |
-          if [ "${{ matrix.platform }}" = "windows" ]; then
-            just test | tee output.log
+          set -e # Exit on first command failure.
+          set -o pipefail # Prevent tee swallowing the exit code.
+
+          if [ "${{ matrix.platform }}" == "windows" ]; then
+            # The setup-godot action does not currently support visual godot 4+ on Windows.
+            just test-unit | tee output.log
+            just test-integration | tee -a output.log
           else
-            just test-all | tee output.log
+            just test | tee output.log
           fi
 
           # This step often passes when it shouldn't, due to GUT not failing on script errors
           # (see: https://github.com/bitwes/Gut/issues/210). Therefore, we check the output
           # for expected (and unexpected) strings.
-          if grep -q 'SCRIPT_ERROR:' output.log || grep -q 'Tests             none' output.log; then
+          if grep -q 'SCRIPT ERROR:' output.log || grep -q '\[ERROR\]:' output.log; then
             exit 1
           fi
       - name: Upload screenshots
