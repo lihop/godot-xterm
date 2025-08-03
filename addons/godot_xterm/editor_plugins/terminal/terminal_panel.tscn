@@ -66,6 +66,7 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_osmrc")
 tabs_visible = false
+deselect_enabled = true
 
 [node name="TerminalPopupMenu" type="PopupMenu" parent="VBoxContainer"]
 size = Vector2i(136, 178)

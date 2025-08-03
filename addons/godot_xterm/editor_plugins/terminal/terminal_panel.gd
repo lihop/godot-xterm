@@ -147,7 +147,9 @@ func _on_AddButton_pressed():
 func _on_Tabs_tab_changed(tab_index):
 	tab_container.call_deferred("set_current_tab", tab_index)
 	await get_tree().process_frame
-	tab_container.get_current_tab_control().grab_focus()
+	var current_tab_control = tab_container.get_current_tab_control()
+	if current_tab_control:
+		current_tab_control.grab_focus()
 
 
 func _on_Tabs_tab_close(tab_index):
