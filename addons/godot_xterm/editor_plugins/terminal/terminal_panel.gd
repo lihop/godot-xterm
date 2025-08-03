@@ -98,12 +98,11 @@ func _update_terminal_tabs():
 		await tree.process_frame
 
 	if tabs.get_offset_buttons_visible():
-		# Move add button to fixed position on the tabbar.
+		# Move add button to fixed position at the right of the tabbar container.
 		if add_button.get_parent() == tabs:
-			add_button.position = Vector2.ZERO
 			tabs.remove_child(add_button)
 			tabbar_container.add_child(add_button)
-			tabbar_container.move_child(add_button, 0)
+			# Keep it at the end (right side) of the container.
 	else:
 		# Move add button after last tab.
 		if tabs.tab_count > 0 and add_button.get_parent() == tabbar_container:
@@ -118,6 +117,8 @@ func _update_terminal_tabs():
 	if tabs.tab_count == 0 and add_button.get_parent() == tabs:
 		tabs.remove_child(add_button)
 		tabbar_container.add_child(add_button)
+		tabbar_container.move_child(add_button, 0)  # Move to start (left side)
+		add_button.position = Vector2.ZERO
 
 	# Make sure we still own the button, so it gets saved with our scene.
 	add_button.owner = self
