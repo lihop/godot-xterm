@@ -193,12 +193,12 @@ Error PTY::fork(const String& file, const PackedStringArray& args, const String&
     Dictionary result;
 
 #if defined(__linux__) || defined(__APPLE__)
-    String helper_path = ProjectSettings::get_singleton()->globalize_path("res://addons/godot_xterm/native/bin/spawn-helper");
+    String helper_path = ProjectSettings::get_singleton()->globalize_path("res://addons/godot_xterm/bin/spawn-helper");
     result = PTYUnix::fork(fork_file, args, _parse_env(fork_env), cwd, p_cols, p_rows, -1, -1, true, helper_path, Callable(this, "_on_exit"));
 #endif
 
 #if defined(_WIN32)
-    String helper_path = ProjectSettings::get_singleton()->globalize_path("res://addons/godot_xterm/native/bin/spawn-helper");
+    String helper_path = ProjectSettings::get_singleton()->globalize_path("res://addons/godot_xterm/bin/spawn-helper");
     result = PTYWin::fork(fork_file, args, _parse_env(fork_env), cwd, p_cols, p_rows, -1, -1, true, helper_path, Callable(this, "_on_exit"));
 #endif
 

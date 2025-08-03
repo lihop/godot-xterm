@@ -36,7 +36,7 @@ On Windows, you can use `git-bash` to run this script.
 Provided the dependencies above are installed then it should "just work™".
 :::
 
-Binaries for your platform will be installed in `addons/godot_xterm/native/bin`.
+Binaries for your platform will be installed in `addons/godot_xterm/bin`.
 
 The {{ '[build.sh]({}/addons/godot_xterm/native/build.sh)'.format(repo) }} script accepts args `--target` which can be set to `debug` (default) or `release` and `--disable-pty` to compile only the dependencies of {{Terminal}} node and not {{PTY}} node (even on platforms that support it).
 
@@ -50,4 +50,4 @@ Also feel free to open a new discussion in the [discussions](https://github.com/
 
 Although the SConstruct file contains some logic for cross-compiling, it has never been tested. If you want compile for other platforms consider forking this repo and then pushing your changes to GitHub. The workflow defined in {{ '[main.yml]({}/.github/workflows/main.yml)'.format(repo) }} will run and build the library for all supported platforms (Linux, macOS, Windows, and Web).
 
-Additionally, If you have `docker` and `docker-compose` installed, the {{ '[build.sh]({}/addons/godot_xterm/native/build.sh)'.format(repo) }} script will also try to build the Web binary inside a docker container and copy them to `addons/godot_xterm/native/bin`.
+Additionally, If you have `docker` and `docker-compose` installed, the {{ '[build.sh]({}/addons/godot_xterm/native/build.sh)'.format(repo) }} script will also try to build the Web binary inside a docker container and copy them to `addons/godot_xterm/bin`.

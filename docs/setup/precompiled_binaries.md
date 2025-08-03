@@ -33,11 +33,11 @@ See the [gd-plug documentation](https://github.com/imjp94/gd-plug/blob/master/RE
 Alternatively, GodotXterm can be installed manually in two steps:
 
 1. Copy the {{ '[`addons/godot_xterm`]({}/addons/godot_xterm)'.format(repo) }} directory to the `addons` directory of your Godot project.
-2. Copy the GDNative binaries into `addons/godot_xterm/native/bin` directory.
+2. Copy the GDNative binaries into `addons/godot_xterm/bin` directory.
 
 The easiest way to obtain the GDNative binaries is to download them from [the Releases page](https://github.com/lihop/godot-xterm/releases).
-Download the zip archive named `libgodot-xterm-release.zip` and extract its contents into the `/addons/godot_xterm/native/bin` directory of your project.
-After this your `addons/godot_xterm/native/bin` directory should contain the following files:
+Download the zip archive named `libgodot-xterm-release.zip` and extract its contents into the `/addons/godot_xterm/bin` directory of your project.
+After this your `addons/godot_xterm/bin` directory should contain the following files:
 
 - `libgodot-xterm.javascript.32.wasm`
 - `libgodot-xterm.linux.32.so`

@@ -64,6 +64,18 @@ bench name="":
         ls -1 benchmark/vtebench/benchmarks | xargs -I {} just bench {} && just bench editor_launch; \
     fi
 
+package:
+    #!/usr/bin/env bash
+    set -e
+    if [ -n "$(git status --porcelain)" ]; then
+        echo "Error: Git working directory is not clean. Please commit, stash, or remove all changes first."
+        git status --short
+        exit 1
+    fi
+    git add -f addons/godot_xterm/bin/
+    git archive -o godot-xterm.zip $(git write-tree)
+    git reset HEAD addons/godot_xterm/bin/
+
 clean:
     @if command -v scons > /dev/null; then \
         scons -C addons/godot_xterm/native -c || true; \

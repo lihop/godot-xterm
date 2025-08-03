@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# SPDX-FileCopyrightText: 2020-2024 Leroy Hopson <godot-xterm@leroy.nix.nz>
+# SPDX-FileCopyrightText: 2020-2025 Leroy Hopson <godot-xterm@leroy.nix.nz>
 # SPDX-License-Identifier: MIT
 
 import os
@@ -40,19 +40,19 @@ else:
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
-        "bin/libgodot-xterm.{}.{}.framework/libgodot-xterm.{}.{}".format(
+        "../bin/libgodot-xterm.{}.{}.framework/libgodot-xterm.{}.{}".format(
             env["platform"], env["target"], env["platform"], env["target"]
         ),
         source=sources,
     )
     spawn_helper = env.Program(
-        "bin/spawn-helper",
+        "../bin/spawn-helper",
         source="thirdparty/node-pty/src/unix/spawn-helper.cc"
     )
     Default(spawn_helper)
 else:
     library = env.SharedLibrary(
-        "bin/libgodot-xterm{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "../bin/libgodot-xterm{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources,
     )
 
