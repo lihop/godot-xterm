@@ -45,7 +45,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: libgodot-xterm-linux-${{ matrix.arch }}-${{ matrix.target }}
-          path: addons/godot_xterm/native/bin/*.so
+          path: addons/godot_xterm/bin/*.so
 
   build-other-platforms:
     name: "Build (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.target}}) #${{ github.run_number }}"
@@ -174,12 +174,12 @@ jobs:
         with:
           name: libgodot-xterm-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.target }}
           path: |
-            addons/godot_xterm/native/bin/*.so
-            addons/godot_xterm/native/bin/*.wasm
-            addons/godot_xterm/native/bin/*.framework
-            addons/godot_xterm/native/bin/spawn-helper
-            addons/godot_xterm/native/bin/*.xcframework
-            addons/godot_xterm/native/bin/*.dll
+            addons/godot_xterm/bin/*.so
+            addons/godot_xterm/bin/*.wasm
+            addons/godot_xterm/bin/*.framework
+            addons/godot_xterm/bin/spawn-helper
+            addons/godot_xterm/bin/*.xcframework
+            addons/godot_xterm/bin/*.dll
 
   web-export:
     name: "Web Export"
@@ -212,7 +212,7 @@ jobs:
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: addons/godot_xterm/native/bin
+          path: addons/godot_xterm/bin
           merge-multiple: true
       - name: Export for web
         shell: bash
@@ -294,12 +294,12 @@ jobs:
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: addons/godot_xterm/native/bin
+          path: addons/godot_xterm/bin
           merge-multiple: true
       - name: Set spawn-helper file permissions
         if: ${{ matrix.platform == 'macos' }}
         # File permissions are not preserved by upload-artifact.
-        run: chmod +x addons/godot_xterm/native/bin/spawn-helper
+        run: chmod +x addons/godot_xterm/bin/spawn-helper
       - name: Test
         shell: bash
         run: |
@@ -359,7 +359,7 @@ jobs:
         uses: taiki-e/install-action@just
       - name: Update gdextension file
         run: | # Use release builds as the build job finishes sooner.
-          sed -i 's/template_debug/template_release/g' addons/godot_xterm/native/godot-xterm.gdextension
+          sed -i 's/template_debug/template_release/g' addons/godot_xterm/godot-xterm.gdextension
       - name: Import assets
         shell: bash
         run: godot --editor --headless --quit-after 100 || true
@@ -373,7 +373,7 @@ jobs:
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: addons/godot_xterm/native/bin
+          path: addons/godot_xterm/bin
           merge-multiple: true
       - name: Benchmark
         if: steps.wait-for-build.outputs.conclusion == 'success'
