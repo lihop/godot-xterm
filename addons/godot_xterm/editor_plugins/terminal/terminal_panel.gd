@@ -145,8 +145,14 @@ func _on_AddButton_pressed():
 
 
 func _on_Tabs_tab_changed(tab_index):
-	tab_container.call_deferred("set_current_tab", tab_index)
-	await get_tree().process_frame
+	# Simply sync the TabContainer - focus handling happens in TabContainer signal
+	# Only sync if TabContainer has enough tabs
+	if tab_index < tab_container.get_tab_count():
+		tab_container.current_tab = tab_index
+
+
+func _on_TabContainer_tab_changed(tab_index):
+	# TabContainer has already changed, so we can safely focus immediately
 	var current_tab_control = tab_container.get_current_tab_control()
 	if current_tab_control:
 		current_tab_control.grab_focus()
@@ -156,9 +162,10 @@ func _on_Tabs_tab_close(tab_index):
 	tabs.remove_tab(tab_index)
 	tab_container.get_child(tab_index).queue_free()
 
-	# Switch focus to the next active tab.
+	# Sync TabContainer to the current TabBar selection
+	# Focus will be handled automatically by the TabContainer signal
 	if tabs.get_tab_count() > 0:
-		tab_container.get_child(tabs.current_tab).grab_focus()
+		tab_container.current_tab = tabs.current_tab
 
 	_update_terminal_tabs()
 

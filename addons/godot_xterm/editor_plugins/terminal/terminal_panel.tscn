@@ -41,6 +41,7 @@ layout_mode = 2
 [node name="Tabs" type="TabBar" parent="VBoxContainer/TabbarContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+focus_mode = 0
 tab_close_display_policy = 2
 drag_to_rearrange_enabled = true
 
@@ -126,5 +127,6 @@ grow_vertical = 2
 [connection signal="tab_close_pressed" from="VBoxContainer/TabbarContainer/Tabs" to="." method="_on_Tabs_tab_close"]
 [connection signal="pressed" from="VBoxContainer/TabbarContainer/AddButton" to="." method="_on_AddButton_pressed"]
 [connection signal="gui_input" from="VBoxContainer/TabContainer" to="." method="_on_TabContainer_gui_input"]
+[connection signal="tab_changed" from="VBoxContainer/TabContainer" to="." method="_on_TabContainer_tab_changed"]
 [connection signal="id_pressed" from="VBoxContainer/TerminalPopupMenu" to="." method="_on_TerminalPopupMenu_id_pressed"]
 [connection signal="timeout" from="SizeLabel/SizeLabelTimer" to="." method="_on_SizeLabelTimer_timeout"]
