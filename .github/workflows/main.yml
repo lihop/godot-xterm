@@ -449,6 +449,27 @@ jobs:
           pattern: "*-${{ matrix.target }}"
           delete-merged: true
 
+  package-for-asset-lib:
+    name: Package for Asset Library
+    runs-on: ubuntu-22.04
+    needs: [merge-artifacts]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Add binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: addons/godot_xterm/bin
+          merge-multiple: true
+      - name: Create archive
+        run: just package
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-xterm
+          path: godot-xterm.zip
+
   check-pre-commit:
     name: "Check Pre-Commit"
     runs-on: ubuntu-22.04
