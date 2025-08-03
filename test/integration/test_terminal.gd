@@ -17,18 +17,18 @@ func test_bell() -> void:
 	terminal.write("\a")
 	terminal.write("\u0007")
 	terminal.write("'Ask not for whom the \a tolls; it tolls for thee' - John Donne")
-	await wait_for_signal(terminal.bell, 5)
+	await wait_for_signal(terminal.bell, 1)
 	assert_signal_emit_count(terminal, "bell", 5)
 
 
 func test_bell_cooldown() -> void:
 	watch_signals(terminal)
-	terminal.bell_cooldown = 0.5
+	terminal.bell_cooldown = 0.1
 	terminal.write("\a")
 	terminal.write("\a")
-	await wait_seconds(1)
+	await wait_seconds(0.15)
 	terminal.write("\a")
-	await wait_for_signal(terminal.bell, 5)
+	await wait_for_signal(terminal.bell, 1)
 	assert_signal_emit_count(terminal, "bell", 2)
 
 
