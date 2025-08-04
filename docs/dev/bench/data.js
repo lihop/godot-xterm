@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1754219931987,
+  "lastUpdate": 1754305926719,
   "repoUrl": "https://github.com/lihop/godot-xterm",
   "entries": {
     "GodotXterm Benchmarks": [
@@ -40980,6 +40980,193 @@ window.BENCHMARK_DATA = {
           {
             "name": "unicode - render gpu",
             "value": 1475,
+            "unit": "milliseconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Leroy Hopson",
+            "username": "lihop",
+            "email": "git@leroy.nix.nz"
+          },
+          "committer": {
+            "name": "Leroy Hopson",
+            "username": "lihop",
+            "email": "git@leroy.nix.nz"
+          },
+          "id": "27aac8a90d54cd4fbd955cc54d3d71945bcd50c1",
+          "message": "chore: reorganize tests\n\nMerge visual tests in to test/visual.\n\nAdd gut configurations for unit, integration and visual tests with\nplatform-specific versions where applicable.\n\nUpdates Justfile and github actions workflow to use the new test\nconfigurations.\n\nRun test commands in bash so correct exit code is returned on failure.",
+          "timestamp": "2025-07-28T10:54:27Z",
+          "url": "https://github.com/lihop/godot-xterm/commit/27aac8a90d54cd4fbd955cc54d3d71945bcd50c1"
+        },
+        "date": 1754305925830,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "cursor_motion",
+            "value": 72.04,
+            "unit": "milliseconds",
+            "range": "± 17.51"
+          },
+          {
+            "name": "cursor_motion - render cpu",
+            "value": 8.863,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "cursor_motion - render gpu",
+            "value": 2085,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "dense_cells",
+            "value": 104.2,
+            "unit": "milliseconds",
+            "range": "± 25.98"
+          },
+          {
+            "name": "dense_cells - render cpu",
+            "value": 9.234,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "dense_cells - render gpu",
+            "value": 2230,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "editor_launch",
+            "value": 10.94,
+            "unit": "seconds"
+          },
+          {
+            "name": "light_cells",
+            "value": 77.01,
+            "unit": "milliseconds",
+            "range": "± 11.27"
+          },
+          {
+            "name": "light_cells - render cpu",
+            "value": 7.585,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "light_cells - render gpu",
+            "value": 1800,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling",
+            "value": 456.7,
+            "unit": "milliseconds",
+            "range": "± 15.42"
+          },
+          {
+            "name": "scrolling - render cpu",
+            "value": 6.624,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling - render gpu",
+            "value": 3154,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region",
+            "value": 460.8,
+            "unit": "milliseconds",
+            "range": "± 15.85"
+          },
+          {
+            "name": "scrolling_bottom_region - render cpu",
+            "value": 6.83,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region - render gpu",
+            "value": 3129,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_small_region",
+            "value": 458,
+            "unit": "milliseconds",
+            "range": "± 17.20"
+          },
+          {
+            "name": "scrolling_bottom_small_region - render cpu",
+            "value": 6.66,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_small_region - render gpu",
+            "value": 3192,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen",
+            "value": 88.25,
+            "unit": "milliseconds",
+            "range": "± 6.59"
+          },
+          {
+            "name": "scrolling_fullscreen - render cpu",
+            "value": 6.862,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen - render gpu",
+            "value": 1594,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region",
+            "value": 471.2,
+            "unit": "milliseconds",
+            "range": "± 15.07"
+          },
+          {
+            "name": "scrolling_top_region - render cpu",
+            "value": 7.336,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region - render gpu",
+            "value": 3227,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region",
+            "value": 462.7,
+            "unit": "milliseconds",
+            "range": "± 15.53"
+          },
+          {
+            "name": "scrolling_top_small_region - render cpu",
+            "value": 6.195,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region - render gpu",
+            "value": 3174,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode",
+            "value": 114.4,
+            "unit": "milliseconds",
+            "range": "± 49.64"
+          },
+          {
+            "name": "unicode - render cpu",
+            "value": 5.628,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode - render gpu",
+            "value": 1291,
             "unit": "milliseconds"
           }
         ]
