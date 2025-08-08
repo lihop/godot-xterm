@@ -282,8 +282,10 @@ int Terminal::_draw_cb(struct tsm_screen* con,
 
     // Update images (accounting for ultra-wide characters).
     for (int i = 0; i < width && (posx + i) < term->cols; i++) {
-        term->back_image->set_pixel(posx + i, posy, bgcol);
-        term->attr_image->set_pixel(posx + i, posy, Color(attr_flags / 255.0f, 0, 0, 0));
+        if (posy < term->rows && (posx + i) < term->cols) {
+            term->back_image->set_pixel(posx + i, posy, bgcol);
+            term->attr_image->set_pixel(posx + i, posy, Color(attr_flags / 255.0f, 0, 0, 0));
+        }
     }
 
     Vector2 cell_position = Vector2(posx * term->cell_size.x, posy * term->cell_size.y);
