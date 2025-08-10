@@ -413,7 +413,7 @@ jobs:
           key: ${{runner.os}}-benchmark
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
-        if: github.ref != 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
         with:
           tool: "customSmallerIsBetter"
           output-file-path: benchmark/results/all.json
@@ -424,7 +424,7 @@ jobs:
           comment-on-alert: true
           summary-always: true
       - name: Publish benchmark results
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: "GodotXterm Benchmarks"
