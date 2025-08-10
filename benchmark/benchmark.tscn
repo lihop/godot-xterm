@@ -1,9 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://b2axn64mqnt8n"]
+[gd_scene load_steps=4 format=3 uid="uid://b2axn64mqnt8n"]
 
-[ext_resource type="Script" path="res://benchmark/benchmark.gd" id="1_tmqb5"]
+[ext_resource type="Script" uid="uid://ce3hcuxfhcft4" path="res://benchmark/benchmark.gd" id="1_tmqb5"]
 [ext_resource type="PackedScene" uid="uid://cysad55lwtnc6" path="res://examples/terminal/terminal.tscn" id="2_3raq0"]
-[ext_resource type="Script" path="res://benchmark/terminal_benchmark.gd" id="3_8t8od"]
-[ext_resource type="FontVariation" uid="uid://ckq73bs2fwsie" path="res://themes/fonts/regular.tres" id="3_hnrrm"]
+[ext_resource type="Script" uid="uid://bxe58aqnhlhqs" path="res://benchmark/terminal_benchmark.gd" id="3_8t8od"]
 
 [node name="Benchmark" type="Control"]
 layout_mode = 3
@@ -17,7 +16,6 @@ script = ExtResource("1_tmqb5")
 [node name="Terminal" parent="." instance=ExtResource("2_3raq0")]
 layout_mode = 1
 focus_mode = 0
-theme_override_fonts/normal_font = ExtResource("3_hnrrm")
 script = ExtResource("3_8t8od")
 
 [connection signal="exited" from="Terminal" to="." method="_on_terminal_exited"]

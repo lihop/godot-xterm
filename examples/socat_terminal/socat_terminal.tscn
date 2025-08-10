@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bc5o6m6ty0ejn"]
 
-[ext_resource type="Script" path="res://examples/socat_terminal/socat_terminal.gd" id="1"]
+[ext_resource type="Script" uid="uid://bbsrwvfyn7e48" path="res://examples/socat_terminal/socat_terminal.gd" id="1"]
 [ext_resource type="Theme" uid="uid://0gk8swmcldbg" path="res://themes/demo.tres" id="1_rw2ub"]
 
 [node name="Terminal" type="Terminal"]

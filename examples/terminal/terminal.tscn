@@ -2,7 +2,7 @@
 
 [ext_resource type="AudioStream" uid="uid://n0hqjfxltbm0" path="res://themes/audio/bell.wav" id="1"]
 [ext_resource type="Theme" uid="uid://0gk8swmcldbg" path="res://themes/demo.tres" id="1_osky4"]
-[ext_resource type="Script" path="res://examples/terminal/terminal.gd" id="3"]
+[ext_resource type="Script" uid="uid://dob3lqpk8id5" path="res://examples/terminal/terminal.gd" id="3"]
 
 [node name="Terminal" type="Terminal"]
 anchors_preset = 15

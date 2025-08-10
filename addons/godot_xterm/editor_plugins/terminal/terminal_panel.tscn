@@ -22,7 +22,8 @@ custom_minimum_size = Vector2(0, 206)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = -233.0
+offset_right = 1152.0
+offset_bottom = 415.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
@@ -91,7 +92,6 @@ item_7/text = "Kill Terminal"
 item_7/id = 7
 
 [node name="SizeLabel" type="Label" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -105,7 +105,7 @@ offset_bottom = 15.5
 grow_horizontal = 2
 grow_vertical = 2
 text = "Size:
-(1152 x 623 px)"
+(0 x 0 px)"
 
 [node name="Panel" type="Panel" parent="SizeLabel"]
 show_behind_parent = true
