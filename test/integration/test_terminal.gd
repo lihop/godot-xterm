@@ -153,3 +153,26 @@ class TestTheme:
 		terminal.call_deferred("set_theme", default_theme)
 		await wait_for_signal(terminal.theme_changed, 5)
 		_check_colors(default_theme)
+
+
+class TestResize:
+	extends TerminalTest
+
+	func test_resize():
+		# Issue 114: https://github.com/lihop/godot-xterm/issues/114
+		var scene = preload("res://test/scenes/resize_crash_test.tscn").instantiate()
+		var new_window = add_child_autofree(Window.new())
+		new_window.add_child(scene)
+		for i in range(15):
+			await get_tree().process_frame
+			new_window.size = Vector2i(100 + i * 5, 100 + i * 3)
+			await get_tree().process_frame
+			new_window.size = Vector2i(800 - i * 2, 600 - i)
+		assert_true(true, "Should not crash during resize")
+
+	func test_writes_not_dropped_during_resize():
+		var scene = preload("res://test/scenes/resize_write.tscn").instantiate()
+		add_child_autofree(scene)
+		get_window().size = Vector2i(100, 100)
+		get_window().size = Vector2i(1000, 350)
+		assert_eq(scene.response, "\u001b[0n", "Should return response and not crash during resize")

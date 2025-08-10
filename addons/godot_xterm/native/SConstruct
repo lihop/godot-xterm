@@ -14,6 +14,7 @@ env['OBJPREFIX'] = os.path.join('build', '')
 env.Append(CPPPATH=[
     "thirdparty/libtsm/src/tsm",
     "thirdparty/libtsm/external",
+    "thirdparty/libtsm/external/wcwidth",
     "thirdparty/libtsm/src/shared",
     'thirdparty/libuv/src',
     'thirdparty/libuv/include',
