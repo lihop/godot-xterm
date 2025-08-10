@@ -42,13 +42,6 @@ class TestInterface:
 	func test_has_property_copy_on_selection():
 		assert_has_property_with_default_value("copy_on_selection", false)
 
-	# TODO: Implement update_mode property.
-	func xtest_has_property_update_mode():
-		#assert_has_property_with_default_value("update_mode", UPDATE_MODE_AUTO)
-		pass
-
-	# cols and rows removed.
-
 	# Methods.
 
 	func test_has_method_clear():
@@ -82,15 +75,6 @@ class TestInterface:
 
 	func test_has_signal_bell():
 		assert_has_signal(subject, "bell")
-
-	# Enums.
-
-	# TODO: Implement UpdateMode enum.
-	func xtest_has_enum_update_mode():
-		assert_eq(described_class.UPDATE_MODE_DISABLED, 0)
-		assert_eq(described_class.AUTO, 1)
-		assert_eq(described_class.ALL, 2)
-		assert_eq(described_class.ALL_NEXT_FRAME, 3)
 
 	## API Next.
 
