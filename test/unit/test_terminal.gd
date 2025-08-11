@@ -295,6 +295,36 @@ class TestSelect:
 		assert_select_eq([-999, -999, 999, 999], "0123456789\nABCDEFGHIJ\n)!@#$%^&*(\n\n\n\n\n\n")
 
 
+class TestDECRQSS:
+	extends TerminalTest
+
+	func test_decrqss_returns_response_for_sgr_query():
+		subject.write("\u001b[1;31mTEST")  # Set some attributes: bold + red foreground.
+		var response = subject.write("\u001bP$qm\u001b\\")  # Send DECRQSS query for SGR state.
+		assert_true(response.begins_with("\u001bP1$r"), "Response should start with DCS success")
+		assert_true(response.ends_with("m\u001b\\"), "Response should end with SGR terminator")
+
+	func test_decrqss_reports_basic_colors():
+		subject.write("\u001b[31;44mTEST")  # Set red foreground (31) and blue background (44).
+		var response = subject.write("\u001bP$qm\u001b\\")
+		assert_true(response.contains(";31"), "Should report foreground color 31")
+		assert_true(response.contains(";44"), "Should report background color 44")
+
+	func test_decrqss_reports_extended_colors():
+		subject.write("\u001b[107mTEST")  # Direct SGR 107 (bright white bg).
+		var response = subject.write("\u001bP$qm\u001b\\")
+		assert_true(
+			response.contains(";107"), "SGR 107 should be reported as the original SGR code 107"
+		)
+
+	func test_decrqss_reports_attributes():
+		subject.write("\u001b[1;3;4mTEST")  # Set bold, italic, underline.
+		var response = subject.write("\u001bP$qm\u001b\\")
+		assert_true(response.contains(";1"), "Should report bold attribute")
+		assert_true(response.contains(";3"), "Should report italic attribute")
+		assert_true(response.contains(";4"), "Should report underline attribute")
+
+
 class TestMultipleInputs:
 	# Tests for when Terminal is around other input nodes and arrow keys or TAB
 	# key is pressed. Focus should not change to other inputs when pressing these
