@@ -193,7 +193,7 @@ jobs:
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
-          version: "4.2.1-stable"
+          version: "v4.4.1-stable"
           export-templates: true
       - name: Import assets
         run: godot --editor --headless --quit-after 100 || true
@@ -354,7 +354,7 @@ jobs:
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
-          version: "4.2.2-stable"
+          version: "v4.4.1-stable"
       - name: Install just
         uses: taiki-e/install-action@just
       - name: Update gdextension file
