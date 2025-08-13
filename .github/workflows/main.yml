@@ -193,7 +193,7 @@ jobs:
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
-          version: "4.4.1-stable"
+          version: "4.2.1-stable"
           export-templates: true
       - name: Import assets
         run: godot --editor --headless --quit-after 100 || true
@@ -244,7 +244,7 @@ jobs:
       matrix:
         platform: [linux, macos, windows]
         arch: [x86_64, x86_32, universal]
-        godot-version: ["v4.2-stable", "v4.4.1-stable"]
+        godot-version: ["v4.2-stable", "v4.2.1-stable"]
         exclude:
           - platform: linux
             arch: universal
@@ -254,8 +254,6 @@ jobs:
             arch: x86_32
           - platform: windows
             arch: universal
-          - platform: linux
-            godot-version: "v4.4.1-stable"
         include:
           - platform: linux
             os: ubuntu-22.04
@@ -356,7 +354,7 @@ jobs:
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
-          version: "4.4.1-stable"
+          version: "4.2.2-stable"
       - name: Install just
         uses: taiki-e/install-action@just
       - name: Update gdextension file
