@@ -4,8 +4,8 @@ ci:
   autofix_commit_msg: "fix: auto fixes"
   autoupdate_commit_msg: "chore: autoupdate"
 repos:
-  - repo: https://github.com/lihop/setup-godot
-    rev: hooks-v1.0.0
+  - repo: https://github.com/lihop/godot-hooks
+    rev: v1.0.0
     hooks:
       - id: check-git-archive
         args: [addons/godot_xterm]
