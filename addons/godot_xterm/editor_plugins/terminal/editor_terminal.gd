@@ -18,9 +18,48 @@ func _set_terminal_colors(color_map: Dictionary) -> void:
 		add_theme_color_override(key, color)
 
 
+func _apply_font_size(font_size: int) -> void:
+	add_theme_font_size_override("normal_font_size", font_size)
+	add_theme_font_size_override("bold_font_size", font_size)
+	add_theme_font_size_override("italics_font_size", font_size)
+	add_theme_font_size_override("bold_italics_font_size", font_size)
+
+
+func _set_terminal_font() -> void:
+	# Try to get editor's code font and font size first.
+	var editor_font = null
+	if editor_settings.has_setting("interface/editor/code_font"):
+		editor_font = editor_settings.get_setting("interface/editor/code_font")
+	if editor_settings.has_setting("interface/editor/code_font_size"):
+		var editor_font_size = editor_settings.get_setting("interface/editor/code_font_size")
+		if editor_font_size is int:
+			_apply_font_size(editor_font_size)
+
+	# If we have an editor font, use it.
+	if editor_font and editor_font is Font:
+		add_theme_font_override("normal_font", editor_font)
+		add_theme_font_override("bold_font", editor_font)
+		add_theme_font_override("italics_font", editor_font)
+		add_theme_font_override("bold_italics_font", editor_font)
+		return
+
+	# Fallback to bundled monospace font.
+	var font_path = "res://addons/godot_xterm/themes/fonts/regular.tres"
+	if ResourceLoader.exists(font_path):
+		var default_font = load(font_path)
+		if default_font and default_font is Font:
+			add_theme_font_override("normal_font", default_font)
+			add_theme_font_override("bold_font", default_font)
+			add_theme_font_override("italics_font", default_font)
+			add_theme_font_override("bold_italics_font", default_font)
+
+
 func _ready():
 	if not editor_settings:
 		return
+
+	# Ensure monospace font is loaded for editor terminal.
+	_set_terminal_font()
 
 	# Get colors from TextEdit theme. Created using the default (Adaptive) theme
 	# for reference, but will probably cause strange results if using another theme
