@@ -30,8 +30,10 @@ jobs:
         run: docker compose pull
         working-directory: addons/godot_xterm/native
       - name: Cache docker image layers
-        uses: jpribyl/action-docker-layer-caching@v0.1.1
+        uses: AndreKurait/docker-cache@0.6.0
         continue-on-error: true
+        with:
+          key: docker-${{ runner.os }}-${{ hashFiles('addons/godot_xterm/native/docker-compose.yml') }}
       - name: Ensure scons cache exists
         run: mkdir -p ${{github.workspace}}/.scons-cache
       - name: Build libuv
@@ -103,7 +105,7 @@ jobs:
             emsdk-cache-${{ matrix.target }}-
       - name: Install web build dependencies
         if: ${{ matrix.platform == 'web' }}
-        uses: mymindstorm/setup-emsdk@v14
+        uses: pyodide/setup-emsdk@v15
         with:
           version: 3.1.14
           actions-cache-folder: emsdk-cache-${{ matrix.target }}
@@ -438,7 +440,7 @@ jobs:
   merge-artifacts:
     name: Merge Artifacts
     runs-on: ubuntu-latest
-    needs: [build-linux, build-other-platforms, test, web-export]
+    needs: [build-linux, build-other-platforms]
     strategy:
       matrix:
         target: [release, debug]
@@ -448,6 +450,67 @@ jobs:
           name: libgodot-xterm-${{ matrix.target }}
           pattern: "*-${{ matrix.target }}"
           delete-merged: true
+
+  package-for-asset-lib:
+    name: Package for Asset Library
+    runs-on: ubuntu-22.04
+    needs: [merge-artifacts]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get version
+        id: version
+        run: |
+          BASE_VERSION=$(grep 'version=' addons/godot_xterm/plugin.cfg | sed 's/version="\(.*\)"/\1/')
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+            echo "VERSION=$BASE_VERSION" >> $GITHUB_OUTPUT
+          else
+            DATE=$(date +%Y%m%d)
+            COMMIT_HASH=${GITHUB_SHA:0:7}
+            echo "VERSION=${BASE_VERSION}-dev.${DATE}+${COMMIT_HASH}" >> $GITHUB_OUTPUT
+          fi
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Add binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: addons/godot_xterm/bin
+          pattern: "libgodot-xterm-*"
+          merge-multiple: true
+      - name: Set executable permissions
+        run: |
+          # Set executable permissions for spawn-helper (Unix platforms)
+          if [ -f addons/godot_xterm/bin/spawn-helper ]; then
+            chmod +x addons/godot_xterm/bin/spawn-helper
+          fi
+          # Set executable permissions for macOS framework binaries
+          find addons/godot_xterm/bin -name "libgodot-xterm.macos.*" -type f -exec chmod +x {} \;
+      - name: Create versioned archive
+        run: just package ${{ steps.version.outputs.VERSION }}
+      - name: Extract package for upload # Workaround for https://github.com/actions/upload-artifact/issues/39
+        run: |
+          ZIP_NAME="godot-xterm-v${{ steps.version.outputs.VERSION }}.zip"
+          EXTRACT_DIR="godot-xterm-v${{ steps.version.outputs.VERSION }}"
+          unzip "$ZIP_NAME" -d "$EXTRACT_DIR"
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-xterm-v${{ steps.version.outputs.VERSION }}
+          path: godot-xterm-v${{ steps.version.outputs.VERSION }}/
+      - name: Extract release notes
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: ffurrer2/extract-release-notes@v2
+        with:
+          changelog_file: docs/CHANGELOG.md
+          release_notes_file: RELEASE_NOTES.md
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}
+          name: "${{ steps.version.outputs.VERSION }}"
+          files: godot-xterm-v${{ steps.version.outputs.VERSION }}.zip
+          body_path: RELEASE_NOTES.md
 
   check-pre-commit:
     name: "Check Pre-Commit"

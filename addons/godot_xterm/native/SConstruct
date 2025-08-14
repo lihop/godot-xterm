@@ -27,7 +27,9 @@ sources.append([
 ])
 
 if env['platform'] == 'linux' or env['platform'] == 'macos':
-	env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
+    env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
+    if env['platform'] == 'linux':
+        env.Append(LINKFLAGS=['-static-libstdc++', '-static-libgcc'])
 elif env['platform'] == 'windows':
 	# godot-cpp always builds with the non-debug version of the CRT. So we use /MT for both debug and release builds. 
 	env.Append(CCFLAGS=["-MT"])

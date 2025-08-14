@@ -16,6 +16,7 @@
 
 # Files to exclude from asset-lib download.
 /addons/gd-plug export-ignore
+/addons/godot_xterm/native export-ignore
 /default_env.tres export-ignore
 /benchmark export-ignore
 /.clang-format export-ignore
