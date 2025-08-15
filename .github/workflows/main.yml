@@ -308,8 +308,8 @@ jobs:
 
           if [ "${{ matrix.platform }}" == "windows" ]; then
             # The setup-godot action does not currently support visual godot 4+ on Windows.
-            just test-unit | tee output.log
-            just test-integration | tee -a output.log
+            just test unit | tee output.log
+            just test integration | tee -a output.log
           else
             just test | tee output.log
           fi

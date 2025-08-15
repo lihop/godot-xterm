@@ -37,20 +37,14 @@ install:
 
 test_config_suffix := if os_family() == "unix" { "unix.json" } else { "json" }
 
-test:
-    {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.{{test_config_suffix}}
-
-test-unit:
+test type="all":
     #!/usr/bin/env bash
-    {{godot}} --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.unit.json
-
-test-integration:
-    #!/usr/bin/env bash
-    {{godot}} --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.integration.{{test_config_suffix}}
-
-test-visual:
-    #!/usr/bin/env bash
-    {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.visual.json
+    case "{{type}}" in
+        unit) {{godot}} --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.unit.json ;;
+        integration) {{godot}} --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.integration.{{test_config_suffix}} ;;
+        visual) {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.visual.json ;;
+        all|*) {{godot}} --windowed --resolution 400x200 --position 0,0 -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.{{test_config_suffix}} ;;
+    esac
 
 uninstall:
     {{godot}} --headless -s plug.gd uninstall
