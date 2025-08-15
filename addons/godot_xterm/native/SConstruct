@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# SPDX-FileCopyrightText: 2020-2024 Leroy Hopson <godot-xterm@leroy.nix.nz>
+# SPDX-FileCopyrightText: 2020-2025 Leroy Hopson <godot-xterm@leroy.nix.nz>
 # SPDX-License-Identifier: MIT
 
 import os
@@ -14,6 +14,7 @@ env['OBJPREFIX'] = os.path.join('build', '')
 env.Append(CPPPATH=[
     "thirdparty/libtsm/src/tsm",
     "thirdparty/libtsm/external",
+    "thirdparty/libtsm/external/wcwidth",
     "thirdparty/libtsm/src/shared",
     'thirdparty/libuv/src',
     'thirdparty/libuv/include',
@@ -26,25 +27,33 @@ sources.append([
 ])
 
 if env['platform'] == 'linux' or env['platform'] == 'macos':
-    env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
+	env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
+elif env['platform'] == 'windows':
+	# godot-cpp always builds with the non-debug version of the CRT. So we use /MT for both debug and release builds. 
+	env.Append(CCFLAGS=["-MT"])
+	env.Append(LIBS=['ws2_32.lib', 'Advapi32', 'User32', 'Userenv', 'iphlpapi'])
+	if env["target"] == "template_release":
+		env.Append(LIBS=[env.File('thirdparty/libuv/build/Release/uv_a.lib')])
+	else:
+		env.Append(LIBS=[env.File('thirdparty/libuv/build/Debug/uv_a.lib')])
 else:
-    env.Append(CPPDEFINES=['_PTY_DISABLED'])
+	env.Append(CPPDEFINES=['_PTY_DISABLED'])
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
-        "bin/libgodot-xterm.{}.{}.framework/libgodot-xterm.{}.{}".format(
+        "../bin/libgodot-xterm.{}.{}.framework/libgodot-xterm.{}.{}".format(
             env["platform"], env["target"], env["platform"], env["target"]
         ),
         source=sources,
     )
     spawn_helper = env.Program(
-        "bin/spawn-helper",
+        "../bin/spawn-helper",
         source="thirdparty/node-pty/src/unix/spawn-helper.cc"
     )
     Default(spawn_helper)
 else:
     library = env.SharedLibrary(
-        "bin/libgodot-xterm{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "../bin/libgodot-xterm{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources,
     )
 

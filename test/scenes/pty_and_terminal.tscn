@@ -1,6 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://31l3ufwtaidn"]
-
-[ext_resource type="Script" path="res://addons/godot_xterm/pty.gd" id="2"]
+[gd_scene format=3 uid="uid://31l3ufwtaidn"]
 
 [node name="PTYandTerminal" type="Node"]
 
@@ -11,14 +9,12 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="PTY" type="Node" parent="PTYChild/Terminal"]
-script = ExtResource("2")
+[node name="PTY" type="PTY" parent="PTYChild/Terminal"]
 terminal_path = NodePath("..")
 
 [node name="PTYSiblingAbove" type="Node" parent="."]
 
-[node name="PTY" type="Node" parent="PTYSiblingAbove"]
-script = ExtResource("2")
+[node name="PTY" type="PTY" parent="PTYSiblingAbove"]
 terminal_path = NodePath("../Terminal")
 
 [node name="Terminal" type="Terminal" parent="PTYSiblingAbove"]
@@ -33,16 +29,14 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="PTY" type="Node" parent="PTYSiblingBelow"]
-script = ExtResource("2")
+[node name="PTY" type="PTY" parent="PTYSiblingBelow"]
 terminal_path = NodePath("../Terminal")
 
 [node name="PTYCousinAbove" type="Node" parent="."]
 
 [node name="Node" type="Node" parent="PTYCousinAbove"]
 
-[node name="PTY" type="Node" parent="PTYCousinAbove/Node"]
-script = ExtResource("2")
+[node name="PTY" type="PTY" parent="PTYCousinAbove/Node"]
 terminal_path = NodePath("../../Terminal")
 
 [node name="Terminal" type="Terminal" parent="PTYCousinAbove"]
@@ -59,8 +53,7 @@ anchor_bottom = 1.0
 
 [node name="Node" type="Node" parent="PTYCousinBelow"]
 
-[node name="PTY" type="Node" parent="PTYCousinBelow/Node"]
-script = ExtResource("2")
+[node name="PTY" type="PTY" parent="PTYCousinBelow/Node"]
 terminal_path = NodePath("../../Terminal")
 
 [node name="PTYCousinAbove2" type="Node" parent="."]
@@ -69,8 +62,7 @@ terminal_path = NodePath("../../Terminal")
 
 [node name="Node" type="Node" parent="PTYCousinAbove2/Node"]
 
-[node name="PTY" type="Node" parent="PTYCousinAbove2/Node/Node"]
-script = ExtResource("2")
+[node name="PTY" type="PTY" parent="PTYCousinAbove2/Node/Node"]
 terminal_path = NodePath("../../../Control/Terminal")
 
 [node name="Control" type="Control" parent="PTYCousinAbove2"]
@@ -78,6 +70,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Terminal" type="Terminal" parent="PTYCousinAbove2/Control"]
 layout_mode = 0
@@ -91,6 +85,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Terminal" type="Terminal" parent="PTYCousinBelow2/Control"]
 layout_mode = 0
@@ -101,6 +97,5 @@ anchor_bottom = 1.0
 
 [node name="Node" type="Node" parent="PTYCousinBelow2/Node"]
 
-[node name="PTY" type="Node" parent="PTYCousinBelow2/Node/Node"]
-script = ExtResource("2")
+[node name="PTY" type="PTY" parent="PTYCousinBelow2/Node/Node"]
 terminal_path = NodePath("../../../Control/Terminal")

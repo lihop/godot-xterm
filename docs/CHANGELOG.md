@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added select() method to Terminal.
+- [#72][i72] Implemented DCS $ q m ST (DECRQSS) to output a CSI SGR string. Thanks to [@diggernet](https://github.com/diggernet)'s [pull request](https://github.com/lihop/libtsm/pull/1) in the libtsm repo.
+
+[i72]: https://github.com/lihop/godot-xterm/issues/72
 
 ### Changed
 

@@ -92,16 +92,17 @@ func _update_settings() -> void:
 
 func _update_terminal_tabs():
 	# Wait a couple of frames to allow everything to resize before updating.
-	await get_tree().process_frame
-	await get_tree().process_frame
+	var tree = get_tree()
+	if tree:
+		await tree.process_frame
+		await tree.process_frame
 
 	if tabs.get_offset_buttons_visible():
-		# Move add button to fixed position on the tabbar.
+		# Move add button to fixed position at the right of the tabbar container.
 		if add_button.get_parent() == tabs:
-			add_button.position = Vector2.ZERO
 			tabs.remove_child(add_button)
 			tabbar_container.add_child(add_button)
-			tabbar_container.move_child(add_button, 0)
+			# Keep it at the end (right side) of the container.
 	else:
 		# Move add button after last tab.
 		if tabs.tab_count > 0 and add_button.get_parent() == tabbar_container:
@@ -116,13 +117,19 @@ func _update_terminal_tabs():
 	if tabs.tab_count == 0 and add_button.get_parent() == tabs:
 		tabs.remove_child(add_button)
 		tabbar_container.add_child(add_button)
+		tabbar_container.move_child(add_button, 0)  # Move to start (left side)
+		add_button.position = Vector2.ZERO
 
 	# Make sure we still own the button, so it gets saved with our scene.
 	add_button.owner = self
 
 
 func _on_AddButton_pressed():
-	var shell = OS.get_environment("SHELL") if OS.has_environment("SHELL") else "sh"
+	var shell = (
+		OS.get_environment("SHELL")
+		if OS.has_environment("SHELL")
+		else ("powershell" if OS.get_name() == "Windows" else "sh")
+	)
 	var terminal := EditorTerminal.instantiate()
 	tabs.add_tab(shell.get_file())
 	terminal.editor_settings = editor_settings
@@ -138,18 +145,27 @@ func _on_AddButton_pressed():
 
 
 func _on_Tabs_tab_changed(tab_index):
-	tab_container.call_deferred("set_current_tab", tab_index)
-	await get_tree().process_frame
-	tab_container.get_current_tab_control().grab_focus()
+	# Simply sync the TabContainer - focus handling happens in TabContainer signal
+	# Only sync if TabContainer has enough tabs
+	if tab_index < tab_container.get_tab_count():
+		tab_container.current_tab = tab_index
+
+
+func _on_TabContainer_tab_changed(tab_index):
+	# TabContainer has already changed, so we can safely focus immediately
+	var current_tab_control = tab_container.get_current_tab_control()
+	if current_tab_control:
+		current_tab_control.grab_focus()
 
 
 func _on_Tabs_tab_close(tab_index):
 	tabs.remove_tab(tab_index)
 	tab_container.get_child(tab_index).queue_free()
 
-	# Switch focus to the next active tab.
+	# Sync TabContainer to the current TabBar selection
+	# Focus will be handled automatically by the TabContainer signal
 	if tabs.get_tab_count() > 0:
-		tab_container.get_child(tabs.current_tab).grab_focus()
+		tab_container.current_tab = tabs.current_tab
 
 	_update_terminal_tabs()
 
