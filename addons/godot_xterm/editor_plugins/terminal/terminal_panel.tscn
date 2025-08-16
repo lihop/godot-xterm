@@ -49,8 +49,9 @@ drag_to_rearrange_enabled = true
 
 [node name="AddButton" type="Button" parent="VBoxContainer/TabbarContainer"]
 layout_mode = 2
-tooltip_text = "Add a new scene."
-icon = SubResource("ImageTexture_umfb5")
+tooltip_text = "New Terminal (Ctrl+Shift+T)"
+theme_override_colors/icon_normal_color = Color(0.6, 0.6, 0.6, 0.8)
+flat = true
 
 [node name="PopupMenu" type="PopupMenu" parent="VBoxContainer/TabbarContainer"]
 item_count = 4
@@ -93,6 +94,7 @@ item_7/text = "Kill Terminal"
 item_7/id = 7
 
 [node name="SizeLabel" type="Label" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -106,7 +108,7 @@ offset_bottom = 15.5
 grow_horizontal = 2
 grow_vertical = 2
 text = "Size:
-(0 x 0 px)"
+(3456 x 1035 px)"
 
 [node name="Panel" type="Panel" parent="SizeLabel"]
 show_behind_parent = true
