@@ -47,6 +47,7 @@ var _tab_container_min_size
 
 func _ready():
 	if editor_interface:
+		add_button.set("icon", get_theme_icon("Add", "EditorIcons"))
 		editor_settings = editor_interface.get_editor_settings()
 	_update_settings()
 
