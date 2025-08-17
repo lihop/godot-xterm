@@ -19,6 +19,7 @@
 /addons/godot_xterm/native export-ignore
 /default_env.tres export-ignore
 /benchmark export-ignore
+/CHANGELOG.md export-ignore
 /.clang-format export-ignore
 /docs export-ignore
 /.env.example export-ignore

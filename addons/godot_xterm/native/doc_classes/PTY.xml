@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="PTY" inherits="Node" keywords="pty, pseudoterminal, process, shell, fork" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		A pseudoterminal for forking and managing processes.
+	</brief_description>
+	<description>
+		Creates pseudoterminals for forking and managing processes (such as bash, zsh, or PowerShell, or one-off commands). It provides bidirectional communication channels for interacting with terminal-based applications.
+		Operates in two modes:[br]    • [b]Fork:[/b] Starts a new process and connects it to the PTY using [method fork].[br]    • [b]Open:[/b] Creates a PTY without starting a process using [method open], allowing manual interaction.
+		Can be used with the [Terminal] node to create a fully functional shell interface.
+		[b]Note:[/b] Not supported on Web. On Windows, requires Windows 10 version 1903 (May 2019) or later due to the use of ConPTY.
+	</description>
+	<tutorials>
+		<link title="Getting started with the PTY node">$GODOT_XTERM_DOCS_URL/getting_started/pty_node.html</link>
+	</tutorials>
+	<methods>
+		<method name="fork">
+			<return type="int" enum="Error" />
+			<param index="0" name="file" type="String" default="&quot;&quot;" />
+			<param index="1" name="args" type="PackedStringArray" default="PackedStringArray()" />
+			<param index="2" name="cwd" type="String" default="&quot;.&quot;" />
+			<param index="3" name="cols" type="int" default="80" />
+			<param index="4" name="rows" type="int" default="24" />
+			<description>
+				Opens a pseudoterminal and starts a new process using the specified program. [param file] defaults to the [code]SHELL[/code] environment variable, or platform defaults if not set: [code]sh[/code] on Linux, [code]zsh[/code] on macOS, or [code]cmd.exe[/code] on Windows. [param args] are arguments passed to the program. [param cwd] is the working directory (defaults to current directory). [param cols] and [param rows] set the initial terminal dimensions.
+				Returns [constant OK] on success, or an [enum Error] code on failure.
+				[codeblocks]
+				[gdscript]
+				# Fork a default shell
+				var result = pty.fork()
+				if result == OK:
+				    print("Shell started successfully")
+
+				# Fork a specific program with arguments
+				var result = pty.fork("python3", ["-i"], "/home/user")
+
+				# Fork with custom terminal size
+				var result = pty.fork("bash", [], ".", 120, 40)
+				[/gdscript]
+				[/codeblocks]
+			</description>
+		</method>
+		<method name="get_pts_name" qualifiers="const">
+			<return type="String" />
+			<description>
+				Returns the pseudoterminal device name. On Unix-like systems, this is typically a path like [code]/dev/pts/1[/code]. Returns an empty string if no PTY is open or on platforms that don't use traditional PTY device files (such as Windows).
+				[codeblocks]
+				[gdscript]
+				var pts_name = pty.get_pts_name()
+				if pts_name != "":
+				    print("PTY device: ", pts_name)
+				[/gdscript]
+				[/codeblocks]
+			</description>
+		</method>
+		<method name="kill">
+			<return type="void" />
+			<param index="0" name="signal" type="int" />
+			<description>
+				Sends a signal to the PTY's child process. [param signal] is the signal number to send. You can use the [enum IPCSignal] constants for common signals, or any valid signal number.
+				[b]Note:[/b] This method has no effect if no child process is running.
+				[codeblocks]
+				[gdscript]
+				# Send SIGTERM to gracefully terminate the process
+				pty.kill(PTY.IPCSIGNAL_SIGTERM)
+
+				# Send SIGKILL to forcefully terminate the process
+				pty.kill(PTY.IPCSIGNAL_SIGKILL)
+
+				# Send SIGINT (equivalent to Ctrl + C)
+				pty.kill(PTY.IPCSIGNAL_SIGINT)
+				[/gdscript]
+				[/codeblocks]
+			</description>
+		</method>
+		<method name="open">
+			<return type="int" enum="Error" />
+			<param index="0" name="cols" type="int" default="80" />
+			<param index="1" name="rows" type="int" default="24" />
+			<description>
+				Opens a pseudoterminal without starting a process. This creates the PTY device files for manual interaction. [param cols] and [param rows] set the initial terminal dimensions.
+				Returns [constant OK] on success, or an [enum Error] code on failure.
+				Useful for setting up a PTY for later use or direct terminal device interaction.
+			</description>
+		</method>
+		<method name="resize">
+			<return type="void" />
+			<param index="0" name="cols" type="int" />
+			<param index="1" name="rows" type="int" />
+			<description>
+				Resizes the pseudoterminal to [param cols] columns and [param rows] rows. Call this when the connected [Terminal] node changes size to keep them synchronized. The child process will receive a [code]SIGWINCH[/code] signal on Unix platforms to notify it of the size change.
+			</description>
+		</method>
+		<method name="resizev">
+			<return type="void" />
+			<param index="0" name="size" type="Vector2i" />
+			<description>
+				Same as [method resize], but accepts a [Vector2i] where [code]x[/code] is columns and [code]y[/code] is rows. Convenience method for when you have the terminal size as a vector.
+			</description>
+		</method>
+		<method name="write" qualifiers="const">
+			<return type="void" />
+			<param index="0" name="data" type="Variant" />
+			<description>
+				Writes data to the pseudoterminal. Accepts either a [String] or [PackedByteArray]. This data is sent to the child process's stdin. For interactive shells, this typically represents user input such as typed commands.
+				[codeblocks]
+				[gdscript]
+				# Send a command to a shell
+				pty.write("ls -la\n")
+				# Send raw bytes (e.g. Ctrl + C)
+				pty.write(PackedByteArray([0x03]))
+				[/gdscript]
+				[/codeblocks]
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="cols" type="int" setter="set_cols" getter="get_cols" default="80">
+			The number of columns (width) of the terminal in characters.
+		</member>
+		<member name="env" type="Dictionary" setter="set_env" getter="get_env" default="{ &quot;COLORTERM&quot;: &quot;truecolor&quot;, &quot;TERM&quot;: &quot;xterm-256color&quot; }">
+			Environment variables to set for the child program.
+			[b]Note:[/b] The default includes [code]COLORTERM[/code] and [code]TERM[/code] variables that enable full color support in most terminal applications.
+		</member>
+		<member name="rows" type="int" setter="set_rows" getter="get_rows" default="24">
+			The number of rows (height) of the terminal in characters.
+		</member>
+		<member name="terminal_path" type="NodePath" setter="set_terminal_path" getter="get_terminal_path" default="NodePath(&quot;&quot;)">
+			[NodePath] to a [Terminal] node. Setting this path automatically connects the appropriate signals of both nodes for standard operation. Also disconnects signals from any previously connected terminal.
+			When connected, the PTY automatically resizes to match the [Terminal]'s size and data flows bidirectionally between them.
+		</member>
+		<member name="use_os_env" type="bool" setter="set_use_os_env" getter="get_use_os_env" default="true">
+			If [code]true[/code], environment variables from [member env] are merged with the current program's environment variables (Godot).
+			If [code]false[/code], only variables from [member env] are used.
+			[b]Note:[/b] Variables from [member env] take precedence over the current program's environment variables.
+		</member>
+		<member name="use_threads" type="bool" setter="set_use_threads" getter="is_using_threads" default="true">
+			If [code]true[/code], the PTY uses threads for non-blocking I/O operations. This improves performance by preventing the main thread from blocking during PTY operations.
+			Should generally remain [code]true[/code] unless you have specific threading requirements.
+		</member>
+	</members>
+	<signals>
+		<signal name="data_received">
+			<param index="0" name="data" type="PackedByteArray" />
+			<description>
+				Emitted when data is read from the pseudoterminal. This typically occurs when the child process writes to stdout or stderr.
+				[param data] contains raw bytes that should typically be forwarded to a [Terminal] node for display.
+			</description>
+		</signal>
+		<signal name="exited">
+			<param index="0" name="exit_code" type="int" />
+			<param index="1" name="signal_code" type="int" />
+			<description>
+				Emitted when the child program exits. [param exit_code] is the exit status ([code]0[/code] typically means success). [param signal_code] is the signal number that terminated the program, or [code]0[/code] if the program exited normally.
+			</description>
+		</signal>
+	</signals>
+	<constants>
+		<constant name="IPCSIGNAL_SIGHUP" value="1" enum="IPCSignal">
+			Hangup signal. Traditionally sent when a terminal disconnects.
+		</constant>
+		<constant name="IPCSIGNAL_SIGINT" value="2" enum="IPCSignal">
+			Interrupt signal. Typically sent when the user presses [kbd]Ctrl + C[/kbd].
+		</constant>
+		<constant name="IPCSIGNAL_SIGQUIT" value="3" enum="IPCSignal">
+			Quit signal. Typically sent when the user presses [kbd]Ctrl + \[/kbd].
+		</constant>
+		<constant name="IPCSIGNAL_SIGILL" value="4" enum="IPCSignal">
+			Illegal instruction signal. Sent when a process attempts to execute an invalid instruction.
+		</constant>
+		<constant name="IPCSIGNAL_SIGTRAP" value="5" enum="IPCSignal">
+			Trace/breakpoint trap signal. Used by debuggers.
+		</constant>
+		<constant name="IPCSIGNAL_SIGABRT" value="6" enum="IPCSignal">
+			Abort signal. Sent when a process calls [code]abort()[/code].
+		</constant>
+		<constant name="IPCSIGNAL_SIGFPE" value="8" enum="IPCSignal">
+			Floating-point exception signal. Sent on arithmetic errors like division by zero.
+		</constant>
+		<constant name="IPCSIGNAL_SIGKILL" value="9" enum="IPCSignal">
+			Kill signal. Cannot be caught, blocked, or ignored. Forcefully terminates the process.
+		</constant>
+		<constant name="IPCSIGNAL_SIGSEGV" value="11" enum="IPCSignal">
+			Segmentation violation signal. Sent when a process accesses invalid memory.
+		</constant>
+		<constant name="IPCSIGNAL_SIGPIPE" value="13" enum="IPCSignal">
+			Broken pipe signal. Sent when writing to a pipe with no readers.
+		</constant>
+		<constant name="IPCSIGNAL_SIGALRM" value="14" enum="IPCSignal">
+			Alarm signal. Sent when a timer set by [code]alarm()[/code] expires.
+		</constant>
+		<constant name="IPCSIGNAL_SIGTERM" value="15" enum="IPCSignal">
+			Termination signal. Requests graceful termination of the process.
+		</constant>
+	</constants>
+</class>

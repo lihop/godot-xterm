@@ -1,0 +1,11 @@
+/* Custom CSS to override Godot docs styling. */
+
+/* Fix logo aspect ratio in sidebar */
+.logo {
+  height: auto !important;
+}
+
+/* Hide the grey "docs" icon from class reference links. */
+.rst-content a[href*="classes/"]::after {
+  display: none !important;
+}

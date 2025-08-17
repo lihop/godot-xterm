@@ -1,19 +1,18 @@
-<img align="left" width="64" height="64" src="./docs/_static/images/icon.png">
+<img align="left" width="64" height="64" src="./icon.png">
 
 # GodotXterm - Terminal Emulator
 
 <br/>
 
-[![Godot Version](https://img.shields.io/badge/Godot-4.3+-blue.svg)](#supported-godot-versions)
+![Godot Version](https://img.shields.io/badge/Godot-4.3+-blue.svg)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/lihop/godot-xterm/blob/stable/LICENSE.md)
 [![Build and Test](https://github.com/lihop/godot-xterm/actions/workflows/main.yml/badge.svg?event=schedule)](https://github.com/lihop/godot-xterm/actions/workflows/main.yml)
 
-GDNative terminal for Godot.
+GDExtension terminal emulator for Godot.
 Built using [libtsm](https://www.freedesktop.org/wiki/Software/libtsm/), [libuv](https://github.com/libuv/libuv), and [node-pty](https://github.com/microsoft/node-pty).
-Primarily developed and tested on Linux, it also supports macOS with partial support for Windows and HTML5. See the [Features section](https://docs.godot-xterm.nix.nz/en/stable/introduction.html#features) of [the documentation](https://docs.godot-xterm.nix.nz/en/stable) for more detail.
+Primarily developed and tested on Linux, it also supports macOS and Windows with partial support for HTML5.
 
-The plugin currently supports Godot 3.x, with a Godot 4 (GDExtension) version under development on the [`main`](https://github.com/lihop/godot-xterm/tree/main) branch.
-The latest code for the Godot 3 version can be found on the [`godot-3.x`](https://github.com/lihop/godot-xterm/tree/godot-3.x) branch.
+Supports Godot 4.3+. For Godot 3.x support, see the [`godot-3.x`](https://github.com/lihop/godot-xterm/tree/godot-3.x) branch.
 
 <video width="100%" controls>
   <source src="https://user-images.githubusercontent.com/3696783/126894061-a69eb6ad-9979-4723-ade7-829494a9fc87.mp4" />

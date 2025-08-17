@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="Terminal" inherits="Control" keywords="terminal, console, vt100, xterm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		A VT100/xterm-compatible terminal emulator.
+	</brief_description>
+	<description>
+		A terminal emulator Control node that provides VT100/xterm-compatible terminal emulation. It supports ANSI and (some) XTerm Control Sequences which can be used to do things such as clear the screen, move the cursor, change printed text color, ring a bell, and so on. For an exhaustive list of terminal control sequences (not all of which are supported by GodotXterm) see [url=https://invisible-island.net/xterm/ctlseqs/ctlseqs.html]XTerm Control Sequences[/url].
+		Can be used standalone for displaying terminal output, or connected to a [PTY] node to create a fully functional terminal emulator.
+	</description>
+	<tutorials>
+		<link title="Getting started with the Terminal node">$GODOT_XTERM_DOCS_URL/getting_started/terminal_node.html</link>
+		<link title="Theming and customization">$GODOT_XTERM_DOCS_URL/tutorials/theming.html</link>
+	</tutorials>
+	<methods>
+		<method name="clear">
+			<return type="void" />
+			<description>
+				Clears the terminal screen, removing all text except the bottom row. This also clears the scrollback buffer. The cursor is moved to the top-left corner. Equivalent to sending the ANSI escape sequence [code]\u001b[2J\u001b[H[/code].
+			</description>
+		</method>
+		<method name="copy_all">
+			<return type="String" />
+			<description>
+				Copies all of the text in the terminal, including the scrollback buffer. Returns the complete terminal content as a string with newlines separating rows.
+				[codeblocks]
+				[gdscript]
+				var terminal_content = terminal.copy_all()
+				print("Terminal contains: ", terminal_content)
+				[/gdscript]
+				[/codeblocks]
+			</description>
+		</method>
+		<method name="copy_selection">
+			<return type="String" />
+			<description>
+				Copies only the currently selected (i.e. highlighted) text in the terminal. Returns an empty string if no text is currently selected.
+				Text can be selected by dragging the mouse or using the [method select] method.
+				[codeblocks]
+				[gdscript]
+				# Select some text first
+				terminal.select(0, 0, 0, 10)
+				var selected_text = terminal.copy_selection()
+				[/gdscript]
+				[/codeblocks]
+			</description>
+		</method>
+		<method name="get_cell_size" qualifiers="const">
+			<return type="Vector2" />
+			<description>
+				Returns the size of a single character cell in pixels. This is determined by the current font size and represents the width and height of one character.
+				Useful for calculating precise positioning and sizing when working with terminal coordinates.
+			</description>
+		</method>
+		<method name="get_cols" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the width of the terminal in characters. When using a monospace font, this is the number of visible characters that can fit from one side of the terminal to the other in a single row. It will automatically update according to the terminal’s size.
+			</description>
+		</method>
+		<method name="get_cursor_pos" qualifiers="const">
+			<return type="Vector2i" />
+			<description>
+				Returns the current cursor position as a [Vector2i] where [code]x[/code] is the column and [code]y[/code] is the row. Both values are zero-based, so the top-left corner is [code]Vector2i(0, 0)[/code].
+			</description>
+		</method>
+		<method name="get_rows" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the height of the terminal in characters (rows). This represents the number of character rows that can fit vertically in the terminal at the current font size. Automatically updates when the terminal is resized.
+			</description>
+		</method>
+		<method name="select">
+			<return type="void" />
+			<param index="0" name="from_line" type="int" />
+			<param index="1" name="from_column" type="int" />
+			<param index="2" name="to_line" type="int" />
+			<param index="3" name="to_column" type="int" />
+			<description>
+				Selects text from one position to another in the terminal. [param from_line] and [param from_column] specify the starting position of the selection. [param to_line] and [param to_column] specify the ending position of the selection. All coordinates are zero-based.
+				The selected text will typically be highlighted, and can be copied using [method copy_selection].
+			</description>
+		</method>
+		<method name="write">
+			<return type="String" />
+			<param index="0" name="data" type="Variant" />
+			<description>
+				Writes data to the terminal emulator for display. Accepts either a [String] or [PackedByteArray].
+				The data is processed through the terminal state machine, which interprets ANSI escape sequences for colors, cursor movement, and other terminal control functions.
+				Returns any response data that should be sent back (typically for interactive applications).
+				[codeblocks]
+				[gdscript]
+				# Write simple text
+				terminal.write("Hello World\n")
+				# Write colored text using ANSI escape sequences
+				terminal.write("\e[31mRed text\e[0m\n")
+				# Write raw bytes
+				terminal.write(PackedByteArray([0x1b, 0x5b, 0x32, 0x4a]))  # Clear screen
+				[/gdscript]
+				[/codeblocks]
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="bell_cooldown" type="float" setter="set_bell_cooldown" getter="get_bell_cooldown" default="0.1">
+			The minimum amount of time (in seconds) to wait before emitting another [signal bell] signal. This prevents performance issues when the bell character is written too frequently, such as with commands like [code]while true; do echo -e "\a"; done[/code].
+		</member>
+		<member name="bell_muted" type="bool" setter="set_bell_muted" getter="get_bell_muted" default="false">
+			If [code]true[/code], the [signal bell] signal will not be emitted when the bell character ([code]\u0007[/code]) is written to the terminal. This can be useful to disable audible or visual bell notifications.
+		</member>
+		<member name="blink_off_time" type="float" setter="set_blink_off_time" getter="get_blink_off_time" default="0.3">
+			The duration (in seconds) that blinking text remains invisible during a blink cycle. This affects text displayed with the blink attribute (ANSI escape sequence [code]\u001b[5m[/code]).
+		</member>
+		<member name="blink_on_time" type="float" setter="set_blink_on_time" getter="get_blink_on_time" default="0.6">
+			The duration (in seconds) that blinking text remains visible during a blink cycle. This affects text displayed with the blink attribute (ANSI escape sequence [code]\u001b[5m[/code]).
+		</member>
+		<member name="copy_on_selection" type="bool" setter="set_copy_on_selection" getter="get_copy_on_selection" default="false">
+			If [code]true[/code], text will be automatically copied to the clipboard when selected (highlighted) in the terminal. This provides a convenient way to copy text without explicitly calling [method copy_selection].
+		</member>
+		<member name="focus_mode" type="int" setter="set_focus_mode" getter="get_focus_mode" overrides="Control" enum="Control.FocusMode" default="2" />
+		<member name="inverse_mode" type="int" setter="set_inverse_mode" getter="get_inverse_mode" enum="Terminal.InverseMode" default="0">
+			Determines which technique to use to display [url=https://en.wikipedia.org/wiki/Reverse_video]reverse video[/url] (ANSI escape sequence [code]\u001b[7m[/code]). See [enum InverseMode] for available options.
+		</member>
+		<member name="max_scrollback" type="int" setter="set_max_scrollback" getter="get_max_scrollback" default="1000">
+			The maximum number of lines to keep in the scrollback buffer. When this limit is exceeded, the oldest lines are discarded. Set to [code]0[/code] to disable scrollback entirely. Larger values use more memory but allow scrolling back through more terminal history.
+		</member>
+	</members>
+	<signals>
+		<signal name="bell">
+			<description>
+				Emitted when the bell character ([code]\u0007[/code]) is written to the terminal. This signal can be used to trigger visual or audible notifications. Respects the [member bell_cooldown] setting.
+				If [member bell_muted] is [code]true[/code], this signal will not be emitted.
+			</description>
+		</signal>
+		<signal name="data_sent">
+			<param index="0" name="data" type="PackedByteArray" />
+			<description>
+				Emitted when the terminal generates output data, typically in response to user input. For example, pressing the down arrow key would emit this signal with data containing [code]\u001b[B[/code].
+				This data should typically be forwarded to a [PTY] for processing by the connected application.
+			</description>
+		</signal>
+		<signal name="key_pressed">
+			<param index="0" name="data" type="PackedByteArray" />
+			<param index="1" name="event" type="Object" />
+			<description>
+				Emitted when a key is pressed in the terminal. [param data] contains the terminal sequence that would be sent via [signal data_sent]. [param event] is the original [InputEventKey] captured by the terminal.
+				This signal allows you to intercept and potentially modify key handling behavior.
+			</description>
+		</signal>
+		<signal name="size_changed">
+			<param index="0" name="new_size" type="Vector2i" />
+			<description>
+				Emitted when the terminal’s size changes, typically in response to the Control’s [code]size[/code] changing. [param new_size] contains the new dimensions where [code]x[/code] is the number of columns and [code]y[/code] is the number of rows.
+				This information should be forwarded to a connected [PTY] so it can update its size accordingly.
+			</description>
+		</signal>
+	</signals>
+	<constants>
+		<constant name="INVERSE_MODE_INVERT" value="0" enum="InverseMode">
+			Inverse video text (ANSI escape sequence [code]\u001b[7m[/code]) is displayed by inverting the foreground and background colors. For example, red text on a green background will become cyan text on a magenta background.
+		</constant>
+		<constant name="INVERSE_MODE_SWAP" value="1" enum="InverseMode">
+			Inverse video text (ANSI escape sequence [code]\u001b[7m[/code]) is displayed by swapping the foreground and background colors. For example, red text on a green background will become green text on a red background.
+		</constant>
+	</constants>
+</class>
