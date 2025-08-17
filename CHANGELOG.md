@@ -251,7 +251,7 @@ Thanks to [@ConteZero](https://github.com/contezero) for reporting and providing
 ### Added
 
 - Changelog.
-- Asciicast importer plugin. Enables the import of .cast ([asciicast files v2](https://github.com/asciinema/asciinema/blob/master/doc/asciicast-v2.md)) that can be made using the [asciinema](https://asciinema.org/) terminal session recorder. See the [asciicast scene](/examples/asciicast) for example usage.
+- Asciicast importer plugin. Enables the import of .cast ([asciicast files v2](https://github.com/asciinema/asciinema/blob/master/doc/asciicast-v2.md)) that can be made using the [asciinema](https://asciinema.org/) terminal session recorder. See the [asciicast scene](https://github.com/lihop/godot-xterm/tree/main/examples/asciicast) for example usage.
 - Pre-built binary for x11 platform.
 
 ### Changed

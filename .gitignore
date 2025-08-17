@@ -17,6 +17,8 @@ mono_crash.*
 
 # Python-specific ignores
 .venv
+docs/.venv/
+__pycache__/
 
 # Emscripten-specific ignores
 .emcache/
@@ -37,6 +39,7 @@ test/visual/screenshots/
 addons/*
 !addons/gd-plug/
 !addons/godot_xterm/
+docs/classes/*.rst
 docs/demo
 docs/logs
 docs/_build

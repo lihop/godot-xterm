@@ -13,3 +13,9 @@
 [submodule "benchmark/vtebench"]
 	path = benchmark/vtebench
 	url = https://github.com/alacritty/vtebench
+[submodule "misc/godot"]
+	path = misc/godot
+	url = https://github.com/godotengine/godot
+[submodule "docs/godot-docs"]
+	path = docs/godot-docs
+	url = https://github.com/godotengine/godot-docs

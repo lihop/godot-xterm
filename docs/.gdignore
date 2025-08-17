@@ -1,0 +1,3 @@
+# Ignore the entire docs directory from Godot import
+# This prevents Godot from trying to import documentation files,
+# build artifacts, and the godot-docs submodule

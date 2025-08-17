@@ -4,6 +4,14 @@ build:
   os: "ubuntu-22.04"
   tools:
     python: "3.10"
+  apt_packages:
+    - curl
+  jobs:
+    pre_build:
+      # Install just from the official installer to a writable directory
+      - mkdir -p $HOME/.local/bin
+      - curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to $HOME/.local/bin
+      - $HOME/.local/bin/just docs
 
 python:
   install:
@@ -11,3 +19,9 @@ python:
 
 sphinx:
   configuration: docs/conf.py
+
+submodules:
+  include:
+    - misc/godot
+    - docs/godot-docs
+  recursive: false

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bk450yhh0sx2f"]
 
-[ext_resource type="Texture2D" uid="uid://2em8p7vcmp33" path="res://docs/_static/images/icon.png" id="1_osuf4"]
+[ext_resource type="Texture2D" uid="uid://bbxrg1u0w0ecd" path="res://icon.png" id="1_osuf4"]
 
 [node name="Background" type="TextureRect"]
 z_index = -1

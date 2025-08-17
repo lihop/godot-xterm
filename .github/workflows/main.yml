@@ -40,6 +40,8 @@ jobs:
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         working-directory: addons/godot_xterm/native
         run: UID_GID="$(id -u):$(id -g)" docker compose run -e TARGET=${{ matrix.target }} -e ARCH=${{ matrix.arch }} -v ${{github.workspace}}/.scons-cache:/scons-cache libuv-linux
+      - name: Update documentation URLs in XML files
+        run: ./misc/update_doc_urls.sh
       - name: Build libgodot-xterm
         working-directory: addons/godot_xterm/native
         run: UID_GID="$(id -u):$(id -g)" docker compose run -e TARGET=${{ matrix.target }} -e ARCH=${{ matrix.arch }} -v ${{github.workspace}}/.scons-cache:/scons-cache libgodot-xterm-linux
@@ -164,6 +166,9 @@ jobs:
           cmake --build build --config $TARGET
       - name: Ensure scons cache exists
         run: mkdir -p ${{github.workspace}}/.scons-cache
+        shell: bash
+      - name: Update documentation URLs in XML files
+        run: ./misc/update_doc_urls.sh
         shell: bash
       - name: Build libgodot-xterm
         env:

@@ -1,31 +1,66 @@
-<img align="left" width="64" height="64" src="./_static/images/icon.png">
+---
+title: GodotXterm Documentation
+---
 
-# GodotXterm - Terminal Emulator
+```{image} ../icon.png
+:align: left
+:width: 54px
+:height: 54px
+:alt: GodotXterm icon
+```
 
-<br/>
-
-[![Godot Version](https://img.shields.io/badge/Godot-4.3+-blue.svg)](#supported-godot-versions)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/lihop/godot-xterm/blob/stable/LICENSE.md)
-[![Build and Test](https://github.com/lihop/godot-xterm/actions/workflows/main.yml/badge.svg?event=schedule)](https://github.com/lihop/godot-xterm/actions/workflows/main.yml)
-
-GDNative terminal for Godot.
-Built using [libtsm](https://www.freedesktop.org/wiki/Software/libtsm/), [libuv](https://github.com/libuv/libuv), and [node-pty](https://github.com/microsoft/node-pty).
-Primarily developed and tested on Linux, it also supports macOS with partial support for Windows and Web. See the [Features section](introduction.md#features) for more detail.
-
-<video width="100%" controls>
-  <source src="https://user-images.githubusercontent.com/3696783/126894061-a69eb6ad-9979-4723-ade7-829494a9fc87.mp4" />
-</video>
+```{include} ../README.md
+:start-after: '.png">'
+:end-before: "<div id=\"video-preview\">"
+:relative-docs: ..
+```
 
 [![Live Demo](./_static/images/button_live_demo.png)](https://lihop.github.io/godot-xterm-dist/demo)
 [![View it on GitHub](./_static/images/button_view_it_on_github.png)](https://github.com/lihop/godot-xterm)
 
 ```{toctree}
-:maxdepth: 2
-:caption: Table of Contents
+:hidden:
+:maxdepth: 1
+:caption: About
 
-introduction
-themes
-setup/index
-api/index
-CHANGELOG
+about/features
+about/demos
+about/licenses
+about/changelog
+```
+
+```{toctree}
+:hidden:
+:maxdepth: 1
+:caption: Getting Started
+
+getting_started/installation
+getting_started/terminal_node
+getting_started/pty_node
+```
+
+```{toctree}
+:hidden:
+:maxdepth: 1
+:caption: Manual
+
+tutorials/theming
+tutorials/integrated_terminal
+tutorials/import_plugins
+```
+
+```{toctree}
+:hidden:
+:maxdepth: 1
+:caption: Development
+
+development/building_from_source
+```
+
+```{toctree}
+:hidden:
+:maxdepth: 1
+:caption: Class Reference
+
+classes/index
 ```
