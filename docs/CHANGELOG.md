@@ -9,23 +9,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added select() method to Terminal.
-- [#72][i72] Implemented DCS $ q m ST (DECRQSS) to output a CSI SGR string. Thanks to [@diggernet](https://github.com/diggernet)'s [pull request](https://github.com/lihop/libtsm/pull/1) in the libtsm repo.
+- [#25][i25] Added PTY support for Windows (requires Windows 10 version 1903 or later with ConPTY). Thanks to [@AlexanderTreml](https://github.com/AlexanderTreml).
+- [#72][i72] Implemented DCS $ q m ST (DECRQSS) sequence to output a CSI SGR string. Thanks to [@diggernet](https://github.com/diggernet)'s [pull request](https://github.com/lihop/libtsm/pull/1) in the libtsm repo.
+- Added various methods to Terminal:
+  - `select()`: behaves like TextEdit's select method.
+  - `get_cursor_pos()`: returns the current cursor location as Vector2i.
+  - `get_cell_size()`: returns the pixel size of each character cell.
+- Added various properties to Terminal:
+  - `inverse_mode`: controls whether inverse video inverts colors or swaps foreground/background colors.
+  - `max_scrollback`: controls how many lines of history are kept (default 1000 lines).
+- Added `get_pts_name()` method to PTY that returns the pseudoterminal device path (like "/dev/pts/1"), replacing the deprecated `get_pts()` method.
+- Added `use_threads` property to PTY to enable threading.
+  When enabled (default), improves performance (e.g. displaying a ~4.5MB file takes ~0.25s with threading vs >20s without).
 
+[i25]: https://github.com/lihop/godot-xterm/issues/25
 [i72]: https://github.com/lihop/godot-xterm/issues/72
 
 ### Changed
 
-- Custom export templates are no longer required when exporting to HTML5 from Godot v3.5.x.
-- The default bundled monospace font is now [JetBrains Mono](https://www.jetbrains.com/lp/mono/) rather than [Hack](https://sourcefoundry.org/hack/).
-  This reflects the change to the editor's default monospace font that was made in Godot 4.
+- **BREAKING**: Minimum supported Godot version is now 4.2+. Godot 3.x is no longer supported.
+- **BREAKING**: Terminal `cols` and `rows` properties are now read-only. Use `get_cols()` and `get_rows()` methods instead.
+- **BREAKING**: Theme color names changed to ANSI numbering system.
+  Colors now use `ansi_0_color` through `ansi_15_color` instead of descriptive names.
+  Custom themes will need to be updated accordingly.
+- **BREAKING**: PTY signal constants renamed from `Signal.*` to `IPCSignal.*` (e.g., `PTY.Signal.SIGHUP` → `PTY.IPCSignal.IPCSIGNAL_SIGHUP`).
+  Non-portable signal constants have been removed.
+- **BREAKING**: A default theme is now automatically applied if no theme is specified.
+  The default bundled monospace font changed from [Hack](https://sourcefoundry.org/hack/) to [JetBrains Mono](https://www.jetbrains.com/lp/mono/)
+  (matching the Godot script editor's font).
+- [#29][i29] Cursor now appears hollow when Terminal loses focus.
 - Editor terminal 'Copy All' menu item replaced with 'Select All'.
+
+[i29]: https://github.com/lihop/godot-xterm/issues/29
 
 ### Removed
 
-- Removed support for deprecated theme item names.
-- Removed deprecated get_master() method of PTY.
-- Removed deprecated cols/rows properties of Terminal.
+- **BREAKING**: Removed deprecated `get_master()` method of PTY (as announced in v2.2.0).
+
+### Fixed
+
+- Fixed END key not working in terminal. Thanks to [@rpaciorek](https://github.com/rpaciorek).
 
 ## [v2.2.0](https://github.com/lihop/godot-xterm/compare/v2.1.1...v2.2.0) - 2022-08-26
 
