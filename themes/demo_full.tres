@@ -1,14 +1,12 @@
-[gd_resource type="Theme" load_steps=7 format=3 uid="uid://c7vj5543645y4"]
+[gd_resource type="Theme" load_steps=6 format=3 uid="uid://c7vj5543645y4"]
 
 [ext_resource type="FontVariation" uid="uid://bic8m0k54oyy5" path="res://themes/fonts/bold.tres" id="1_0fs6o"]
 [ext_resource type="FontVariation" uid="uid://ddjoc6kuuq1bh" path="res://themes/fonts/bold_italic.tres" id="2_vxvx6"]
 [ext_resource type="FontVariation" uid="uid://bvoyrkgr4mipq" path="res://themes/fonts/italic.tres" id="3_0wjcg"]
 [ext_resource type="FontVariation" uid="uid://ckq73bs2fwsie" path="res://themes/fonts/regular.tres" id="4_ldymn"]
-[ext_resource type="FontVariation" uid="uid://vmgmcu8gc6nt" path="res://addons/godot_xterm/themes/fonts/regular.tres" id="5_s2il6"]
 [ext_resource type="StyleBox" uid="uid://cxaclm5pavuv6" path="res://themes/normal.stylebox" id="5_u76ir"]
 
 [resource]
-default_font = ExtResource("5_s2il6")
 Terminal/colors/ansi_0_color = Color(0, 0, 0, 1)
 Terminal/colors/ansi_10_color = Color(0.258824, 1, 0.760784, 1)
 Terminal/colors/ansi_11_color = Color(1, 0.929412, 0.631373, 1)
