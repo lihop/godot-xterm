@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/lihop/godot-xterm/compare/v4.0.0-rc.1...HEAD)
+## [Unreleased](https://github.com/lihop/godot-xterm/compare/v4.0.0-rc.2...HEAD)
+
+## [v4.0.0-rc.2](https://github.com/lihop/godot-xterm/compare/v4.0.0-rc.1...v4.0.0-rc.2) - 2025-08-18
+
+### Fixed
+
+- Text selection now works correctly when `Engine.time_scale = 0` by removing timer-based selection handling. Thanks to [@rpaciorek](https://github.com/rpaciorek).
+- Copy-on-selection now uses clipboard on non-Linux systems. Thanks to [@rpaciorek](https://github.com/rpaciorek).
+- Blinking text always starts at the beginning of the ON cycle (visible). Otherwise it would never be visible when the game is paused (`Engine.time_scale = 0`).
 
 ## [v4.0.0-rc.1](https://github.com/lihop/godot-xterm/compare/v2.2.0...v4.0.0-rc.1) - 2025-08-17
 
