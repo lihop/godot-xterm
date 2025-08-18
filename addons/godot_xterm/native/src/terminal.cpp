@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <godot_cpp/classes/control.hpp>
+#include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/font.hpp>
 #include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/input.hpp>
@@ -21,10 +22,6 @@
 #include <godot_cpp/classes/theme_db.hpp>
 #include <libtsm.h>
 #include <xkbcommon/xkbcommon-keysyms.h>
-
-#if defined(__linux)
-#include <godot_cpp/classes/display_server.hpp>
-#endif
 
 #define SHADERS_DIR "res://addons/godot_xterm/shaders/"
 #define FOREGROUND_SHADER_PATH SHADERS_DIR "foreground.gdshader"
@@ -89,7 +86,6 @@ void Terminal::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_cell_size"), &Terminal::get_cell_size);
     ClassDB::bind_method(D_METHOD("_on_frame_post_draw"), &Terminal::_on_frame_post_draw);
     ClassDB::bind_method(D_METHOD("_on_gui_input", "event"), &Terminal::_gui_input);
-    ClassDB::bind_method(D_METHOD("_on_selection_held"), &Terminal::_on_selection_held);
 }
 
 Terminal::Terminal() {
@@ -694,9 +690,11 @@ void Terminal::select(const int p_from_line, const int p_from_column, const int 
 
     String selection = copy_selection();
 
-#if defined(__linux__)
     if (copy_on_selection)
+#if defined(__linux__)
         DisplayServer::get_singleton()->clipboard_set_primary(selection);
+#else
+        DisplayServer::get_singleton()->clipboard_set(selection);
 #endif
 
     if (selection.length() > 0) {
@@ -736,11 +734,6 @@ int Terminal::get_inverse_mode() const {
 
 void Terminal::initialize_input() {
     selecting = false;
-    selection_mode = SelectionMode::NONE;
-    selection_timer = memnew(Timer);
-    selection_timer->set_wait_time(0.05);
-    selection_timer->connect("timeout", Callable(this, "_on_selection_held"));
-    add_child(selection_timer, false, INTERNAL_MODE_FRONT);
 }
 
 void Terminal::_handle_key_input(Ref<InputEventKey> event) {
@@ -814,51 +807,45 @@ void Terminal::_handle_selection(Ref<InputEventMouse> event) {
 
     Ref<InputEventMouseButton> mb = event;
     if (mb.is_valid()) {
-        if (!mb->is_pressed() || mb->get_button_index() != MOUSE_BUTTON_LEFT)
+        if (!selecting || mb->get_button_index() != MOUSE_BUTTON_LEFT)
             return;
 
-        if (selecting) {
-            selecting = false;
-            selection_mode = SelectionMode::NONE;
-            tsm_screen_selection_reset(screen);
-            queue_redraw();
+        if (!mb->is_pressed()) {
+            if (copy_on_selection) {
+#if defined(__linux__)
+                DisplayServer::get_singleton()->clipboard_set_primary(copy_selection());
+#else
+                DisplayServer::get_singleton()->clipboard_set(copy_selection());
+#endif
+            }
+        } else {
+            if (selecting) {
+                selecting = false;
+                tsm_screen_selection_reset(screen);
+                queue_redraw();
+            }
         }
-
-        selecting = false;
-        selection_mode = SelectionMode::POINTER;
-
         return;
     }
 
     Ref<InputEventMouseMotion> mm = event;
     if (mm.is_valid()) {
-        if ((mm->get_button_mask() & MOUSE_BUTTON_MASK_LEFT) && selection_mode != SelectionMode::NONE && !selecting) {
-            selecting = true;
-            Vector2 start = event->get_position() / cell_size;
-            tsm_screen_selection_start(screen, start.x, start.y);
-            queue_redraw();
-            selection_timer->start();
+        if (mm->get_button_mask() & MOUSE_BUTTON_MASK_LEFT) {
+            if (!selecting) {
+                selecting = true;
+                selection_last_point = event->get_position() / cell_size;
+                tsm_screen_selection_start(screen, selection_last_point.x, selection_last_point.y);
+                queue_redraw();
+            } else {
+                Vector2i target = get_local_mouse_position() / cell_size;
+                if (selection_last_point != target) {
+                    selection_last_point = target;
+                    tsm_screen_selection_target(screen, target.x, target.y);
+                    queue_redraw();
+                }
+            }
         }
-        return;
     }
-}
-
-void Terminal::_on_selection_held() {
-    if (!(Input::get_singleton()->is_mouse_button_pressed(MOUSE_BUTTON_LEFT)) || selection_mode == SelectionMode::NONE) {
-#if defined(__linux__)
-        if (copy_on_selection) {
-            DisplayServer::get_singleton()->clipboard_set_primary(copy_selection());
-        }
-#endif
-
-        selection_timer->stop();
-        return;
-    }
-
-    Vector2 target = get_local_mouse_position() / cell_size;
-    tsm_screen_selection_target(screen, target.x, target.y);
-    queue_redraw();
-    selection_timer->start();
 }
 
 // Add default theme items for the "Terminal" theme type if they don't exist.
