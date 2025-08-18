@@ -12,4 +12,4 @@
 	url = https://github.com/microsoft/node-pty
 [submodule "benchmark/vtebench"]
 	path = benchmark/vtebench
-	url = git@github.com:alacritty/vtebench
+	url = https://github.com/alacritty/vtebench

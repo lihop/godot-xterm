@@ -27,10 +27,9 @@ mono_crash.*
 .vs
 
 # Test-specific ignores
-.gutconfig.json
 test/results.xml
 test/test_metadata.json
-test/visual_regression/screenshots/
+test/visual/screenshots/
 
 # GodotXterm-specific ignores
 .gdxterm
@@ -41,6 +40,7 @@ addons/*
 docs/demo
 docs/logs
 docs/_build
+godot-xterm*.zip
 
 # Imported translations (automatically generated from CSV files)
 *.translation
@@ -52,3 +52,4 @@ docs/_build
 
 # Other ignores
 .env
+node_modules/

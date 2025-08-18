@@ -5,7 +5,7 @@
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_eb6bs"]
 _data = {
-"example": ExtResource("2_3048a")
+&"example": ExtResource("2_3048a")
 }
 
 [node name="Terminal" type="Terminal"]
@@ -20,6 +20,6 @@ theme = ExtResource("1_nv54h")
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 callback_mode_method = 1
 libraries = {
-"": SubResource("AnimationLibrary_eb6bs")
+&"": SubResource("AnimationLibrary_eb6bs")
 }
 autoplay = "example"

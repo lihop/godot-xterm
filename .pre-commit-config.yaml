@@ -3,23 +3,32 @@
 ci:
   autofix_commit_msg: "fix: auto fixes"
   autoupdate_commit_msg: "chore: autoupdate"
-exclude: "^addons/gut/"
 repos:
+  - repo: https://github.com/lihop/godot-hooks
+    rev: v1.0.0
+    hooks:
+      - id: check-git-archive
+        args: [addons/godot_xterm]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
+    rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
   - repo: https://github.com/Scony/godot-gdscript-toolkit
-    rev: 4.2.2
+    rev: 4.3.4
     hooks:
       - id: gdformat
-        exclude: "^addons/gut/"
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.4.1
     hooks:
       - id: codespell
+        args: [--ignore-words-list=thirdparty] # FIXME: Rename the thirdparty directory to third-party.
         exclude: ".*package-lock.json|.*demo.txt|.*fonts.*LICENSE|.*THIRDPARTY_NOTICES.*|.*.svg"
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v20.1.8
+    hooks:
+      - id: clang-format
+        exclude: '.*\.(js|json)'

@@ -6,7 +6,9 @@ services:
       dockerfile: javascript.Dockerfile
     user: ${UID_GID}
     volumes:
-      - .:/src
+      - .:/src/native
+      - ../bin:/src/bin
+    working_dir: /src/native
     command:
       - /bin/bash
       - -c
@@ -45,8 +47,9 @@ services:
       context: .
       dockerfile: linux.Dockerfile
     volumes:
-      - .:/godot-xterm
-    working_dir: /godot-xterm
+      - .:/src/native
+      - ../bin:/src/bin
+    working_dir: /src/native
     environment:
       - SCONS_CACHE=/scons-cache
     command:

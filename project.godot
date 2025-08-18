@@ -12,7 +12,7 @@ config_version=5
 
 config/name="GodotXterm"
 run/main_scene="res://examples/menu/menu.tscn"
-config/features=PackedStringArray("4.2")
+config/features=PackedStringArray("4.4")
 config/icon="res://docs/_static/images/icon.png"
 
 [display]
@@ -21,7 +21,7 @@ window/vsync/use_vsync=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot_xterm/plugin.cfg", "res://addons/zylann.editor_debugger/plugin.cfg")
+enabled=PackedStringArray("res://addons/godot_xterm/plugin.cfg")
 
 [rendering]
 

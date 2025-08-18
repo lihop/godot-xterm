@@ -1,6 +1,6 @@
 [gd_resource type="Theme" load_steps=4 format=3 uid="uid://blh56m1gdieyu"]
 
-[ext_resource type="Script" path="res://addons/godot_xterm/resources/xrdb_theme.gd" id="1"]
+[ext_resource type="Script" uid="uid://b5w7m5xhi0vba" path="res://addons/godot_xterm/resources/xrdb_theme.gd" id="1"]
 [ext_resource type="FontFile" uid="uid://c51gnbjamppg" path="res://addons/godot_xterm/themes/fonts/jet_brains_mono/jet_brains_mono_nl-regular-2.304.ttf" id="2"]
 
 [sub_resource type="FontFile" id="FontFile_tdf0u"]

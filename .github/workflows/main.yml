@@ -2,8 +2,9 @@ name: "Build and Test"
 
 on:
   push:
-  schedule: # Build and test weekly.
-    - cron: 8 2 * * thu
+  pull_request:
+  schedule: # Build and test daily.
+    - cron: 0 11 * * *
 
 jobs:
   build-linux:
@@ -26,25 +27,27 @@ jobs:
           arch: ${{ matrix.arch }}
           target: ${{ matrix.target }}
       - name: Pull docker images
-        run: docker-compose pull
+        run: docker compose pull
         working-directory: addons/godot_xterm/native
       - name: Cache docker image layers
-        uses: jpribyl/action-docker-layer-caching@v0.1.1
+        uses: AndreKurait/docker-cache@0.6.0
         continue-on-error: true
+        with:
+          key: docker-${{ runner.os }}-${{ hashFiles('addons/godot_xterm/native/docker-compose.yml') }}
       - name: Ensure scons cache exists
         run: mkdir -p ${{github.workspace}}/.scons-cache
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         working-directory: addons/godot_xterm/native
-        run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e ARCH=${{ matrix.arch }} -v ${{github.workspace}}/.scons-cache:/scons-cache libuv-linux
+        run: UID_GID="$(id -u):$(id -g)" docker compose run -e TARGET=${{ matrix.target }} -e ARCH=${{ matrix.arch }} -v ${{github.workspace}}/.scons-cache:/scons-cache libuv-linux
       - name: Build libgodot-xterm
         working-directory: addons/godot_xterm/native
-        run: UID_GID="$(id -u):$(id -g)" docker-compose run -e TARGET=${{ matrix.target }} -e ARCH=${{ matrix.arch }} -v ${{github.workspace}}/.scons-cache:/scons-cache libgodot-xterm-linux
+        run: UID_GID="$(id -u):$(id -g)" docker compose run -e TARGET=${{ matrix.target }} -e ARCH=${{ matrix.arch }} -v ${{github.workspace}}/.scons-cache:/scons-cache libgodot-xterm-linux
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
           name: libgodot-xterm-linux-${{ matrix.arch }}-${{ matrix.target }}
-          path: addons/godot_xterm/native/bin/*.so
+          path: addons/godot_xterm/bin/*.so
 
   build-other-platforms:
     name: "Build (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.target}}) #${{ github.run_number }}"
@@ -59,7 +62,7 @@ jobs:
           - platform: web
             os: ubuntu-22.04
           - platform: macos
-            os: macos-12
+            os: macos-15
           - platform: windows
             os: windows-2022
         exclude:
@@ -102,7 +105,7 @@ jobs:
             emsdk-cache-${{ matrix.target }}-
       - name: Install web build dependencies
         if: ${{ matrix.platform == 'web' }}
-        uses: mymindstorm/setup-emsdk@v14
+        uses: pyodide/setup-emsdk@v15
         with:
           version: 3.1.14
           actions-cache-folder: emsdk-cache-${{ matrix.target }}
@@ -135,17 +138,24 @@ jobs:
           BITS: ${{ matrix.arch == 'x86_64' && 64 || 32 }}
         run: |
           cd addons/godot_xterm/native/thirdparty/libuv
+          # Clean only CMake configuration files to avoid stale cache issues
+          mkdir -p build
+          rm -f build/CMakeCache.txt
+          rm -rf build/CMakeFiles
           args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
           if [ "$TARGET" == "release" ]; then
-            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
+            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"
           else
-            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"
+            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
           fi
-          if [ "$BITS" -eq 32 -a "$PLATFORM" == "windows" ]; then
+          if  [ ${{matrix.platform}} == 'windows' ]; then
+            # godot-cpp always builds with the non-debug version of the CRT. So we use /MT for both debug and release builds. 
+            args="$args -DCMAKE_C_FLAGS_DEBUG=-MT -DCMAKE_C_FLAGS_RELEASE=-MT"
+          fi
+          if [ "$BITS" -eq 32 -a ${{matrix.platform}} == "windows" ]; then
             cmake -G "Visual Studio 17 2022" -A Win32 -S $(pwd) -B "build" $args
           else
-            mkdir build || true
             cd build
             if [ "$BITS" -eq 32 ]; then args="$args -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32"; fi
             cmake .. $args
@@ -166,12 +176,12 @@ jobs:
         with:
           name: libgodot-xterm-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.target }}
           path: |
-            addons/godot_xterm/native/bin/*.so
-            addons/godot_xterm/native/bin/*.wasm
-            addons/godot_xterm/native/bin/*.framework
-            addons/godot_xterm/native/bin/spawn-helper
-            addons/godot_xterm/native/bin/*.xcframework
-            addons/godot_xterm/native/bin/*.dll
+            addons/godot_xterm/bin/*.so
+            addons/godot_xterm/bin/*.wasm
+            addons/godot_xterm/bin/*.framework
+            addons/godot_xterm/bin/spawn-helper
+            addons/godot_xterm/bin/*.xcframework
+            addons/godot_xterm/bin/*.dll
 
   web-export:
     name: "Web Export"
@@ -185,7 +195,7 @@ jobs:
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
-          version: "4.2.1-stable"
+          version: "v4.4.1-stable"
           export-templates: true
       - name: Import assets
         run: godot --editor --headless --quit-after 100 || true
@@ -204,15 +214,17 @@ jobs:
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: addons/godot_xterm/native/bin
+          path: addons/godot_xterm/bin
           merge-multiple: true
       - name: Export for web
         shell: bash
         run: godot --no-window --export-release Web
-      - name: NPM cache
-        uses: c-hive/gha-npm-cache@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          directory: test/web
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: test/web/package-lock.json
       - name: Smoke test Web export
         shell: bash
         working-directory: test/web
@@ -248,7 +260,7 @@ jobs:
           - platform: linux
             os: ubuntu-22.04
           - platform: macos
-            os: macos-12
+            os: macos-15
           - platform: windows
             os: windows-2022
     steps:
@@ -284,25 +296,30 @@ jobs:
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: addons/godot_xterm/native/bin
+          path: addons/godot_xterm/bin
           merge-multiple: true
       - name: Set spawn-helper file permissions
         if: ${{ matrix.platform == 'macos' }}
         # File permissions are not preserved by upload-artifact.
-        run: chmod +x addons/godot_xterm/native/bin/spawn-helper
+        run: chmod +x addons/godot_xterm/bin/spawn-helper
       - name: Test
         shell: bash
         run: |
-          if [ "${{ matrix.platform }}" = "windows" ]; then
-            just test | tee output.log
+          set -e # Exit on first command failure.
+          set -o pipefail # Prevent tee swallowing the exit code.
+
+          if [ "${{ matrix.platform }}" == "windows" ]; then
+            # The setup-godot action does not currently support visual godot 4+ on Windows.
+            just test unit | tee output.log
+            just test integration | tee -a output.log
           else
-            just test-all | tee output.log
+            just test | tee output.log
           fi
 
           # This step often passes when it shouldn't, due to GUT not failing on script errors
           # (see: https://github.com/bitwes/Gut/issues/210). Therefore, we check the output
           # for expected (and unexpected) strings.
-          if grep -q 'SCRIPT_ERROR:' output.log || grep -q 'Tests             none' output.log; then
+          if grep -q 'SCRIPT ERROR:' output.log || grep -q '\[ERROR\]:' output.log; then
             exit 1
           fi
       - name: Upload screenshots
@@ -310,7 +327,7 @@ jobs:
         if: failure()
         with:
           name: failed-screenshots
-          path: test/visual_regression/screenshots
+          path: test/visual/screenshots
 
   benchmark:
     name: Benchmark (${{matrix.benchmark}})
@@ -339,17 +356,18 @@ jobs:
       - name: Setup Godot
         uses: lihop/setup-godot@v2
         with:
-          version: "4.2.2-stable"
+          version: "v4.4.1-stable"
       - name: Install just
         uses: taiki-e/install-action@just
       - name: Update gdextension file
         run: | # Use release builds as the build job finishes sooner.
-          sed -i 's/template_debug/template_release/g' addons/godot_xterm/native/godot-xterm.gdextension
+          sed -i 's/template_debug/template_release/g' addons/godot_xterm/godot-xterm.gdextension
       - name: Import assets
         shell: bash
         run: godot --editor --headless --quit-after 100 || true
       - name: Wait for build
         uses: fountainhead/action-wait-for-check@v1.2.0
+        id: wait-for-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: "Build (linux, x86_64, release) #${{ github.run_number }}"
@@ -357,11 +375,13 @@ jobs:
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: addons/godot_xterm/native/bin
+          path: addons/godot_xterm/bin
           merge-multiple: true
       - name: Benchmark
+        if: steps.wait-for-build.outputs.conclusion == 'success'
         shell: bash
         run: just bench ${{matrix.benchmark}}
+        timeout-minutes: 10
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
@@ -395,18 +415,18 @@ jobs:
           key: ${{runner.os}}-benchmark
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
-        if: github.ref != 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
         with:
           tool: "customSmallerIsBetter"
           output-file-path: benchmark/results/all.json
           external-data-json-path: ./cache/benchmark-data.json
-          alert-threshold: "20%"
+          alert-threshold: "120%"
           fail-threshold: "200%"
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-on-alert: true
           summary-always: true
       - name: Publish benchmark results
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: "GodotXterm Benchmarks"
@@ -420,7 +440,7 @@ jobs:
   merge-artifacts:
     name: Merge Artifacts
     runs-on: ubuntu-latest
-    needs: [build-linux, build-other-platforms, test, web-export]
+    needs: [build-linux, build-other-platforms]
     strategy:
       matrix:
         target: [release, debug]
@@ -431,40 +451,66 @@ jobs:
           pattern: "*-${{ matrix.target }}"
           delete-merged: true
 
-  # Git archive should only include addons/godot_xterm directory.
-  check-archive:
-    name: "Check Archive"
+  package-for-asset-lib:
+    name: Package for Asset Library
     runs-on: ubuntu-22.04
+    needs: [merge-artifacts]
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Create git archive
-        run: git archive -o archive.zip HEAD
-      - name: Extract archive
-        run: mkdir -p /tmp/unzipped && unzip archive.zip -d /tmp/unzipped
-      - name: Check that archive only contains addons/godot_xterm directory
+      - name: Get version
+        id: version
         run: |
-          shopt -s nullglob dotglob
-          ls -laR /tmp/unzipped
-          files=(/tmp/unzipped/*)
-          if [ ${#files[@]} -ne 1 ]; then
-            echo "Wrong number of files in archive (${#files[@]}) expected 1."
-            exit 1
+          BASE_VERSION=$(grep 'version=' addons/godot_xterm/plugin.cfg | sed 's/version="\(.*\)"/\1/')
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+            echo "VERSION=$BASE_VERSION" >> $GITHUB_OUTPUT
+          else
+            DATE=$(date +%Y%m%d)
+            COMMIT_HASH=${GITHUB_SHA:0:7}
+            echo "VERSION=${BASE_VERSION}-dev.${DATE}+${COMMIT_HASH}" >> $GITHUB_OUTPUT
           fi
-          if [ ! -d "/tmp/unzipped/addons" ]; then
-            echo "Expected directory (addons) not found."
-            exit 1
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Add binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: addons/godot_xterm/bin
+          pattern: "libgodot-xterm-*"
+          merge-multiple: true
+      - name: Set executable permissions
+        run: |
+          # Set executable permissions for spawn-helper (Unix platforms)
+          if [ -f addons/godot_xterm/bin/spawn-helper ]; then
+            chmod +x addons/godot_xterm/bin/spawn-helper
           fi
-          files=(/tmp/unzipped/addons)
-          if [ ${#files[@]} -ne 1 ]; then
-            echo "Wrong number of files in addons directory (${#files[@]}) expected 1."
-            exit 1
-          fi
-          if [ ! -d "/tmp/unzipped/addons/godot_xterm" ]; then
-            echo "Expected directory (addons/godot_xterm) not found."
-            exit 1
-          fi
+          # Set executable permissions for macOS framework binaries
+          find addons/godot_xterm/bin -name "libgodot-xterm.macos.*" -type f -exec chmod +x {} \;
+      - name: Create versioned archive
+        run: just package ${{ steps.version.outputs.VERSION }}
+      - name: Extract package for upload # Workaround for https://github.com/actions/upload-artifact/issues/39
+        run: |
+          ZIP_NAME="godot-xterm-v${{ steps.version.outputs.VERSION }}.zip"
+          EXTRACT_DIR="godot-xterm-v${{ steps.version.outputs.VERSION }}"
+          unzip "$ZIP_NAME" -d "$EXTRACT_DIR"
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-xterm-v${{ steps.version.outputs.VERSION }}
+          path: godot-xterm-v${{ steps.version.outputs.VERSION }}/
+      - name: Extract release notes
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: ffurrer2/extract-release-notes@v2
+        with:
+          changelog_file: docs/CHANGELOG.md
+          release_notes_file: RELEASE_NOTES.md
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}
+          name: "${{ steps.version.outputs.VERSION }}"
+          files: godot-xterm-v${{ steps.version.outputs.VERSION }}.zip
+          body_path: RELEASE_NOTES.md
 
   check-pre-commit:
     name: "Check Pre-Commit"
