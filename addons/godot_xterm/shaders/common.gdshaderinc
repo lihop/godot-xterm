@@ -69,11 +69,11 @@ void fragment() {
 #ifdef FOREGROUND
 		if (has_attribute(sample_uv, FLAG_BLINK)) {
 			float blink_cycle = blink_on_time + blink_off_time;
-			float current_time = mod(TIME, blink_cycle);
+			float current_time = mod(TIME + blink_cycle, blink_cycle); // The offset ensures blink always starts at the beginning of the ON cycle.
 			if (current_time > blink_on_time) {
 				color = transparent;
 			}
-        }
+    }
 #endif
 
 #ifdef BACKGROUND
