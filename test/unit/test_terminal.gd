@@ -193,7 +193,7 @@ class TestCopy:
 		assert_eq(subject.copy_all().replace("\n", ""), text)
 
 	func test_copy_all_empty_screen():
-		assert_true(subject.copy_all().strip_edges() == "")
+		assert_eq(subject.copy_all(), "\n".repeat(subject.get_rows()))
 
 	func test_copy_all_copies_the_scrollback_buffer():
 		var text = fill_screen()
@@ -212,6 +212,12 @@ class TestCopy:
 
 class TestClear:
 	extends TerminalTest
+
+	func test_clear_an_empty_screen_changes_nothing():
+		var empty_screen = subject.copy_all()
+		subject.clear()
+		var screen_after = subject.copy_all()
+		assert_eq(screen_after, empty_screen)
 
 	func test_copy_after_clear():
 		subject.clear()
