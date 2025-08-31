@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1756634502057,
+  "lastUpdate": 1756635832150,
   "repoUrl": "https://github.com/lihop/godot-xterm",
   "entries": {
     "GodotXterm Benchmarks": [
@@ -1700,6 +1700,195 @@ window.BENCHMARK_DATA = {
           {
             "name": "unicode - render gpu",
             "value": 2041,
+            "unit": "milliseconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "git@leroy.nix.nz",
+            "name": "Leroy Hopson",
+            "username": "lihop"
+          },
+          "committer": {
+            "email": "git@leroy.nix.nz",
+            "name": "Leroy Hopson",
+            "username": "lihop"
+          },
+          "distinct": true,
+          "id": "8182a5c549222f26ef8188dc6e4b74341621684b",
+          "message": "fix: prevent visual glitch when resizing terminal\n\nHides fore_canvas_item when doing a full redraw (e.g. on resize) to\nprevent showing a corrupted texture from the viewport when it is\nresized.\n\nWhen the fore_canvas_item is hidden, draws directly to the main canvas\nitem. This requires cell attributes, which are typically handled by the\nshader (blink, inverse video), to be handled by C++ code.\n\nFor now, blinking characters are always made visible as it is difficult\nto sync with the shaders TIME value. Also, it could be considered good\nUX to show characters that might be hidden when the user is resizing.",
+          "timestamp": "2025-08-31T22:17:17+12:00",
+          "tree_id": "c98df2ae4298aa3ae58ec079e878d51fdaf69c0b",
+          "url": "https://github.com/lihop/godot-xterm/commit/8182a5c549222f26ef8188dc6e4b74341621684b"
+        },
+        "date": 1756635831282,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "cursor_motion",
+            "value": 71.71,
+            "unit": "milliseconds",
+            "range": "± 17.32"
+          },
+          {
+            "name": "cursor_motion - render cpu",
+            "value": 9.787,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "cursor_motion - render gpu",
+            "value": 2349,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "dense_cells",
+            "value": 101.7,
+            "unit": "milliseconds",
+            "range": "± 25.11"
+          },
+          {
+            "name": "dense_cells - render cpu",
+            "value": 9.493,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "dense_cells - render gpu",
+            "value": 2534,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "editor_launch",
+            "value": 17.66,
+            "unit": "seconds"
+          },
+          {
+            "name": "light_cells",
+            "value": 77.98,
+            "unit": "milliseconds",
+            "range": "± 14.67"
+          },
+          {
+            "name": "light_cells - render cpu",
+            "value": 8.381,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "light_cells - render gpu",
+            "value": 1981,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling",
+            "value": 481.7,
+            "unit": "milliseconds",
+            "range": "± 16.22"
+          },
+          {
+            "name": "scrolling - render cpu",
+            "value": 7.171,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling - render gpu",
+            "value": 4342,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region",
+            "value": 506.3,
+            "unit": "milliseconds",
+            "range": "± 19.35"
+          },
+          {
+            "name": "scrolling_bottom_region - render cpu",
+            "value": 7.139,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region - render gpu",
+            "value": 4450,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_small_region",
+            "value": 507.4,
+            "unit": "milliseconds",
+            "range": "± 20.67"
+          },
+          {
+            "name": "scrolling_bottom_small_region - render cpu",
+            "value": 7.63,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_small_region - render gpu",
+            "value": 4475,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen",
+            "value": 93.45,
+            "unit": "milliseconds",
+            "range": "± 13.22"
+          },
+          {
+            "name": "scrolling_fullscreen - render cpu",
+            "value": 6.572,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen - render gpu",
+            "value": 2099,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region",
+            "value": 480.1,
+            "unit": "milliseconds",
+            "range": "± 17.63"
+          },
+          {
+            "name": "scrolling_top_region - render cpu",
+            "value": 5.709,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region - render gpu",
+            "value": 4282,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region",
+            "value": 478.5,
+            "unit": "milliseconds",
+            "range": "± 10.49"
+          },
+          {
+            "name": "scrolling_top_small_region - render cpu",
+            "value": 5.545,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region - render gpu",
+            "value": 4267,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode",
+            "value": 46.58,
+            "unit": "milliseconds",
+            "range": "± 10.05"
+          },
+          {
+            "name": "unicode - render cpu",
+            "value": 11.3,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode - render gpu",
+            "value": 3823,
             "unit": "milliseconds"
           }
         ]
