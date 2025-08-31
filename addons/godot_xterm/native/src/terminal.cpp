@@ -290,18 +290,36 @@ int Terminal::_draw_cb(struct tsm_screen* con,
     Rect2 erase_rect = Rect2(cell_position, Vector2(width * term->cell_size.x, term->cell_size.y));
     term->rs->canvas_item_add_rect(term->char_canvas_item, erase_rect, Color(1, 1, 1, 0));
 
-    if (len < 1) { // No foreground to draw.
-        return OK;
+    if (len >= 1) {
+        FontType font_type = static_cast<FontType>((attr->bold ? 1 : 0) | (attr->italic ? 2 : 0));
+
+        // Always draw to the char_canvas_item, even when fore_canvas_item is hidden, so that the viewport texture stays up to date.
+        term->fonts[font_type]->draw_char(
+                term->char_canvas_item,
+                Vector2i(cell_position.x, cell_position.y + term->font_offset),
+                static_cast<uint64_t>(*ch),
+                term->font_size,
+                fgcol);
+
+        // Draw directly to the main canvas item when doing a full redraw, as the fore_canvas_item will be hidden.
+        // Attribute effects need to be applied manually (replicating shader logic).
+        if (term->framebuffer_age == 0) {
+            if (attr->blink) {
+                // Currently blink characters are always visible on a full redraw.
+            }
+
+            if (attr->inverse && term->inverse_mode == InverseMode::INVERSE_MODE_INVERT) {
+                fgcol = Color(1.0 - fgcol.r, 1.0 - fgcol.g, 1.0 - fgcol.b, fgcol.a);
+            }
+
+            term->fonts[font_type]->draw_char(
+                    term->get_canvas_item(),
+                    Vector2i(cell_position.x + term->style_normal->get_margin(SIDE_LEFT), cell_position.y + term->font_offset + term->style_normal->get_margin(SIDE_TOP)),
+                    static_cast<uint64_t>(*ch),
+                    term->font_size,
+                    fgcol);
+        }
     }
-
-    FontType font_type = static_cast<FontType>((attr->bold ? 1 : 0) | (attr->italic ? 2 : 0));
-
-    term->fonts[font_type]->draw_char(
-            term->char_canvas_item,
-            Vector2i(cell_position.x, cell_position.y + term->font_offset),
-            static_cast<uint64_t>(*ch),
-            term->font_size,
-            fgcol);
 
     return OK;
 }
@@ -573,11 +591,21 @@ void Terminal::draw_screen() {
         rs->canvas_item_add_texture_rect(fore_canvas_item, rect, rs->viewport_get_texture(viewport));
     }
 
+    // Hide the fore_canvas_item when doing full redraws. This is to prevent the corrupted viewport
+    // texture (that occurs when the viewport is resized) from being shown during resize operations.
+    rs->canvas_item_set_visible(fore_canvas_item, framebuffer_age != 0);
+
     rs->canvas_item_clear(char_canvas_item);
     cursor_position = tsm_screen_get_flags(screen) & TSM_SCREEN_HIDE_CURSOR ? Vector2i(-1, -1) : get_cursor_pos();
+    tsm_age_t prev_framebuffer_age = framebuffer_age;
     framebuffer_age = tsm_screen_draw(screen, Terminal::_draw_cb, this);
     attr_texture->update(attr_image);
     back_texture->update(back_image);
+
+    // Schedule next frame redraw after direct draw to transition to viewport mode.
+    if (prev_framebuffer_age == 0 && framebuffer_age > 0) {
+        redraw_requested = true;
+    }
 }
 
 void Terminal::refresh() {
