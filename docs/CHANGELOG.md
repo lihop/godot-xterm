@@ -5,7 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/lihop/godot-xterm/compare/v4.0.0-rc.2...HEAD)
+## [Unreleased](https://github.com/lihop/godot-xterm/compare/v4.0.0-rc.3...HEAD)
+
+## [v4.0.0-rc.3](https://github.com/lihop/godot-xterm/compare/v4.0.0-rc.2...v4.0.0-rc.3) - 2025-08-31
+
+### Changed
+
+- **BREAKING**: Minimum supported Godot version is now 4.3 due to godot-cpp upgrade for in-engine documentation support.
+
+### Fixed
+
+- [#123][i123] Resizing creating duplicate lines in terminal. Thanks to [@MattParkerDev](https://github.com/MattParkerDev) for reporting.
+- Visual glitches during terminal resize.
+
+[i123]: https://github.com/lihop/godot-xterm/issues/123
 
 ## [v4.0.0-rc.2](https://github.com/lihop/godot-xterm/compare/v4.0.0-rc.1...v4.0.0-rc.2) - 2025-08-18
 
