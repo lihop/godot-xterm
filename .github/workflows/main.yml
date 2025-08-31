@@ -508,7 +508,7 @@ jobs:
         with:
           draft: true
           prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}
-          name: "${{ steps.version.outputs.VERSION }}"
+          name: "v${{ steps.version.outputs.VERSION }}"
           files: godot-xterm-v${{ steps.version.outputs.VERSION }}.zip
           body_path: RELEASE_NOTES.md
 
