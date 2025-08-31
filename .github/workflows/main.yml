@@ -246,7 +246,7 @@ jobs:
       matrix:
         platform: [linux, macos, windows]
         arch: [x86_64, x86_32, universal]
-        godot-version: ["v4.2-stable", "v4.2.1-stable"]
+        godot-version: ["v4.3-stable"]
         exclude:
           - platform: linux
             arch: universal

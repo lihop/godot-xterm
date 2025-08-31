@@ -885,7 +885,7 @@ void Terminal::set_default_theme_items() {
 
     // As a workaround, create a new theme and then merge it with the default theme at the end.
     // See: https://github.com/godotengine/godot-cpp/issues/1332#issuecomment-2041060614.
-    Ref<Theme> custom_theme = new Theme();
+    Ref<Theme> custom_theme = memnew(Theme);
 
     // Default colors and font sizes from CodeEdit, TextEdit, et al.
     // A comment on the translucency of the default background color: https://github.com/godotengine/godot/pull/51159#issuecomment-891127783.
