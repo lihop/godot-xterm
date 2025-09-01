@@ -37,7 +37,7 @@ class TestRendering:
 	func test_render():
 		fill_color(Color.BLUE)
 		await wait_for_signal(subject.draw, 3)
-		await wait_frames(15)
+		await wait_idle_frames(15)
 		var cell_color = pick_cell_color()
 		assert_eq(cell_color, Color.BLUE)
 
@@ -46,20 +46,20 @@ class TestRendering:
 		await get_tree().physics_frame
 		subject.queue_redraw()
 		await wait_for_signal(subject.draw, 3)
-		await wait_frames(15)
+		await wait_idle_frames(15)
 		var cell_color = pick_cell_color(Vector2i(0, 0))
 		assert_eq(cell_color, Color.RED)
 
 	func test_clear_clears_all_but_the_first_row():
-		await wait_frames(15)
+		await wait_idle_frames(15)
 		var cell = Vector2i(0, 1)  # Pick a cell not on the first row.
 		var original_color = pick_cell_color(cell)
 		call_deferred("fill_color", Color.CYAN)
 		await wait_for_signal(subject.draw, 3)
-		await wait_frames(15)
+		await wait_idle_frames(15)
 		subject.clear()
 		await wait_for_signal(subject.draw, 3)
-		await wait_frames(15)
+		await wait_idle_frames(15)
 		var cell_color = pick_cell_color(cell)
 		assert_eq(cell_color, original_color)
 
@@ -67,10 +67,10 @@ class TestRendering:
 		fill_color(Color.GREEN)
 		fill_color(Color.ORANGE, 1)
 		await wait_for_signal(subject.draw, 3)
-		await wait_frames(15)
+		await wait_idle_frames(15)
 		subject.clear()
 		await wait_for_signal(subject.draw, 3)
-		await wait_frames(15)
+		await wait_idle_frames(15)
 		var cell_color = pick_cell_color(Vector2i(0, 0))
 		assert_eq(cell_color, Color.ORANGE)
 
@@ -123,7 +123,7 @@ class TestKeyPressed:
 
 	func test_key_pressed_not_emitted_when_writing_to_subject():
 		subject.write("a")
-		await wait_frames(1)
+		await wait_idle_frames(1)
 		assert_signal_emit_count(subject, "key_pressed", 0)
 
 	func test_key_pressed_not_emitted_by_other_input_type():

@@ -70,7 +70,7 @@ func test_closes_pty_on_free():
 	var num_pts = helper.get_pts().size()
 	subject.fork("sleep", ["1000"])
 	subject.free()
-	await wait_frames(1)
+	await wait_idle_frames(1)
 	var new_num_pts = helper.get_pts().size()
 	assert_eq(new_num_pts, num_pts)
 
@@ -81,7 +81,7 @@ func test_pty_terminal_connection_across_node_hierarchies():
 	var scene = add_child_autofree(preload("res://test/scenes/pty_and_terminal.tscn").instantiate())
 
 	# Wait for scene to fully initialize
-	await wait_frames(1)
+	await wait_idle_frames(1)
 
 	# Test just the basic configurations to avoid timeout
 	for layout_name in ["PTYChild", "PTYSiblingAbove", "PTYSiblingBelow"]:
@@ -108,7 +108,7 @@ func test_pty_terminal_connection_across_node_hierarchies():
 func test_pty_terminal_size_sync_on_fork():
 	# Test that PTY syncs its size with Terminal when terminal_path is set
 	var scene = add_child_autofree(preload("res://test/scenes/pty_and_terminal.tscn").instantiate())
-	await wait_frames(2)  # Give more time for scene initialization
+	await wait_idle_frames(2)  # Give more time for scene initialization
 
 	# Test with just one layout to keep test fast
 	var pty = scene.get_node("PTYChild").find_child("PTY")
@@ -120,7 +120,7 @@ func test_pty_terminal_size_sync_on_fork():
 
 	# Manually trigger terminal path update to ensure sync happens
 	pty.set_terminal_path(pty.terminal_path)
-	await wait_frames(1)
+	await wait_idle_frames(1)
 
 	print("After set_terminal_path - PTY cols: ", pty.cols, ", Terminal cols: ", terminal.cols)
 	print("After set_terminal_path - PTY rows: ", pty.rows, ", Terminal rows: ", terminal.rows)
@@ -154,7 +154,7 @@ func test_emits_exit_code_on_failure():
 
 func test_emits_exited_on_kill():
 	subject.call("fork", "yes")
-	await wait_frames(1)
+	await wait_idle_frames(1)
 	subject.call_deferred("kill", PTY.IPCSIGNAL_SIGKILL)
 	await wait_for_signal(subject.exited, 1)
 	assert_signal_emitted(subject, "exited")
@@ -162,7 +162,7 @@ func test_emits_exited_on_kill():
 
 func test_emits_exited_with_signal():
 	subject.call("fork", "yes")
-	await wait_frames(1)
+	await wait_idle_frames(1)
 	subject.call_deferred("kill", PTY.IPCSIGNAL_SIGSEGV)
 	await wait_for_signal(subject.exited, 1)
 	assert_signal_emitted_with_parameters(subject, "exited", [0, PTY.IPCSIGNAL_SIGSEGV])
@@ -232,7 +232,7 @@ class TestPTYSize:
 
 	# Get the size as reported by stty.
 	func get_stty_size() -> Vector2i:
-		await wait_frames(1)
+		await wait_idle_frames(1)
 		subject.call_deferred("write", "stty -a | head -n1\n")
 		var output := ""
 		while not "rows" in output or not "columns" in output:

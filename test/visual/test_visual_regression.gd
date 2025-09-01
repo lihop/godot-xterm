@@ -48,17 +48,17 @@ class TestVisualRegression:
 	extends VisualRegressionTest
 
 	func test_empty():
-		await wait_frames(30)
+		await wait_idle_frames(30)
 		assert_match("empty")
 
 	func test_empty_focused():
 		subject.grab_focus()
-		await wait_frames(30)
+		await wait_idle_frames(30)
 		assert_match("empty_focused")
 
 	func test_hollow_cursor():
 		subject.write("W\b")
-		await wait_frames(30)
+		await wait_idle_frames(30)
 		assert_match("hollow_cursor")
 
 	func test_default_theme():
@@ -94,7 +94,7 @@ class TestVisualRegression:
 		subject.write("\u001b[3mL\u001b[0m")  # Italic.
 		subject.write("\u001b[1m\u001b[3mL\u001b[0m")  # Bold Italic.
 
-		await wait_frames(30)
+		await wait_idle_frames(30)
 		assert_match("default_theme")
 
 	func test_transparency():
@@ -104,7 +104,7 @@ class TestVisualRegression:
 		subject.add_theme_color_override("background_color", Color(1, 0, 0, 0.5))
 		subject.write("bg red, 50% transparency\r\n")
 		subject.write("fg green, 50% transparency")
-		await wait_frames(30)
+		await wait_idle_frames(30)
 		assert_match("transparency")
 
 	func test_emoji():
@@ -116,7 +116,7 @@ class TestVisualRegression:
 		subject.write("😟🤏😛🤖🤗👻😳👐😤👀\r\n")
 		subject.write("😆🤳🤫😊😜😻😏👿🥶👻\r\n")
 		subject.write("👈🤮👉💩👃😍🤥😤🙏🤟")
-		await wait_frames(30)
+		await wait_idle_frames(30)
 		assert_match("emoji")
 
 	func test_solid_invert_selection():
@@ -124,7 +124,7 @@ class TestVisualRegression:
 		subject.add_theme_color_override("background_color", Color.ORANGE)
 		subject.inverse_mode = Terminal.INVERSE_MODE_INVERT
 		subject.select(0, 5, 1, 6)
-		await wait_frames(30)
+		await wait_idle_frames(30)
 		assert_match("solid_invert_selection")
 
 	func test_solid_swap_selection():
@@ -132,7 +132,7 @@ class TestVisualRegression:
 		subject.add_theme_color_override("background_color", Color.ORANGE)
 		subject.inverse_mode = Terminal.INVERSE_MODE_SWAP
 		subject.select(0, 5, 1, 6)
-		await wait_frames(30)
+		await wait_idle_frames(30)
 		assert_match("solid_swap_selection")
 
 	func test_transparent_invert_selection():
@@ -142,7 +142,7 @@ class TestVisualRegression:
 		subject.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 		subject.inverse_mode = Terminal.INVERSE_MODE_INVERT
 		subject.select(0, 5, 1, 6)
-		await wait_frames(30)
+		await wait_idle_frames(30)
 		assert_match("transparent_invert_selection")
 
 	func test_transparent_swap_selection():
@@ -152,5 +152,5 @@ class TestVisualRegression:
 		subject.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 		subject.inverse_mode = Terminal.INVERSE_MODE_SWAP
 		subject.select(0, 5, 1, 6)
-		await wait_frames(30)
+		await wait_idle_frames(30)
 		assert_match("transparent_swap_selection")

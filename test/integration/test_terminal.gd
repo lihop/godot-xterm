@@ -34,7 +34,7 @@ func test_bell_cooldown() -> void:
 
 func test_writing_random_data_to_terminal_does_not_crash_application():
 	add_child_autofree(preload("res://test/scenes/write_random.tscn").instantiate())
-	await wait_frames(5, "Writing random data to terminal")
+	await wait_idle_frames(5, "Writing random data to terminal")
 	assert_true(true, "Expected no crash when writing random data to terminal.")
 
 
@@ -96,7 +96,7 @@ class TestTheme:
 
 	func before_each():
 		terminal = autofree(TestScene.instantiate())
-		await wait_frames(1)
+		await wait_idle_frames(1)
 
 	# FIXME: All tests below are broken.
 
@@ -115,7 +115,7 @@ class TestTheme:
 	func _test_visible_characters_still_displayed_after_resize_with_default_theme():
 		terminal.theme = null
 		add_child(terminal)
-		await wait_frames(1)
+		await wait_idle_frames(1)
 		DisplayServer.window_set_size(DisplayServer.window_get_size() + Vector2i(1, 0))
 		await wait_for_signal(terminal.size_changed, 5)
 		_check_colors(default_theme)
@@ -133,7 +133,7 @@ class TestTheme:
 		# Issue 58: https://github.com/lihop/godot-xterm/issues/58
 		terminal.theme = null
 		add_child(terminal)
-		await wait_frames(1)
+		await wait_idle_frames(1)
 		terminal.call_deferred("set_theme", alt_theme)
 		await wait_for_signal(terminal.theme_changed, 5)
 		_check_colors(alt_theme)
