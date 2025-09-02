@@ -784,7 +784,16 @@ void Terminal::_handle_key_input(Ref<InputEventKey> event) {
     uint32_t keysym = (KEY_MAP.count(key) > 0) ? KEY_MAP.at(key) : XKB_KEY_NoSymbol;
 
     last_input_event_key = event;
-    tsm_vte_handle_keyboard(vte, keysym, ascii, mods, unicode ? unicode : TSM_VTE_INVALID);
+
+    if (keysym == XKB_KEY_NoSymbol && unicode > 0 && (mods & TSM_CONTROL_MASK) && (mods & TSM_ALT_MASK)) {
+        // If we cannot find a match in KEY_MAP (e.g. {KEY_9, ']'}) and ctrl+alt was pressed
+        // (which is used as AltGr on Windows international keyboards), then assume those
+        // modifiers were consumed to produce the unicode character (e.g. ctrl+alt+9 = ']'),
+        // and handle the event with those modifiers stripped.
+        tsm_vte_handle_keyboard(vte, XKB_KEY_NoSymbol, ascii, mods & ~(TSM_CONTROL_MASK | TSM_ALT_MASK), unicode);
+    } else {
+        tsm_vte_handle_keyboard(vte, keysym, ascii, mods, unicode ? unicode : TSM_VTE_INVALID);
+    }
 
     // Return to the bottom of the scrollback buffer if we scrolled up. Ignore
     // modifier keys pressed in isolation or if Ctrl+Shift modifier keys are
