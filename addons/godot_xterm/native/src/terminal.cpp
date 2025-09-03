@@ -116,6 +116,7 @@ Terminal::Terminal() {
         ERR_PRINT("Failed to create tsm vte.");
     }
     tsm_vte_set_bell_cb(vte, &Terminal::_bell_cb, this);
+    tsm_vte_set_backspace_sends_delete(vte, true);
 
     initialize_input();
     initialize_rendering();
