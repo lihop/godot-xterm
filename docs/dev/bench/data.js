@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1757110660222,
+  "lastUpdate": 1757110793437,
   "repoUrl": "https://github.com/lihop/godot-xterm",
   "entries": {
     "GodotXterm Benchmarks": [
@@ -2645,6 +2645,195 @@ window.BENCHMARK_DATA = {
           {
             "name": "unicode - render gpu",
             "value": 3831,
+            "unit": "milliseconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "git@leroy.nix.nz",
+            "name": "Leroy Hopson",
+            "username": "lihop"
+          },
+          "committer": {
+            "email": "github@leroy.nix.nz",
+            "name": "Leroy Hopson",
+            "username": "lihop"
+          },
+          "distinct": true,
+          "id": "ee2f822f308fa25ca9226c57d813a277cae841d1",
+          "message": "fix(input): handle AltGr combinations\n\nOn Windows, some international keyboards use Ctrl+Alt (AltGr)\nto type special chars (e.g ']' with Ctrl+Alt+9). Previously,\nboth the unicode character AND raw modifiers were sent,\ncausing \"^<char>\" instead of \"<char>\" ('^]' instead of ']'\nin the example).\n\nThis PR handles the special case of ctrl+alt on Windows so that when\nctrl+alt is pressed, there is a unicode character, and the key/unicode\npair cannot be found in the KEY_MAP (e.g {KEY_9, ']'}), then we assume\nthe ctrl+alt modifiers where used to produce the unicode character\nand strip them.\n\nIt also fixes some test cases (uses the unicode value so it is only 0 on\nWindows). And adds some test cases to ensure backwards compatability for\nLinux and compatability with the way Linux handles AltGr (i.e. does not\nset ctrl+alt, allowing for both AltGr+9 = ']' and Ctrl+AltGr+9 = '^]').\n\nCloses #125.",
+          "timestamp": "2025-09-06T10:12:34+12:00",
+          "tree_id": "5780404204b4545e0fd411ba5811888f960674d9",
+          "url": "https://github.com/lihop/godot-xterm/commit/ee2f822f308fa25ca9226c57d813a277cae841d1"
+        },
+        "date": 1757110791835,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "cursor_motion",
+            "value": 70.78,
+            "unit": "milliseconds",
+            "range": "± 17.74"
+          },
+          {
+            "name": "cursor_motion - render cpu",
+            "value": 9.275,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "cursor_motion - render gpu",
+            "value": 2400,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "dense_cells",
+            "value": 123,
+            "unit": "milliseconds",
+            "range": "± 30.52"
+          },
+          {
+            "name": "dense_cells - render cpu",
+            "value": 8.64,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "dense_cells - render gpu",
+            "value": 2536,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "editor_launch",
+            "value": 16.65,
+            "unit": "seconds"
+          },
+          {
+            "name": "light_cells",
+            "value": 77.43,
+            "unit": "milliseconds",
+            "range": "± 7.48"
+          },
+          {
+            "name": "light_cells - render cpu",
+            "value": 7.467,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "light_cells - render gpu",
+            "value": 1991,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling",
+            "value": 486.2,
+            "unit": "milliseconds",
+            "range": "± 19.34"
+          },
+          {
+            "name": "scrolling - render cpu",
+            "value": 7.721,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling - render gpu",
+            "value": 4560,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region",
+            "value": 488.3,
+            "unit": "milliseconds",
+            "range": "± 14.92"
+          },
+          {
+            "name": "scrolling_bottom_region - render cpu",
+            "value": 7.85,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region - render gpu",
+            "value": 4347,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_small_region",
+            "value": 487,
+            "unit": "milliseconds",
+            "range": "± 19.09"
+          },
+          {
+            "name": "scrolling_bottom_small_region - render cpu",
+            "value": 7.969,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_small_region - render gpu",
+            "value": 4398,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen",
+            "value": 98.85,
+            "unit": "milliseconds",
+            "range": "± 12.54"
+          },
+          {
+            "name": "scrolling_fullscreen - render cpu",
+            "value": 6.516,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen - render gpu",
+            "value": 1911,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region",
+            "value": 482.9,
+            "unit": "milliseconds",
+            "range": "± 18.33"
+          },
+          {
+            "name": "scrolling_top_region - render cpu",
+            "value": 5.651,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region - render gpu",
+            "value": 4345,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region",
+            "value": 480.5,
+            "unit": "milliseconds",
+            "range": "± 20.38"
+          },
+          {
+            "name": "scrolling_top_small_region - render cpu",
+            "value": 7.539,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region - render gpu",
+            "value": 4268,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode",
+            "value": 97.03,
+            "unit": "milliseconds",
+            "range": "± 43.9"
+          },
+          {
+            "name": "unicode - render cpu",
+            "value": 7.262,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode - render gpu",
+            "value": 2001,
             "unit": "milliseconds"
           }
         ]
