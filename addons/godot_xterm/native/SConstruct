@@ -34,8 +34,11 @@ if env["target"] in ["editor", "template_debug"]:
     except AttributeError:
         print("Not including class reference as we're targeting a pre-4.3 baseline.")
 
+# Allow overriding libuv build directory to support side-by-side platform builds.
+uv_build_dir = os.environ.get('LIBUV_BUILD_DIR', 'build')
+
 if env['platform'] == 'linux' or env['platform'] == 'macos':
-    env.Append(LIBS=['util', env.File('thirdparty/libuv/build/libuv_a.a')])
+    env.Append(LIBS=['util', env.File('thirdparty/libuv/' + uv_build_dir + '/libuv_a.a')])
     if env['platform'] == 'linux':
         env.Append(LINKFLAGS=['-static-libstdc++', '-static-libgcc'])
 elif env['platform'] == 'windows':
@@ -43,9 +46,9 @@ elif env['platform'] == 'windows':
 	env.Append(CCFLAGS=["-MT"])
 	env.Append(LIBS=['ws2_32.lib', 'Advapi32', 'User32', 'Userenv', 'iphlpapi'])
 	if env["target"] == "template_release":
-		env.Append(LIBS=[env.File('thirdparty/libuv/build/Release/uv_a.lib')])
+		env.Append(LIBS=[env.File('thirdparty/libuv/' + uv_build_dir + '/Release/uv_a.lib')])
 	else:
-		env.Append(LIBS=[env.File('thirdparty/libuv/build/Debug/uv_a.lib')])
+		env.Append(LIBS=[env.File('thirdparty/libuv/' + uv_build_dir + '/Debug/uv_a.lib')])
 else:
 	env.Append(CPPDEFINES=['_PTY_DISABLED'])
 

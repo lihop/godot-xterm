@@ -4,11 +4,14 @@
 set dotenv-load
 
 godot := `echo "${GODOT:-godot}"`
-target := `echo "${TARGET:-template_debug}"`
+target := `echo "${TARGET:-debug}"`
+uv_build_dir := "build/" + os() + "-" + arch() 
 
-build:
-    just build-libuv
-    cd addons/godot_xterm/native && scons debug_symbols=yes
+build: build-libuv
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    cd addons/godot_xterm/native
+    LIBUV_BUILD_DIR="{{uv_build_dir}}" scons target=template_{{target}} arch=$(uname -m) debug_symbols={{ if target == "release" { "no" } else { "yes" } }}
 
 build-javascript:
     UID_GID="$(id -u):$(id -g)" docker-compose -f addons/godot_xterm/native/docker-compose.yml run --rm javascript
@@ -17,18 +20,19 @@ build-libuv:
     #!/usr/bin/env bash
     set -euxo pipefail
     cd addons/godot_xterm/native/thirdparty/libuv
-    mkdir -p build
-    cd build
     args="-DCMAKE_BUILD_TYPE={{target}} -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DCMAKE_OSX_ARCHITECTURES=$(uname -m)"
-    if [ "{{target}}" == "template_release" ]; then \
-        args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"; \
+    if [ "{{target}}" == "release" ]; then \
+        args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"; \
     else \
-        args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL"; \
+        args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"; \
     fi
-    cmake .. $args
-    cd ..
+    # On MSYS/Cygwin enforce /MT even for debug to match godot-cpp's CRT choice.
+    if [ "$OSTYPE" = "cygwin" ] || [ "$OSTYPE" = "msys" ]; then \
+        args="$args -DCMAKE_C_FLAGS_DEBUG=-MT -DCMAKE_C_FLAGS_RELEASE=-MT"; \
+    fi
+    cmake -S . -B {{uv_build_dir}} $args
     nproc=$(nproc || sysctl -n hw.ncpu)
-    cmake --build build --config {{target}} -j$nproc
+    cmake --build {{uv_build_dir}} --config {{target}} -j$nproc
 
 build-all: build build-javascript
 
