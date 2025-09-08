@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1757228045937,
+  "lastUpdate": 1757320663913,
   "repoUrl": "https://github.com/lihop/godot-xterm",
   "entries": {
     "GodotXterm Benchmarks": [
@@ -3212,6 +3212,131 @@ window.BENCHMARK_DATA = {
           {
             "name": "unicode - render gpu",
             "value": 1889,
+            "unit": "milliseconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "git@leroy.nix.nz",
+            "name": "Leroy Hopson",
+            "username": "lihop"
+          },
+          "committer": {
+            "email": "github@leroy.nix.nz",
+            "name": "Leroy Hopson",
+            "username": "lihop"
+          },
+          "distinct": true,
+          "id": "3863114dca9ff8366b89ff17208ac55760508f53",
+          "message": "chore: update documentation\n\nCloses #113.",
+          "timestamp": "2025-09-08T20:09:08+12:00",
+          "tree_id": "34c21195f7925d65f160d611f805bfa23c14f441",
+          "url": "https://github.com/lihop/godot-xterm/commit/3863114dca9ff8366b89ff17208ac55760508f53"
+        },
+        "date": 1757320663019,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "editor_launch",
+            "value": 16.7,
+            "unit": "seconds"
+          },
+          {
+            "name": "light_cells",
+            "value": 76.72,
+            "range": "± 1.49",
+            "unit": "milliseconds"
+          },
+          {
+            "name": "light_cells - render cpu",
+            "value": 8.009,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "light_cells - render gpu",
+            "value": 1998,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region",
+            "value": 485.5,
+            "range": "± 15.32",
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region - render cpu",
+            "value": 8.222,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_bottom_region - render gpu",
+            "value": 4305,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen",
+            "value": 90.99,
+            "range": "± 6.76",
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen - render cpu",
+            "value": 6.563,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_fullscreen - render gpu",
+            "value": 2028,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region",
+            "value": 504.3,
+            "range": "± 23.02",
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region - render cpu",
+            "value": 7.158,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_region - render gpu",
+            "value": 4502,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region",
+            "value": 487.7,
+            "range": "± 18.14",
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region - render cpu",
+            "value": 6.543,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "scrolling_top_small_region - render gpu",
+            "value": 4374,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode",
+            "value": 95.18,
+            "range": "± 43.8",
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode - render cpu",
+            "value": 6.547,
+            "unit": "milliseconds"
+          },
+          {
+            "name": "unicode - render gpu",
+            "value": 2006,
             "unit": "milliseconds"
           }
         ]
