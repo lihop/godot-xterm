@@ -12,8 +12,24 @@ There are several ways to get the files:
 
 ### Godot Asset Library
 
-The latest version of GodotXterm is not yet available in the [Godot Asset Library](https://godotengine.org/asset-library), but there are plans to add it soon.
-Once added, this will be the easiest installation method.
+The easiest way to install GodotXterm is from the official [Godot Asset Library](https://godotengine.org/asset-library/asset/4301).
+
+1. Open your Godot project.
+2. Go to the **AssetLib** tab at the top of the editor.
+
+```{note}
+If this is your first time using the Asset Library, click **Go Online** to connect.
+```
+
+3. Search for "GodotXterm" (or "terminal" to see GodotXterm along with a range of other terminal addons).
+4. Click on the GodotXterm result and then **Download**.
+5. In the installation dialog, make sure to uncheck "Ignore asset root" so the addon is installed under `addons/godot_xterm`.
+
+![AssetLib install dialog: uncheck "Ignore asset root"](../_static/images/asset_lib.png)
+
+6. Click **Install** and **OK** to complete the installation.
+
+The addon files (along with GDExtension binaries) will be automatically placed in your project's `addons/godot_xterm` directory.
 
 ### Manual
 

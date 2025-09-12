@@ -505,7 +505,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: ffurrer2/extract-release-notes@v2
         with:
-          changelog_file: docs/CHANGELOG.md
+          changelog_file: CHANGELOG.md
           release_notes_file: RELEASE_NOTES.md
       - name: Create release
         if: startsWith(github.ref, 'refs/tags/v')
