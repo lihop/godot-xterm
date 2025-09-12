@@ -78,6 +78,10 @@ html_js_files = [
   'js/custom.js',
 ]
 
+html_context = {
+    'godot_is_latest': os.getenv('READTHEDOCS_VERSION') == 'latest',
+}
+
 myst_substitutions = {
   'repo': 'https://github.com/lihop/godot-xterm/blob/{}'.format(current_branch),
   'godot_docs': 'https://docs.godotengine.org/en/' + godot_version,
