@@ -28,7 +28,7 @@ repos:
         args: [--ignore-words-list=thirdparty] # FIXME: Rename the thirdparty directory to third-party.
         exclude: ".*package-lock.json|.*demo.txt|.*fonts.*LICENSE|.*THIRDPARTY_NOTICES.*|.*.svg"
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v21.1.0
+    rev: v21.1.1
     hooks:
       - id: clang-format
         exclude: '.*\.(js|json)'
