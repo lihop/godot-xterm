@@ -210,12 +210,14 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: "Build (web, wasm32, release) #${{ github.run_number }}"
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          timeoutSeconds: 1800
       - name: Wait for linux build # Required for linux-based editor to recognize the GDExtension node types.
         uses: fountainhead/action-wait-for-check@v1.2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: "Build (linux, x86_64, debug) #${{ github.run_number }}"
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          timeoutSeconds: 1800
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -298,6 +300,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: "Build (${{ matrix.platform }}, ${{ matrix.arch }}, debug) #${{ github.run_number }}"
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          timeoutSeconds: 1800
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -377,6 +380,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: "Build (linux, x86_64, release) #${{ github.run_number }}"
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          timeoutSeconds: 1800
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
