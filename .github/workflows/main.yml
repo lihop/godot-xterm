@@ -49,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: libgodot-xterm-linux-${{ matrix.arch }}-${{ matrix.target }}
-          path: addons/godot_xterm/bin/*.so
+          path: addons/godot_xterm/lib/*.so
 
   build-other-platforms:
     name: "Build (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.target}}) #${{ github.run_number }}"
@@ -181,12 +181,12 @@ jobs:
         with:
           name: libgodot-xterm-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.target }}
           path: |
-            addons/godot_xterm/bin/*.so
-            addons/godot_xterm/bin/*.wasm
-            addons/godot_xterm/bin/*.framework
-            addons/godot_xterm/bin/spawn-helper
-            addons/godot_xterm/bin/*.xcframework
-            addons/godot_xterm/bin/*.dll
+            addons/godot_xterm/lib/*.so
+            addons/godot_xterm/lib/*.wasm
+            addons/godot_xterm/lib/*.framework
+            addons/godot_xterm/lib/spawn-helper
+            addons/godot_xterm/lib/*.xcframework
+            addons/godot_xterm/lib/*.dll
 
   web-export:
     name: "Web Export"
@@ -221,7 +221,7 @@ jobs:
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: addons/godot_xterm/bin
+          path: addons/godot_xterm/lib
           merge-multiple: true
       - name: Export for web
         shell: bash
@@ -304,12 +304,12 @@ jobs:
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: addons/godot_xterm/bin
+          path: addons/godot_xterm/lib
           merge-multiple: true
       - name: Set spawn-helper file permissions
         if: ${{ matrix.platform == 'macos' }}
         # File permissions are not preserved by upload-artifact.
-        run: chmod +x addons/godot_xterm/bin/spawn-helper
+        run: chmod +x addons/godot_xterm/lib/spawn-helper
       - name: Test
         shell: bash
         run: |
@@ -384,7 +384,7 @@ jobs:
       - name: Install binary build artifacts
         uses: actions/download-artifact@v4
         with:
-          path: addons/godot_xterm/bin
+          path: addons/godot_xterm/lib
           merge-multiple: true
       - name: Benchmark
         if: steps.wait-for-build.outputs.conclusion == 'success'
@@ -482,17 +482,17 @@ jobs:
       - name: Add binaries
         uses: actions/download-artifact@v4
         with:
-          path: addons/godot_xterm/bin
+          path: addons/godot_xterm/lib
           pattern: "libgodot-xterm-*"
           merge-multiple: true
       - name: Set executable permissions
         run: |
           # Set executable permissions for spawn-helper (Unix platforms)
-          if [ -f addons/godot_xterm/bin/spawn-helper ]; then
-            chmod +x addons/godot_xterm/bin/spawn-helper
+          if [ -f addons/godot_xterm/lib/spawn-helper ]; then
+            chmod +x addons/godot_xterm/lib/spawn-helper
           fi
           # Set executable permissions for macOS framework binaries
-          find addons/godot_xterm/bin -name "libgodot-xterm.macos.*" -type f -exec chmod +x {} \;
+          find addons/godot_xterm/lib -name "libgodot-xterm.macos.*" -type f -exec chmod +x {} \;
       - name: Create versioned archive
         run: just package ${{ steps.version.outputs.VERSION }}
       - name: Extract package for upload # Workaround for https://github.com/actions/upload-artifact/issues/39

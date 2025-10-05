@@ -54,19 +54,19 @@ else:
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
-        "../bin/libgodot-xterm.{}.{}.framework/libgodot-xterm.{}.{}".format(
+        "../lib/libgodot-xterm.{}.{}.framework/libgodot-xterm.{}.{}".format(
             env["platform"], env["target"], env["platform"], env["target"]
         ),
         source=sources,
     )
     spawn_helper = env.Program(
-        "../bin/spawn-helper",
+        "../lib/spawn-helper",
         source="thirdparty/node-pty/src/unix/spawn-helper.cc"
     )
     Default(spawn_helper)
 else:
     library = env.SharedLibrary(
-        "../bin/libgodot-xterm{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "../lib/libgodot-xterm{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources,
     )
 
