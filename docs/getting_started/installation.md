@@ -1,6 +1,6 @@
 # Installation
 
-Installing GodotXterm means getting the files from `addons/godot_xterm` into your Godot project and ensuring the GDExtension binary files are in place at `addons/godot_xterm/bin` for your target platforms.
+Installing GodotXterm means getting the files from `addons/godot_xterm` into your Godot project and ensuring the GDExtension binary files are in place at `addons/godot_xterm/lib` for your target platforms.
 
 :::{note}
 If you want to customize the GDExtension you will need to compile the C/C++ code from source. See [Building from source](../development/building_from_source.md) for information on how to do this.

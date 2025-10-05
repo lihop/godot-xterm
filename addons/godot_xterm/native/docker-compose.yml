@@ -7,7 +7,7 @@ services:
     user: ${UID_GID}
     volumes:
       - .:/src/native
-      - ../bin:/src/bin
+      - ../lib:/src/lib
     working_dir: /src/native
     command:
       - /bin/bash
@@ -48,7 +48,7 @@ services:
       dockerfile: linux.Dockerfile
     volumes:
       - .:/src/native
-      - ../bin:/src/bin
+      - ../lib:/src/lib
     working_dir: /src/native
     environment:
       - SCONS_CACHE=/scons-cache

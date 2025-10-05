@@ -70,14 +70,14 @@ package version="":
         git status --short
         exit 1
     fi
-    git add -f addons/godot_xterm/bin/
+    git add -f addons/godot_xterm/lib/
     if [ -z "{{version}}" ]; then
         filename="godot-xterm.zip"
     else
         filename="godot-xterm-v{{version}}.zip"
     fi
     git archive -o "$filename" $(git write-tree)
-    git reset HEAD addons/godot_xterm/bin/
+    git reset HEAD addons/godot_xterm/lib/
 
 clean:
     @if command -v scons > /dev/null; then \
