@@ -87,6 +87,7 @@ public:
     String write(const Variant data);
 
     void _gui_input(const Ref<InputEvent>& event) override;
+    void _process(double delta) override;
 
 protected:
     static void _bind_methods();
@@ -185,6 +186,18 @@ private:
 
     typedef std::function<int(struct tsm_screen*, char**)> ScreenCopyFunction;
     String _copy_screen(ScreenCopyFunction func);
+
+#ifdef _WIN32
+    static inline constexpr int CONPTY_RESIZE_STABLE_FRAMES = 25;
+    static inline constexpr int CONPTY_RESIZE_MAX_FRAMES = 60;
+    Vector2i pending_resize_size;
+    bool pending_resize_dirty = false;
+    int resize_frames_remaining = 0;
+    int resize_total_frames = 0;
+
+    void schedule_conpty_resize_emit();
+    void cancel_conpty_resize_emit();
+#endif
 
     void set_default_theme_items();
 };

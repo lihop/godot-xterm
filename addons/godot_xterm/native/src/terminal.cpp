@@ -12,6 +12,7 @@
 #include <godot_cpp/classes/input_event_key.hpp>
 #include <godot_cpp/classes/input_event_mouse_button.hpp>
 #include <godot_cpp/classes/input_event_mouse_motion.hpp>
+#include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <godot_cpp/classes/shader_material.hpp>
@@ -106,6 +107,7 @@ Terminal::Terminal() {
     copy_on_selection = false;
 
     inverse_mode = InverseMode::INVERSE_MODE_INVERT;
+    set_process(true);
 
     if (tsm_screen_new(&screen, NULL, NULL)) {
         ERR_PRINT("Failed to create tsm screen.");
@@ -431,6 +433,10 @@ void Terminal::update_sizes(bool force) {
     cols = floor(size.x / cell_size.x);
     rows = floor(size.y / cell_size.y);
 
+#ifdef _WIN32
+    bool cols_rows_changed = (prev_cols != cols) || (prev_rows != rows);
+#endif
+
     if (!force && size == prev_size && font_size == prev_font_size && cell_size == prev_cell_size && cols == prev_cols && rows == prev_rows)
         return;
 
@@ -449,8 +455,20 @@ void Terminal::update_sizes(bool force) {
 
     set_shader_parameters();
 
+#ifdef _WIN32
+    bool inside_tree = is_inside_tree();
+    if (force || cols_rows_changed) {
+        if (force || !inside_tree) {
+            cancel_conpty_resize_emit();
+            emit_signal("size_changed", Vector2i(cols, rows));
+        } else if (cols_rows_changed) {
+            schedule_conpty_resize_emit();
+        }
+    }
+#else
     if (force || prev_cols != cols || prev_rows != rows)
         emit_signal("size_changed", Vector2i(cols, rows));
+#endif
 
     refresh();
 }
@@ -885,6 +903,52 @@ void Terminal::_handle_selection(Ref<InputEventMouse> event) {
         }
     }
 }
+
+void Terminal::_process(double delta) {
+    (void)delta;
+
+#ifdef _WIN32
+    if (pending_resize_dirty) {
+        if (resize_frames_remaining > 0)
+            --resize_frames_remaining;
+
+        if (resize_total_frames < CONPTY_RESIZE_MAX_FRAMES)
+            ++resize_total_frames;
+
+        if (resize_frames_remaining <= 0 || resize_total_frames >= CONPTY_RESIZE_MAX_FRAMES) {
+            Vector2i size_to_emit = pending_resize_size;
+            cancel_conpty_resize_emit();
+            emit_signal("size_changed", size_to_emit);
+        }
+    }
+#endif
+}
+
+#ifdef _WIN32
+void Terminal::schedule_conpty_resize_emit() {
+    if (!is_inside_tree()) {
+        Vector2i size_to_emit = Vector2i(cols, rows);
+        cancel_conpty_resize_emit();
+        emit_signal("size_changed", size_to_emit);
+        return;
+    }
+
+    pending_resize_size = Vector2i(cols, rows);
+
+    if (!pending_resize_dirty) {
+        pending_resize_dirty = true;
+        resize_total_frames = 0;
+    }
+
+    resize_frames_remaining = CONPTY_RESIZE_STABLE_FRAMES;
+}
+
+void Terminal::cancel_conpty_resize_emit() {
+    pending_resize_dirty = false;
+    resize_frames_remaining = 0;
+    resize_total_frames = 0;
+}
+#endif
 
 // Add default theme items for the "Terminal" theme type if they don't exist.
 // These defaults match Godot's built-in default theme (note: this is different from the default editor theme).

@@ -246,7 +246,7 @@ func _on_TerminalPopupMenu_id_pressed(id):
 			TerminalPopupMenuOptions.COPY:
 				DisplayServer.clipboard_set(terminal.copy_selection())
 			TerminalPopupMenuOptions.PASTE:
-				terminal.write(DisplayServer.clipboard_get())
+				terminal.pty.write(DisplayServer.clipboard_get())
 			TerminalPopupMenuOptions.SELECT_ALL:
 				terminal.select(0, 0, terminal.get_rows(), terminal.get_cols())
 			TerminalPopupMenuOptions.CLEAR:

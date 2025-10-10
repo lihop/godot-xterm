@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/lihop/godot-xterm/compare/v4.0.0...HEAD)
 
+### Fixed
+
+- [#132] In editor terminal, paste (Ctrl+Shift+V) now correctly sends text to shell process instead of only displaying in terminal.
+
 ## [v4.0.0](https://github.com/lihop/godot-xterm/compare/v2.2.0...v4.0.0) - 2025-09-08
 
 ### Added
