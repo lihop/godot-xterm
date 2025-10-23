@@ -4,6 +4,6 @@
   },
   "devDependencies": {
     "express": "^4.19.2",
-    "playwright": "^1.42.1"
+    "playwright": "^1.55.1"
   }
 }
