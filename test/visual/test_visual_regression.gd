@@ -154,3 +154,14 @@ class TestVisualRegression:
 		subject.select(0, 5, 1, 6)
 		await wait_idle_frames(30)
 		assert_match("transparent_swap_selection")
+
+	func test_underline():
+		subject.write("\u001b[4mUnderlined\u001b[0m")
+		await wait_idle_frames(30)
+		assert_match("underline")
+
+	func test_underline_thickness():
+		subject.add_theme_font_size_override("font_size", 52)
+		subject.write("\u001b[4mUnderlined\u001b[0m")
+		await wait_idle_frames(30)
+		assert_match("underline_thickness")
