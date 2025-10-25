@@ -32,7 +32,7 @@ The build system supports different targets via the `TARGET` environment variabl
 just build
 
 # Release build
-TARGET=template_release just build
+TARGET=release just build
 ```
 
 ## Platform-specific builds

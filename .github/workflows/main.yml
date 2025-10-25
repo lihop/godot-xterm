@@ -39,7 +39,7 @@ jobs:
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         working-directory: addons/godot_xterm/native
-        run: UID_GID="$(id -u):$(id -g)" docker compose run -e TARGET=${{ matrix.target }} -e ARCH=${{ matrix.arch }} -v ${{github.workspace}}/.scons-cache:/scons-cache libuv-linux
+        run: UID_GID="$(id -u):$(id -g)" docker compose run -e TARGET=${{ matrix.target }} -e ARCH=${{ matrix.arch }} -v ./thirdparty/libuv/:/libuv libuv-linux
       - name: Update documentation URLs in XML files
         run: ./misc/update_doc_urls.sh
       - name: Build libgodot-xterm
@@ -129,7 +129,7 @@ jobs:
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: "3.23.2"
+          cmake-version: "3.31.6"
           use-32bit: ${{ matrix.arch == 'x86_32' && matrix.platform == 'windows' }}
       - name: Build libuv
         if: steps.cache-submodules.outputs.cache-hit != 'true'
@@ -146,22 +146,17 @@ jobs:
           rm -rf build/CMakeFiles
           args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
-          if [ "$TARGET" == "release" ]; then
-            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"
-          else
-            args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"
+          # On Windows, force /MT even for debug to match godot-cpp's CRT choice.
+          if [ '${{matrix.platform}}' == 'windows' ]; then
+              args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_C_FLAGS_DEBUG=-MT -DCMAKE_C_FLAGS_RELEASE=-MT"
           fi
-          if  [ ${{matrix.platform}} == 'windows' ]; then
-            # godot-cpp always builds with the non-debug version of the CRT. So we use /MT for both debug and release builds. 
-            args="$args -DCMAKE_C_FLAGS_DEBUG=-MT -DCMAKE_C_FLAGS_RELEASE=-MT"
+          if [ "$BITS" -eq 32 ]; then
+            args="$args -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32";
           fi
-          if [ "$BITS" -eq 32 -a ${{matrix.platform}} == "windows" ]; then
-            cmake -G "Visual Studio 17 2022" -A Win32 -S $(pwd) -B "build" $args
+          if [ '${{matrix.platform}}' == 'windows' ] && [ "$BITS" -eq 32 ]; then
+            cmake -G "Visual Studio 17 2022" -A Win32 -S . -B build $args
           else
-            cd build
-            if [ "$BITS" -eq 32 ]; then args="$args -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32"; fi
-            cmake .. $args
-            cd ..
+            cmake -S . -B build $args
           fi
           cmake --build build --config $TARGET
       - name: Ensure scons cache exists

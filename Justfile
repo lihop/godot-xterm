@@ -20,15 +20,11 @@ build-libuv:
     #!/usr/bin/env bash
     set -euxo pipefail
     cd addons/godot_xterm/native/thirdparty/libuv
+    mkdir -p {{uv_build_dir}}
     args="-DCMAKE_BUILD_TYPE={{target}} -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DCMAKE_OSX_ARCHITECTURES=$(uname -m)"
-    if [ "{{target}}" == "release" ]; then \
-        args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"; \
-    else \
-        args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug"; \
-    fi
-    # On MSYS/Cygwin enforce /MT even for debug to match godot-cpp's CRT choice.
-    if [ "$OSTYPE" = "cygwin" ] || [ "$OSTYPE" = "msys" ]; then \
-        args="$args -DCMAKE_C_FLAGS_DEBUG=-MT -DCMAKE_C_FLAGS_RELEASE=-MT"; \
+    # On Windows, force /MT even for debug to match godot-cpp's CRT choice.
+    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+        args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_C_FLAGS_DEBUG=-MT -DCMAKE_C_FLAGS_RELEASE=-MT"
     fi
     cmake -S . -B {{uv_build_dir}} $args
     nproc=$(nproc || sysctl -n hw.ncpu)
