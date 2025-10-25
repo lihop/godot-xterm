@@ -3,6 +3,22 @@
 # SPDX-FileCopyrightText: 2020-2023 Leroy Hopson <godot-xterm@leroy.geek.nz>
 # SPDX-License-Identifier: MIT
 
+# DEPRECATION NOTICE
+echo -e "\033[1;33m"  # Bold yellow text
+echo "╔══════════════════════════════════════════════════════════════════════════════╗"
+echo "║                              ⚠️  DEPRECATION NOTICE  ⚠️                        ║"
+echo "║                                                                              ║"
+echo "║  This build script has been DEPRECATED and will be removed in a later        ║"
+echo "║  version. We are now using Just for build automation.                        ║"
+echo "║                                                                              ║"
+echo "║  Please use 'just build' instead of this script.                             ║"
+echo "║                                                                              ║"
+echo "╚══════════════════════════════════════════════════════════════════════════════╝"
+echo -e "\033[0m"  # Reset color
+echo ""
+read -p "Press Enter to continue anyway, or Ctrl+C to exit and use 'just build' instead: " x
+echo ""
+
 # Convenience function to keep the terminal open on failure in some terminals
 function fail () {
    echo "Failure!"
