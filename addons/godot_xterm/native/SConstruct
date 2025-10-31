@@ -40,6 +40,7 @@ uv_build_dir = os.environ.get('LIBUV_BUILD_DIR', 'build')
 if env['platform'] == 'linux' or env['platform'] == 'macos':
     env.Append(LIBS=['util', env.File('thirdparty/libuv/' + uv_build_dir + '/libuv.a')])
     if env['platform'] == 'linux':
+        env.Append(LIBS=['pthread'])
         env.Append(LINKFLAGS=['-static-libstdc++', '-static-libgcc'])
 elif env['platform'] == 'windows':
 	# godot-cpp always builds with the non-debug version of the CRT. So we use /MT for both debug and release builds. 

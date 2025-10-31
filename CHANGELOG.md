@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Support for the <u>underline</u> attribute (`\u001b[4m`).
+- Support for ARM architecture family (arm64/32 on Linux, and arm64 on Windows).
 
 ## [v4.0.1](https://github.com/lihop/godot-xterm/compare/v4.0.0...v4.0.1) - 2025-10-17
 
