@@ -7,16 +7,24 @@ godot := `echo "${GODOT:-godot}"`
 target := `echo "${TARGET:-debug}"`
 uv_build_dir := "build/" + os() + "-" + arch() 
 
-build: build-libuv
+build: build-libuv init-submodules
     #!/usr/bin/env bash
     set -euxo pipefail
     cd addons/godot_xterm/native
     LIBUV_BUILD_DIR="{{uv_build_dir}}" scons target=template_{{target}} arch=$(uname -m) debug_symbols={{ if target == "release" { "no" } else { "yes" } }}
 
+init-submodules:
+    #!/usr/bin/env bash
+    for m in libuv libtsm godot-cpp; do
+       if [ `ls -A addons/godot_xterm/native/thirdparty/$m/ | wc -l` -eq 0 ]; then
+           git submodule update --init addons/godot_xterm/native/thirdparty/$m
+       fi
+    done
+
 build-javascript:
     UID_GID="$(id -u):$(id -g)" docker-compose -f addons/godot_xterm/native/docker-compose.yml run --rm javascript
 
-build-libuv:
+build-libuv: init-submodules
     #!/usr/bin/env bash
     set -euxo pipefail
     cd addons/godot_xterm/native/thirdparty/libuv
