@@ -463,17 +463,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-on-alert: true
           summary-always: true
-      - name: Publish benchmark results
-        if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
-        uses: benchmark-action/github-action-benchmark@v1
-        with:
-          name: "GodotXterm Benchmarks"
-          tool: "customSmallerIsBetter"
-          output-file-path: benchmark/results/all.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          gh-pages-branch: stable
-          benchmark-data-dir-path: docs/dev/bench
-          auto-push: true
 
   merge-artifacts:
     name: Merge Artifacts
