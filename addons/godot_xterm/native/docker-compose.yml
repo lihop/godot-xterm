@@ -74,3 +74,19 @@ services:
           export PATH="/tmp/cross-bin:$$PATH"
         fi
         scons target=template_$${TARGET:-debug} arch=$$arch
+
+        # Copy libstdc++ fallback for cross-distribution compatibility.
+        echo "Copying libstdc++ for arch: $$arch"
+        if [[ $$arch == "x86_64" ]]; then
+          libstdc_src="/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
+        elif [[ $$arch == "arm64" ]]; then
+          libstdc_src="/usr/lib/gcc-cross/aarch64-linux-gnu/7/libstdc++.so"
+        elif [[ $$arch == "arm32" ]]; then
+          libstdc_src="/usr/lib/gcc-cross/arm-linux-gnueabihf/7/libstdc++.so"
+        elif [[ $$arch == "x86_32" ]]; then
+          libstdc_src="/usr/lib/gcc/x86_64-linux-gnu/9/32/libstdc++.so"
+        fi
+
+        libstdc_dest="../lib/$$arch/libstdc++.so.6"
+        mkdir -p "../lib/$$arch/"
+        cp "$$libstdc_src" "../lib/$$arch/"
