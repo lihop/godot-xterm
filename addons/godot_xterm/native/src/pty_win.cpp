@@ -149,10 +149,7 @@ Dictionary PTYWin::fork(
     if (ret != S_OK) {
         DWORD error = (ret == E_UNEXPECTED) ? GetLastError() : static_cast<DWORD>(ret);
         godot::UtilityFunctions::printerr(
-            "CreateProcess failed! Command: ", String(lpcmd),
-            ", Error code: ", String::num_int64(error),
-            ", CWD: ", String(cwd_.c_str())
-        );
+                "CreateProcess failed! Command: ", String(lpcmd), ", Error code: ", String::num_int64(error), ", CWD: ", String(cwd_.c_str()));
         result["error"] = ERR_CANT_FORK;
         return result;
     }
@@ -410,15 +407,13 @@ static void await_exit(Callable cb, int64_t pid) {
         // Get detailed error information
         DWORD error = GetLastError();
         godot::UtilityFunctions::printerr(
-            "Could not open process! PID: ", String::num_int64(pid),
-            ", Error code: ", String::num_int64(error)
-        );
-        
+                "Could not open process! PID: ", String::num_int64(pid), ", Error code: ", String::num_int64(error));
+
         // Common error codes:
         // ERROR_INVALID_PARAMETER (87): Invalid PID
         // ERROR_ACCESS_DENIED (5): Insufficient permissions
         // ERROR_NOT_FOUND (1168): Process does not exist or already exited
-        
+
         // Still call the callback to notify upper layers, even if we couldn't open the process
         // Use -1 as exit code to indicate we couldn't retrieve the real exit status
         cb.call_deferred(-1, 0);
