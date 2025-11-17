@@ -90,7 +90,7 @@ Dictionary PTYWin::fork(
     env_block.get()[offset++] = '\0'; // block null terminator
     char* env = env_block.get();
 
-    const char* cwd_ = p_cwd.utf8().get_data();
+    std::string cwd_ = p_cwd.utf8().get_data();
 
     // Determine required size of Pseudo Console
     COORD winp{};
@@ -139,11 +139,23 @@ Dictionary PTYWin::fork(
                   FALSE, // Inherit handles
                   EXTENDED_STARTUPINFO_PRESENT, // Creation flags
                   env,
-                  cwd_,
+                  cwd_.c_str(),
                   &startupInfo.StartupInfo, // Pointer to STARTUPINFO
                   &pi) // Pointer to PROCESS_INFORMATION
             ? S_OK
             : GetLastError();
+
+    // Check if CreateProcess failed
+    if (ret != S_OK) {
+        DWORD error = (ret == E_UNEXPECTED) ? GetLastError() : static_cast<DWORD>(ret);
+        godot::UtilityFunctions::printerr(
+            "CreateProcess failed! Command: ", String(lpcmd),
+            ", Error code: ", String::num_int64(error),
+            ", CWD: ", String(cwd_.c_str())
+        );
+        result["error"] = ERR_CANT_FORK;
+        return result;
+    }
 
     result["fd"] = fd;
     result["fd_out"] = fd_out;
@@ -395,7 +407,21 @@ static void await_exit(Callable cb, int64_t pid) {
         CloseHandle(hProcess);
         cb.call_deferred(static_cast<int>(exit_code), signal_code);
     } else {
-        godot::UtilityFunctions::printerr("Could not open process!");
+        // Get detailed error information
+        DWORD error = GetLastError();
+        godot::UtilityFunctions::printerr(
+            "Could not open process! PID: ", String::num_int64(pid),
+            ", Error code: ", String::num_int64(error)
+        );
+        
+        // Common error codes:
+        // ERROR_INVALID_PARAMETER (87): Invalid PID
+        // ERROR_ACCESS_DENIED (5): Insufficient permissions
+        // ERROR_NOT_FOUND (1168): Process does not exist or already exited
+        
+        // Still call the callback to notify upper layers, even if we couldn't open the process
+        // Use -1 as exit code to indicate we couldn't retrieve the real exit status
+        cb.call_deferred(-1, 0);
     }
 }
 
