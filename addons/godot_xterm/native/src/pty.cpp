@@ -85,6 +85,16 @@ void PTY::_bind_methods() {
     ClassDB::bind_method(D_METHOD("_on_exit", "exit_code", "signal_code"), &PTY::_on_exit);
 }
 
+void PTY::_init_uv_handles() {
+    uv_loop_init(&loop);
+    uv_async_init(&loop, &async_handle, [](uv_async_t* handle) {});
+    uv_pipe_init(&loop, &pipe, false);
+#ifdef _WIN32
+    uv_pipe_init(&loop, &pipe_out, false);
+#endif
+    pipe.data = this;
+}
+
 PTY::PTY() {
     use_threads = true;
 
@@ -96,13 +106,7 @@ PTY::PTY() {
     env["TERM"] = "xterm-256color";
     env["COLORTERM"] = "truecolor";
 
-    uv_loop_init(&loop);
-    uv_async_init(&loop, &async_handle, [](uv_async_t* handle) {});
-    uv_pipe_init(&loop, &pipe, false);
-#ifdef _WIN32
-    uv_pipe_init(&loop, &pipe_out, false);
-#endif
-    pipe.data = this;
+    _init_uv_handles();
 }
 
 void PTY::set_cols(const int num_cols) {
@@ -399,13 +403,7 @@ void PTY::_close() {
     }
 
     // Reinitialize loop and handles for next fork
-    uv_loop_init(&loop);
-    uv_async_init(&loop, &async_handle, [](uv_async_t* handle) {});
-    uv_pipe_init(&loop, &pipe, false);
-#ifdef _WIN32
-    uv_pipe_init(&loop, &pipe_out, false);
-#endif
-    pipe.data = this;
+    _init_uv_handles();
 
 #if defined(__linux__) || defined(__APPLE__)
     if (fd > 0)
