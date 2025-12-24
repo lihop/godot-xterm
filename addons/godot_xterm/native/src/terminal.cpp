@@ -304,13 +304,24 @@ int Terminal::_draw_cb(struct tsm_screen* con,
                 term->font_size,
                 fgcol);
 
+        float underline_thickness = 0.0f;
+        float underline_position = 0.0f;
+        if (attr->underline) {
+            underline_thickness = MAX(1.0f, term->fonts[font_type]->get_underline_thickness(term->font_size));
+            underline_position = term->fonts[font_type]->get_underline_position(term->font_size);
+            float underline_y = cell_position.y + term->font_offset + underline_position;
+            Vector2 underline_start = Vector2(cell_position.x, underline_y);
+            Vector2 underline_end = Vector2(cell_position.x + width * term->cell_size.x, underline_y);
+            term->rs->canvas_item_add_line(term->char_canvas_item, underline_start, underline_end, fgcol, underline_thickness);
+        }
+
         // Draw directly to the main canvas item when doing a full redraw, as the fore_canvas_item will be hidden.
-        // Attribute effects need to be applied manually (replicating shader logic).
         if (term->framebuffer_age == 0) {
             if (attr->blink) {
                 // Currently blink characters are always visible on a full redraw.
             }
 
+            // Attribute effects need to be applied manually (replicating shader logic).
             if (attr->inverse && term->inverse_mode == InverseMode::INVERSE_MODE_INVERT) {
                 fgcol = Color(1.0 - fgcol.r, 1.0 - fgcol.g, 1.0 - fgcol.b, fgcol.a);
             }
@@ -321,6 +332,13 @@ int Terminal::_draw_cb(struct tsm_screen* con,
                     static_cast<uint64_t>(*ch),
                     term->font_size,
                     fgcol);
+
+            if (attr->underline) {
+                float underline_y = cell_position.y + term->font_offset + underline_position + term->style_normal->get_margin(SIDE_TOP);
+                Vector2 underline_start = Vector2(cell_position.x + term->style_normal->get_margin(SIDE_LEFT), underline_y);
+                Vector2 underline_end = Vector2(cell_position.x + width * term->cell_size.x + term->style_normal->get_margin(SIDE_LEFT), underline_y);
+                term->rs->canvas_item_add_line(term->get_canvas_item(), underline_start, underline_end, fgcol, underline_thickness);
+            }
         }
     }
 
@@ -596,11 +614,12 @@ void Terminal::draw_screen() {
         Color bgcol = palette[TSM_COLOR_BACKGROUND];
 
         rs->canvas_item_clear(style_canvas_item);
-        style_normal->draw(style_canvas_item, get_rect());
+        Rect2 local_rect = Rect2(Vector2(), get_size());
+        style_normal->draw(style_canvas_item, local_rect);
         if (has_focus())
-            style_focus->draw(style_canvas_item, get_rect());
+            style_focus->draw(style_canvas_item, local_rect);
         if (get_theme_color("background_color").a > 0)
-            rs->canvas_item_add_rect(style_canvas_item, get_rect(), bgcol);
+            rs->canvas_item_add_rect(style_canvas_item, local_rect, bgcol);
 
         rs->canvas_item_clear(back_canvas_item);
         rs->canvas_item_add_rect(back_canvas_item, rect, bgcol);

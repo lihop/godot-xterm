@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://c6ot2uiw1ua1p"]
+
+[node name="Terminal" type="Terminal"]
+offset_left = 50.0
+offset_top = 54.0
+offset_right = 338.0
+offset_bottom = 295.0

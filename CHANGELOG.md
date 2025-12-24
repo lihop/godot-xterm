@@ -5,7 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/lihop/godot-xterm/compare/v4.0.1...HEAD)
+## [Unreleased](https://github.com/lihop/godot-xterm/compare/v4.0.2...HEAD)
+
+### Fixed
+
+- [#149][i149] Fixed misaligned panel when Terminal node has non-zero position/offset. The background panel was being drawn using global coordinates instead of local coordinates, causing visual misalignment.
+
+[i149]: https://github.com/lihop/godot-xterm/issues/149
+
+## [v4.0.2](https://github.com/lihop/godot-xterm/compare/v4.0.1...v4.0.2) - 2025-11-18
+
+### Added
+
+- Support for the <u>underline</u> attribute (`\u001b[4m`).
+- Support for ARM architecture family (arm64/32 on Linux, and arm64 on Windows). Thanks to [@CatMeowByte](https://github.com/CatMeowByte) for the [suggestion][i142].
+
+### Fixed
+
+- [#144][i144] Fixed crash when using godot-xterm alongside GDExtensions with dynamic linking to libstdc++. Thanks to [@rpaciorek](https://github.com/rpaciorek) for reporting.
+- Improved error handling in Windows PTY implementation, fixing dangling pointer issues in CWD handling. Thanks to [@Laurence042](https://github.com/Laurence042).
+
+[i142]: https://github.com/lihop/godot-xterm/issues/142
+[i144]: https://github.com/lihop/godot-xterm/issues/144
 
 ## [v4.0.1](https://github.com/lihop/godot-xterm/compare/v4.0.0...v4.0.1) - 2025-10-17
 

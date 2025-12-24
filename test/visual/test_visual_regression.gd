@@ -5,6 +5,7 @@ class_name VisualRegressionTest extends RenderingTest
 
 const Pixelmatch = preload("res://addons/pixelmatch/pixelmatch.gd")
 const MenuScene = preload("res://examples/menu/menu.tscn")
+const PositionOffset = preload("res://test/scenes/position_offset.tscn")
 
 const TERMINAL_SIZE = Vector2i(200, 100)
 const UPDATE = false  # Set to true when you want to update baseline images.
@@ -154,3 +155,21 @@ class TestVisualRegression:
 		subject.select(0, 5, 1, 6)
 		await wait_idle_frames(30)
 		assert_match("transparent_swap_selection")
+
+	func test_underline():
+		subject.write("\u001b[4mUnderlined\u001b[0m")
+		await wait_idle_frames(30)
+		assert_match("underline")
+
+	func test_underline_thickness():
+		subject.add_theme_font_size_override("font_size", 52)
+		subject.write("\u001b[4mUnderlined\u001b[0m")
+		await wait_idle_frames(30)
+		assert_match("underline_thickness")
+
+	# Issue 149: https://github.com/lihop/godot-xterm/issues/149
+	func test_position_offset():
+		subject.position = Vector2(10, 10)
+		subject.size = Vector2(210, 110)
+		await wait_idle_frames(30)
+		assert_match("position_offset")

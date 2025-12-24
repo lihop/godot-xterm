@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [x86_64, x86_32]
+        arch: [x86_64, x86_32, arm64, arm32]
         target: [release, debug]
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +49,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: libgodot-xterm-linux-${{ matrix.arch }}-${{ matrix.target }}
-          path: addons/godot_xterm/lib/*.so
+          path: |
+            addons/godot_xterm/lib/*.so
+            addons/godot_xterm/lib/**/*.so*
 
   build-other-platforms:
     name: "Build (${{ matrix.platform }}, ${{ matrix.arch }}, ${{ matrix.target}}) #${{ github.run_number }}"
@@ -59,7 +61,7 @@ jobs:
       matrix:
         platform: [web, macos, windows]
         target: [release, debug]
-        arch: [wasm32, universal, x86_64, x86_32]
+        arch: [wasm32, universal, x86_64, x86_32, arm64]
         include:
           - platform: web
             os: ubuntu-22.04
@@ -74,12 +76,18 @@ jobs:
             arch: x86_32
           - platform: web
             arch: universal
+          - platform: web
+            arch: arm64
+          - platform: web
+            arch: arm32
           - platform: macos
             arch: wasm32
           - platform: macos
             arch: x86_64
           - platform: macos
             arch: x86_32
+          - platform: macos
+            arch: arm64
           - platform: windows
             arch: wasm32
           - platform: windows
@@ -124,7 +132,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         if: ${{ matrix.platform == 'windows' }}
         with:
-          arch: win${{ matrix.arch == 'x86_64' && '64' || '32' }}
+          arch: ${{ matrix.arch == 'x86_64' && 'x64' || matrix.arch == 'x86_32' && 'x86' || matrix.arch == 'arm64' && 'x86_arm64' || matrix.arch == 'arm32' && 'x86_arm' }}
       - name: Setup cmake
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         uses: jwlawson/actions-setup-cmake@v2
@@ -137,27 +145,47 @@ jobs:
         env:
           PLATFORM: ${{ matrix.platform }}
           TARGET: ${{ matrix.target }}
-          BITS: ${{ matrix.arch == 'x86_64' && 64 || 32 }}
+          ARCH: ${{ matrix.arch }}
         run: |
           cd addons/godot_xterm/native/thirdparty/libuv
           # Clean only CMake configuration files to avoid stale cache issues
           mkdir -p build
           rm -f build/CMakeCache.txt
           rm -rf build/CMakeFiles
-          args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-            -DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
-          # On Windows, force /MT even for debug to match godot-cpp's CRT choice.
-          if [ '${{matrix.platform}}' == 'windows' ]; then
+          args="-DCMAKE_BUILD_TYPE=$TARGET -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE"
+
+          # Platform-specific configurations
+          if [ '${{matrix.platform}}' == 'macos' ]; then
+              args="$args -DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
+          elif [ '${{matrix.platform}}' == 'windows' ]; then
+              # On Windows, force /MT even for debug to match godot-cpp's CRT choice.
               args="$args -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_C_FLAGS_DEBUG=-MT -DCMAKE_C_FLAGS_RELEASE=-MT"
           fi
-          if [ "$BITS" -eq 32 ]; then
-            args="$args -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32";
+
+          # Architecture-specific configurations
+          if [ "$ARCH" == "x86_32" ]; then
+            args="$args -DCMAKE_SYSTEM_PROCESSOR=i686 -DCMAKE_C_FLAGS=-m32"
+          elif [ "$ARCH" == "arm32" ]; then
+            args="$args -DCMAKE_SYSTEM_PROCESSOR=arm"
+          elif [ "$ARCH" == "arm64" ]; then
+            args="$args -DCMAKE_SYSTEM_PROCESSOR=aarch64"
           fi
-          if [ '${{matrix.platform}}' == 'windows' ] && [ "$BITS" -eq 32 ]; then
-            cmake -G "Visual Studio 17 2022" -A Win32 -S . -B build $args
+          if [ '${{matrix.platform}}' == 'windows' ]; then
+            if [ "$ARCH" == "x86_32" ]; then
+              cmake -G "Visual Studio 17 2022" -A Win32 -S . -B build $args
+            elif [ "$ARCH" == "x86_64" ]; then
+              cmake -G "Visual Studio 17 2022" -A x64 -S . -B build $args
+            elif [ "$ARCH" == "arm32" ]; then
+              cmake -G "Visual Studio 17 2022" -A ARM -S . -B build $args
+            elif [ "$ARCH" == "arm64" ]; then
+              cmake -G "Visual Studio 17 2022" -A ARM64 -S . -B build $args
+            else
+              cmake -G "Visual Studio 17 2022" -S . -B build $args
+            fi
           else
             cmake -S . -B build $args
           fi
+
           cmake --build build --config $TARGET
       - name: Ensure scons cache exists
         run: mkdir -p ${{github.workspace}}/.scons-cache
@@ -193,7 +221,7 @@ jobs:
         with:
           chrome-version: 121
       - name: Setup Godot
-        uses: lihop/setup-godot@v2
+        uses: lihop/setup-godot@v3
         with:
           version: "v4.4.1-stable"
           export-templates: true
@@ -247,8 +275,8 @@ jobs:
       fail-fast: false
       matrix:
         platform: [linux, macos, windows]
-        arch: [x86_64, x86_32, universal]
-        godot-version: ["v4.3-stable"]
+        arch: [x86_64, x86_32, universal, arm64]
+        godot-version: ["v4.3-stable", "v4.5.1-stable"]
         exclude:
           - platform: linux
             arch: universal
@@ -258,6 +286,8 @@ jobs:
             arch: x86_32
           - platform: windows
             arch: universal
+          - platform: macos
+            arch: arm64
         include:
           - platform: linux
             os: ubuntu-22.04
@@ -265,12 +295,18 @@ jobs:
             os: macos-15
           - platform: windows
             os: windows-2022
+          - platform: linux
+            arch: arm64
+            os: ubuntu-24.04-arm
+          - platform: windows
+            arch: arm64
+            os: windows-11-arm
     steps:
       - uses: actions/checkout@v4
       - name: Setup Godot
-        uses: lihop/setup-godot@v2
+        uses: lihop/setup-godot@v3
         with:
-          bits: ${{ matrix.arch == 'x86_32' && 32 || 64 }}
+          arch: ${{ matrix.arch }}
           version: ${{ matrix.godot-version }}
       - name: Macos setup
         if: ${{ matrix.platform == 'macos' }}
@@ -357,7 +393,7 @@ jobs:
         with:
           submodules: recursive
       - name: Setup Godot
-        uses: lihop/setup-godot@v2
+        uses: lihop/setup-godot@v3
         with:
           version: "v4.4.1-stable"
       - name: Install just
@@ -429,17 +465,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-on-alert: true
           summary-always: true
-      - name: Publish benchmark results
-        if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
-        uses: benchmark-action/github-action-benchmark@v1
-        with:
-          name: "GodotXterm Benchmarks"
-          tool: "customSmallerIsBetter"
-          output-file-path: benchmark/results/all.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          gh-pages-branch: stable
-          benchmark-data-dir-path: docs/dev/bench
-          auto-push: true
 
   merge-artifacts:
     name: Merge Artifacts
