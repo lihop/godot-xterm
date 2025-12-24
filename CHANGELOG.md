@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/lihop/godot-xterm/compare/v4.0.2...HEAD)
 
+### Fixed
+
+- [#149][i149] Fixed misaligned panel when Terminal node has non-zero position/offset. The background panel was being drawn using global coordinates instead of local coordinates, causing visual misalignment.
+
+[i149]: https://github.com/lihop/godot-xterm/issues/149
+
 ## [v4.0.2](https://github.com/lihop/godot-xterm/compare/v4.0.1...v4.0.2) - 2025-11-18
 
 ### Added
