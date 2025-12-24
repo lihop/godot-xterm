@@ -614,11 +614,12 @@ void Terminal::draw_screen() {
         Color bgcol = palette[TSM_COLOR_BACKGROUND];
 
         rs->canvas_item_clear(style_canvas_item);
-        style_normal->draw(style_canvas_item, get_rect());
+        Rect2 local_rect = Rect2(Vector2(), get_size());
+        style_normal->draw(style_canvas_item, local_rect);
         if (has_focus())
-            style_focus->draw(style_canvas_item, get_rect());
+            style_focus->draw(style_canvas_item, local_rect);
         if (get_theme_color("background_color").a > 0)
-            rs->canvas_item_add_rect(style_canvas_item, get_rect(), bgcol);
+            rs->canvas_item_add_rect(style_canvas_item, local_rect, bgcol);
 
         rs->canvas_item_clear(back_canvas_item);
         rs->canvas_item_add_rect(back_canvas_item, rect, bgcol);
