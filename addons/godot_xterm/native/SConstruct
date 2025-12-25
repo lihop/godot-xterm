@@ -9,6 +9,11 @@ import shutil
 env = SConscript("thirdparty/godot-cpp/SConstruct")
 env['ENV'] = os.environ
 
+opts = Variables([], ARGUMENTS)
+opts.Add('no_pty', 'Disable PTY', False)
+opts.Update(env)
+Help(opts.GenerateHelpText(env))
+
 VariantDir('build', 'src', duplicate=0)
 env['OBJPREFIX'] = os.path.join('build', '')
 
@@ -39,7 +44,10 @@ if env["target"] in ["editor", "template_debug"]:
 uv_build_dir = os.environ.get('LIBUV_BUILD_DIR', 'build')
 
 if env['platform'] == 'linux' or env['platform'] == 'macos':
-    env.Append(LIBS=['util', env.File('thirdparty/libuv/' + uv_build_dir + '/libuv.a')])
+    if not env['no_pty']:
+        env.Append(LIBS=['util', env.File('thirdparty/libuv/' + uv_build_dir + '/libuv.a')])
+    else:
+        env.Append(CPPDEFINES=['_PTY_DISABLED'])
     if env['platform'] == 'linux':
         env.Append(LIBS=['pthread'])
         env.Append(LINKFLAGS=['-static-libgcc'])
@@ -50,7 +58,7 @@ if env['platform'] == 'linux' or env['platform'] == 'macos':
         arch = env['arch']
         env.Append(LINKFLAGS=[f'-Wl,-rpath,$ORIGIN/../lib/{arch}'])
 
-elif env['platform'] == 'windows':
+elif env['platform'] == 'windows' and not env['no_pty']:
 	# godot-cpp always builds with the non-debug version of the CRT. So we use /MT for both debug and release builds. 
 	env.Append(CCFLAGS=["-MT"])
 	env.Append(LIBS=['ws2_32.lib', 'Advapi32', 'User32', 'Userenv', 'iphlpapi', 'dbghelp', 'ole32', 'shell32'])

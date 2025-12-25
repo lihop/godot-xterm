@@ -1,3 +1,5 @@
+#if !defined(_PTY_DISABLED)
+
 #include "pty.h"
 
 #include <godot_cpp/classes/mutex.hpp>
@@ -232,11 +234,9 @@ Error PTY::fork(const String& file, const PackedStringArray& args, const String&
 }
 
 void PTY::kill(const int signal) {
-#if !defined(_PTY_DISABLED)
     if (pid > 0) {
         uv_kill(pid, signal);
     }
-#endif
 }
 
 Error PTY::open(const int cols, const int rows) {
@@ -407,10 +407,6 @@ Dictionary PTY::_get_fork_env() const {
     if (!use_os_env)
         return env;
 
-#if defined(_PTY_DISABLED)
-    return env;
-#endif
-
     // TODO This might need windows specific adjustment
     Dictionary os_env;
     uv_env_item_t* uv_env;
@@ -507,3 +503,5 @@ Error PTY::_pipe_open(const int fd, uv_pipe_t* pipe) {
 
     return OK;
 }
+
+#endif
