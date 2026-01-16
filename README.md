@@ -25,4 +25,4 @@ https://user-images.githubusercontent.com/3696783/126894061-a69eb6ad-9979-4723-a
 </div>
 
 [![Live Demo](./docs/_static/images/button_live_demo.png)](https://lihop.github.io/godot-xterm-dist/demo)
-[![View Documentation](./docs/_static/images/button_view_documentation.png)](https://docs.godot-xterm.nix.nz/en/stable)
+[![View Documentation](./docs/_static/images/button_view_documentation.png)](https://docs.godot-xterm.nix.nz/en/)
