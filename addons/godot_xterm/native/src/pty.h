@@ -98,6 +98,7 @@ private:
     PackedStringArray _parse_env(const Dictionary& env) const;
     void _on_exit(int exit_code, int exit_signal);
     void _close();
+    void _init_uv_handles();
 
     Ref<Thread> thread;
     Ref<Mutex> buffer_write_mutex;
