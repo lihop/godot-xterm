@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/lihop/godot-xterm/compare/v4.0.2...HEAD)
+## [Unreleased](https://github.com/lihop/godot-xterm/compare/v4.0.3...HEAD)
+
+## [v4.0.3](https://github.com/lihop/godot-xterm/compare/v4.0.2...v4.0.3) - 2026-02-19
 
 ### Fixed
 
-- [#149][i149] Fixed misaligned panel when Terminal node has non-zero position/offset. The background panel was being drawn using global coordinates instead of local coordinates, causing visual misalignment.
+- [#149][i149] Fixed misaligned panel when Terminal node has non-zero position/offset. Thanks to [@JessaTehCrow](https://github.com/JessaTehCrow) for reporting.
 
 [i149]: https://github.com/lihop/godot-xterm/issues/149
 
