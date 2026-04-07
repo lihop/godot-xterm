@@ -117,6 +117,9 @@
 			If [code]true[/code], text will be automatically copied to the clipboard when selected (highlighted) in the terminal. This provides a convenient way to copy text without explicitly calling [method copy_selection].
 		</member>
 		<member name="focus_mode" type="int" setter="set_focus_mode" getter="get_focus_mode" overrides="Control" enum="Control.FocusMode" default="2" />
+		<member name="foreground_redraw_mode" type="int" setter="set_foreground_redraw_mode" getter="get_foreground_redraw_mode" enum="Terminal.ForegroundRedrawMode" default="0">
+			Controls how foreground glyphs are refreshed each frame. [constant FOREGROUND_REDRAW_FULL] fully redraws foreground content every frame to prevent edge artifacts from anti-aliased glyphs that bleed across cell boundaries. [constant FOREGROUND_REDRAW_PARTIAL] restores age-based partial redraw behavior, which may improve performance but can leave stale edge pixels in some font/style combinations.
+		</member>
 		<member name="inverse_mode" type="int" setter="set_inverse_mode" getter="get_inverse_mode" enum="Terminal.InverseMode" default="0">
 			Determines which technique to use to display [url=https://en.wikipedia.org/wiki/Reverse_video]reverse video[/url] (ANSI escape sequence [code]\u001b[7m[/code]). See [enum InverseMode] for available options.
 		</member>
@@ -155,6 +158,12 @@
 		</signal>
 	</signals>
 	<constants>
+		<constant name="FOREGROUND_REDRAW_FULL" value="0" enum="ForegroundRedrawMode">
+			Always redraws the foreground pass each frame. This is the safest mode and avoids persistent edge artifacts when glyph coverage extends slightly beyond the nominal cell.
+		</constant>
+		<constant name="FOREGROUND_REDRAW_PARTIAL" value="1" enum="ForegroundRedrawMode">
+			Only redraws foreground cells that changed according to libtsm age tracking. This can be faster, but can leave stale pixels in edge cases with cell-to-cell glyph bleed.
+		</constant>
 		<constant name="INVERSE_MODE_INVERT" value="0" enum="InverseMode">
 			Inverse video text (ANSI escape sequence [code]\u001b[7m[/code]) is displayed by inverting the foreground and background colors. For example, red text on a green background will become cyan text on a magenta background.
 		</constant>

@@ -48,6 +48,11 @@ public:
         INVERSE_MODE_SWAP,
     };
 
+    enum ForegroundRedrawMode {
+        FOREGROUND_REDRAW_FULL,
+        FOREGROUND_REDRAW_PARTIAL,
+    };
+
     Terminal();
     ~Terminal();
 
@@ -84,6 +89,9 @@ public:
     void set_inverse_mode(const int mode);
     int get_inverse_mode() const;
 
+    void set_foreground_redraw_mode(const int mode);
+    int get_foreground_redraw_mode() const;
+
     String write(const Variant data);
 
     void _gui_input(const Ref<InputEvent>& event) override;
@@ -105,6 +113,7 @@ private:
     bool copy_on_selection;
 
     InverseMode inverse_mode;
+    ForegroundRedrawMode foreground_redraw_mode;
 
     RenderingServer* rs;
 
@@ -205,3 +214,4 @@ private:
 } // namespace godot
 
 VARIANT_ENUM_CAST(Terminal::InverseMode);
+VARIANT_ENUM_CAST(Terminal::ForegroundRedrawMode);

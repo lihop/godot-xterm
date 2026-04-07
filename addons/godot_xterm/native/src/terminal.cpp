@@ -4,6 +4,8 @@
 #include "terminal.h"
 
 #include <algorithm>
+#include <unordered_map>
+
 #include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/display_server.hpp>
 #include <godot_cpp/classes/font.hpp>
@@ -21,6 +23,7 @@
 #include <godot_cpp/classes/timer.hpp>
 #include <godot_cpp/classes/theme.hpp>
 #include <godot_cpp/classes/theme_db.hpp>
+
 #include <libtsm.h>
 #include <xkbcommon/xkbcommon-keysyms.h>
 
@@ -29,6 +32,20 @@
 #define BACKGROUND_SHADER_PATH SHADERS_DIR "background.gdshader"
 
 using namespace godot;
+
+namespace {
+struct ForegroundPassResources {
+    RID clear_shader;
+    RID clear_material;
+    RID clear_canvas_item;
+};
+
+static std::unordered_map<Terminal*, ForegroundPassResources> g_foreground_pass_resources;
+
+static ForegroundPassResources& fg_resources(Terminal* term) {
+    return g_foreground_pass_resources[term];
+}
+} // namespace
 
 void Terminal::_bind_methods() {
     ADD_SIGNAL(MethodInfo("data_sent", PropertyInfo(Variant::PACKED_BYTE_ARRAY, "data")));
@@ -43,12 +60,16 @@ void Terminal::_bind_methods() {
     ClassDB::add_property("Terminal", PropertyInfo(Variant::INT, "max_scrollback"), "set_max_scrollback", "get_max_scrollback");
 
     // Inverse mode.
-
     BIND_ENUM_CONSTANT(INVERSE_MODE_INVERT);
     BIND_ENUM_CONSTANT(INVERSE_MODE_SWAP);
     ClassDB::bind_method(D_METHOD("get_inverse_mode"), &Terminal::get_inverse_mode);
     ClassDB::bind_method(D_METHOD("set_inverse_mode", "inverse_mode"), &Terminal::set_inverse_mode);
     ClassDB::add_property("Terminal", PropertyInfo(Variant::INT, "inverse_mode", PROPERTY_HINT_ENUM, "Invert,Swap"), "set_inverse_mode", "get_inverse_mode");
+    BIND_ENUM_CONSTANT(FOREGROUND_REDRAW_FULL);
+    BIND_ENUM_CONSTANT(FOREGROUND_REDRAW_PARTIAL);
+    ClassDB::bind_method(D_METHOD("get_foreground_redraw_mode"), &Terminal::get_foreground_redraw_mode);
+    ClassDB::bind_method(D_METHOD("set_foreground_redraw_mode", "foreground_redraw_mode"), &Terminal::set_foreground_redraw_mode);
+    ClassDB::add_property("Terminal", PropertyInfo(Variant::INT, "foreground_redraw_mode", PROPERTY_HINT_ENUM, "Full,Partial"), "set_foreground_redraw_mode", "get_foreground_redraw_mode");
 
     // Bell.
     ADD_SIGNAL(MethodInfo("bell"));
@@ -61,7 +82,6 @@ void Terminal::_bind_methods() {
     ClassDB::add_property("Terminal", PropertyInfo(Variant::FLOAT, "bell_cooldown"), "set_bell_cooldown", "get_bell_cooldown");
 
     // Blink.
-
     ClassDB::add_property_group("Terminal", "Blink", "blink_");
     ClassDB::bind_method(D_METHOD("get_blink_on_time"), &Terminal::get_blink_on_time);
     ClassDB::bind_method(D_METHOD("set_blink_on_time", "time"), &Terminal::set_blink_on_time);
@@ -107,6 +127,7 @@ Terminal::Terminal() {
     copy_on_selection = false;
 
     inverse_mode = InverseMode::INVERSE_MODE_INVERT;
+    foreground_redraw_mode = ForegroundRedrawMode::FOREGROUND_REDRAW_FULL;
     set_process(true);
 
     if (tsm_screen_new(&screen, NULL, NULL)) {
@@ -243,8 +264,12 @@ int Terminal::_draw_cb(struct tsm_screen* con,
                        void* data) {
     Terminal* term = static_cast<Terminal*>(data);
 
-    if (age != 0 && age <= term->framebuffer_age)
+    // Legacy partial redraw can be faster, but glyph anti-aliasing/bleed at cell edges can leave stale pixels
+    // in neighboring cells when only changed cells are redrawn.
+    if (term->foreground_redraw_mode == ForegroundRedrawMode::FOREGROUND_REDRAW_PARTIAL &&
+        age != 0 && age <= term->framebuffer_age) {
         return OK;
+    }
 
     if (width < 1) { // No foreground or background to draw.
         return OK;
@@ -289,14 +314,15 @@ int Terminal::_draw_cb(struct tsm_screen* con,
 
     Vector2 cell_position = Vector2(posx * term->cell_size.x, posy * term->cell_size.y);
 
-    // Erase any previous character in the cell(s).
+    // Erase any previous character in the cell(s). This must use the clear pass
+    // with blend_disabled so transparent pixels actually overwrite the persistent viewport.
     Rect2 erase_rect = Rect2(cell_position, Vector2(width * term->cell_size.x, term->cell_size.y));
-    term->rs->canvas_item_add_rect(term->char_canvas_item, erase_rect, Color(1, 1, 1, 0));
+    term->rs->canvas_item_add_rect(fg_resources(term).clear_canvas_item, erase_rect, Color(1, 1, 1, 0));
 
     if (len >= 1) {
         FontType font_type = static_cast<FontType>((attr->bold ? 1 : 0) | (attr->italic ? 2 : 0));
 
-        // Always draw to the char_canvas_item, even when fore_canvas_item is hidden, so that the viewport texture stays up to date.
+        // Draw glyphs onto the glyph canvas item using normal alpha blending.
         term->fonts[font_type]->draw_char(
                 term->char_canvas_item,
                 Vector2i(cell_position.x, cell_position.y + term->font_offset),
@@ -511,17 +537,14 @@ void Terminal::initialize_rendering() {
     attr_texture.instantiate();
 
     // StyleBox.
-
     style_canvas_item = rs->canvas_item_create();
     rs->canvas_item_set_parent(style_canvas_item, get_canvas_item());
     rs->canvas_item_set_draw_behind_parent(style_canvas_item, true);
 
     // Background.
-
     back_texture.instantiate();
 
     back_shader = rl->load(BACKGROUND_SHADER_PATH);
-
     back_material.instantiate();
     back_material->set_shader(back_shader);
     back_material->set_shader_parameter("background_colors", back_texture);
@@ -533,21 +556,7 @@ void Terminal::initialize_rendering() {
     rs->canvas_item_set_draw_behind_parent(back_canvas_item, true);
 
     // Foreground.
-
-    char_shader = rs->shader_create();
-    rs->shader_set_code(char_shader, String(R"(
-		shader_type canvas_item;
-		render_mode blend_disabled;
-	)"));
-
-    char_material = rs->material_create();
-    rs->material_set_shader(char_material, char_shader);
-
-    char_canvas_item = rs->canvas_item_create();
-    rs->canvas_item_set_material(char_canvas_item, char_material);
-
     canvas = rs->canvas_create();
-    rs->canvas_item_set_parent(char_canvas_item, canvas);
 
     viewport = rs->viewport_create();
     rs->viewport_attach_canvas(viewport, canvas);
@@ -556,6 +565,37 @@ void Terminal::initialize_rendering() {
     rs->viewport_set_clear_mode(viewport, RenderingServer::ViewportClearMode::VIEWPORT_CLEAR_NEVER);
     rs->viewport_set_update_mode(viewport, RenderingServer::ViewportUpdateMode::VIEWPORT_UPDATE_ALWAYS);
     rs->viewport_set_active(viewport, true);
+
+    // Foreground clear pass: overwrite-transparent erase rects.
+    {
+        auto& fg = fg_resources(this);
+        fg.clear_shader = rs->shader_create();
+        rs->shader_set_code(fg.clear_shader, String(R"(
+			shader_type canvas_item;
+			render_mode blend_disabled;
+		)"));
+
+        fg.clear_material = rs->material_create();
+        rs->material_set_shader(fg.clear_material, fg.clear_shader);
+
+        fg.clear_canvas_item = rs->canvas_item_create();
+        rs->canvas_item_set_material(fg.clear_canvas_item, fg.clear_material);
+        rs->canvas_item_set_parent(fg.clear_canvas_item, canvas);
+    }
+
+    // Foreground glyph pass: normal alpha blending.
+    char_shader = rs->shader_create();
+    rs->shader_set_code(char_shader, String(R"(
+		shader_type canvas_item;
+		render_mode unshaded;
+	)"));
+
+    char_material = rs->material_create();
+    rs->material_set_shader(char_material, char_shader);
+
+    char_canvas_item = rs->canvas_item_create();
+    rs->canvas_item_set_material(char_canvas_item, char_material);
+    rs->canvas_item_set_parent(char_canvas_item, canvas);
 
     fore_shader = rl->load(FOREGROUND_SHADER_PATH);
 
@@ -606,10 +646,20 @@ void Terminal::_on_frame_post_draw() {
 }
 
 void Terminal::draw_screen() {
+    if (foreground_redraw_mode == ForegroundRedrawMode::FOREGROUND_REDRAW_FULL) {
+        // Safe mode fully rebuilds the foreground viewport every frame to avoid edge artifacts.
+        rs->viewport_set_clear_mode(viewport, RenderingServer::ViewportClearMode::VIEWPORT_CLEAR_ONLY_NEXT_FRAME);
+    } else {
+        // Legacy mode preserves the old age-based partial redraw behavior for performance.
+        rs->viewport_set_clear_mode(
+                viewport,
+                framebuffer_age == 0
+                        ? RenderingServer::ViewportClearMode::VIEWPORT_CLEAR_ONLY_NEXT_FRAME
+                        : RenderingServer::ViewportClearMode::VIEWPORT_CLEAR_NEVER);
+    }
+
     if (framebuffer_age == 0) {
         Rect2 rect = Rect2(Vector2(), size);
-
-        rs->viewport_set_clear_mode(viewport, RenderingServer::ViewportClearMode::VIEWPORT_CLEAR_ONLY_NEXT_FRAME);
 
         Color bgcol = palette[TSM_COLOR_BACKGROUND];
 
@@ -633,7 +683,11 @@ void Terminal::draw_screen() {
     // texture (that occurs when the viewport is resized) from being shown during resize operations.
     rs->canvas_item_set_visible(fore_canvas_item, framebuffer_age != 0);
 
+    // Clear command lists for both offscreen foreground passes. This does not clear viewport pixels;
+    // actual per-cell clearing happens via explicit erase rects on the clear pass.
+    rs->canvas_item_clear(fg_resources(this).clear_canvas_item);
     rs->canvas_item_clear(char_canvas_item);
+
     cursor_position = tsm_screen_get_flags(screen) & TSM_SCREEN_HIDE_CURSOR ? Vector2i(-1, -1) : get_cursor_pos();
     tsm_age_t prev_framebuffer_age = framebuffer_age;
     framebuffer_age = tsm_screen_draw(screen, Terminal::_draw_cb, this);
@@ -652,6 +706,21 @@ void Terminal::refresh() {
 }
 
 void Terminal::cleanup_rendering() {
+    auto it = g_foreground_pass_resources.find(this);
+    if (it != g_foreground_pass_resources.end()) {
+        ForegroundPassResources& fg = it->second;
+        if (fg.clear_canvas_item.is_valid()) {
+            rs->free_rid(fg.clear_canvas_item);
+        }
+        if (fg.clear_material.is_valid()) {
+            rs->free_rid(fg.clear_material);
+        }
+        if (fg.clear_shader.is_valid()) {
+            rs->free_rid(fg.clear_shader);
+        }
+        g_foreground_pass_resources.erase(it);
+    }
+
     // StyleBox.
     rs->free_rid(style_canvas_item);
 
@@ -796,6 +865,26 @@ void Terminal::set_inverse_mode(const int mode) {
 
 int Terminal::get_inverse_mode() const {
     return static_cast<int>(inverse_mode);
+}
+
+void Terminal::set_foreground_redraw_mode(const int mode) {
+    if (mode < ForegroundRedrawMode::FOREGROUND_REDRAW_FULL ||
+        mode > ForegroundRedrawMode::FOREGROUND_REDRAW_PARTIAL) {
+        ERR_PRINT("Invalid foreground redraw mode.");
+        return;
+    }
+
+    ForegroundRedrawMode new_mode = static_cast<ForegroundRedrawMode>(mode);
+    if (foreground_redraw_mode == new_mode) {
+        return;
+    }
+
+    foreground_redraw_mode = new_mode;
+    refresh();
+}
+
+int Terminal::get_foreground_redraw_mode() const {
+    return static_cast<int>(foreground_redraw_mode);
 }
 
 void Terminal::initialize_input() {

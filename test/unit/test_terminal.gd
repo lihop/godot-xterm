@@ -152,6 +152,34 @@ class TestCursorPos:
 		subject.write("_".repeat(subject.cols + 1))
 		assert_eq(subject.get_cursor_pos().y, 1)
 
+	func test_segmented_digits_advance_as_single_cell_characters():
+		var fresh := described_class.new()
+		add_child_autofree(fresh)
+		fresh.size = Vector2(400, 200)
+		fresh.write("🯰🯱")
+		assert_eq(fresh.get_cursor_pos(), Vector2i(2, 0))
+
+	func test_mixed_ascii_and_segmented_digits_use_expected_cursor_width():
+		var fresh := described_class.new()
+		add_child_autofree(fresh)
+		fresh.size = Vector2(400, 200)
+		fresh.write("A🯰B")
+		assert_eq(fresh.get_cursor_pos(), Vector2i(3, 0))
+
+	func test_powerline_private_use_glyphs_advance_as_single_cell_characters():
+		var fresh := described_class.new()
+		add_child_autofree(fresh)
+		fresh.size = Vector2(400, 200)
+		fresh.write("")
+		assert_eq(fresh.get_cursor_pos(), Vector2i(12, 0))
+
+	func test_legacy_computing_cell_graphics_advance_as_single_cell_characters():
+		var fresh := described_class.new()
+		add_child_autofree(fresh)
+		fresh.size = Vector2(400, 200)
+		fresh.write("🮜🮝🮞🮘🮙")
+		assert_eq(fresh.get_cursor_pos(), Vector2i(5, 0))
+
 
 class TestWrite:
 	extends TerminalTest
@@ -182,6 +210,20 @@ class TestWrite:
 		subject.write("")
 		assert_signal_emit_count(subject, "data_sent", 0)
 
+	func test_string_and_utf8_buffer_inputs_match_for_segmented_digits():
+		var from_string := described_class.new()
+		add_child_autofree(from_string)
+		from_string.size = Vector2(400, 200)
+		from_string.write("🯰🯱")
+
+		var from_bytes := described_class.new()
+		add_child_autofree(from_bytes)
+		from_bytes.size = Vector2(400, 200)
+		from_bytes.write("🯰🯱".to_utf8_buffer())
+
+		assert_eq(from_bytes.get_cursor_pos(), from_string.get_cursor_pos())
+		assert_eq(from_bytes.copy_all(), from_string.copy_all())
+
 
 class TestCopy:
 	extends TerminalTest
@@ -206,6 +248,11 @@ class TestCopy:
 		subject.write(text)
 		assert_string_contains(subject.copy_all(), text)
 
+	func test_copy_all_copies_segmented_digits():
+		var text = "🯰🯱"
+		subject.write(text)
+		assert_string_contains(subject.copy_all(), text)
+
 	func test_copy_selection_when_nothing_selected():
 		assert_eq(subject.copy_selection(), "")
 
@@ -223,6 +270,17 @@ class TestClear:
 		subject.clear()
 		subject.write("test")
 		assert_string_contains(subject.copy_all(), "test")
+
+	func test_copy_after_clear_with_segmented_digits():
+		var fresh := described_class.new()
+		add_child_autofree(fresh)
+		fresh.size = Vector2(400, 200)
+		fresh.write("🯰🯱")
+		fresh.clear()
+		fresh.write("AB")
+		assert_string_contains(fresh.copy_all(), "AB")
+		assert_false(fresh.copy_all().contains("🯰"))
+		assert_false(fresh.copy_all().contains("🯱"))
 
 	func test_clear_when_screen_is_full_clears_all_but_the_bottommost_row():
 		fill_screen()
