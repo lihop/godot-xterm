@@ -85,17 +85,7 @@ void PTY::_bind_methods() {
     ClassDB::bind_method(D_METHOD("_on_exit", "exit_code", "signal_code"), &PTY::_on_exit);
 }
 
-PTY::PTY() {
-    use_threads = true;
-
-    set_process_internal(false);
-    thread.instantiate();
-    buffer_write_mutex.instantiate();
-    buffer_cleared.instantiate();
-
-    env["TERM"] = "xterm-256color";
-    env["COLORTERM"] = "truecolor";
-
+void PTY::_init_uv_handles() {
     uv_loop_init(&loop);
     uv_async_init(&loop, &async_handle, [](uv_async_t* handle) {});
     uv_pipe_init(&loop, &pipe, false);
@@ -103,6 +93,21 @@ PTY::PTY() {
     uv_pipe_init(&loop, &pipe_out, false);
 #endif
     pipe.data = this;
+}
+
+PTY::PTY() {
+    use_threads = true;
+
+    set_process_internal(false);
+    thread.instantiate();
+    buffer_write_mutex.instantiate();
+    buffer_cleared.instantiate();
+    close_mutex.instantiate();
+
+    env["TERM"] = "xterm-256color";
+    env["COLORTERM"] = "truecolor";
+
+    _init_uv_handles();
 }
 
 void PTY::set_cols(const int num_cols) {
@@ -188,6 +193,9 @@ String PTY::get_pts_name() const {
 }
 
 Error PTY::fork(const String& file, const PackedStringArray& args, const String& cwd, const int p_cols, const int p_rows) {
+    // Ensure previous resources are cleaned up before forking again
+    _close();
+
     String fork_file = _get_fork_file(file);
     Dictionary fork_env = _get_fork_env();
     Dictionary result;
@@ -342,6 +350,13 @@ void PTY::_thread_func() {
 }
 
 void PTY::_close() {
+    // Prevent multiple close calls and ensure thread-safe closing
+    MutexLock lock(*close_mutex.ptr());
+    if (status == STATUS_CLOSED) {
+        return;
+    }
+    status = STATUS_CLOSED;
+
     if (use_threads) {
         if (thread->is_started()) {
             stop_thread.set();
@@ -350,18 +365,31 @@ void PTY::_close() {
         }
     }
 
+    // Stop reading before closing pipes
+    // Function can safely be called on an already stopped stream
+    uv_read_stop((uv_stream_t*)&pipe);
+
     if (!uv_is_closing((uv_handle_t*)&pipe)) {
         uv_close((uv_handle_t*)&pipe, _close_cb);
     }
+
+#ifdef _WIN32
+    if (!uv_is_closing((uv_handle_t*)&pipe_out)) {
+        uv_close((uv_handle_t*)&pipe_out, _close_cb);
+    }
+#endif
 
     if (!uv_is_closing((uv_handle_t*)&async_handle)) {
         uv_close((uv_handle_t*)&async_handle, _close_cb);
     }
 
-    if (status == STATUS_OPEN) {
+    // Attempt to close loop. Drain loop first if busy.
+    while (uv_loop_close(&loop) == UV_EBUSY) {
         uv_run(&loop, UV_RUN_NOWAIT);
-        uv_loop_close(&loop);
     }
+
+    // Reinitialize loop and handles for next fork
+    _init_uv_handles();
 
 #if defined(__linux__) || defined(__APPLE__)
     if (fd > 0)
@@ -380,7 +408,6 @@ void PTY::_close() {
     pid = -1;
 
     set_process_internal(false);
-    status = STATUS_CLOSED;
 }
 
 String PTY::_get_fork_file(const String& file) const {
@@ -479,7 +506,8 @@ void PTY::_read_cb(uv_stream_t* pipe, ssize_t nread, const uv_buf_t* buf) {
                 // Can happen when the process exits.
                 // As long as PTY has caught it, we should be fine.
                 uv_read_stop(pipe);
-                pty->status = PTY::Status::STATUS_CLOSED;
+                // Close resources to allow reuse
+                pty->_close();
                 return;
             default:
                 pty->status = PTY::Status::STATUS_ERROR;
