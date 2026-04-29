@@ -217,7 +217,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: install-chrome
-        uses: browser-actions/setup-chrome@v1
+        uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: 121
       - name: Setup Godot
