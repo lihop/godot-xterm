@@ -46,7 +46,7 @@ jobs:
         working-directory: addons/godot_xterm/native
         run: UID_GID="$(id -u):$(id -g)" docker compose run -e TARGET=${{ matrix.target }} -e ARCH=${{ matrix.arch }} -v ${{github.workspace}}/.scons-cache:/scons-cache libgodot-xterm-linux
       - name: Upload binaries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: libgodot-xterm-linux-${{ matrix.arch }}-${{ matrix.target }}
           path: |
@@ -200,7 +200,7 @@ jobs:
           cd addons/godot_xterm/native
           scons platform=${{ matrix.platform }} target=template_${{ matrix.target }} arch=${{ matrix.arch }} -j2
       - name: Upload binaries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: libgodot-xterm-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.target }}
           path: |
@@ -263,7 +263,7 @@ jobs:
           npm ci
           npm test
       - name: Upload export
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web-demo
           path: docs/demo
@@ -362,7 +362,7 @@ jobs:
             exit 1
           fi
       - name: Upload screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: failed-screenshots
@@ -423,7 +423,7 @@ jobs:
         run: just bench ${{matrix.benchmark}}
         timeout-minutes: 10
       - name: Upload results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-results-${{ matrix.benchmark }}
           path: benchmark/results/*.json
@@ -437,7 +437,7 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/upload-artifact/merge@v4
+      - uses: actions/upload-artifact/merge@v7
         with:
           name: benchmark-results
           pattern: "benchmark-results-*"
@@ -474,7 +474,7 @@ jobs:
       matrix:
         target: [release, debug]
     steps:
-      - uses: actions/upload-artifact/merge@v4
+      - uses: actions/upload-artifact/merge@v7
         with:
           name: libgodot-xterm-${{ matrix.target }}
           pattern: "*-${{ matrix.target }}"
@@ -521,7 +521,7 @@ jobs:
           EXTRACT_DIR="godot-xterm-v${{ steps.version.outputs.VERSION }}"
           unzip "$ZIP_NAME" -d "$EXTRACT_DIR"
       - name: Upload package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: godot-xterm-v${{ steps.version.outputs.VERSION }}
           path: godot-xterm-v${{ steps.version.outputs.VERSION }}/
