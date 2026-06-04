@@ -30,7 +30,7 @@ jobs:
         run: docker compose pull
         working-directory: addons/godot_xterm/native
       - name: Cache docker image layers
-        uses: AndreKurait/docker-cache@0.6.0
+        uses: AndreKurait/docker-cache@0.7.0
         continue-on-error: true
         with:
           key: docker-${{ runner.os }}-${{ hashFiles('addons/godot_xterm/native/docker-compose.yml') }}
