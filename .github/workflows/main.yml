@@ -16,7 +16,7 @@ jobs:
         arch: [x86_64, x86_32, arm64, arm32]
         target: [release, debug]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Cache submodules
@@ -93,7 +93,7 @@ jobs:
           - platform: windows
             arch: universal
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Cache submodules
@@ -215,7 +215,7 @@ jobs:
     name: "Web Export"
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: install-chrome
         uses: browser-actions/setup-chrome@v1
         with:
@@ -302,7 +302,7 @@ jobs:
             arch: arm64
             os: windows-11-arm
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup Godot
         uses: lihop/setup-godot@v3
         with:
@@ -389,7 +389,7 @@ jobs:
             unicode,
           ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Setup Godot
@@ -436,7 +436,7 @@ jobs:
       deployments: write
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/upload-artifact/merge@v4
         with:
           name: benchmark-results
@@ -485,7 +485,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [merge-artifacts]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Get version
         id: version
         run: |
@@ -545,5 +545,5 @@ jobs:
     name: "Check Pre-Commit"
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pre-commit/action@v3.0.1
