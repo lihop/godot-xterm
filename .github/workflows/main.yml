@@ -105,7 +105,7 @@ jobs:
           arch: ${{ matrix.arch }}
       - name: Cache emscripten
         if: ${{ matrix.platform == 'web' }}
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         env:
           cache-name: cache-emscripten
         with:
@@ -449,7 +449,7 @@ jobs:
       - name: Merge results
         run: jq -s '[.[][]]' benchmark/results/*.json > benchmark/results/all.json
       - name: Download previous benchmark data
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ./cache
           key: ${{runner.os}}-benchmark
