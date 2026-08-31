@@ -22,13 +22,13 @@ repos:
     hooks:
       - id: gdformat
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.3
     hooks:
       - id: codespell
         args: [--ignore-words-list=thirdparty] # FIXME: Rename the thirdparty directory to third-party.
         exclude: ".*package-lock.json|.*demo.txt|.*fonts.*LICENSE|.*THIRDPARTY_NOTICES.*|.*.svg"
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v21.1.8
+    rev: v23.1.0
     hooks:
       - id: clang-format
         exclude: '.*\.(js|json)'
