@@ -366,6 +366,14 @@ HRESULT InitializeStartupInfoAttachedToPseudoConsole(STARTUPINFOEX* pStartupInfo
 
         pStartupInfo->StartupInfo.cb = sizeof(STARTUPINFOEX);
 
+        // Without STARTF_USESTDHANDLES, a console child copies the parent's std
+        // handles (e.g. Godot's own console or a redirected log), writes there and
+        // never reaches the pseudo console. Null handles force it onto the ConPTY.
+        pStartupInfo->StartupInfo.dwFlags = STARTF_USESTDHANDLES;
+        pStartupInfo->StartupInfo.hStdInput = NULL;
+        pStartupInfo->StartupInfo.hStdOutput = NULL;
+        pStartupInfo->StartupInfo.hStdError = NULL;
+
         // Get the size of the thread attribute list.
         InitializeProcThreadAttributeList(NULL, 1, 0, &attrListSize);
 
